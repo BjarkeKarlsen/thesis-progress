@@ -1,0 +1,13 @@
+{
+    "python.defaultInterpreterPath": "/home/bjarkek/.venvs/rl/bin/python",
+    "python.terminal.activateEnvironment": true,
+
+    "python.useEnvironmentsExtension": false,
+
+    "basedpyright.importStrategy": "useBundled",
+    "basedpyright.analysis.typeCheckingMode": "standard",
+
+    "editor.semanticHighlighting.enabled": true,
+    "workbench.colorTheme": "JetBrains Darcula Theme",
+    "python.analysis.typeCheckingMode": "off"
+}
