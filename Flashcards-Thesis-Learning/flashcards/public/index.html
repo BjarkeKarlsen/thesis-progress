@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Flashcard App</title>
+    <style>
+        :root {
+            --color-primary: #2186B4;
+            --color-primary-hover: #1a6a94;
+            --color-background: #f5f5f5;
+            --color-surface: #ffffff;
+            --color-text: #1a1a1a;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --color-success: #4caf50;
+            --color-warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: var(--color-primary);
+        }
+
+        .subject-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .subject-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--color-primary);
+            background-color: var(--color-surface);
+            color: var(--color-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .subject-btn.active {
+            background-color: var(--color-primary);
+            color: var(--color-surface);
+        }
+
+        .subject-btn:hover {
+            border-color: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .study-container {
+            background-color: var(--color-surface);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--color-border);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--color-success);
+            transition: width 0.3s ease;
+        }
+
+        .card-counter {
+            text-align: center;
+            color: var(--color-text-secondary);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .flashcard {
+            background: linear-gradient(135deg, #2186B4 0%, #1a6a94 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 40px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .flashcard-content {
+            width: 100%;
+        }
+
+        .flashcard-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .flashcard-text {
+            font-size: 20px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .flip-hint {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--color-background);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 600px) {
+            .flashcard {
+                min-height: 250px;
+                padding: 25px;
+            }
+
+            .flashcard-text {
+                font-size: 16px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .study-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Thesis Study Cards</h1>
+            <p style="color: var(--color-text-secondary); margin-top: 10px;">Coupled Storage–Routing: Problem Formulation</p>
+        </header>
+
+        <div class="study-container" id="appContainer">
+            <div class="loading">Loading flashcards...</div>
+        </div>
+    </div>
+
+    <script>
+        let flashcardData = {};
+        let currentSubject = null;
+        let currentCardIndex = 0;
+        let flipped = false;
+        let masteredCards = new Set();
+
+        // Fetch flashcard data from API
+        async function loadFlashcards() {
+            try {
+                const response = await fetch('/api/flashcards');
+                flashcardData = await response.json();
+                initializeApp();
+            } catch (error) {
+                console.error('Error loading flashcards:', error);
+                document.getElementById('appContainer').innerHTML = '<p style="color: red;">Error loading flashcards. Check console.</p>';
+            }
+        }
+
+        function initializeApp() {
+            renderSubjectButtons();
+            // Load first subject by ID
+            const firstTopicId = flashcardData.topics[0].id;
+            loadSubject(firstTopicId);
+        }
+
+        function renderSubjectButtons() {
+            const selector = document.createElement('div');
+            selector.className = 'subject-selector';
+            selector.id = 'subjectSelector';
+
+            flashcardData.topics.forEach((topic, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'subject-btn';
+                if (index === 0) btn.classList.add('active');
+                btn.textContent = topic.name;
+                btn.onclick = () => loadSubject(topic.id);
+                selector.appendChild(btn);
+            });
+
+            document.querySelector('header').after(selector);
+        }
+
+        function loadSubject(subjectId) {
+            currentSubject = subjectId;
+            currentCardIndex = 0;
+            flipped = false;
+            masteredCards.clear();
+
+            // Update active button
+            document.querySelectorAll('.subject-btn').forEach((btn, index) => {
+                const topicId = flashcardData.topics[index].id;
+                btn.classList.toggle('active', topicId === subjectId);
+            });
+
+            displayCard();
+            updateStats();
+        }
+
+        function displayCard() {
+            const topic = flashcardData.topics.find(t => t.id === currentSubject);
+            if (!topic) return;
+
+            const cards = topic.cards;
+            const card = cards[currentCardIndex];
+
+            const label = flipped ? 'Answer' : 'Question';
+            const text = flipped ? card.a : card.q;
+
+            // Rebuild card HTML
+            const appContainer = document.getElementById('appContainer');
+            appContainer.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: ${((currentCardIndex + 1) / cards.length) * 100}%"></div>
+                </div>
+
+                <div class="card-counter">Card ${currentCardIndex + 1} of ${cards.length}</div>
+
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-content">
+                        <div class="flashcard-label">${label}</div>
+                        <div class="flashcard-text">${text}</div>
+                        <div class="flip-hint">Click to reveal ${flipped ? 'question' : 'answer'}</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prevBtn" ${currentCardIndex === 0 ? 'disabled' : ''}>← Previous</button>
+                    <button class="btn btn-success" id="knowBtn">✓ I Know This</button>
+                    <button class="btn btn-primary" id="nextBtn" ${currentCardIndex === cards.length - 1 ? 'disabled' : ''}>Next →</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="masteredCount">0</div>
+                        <div class="stat-label">Mastered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="remainingCount">0</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="accuracyPercent">0%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+            `;
+
+            // Update flashcard style
+            updateFlashcardStyle();
+
+            // Attach event listeners
+            document.getElementById('flashcard').addEventListener('click', flipCard);
+            document.getElementById('prevBtn').addEventListener('click', previousCard);
+            document.getElementById('nextBtn').addEventListener('click', nextCard);
+            document.getElementById('knowBtn').addEventListener('click', markAsKnown);
+
+            updateStats();
+        }
+
+        function updateFlashcardStyle() {
+            const flashcard = document.getElementById('flashcard');
+            if (flipped) {
+                flashcard.style.background = 'linear-gradient(135deg, #4caf50 0%, #3d8b40 100%)';
+            } else {
+                flashcard.style.background = 'linear-gradient(135deg, #2186B4 0%, #1a6a94 100%)';
+            }
+        }
+
+        function flipCard() {
+            flipped = !flipped;
+            displayCard();
+        }
+
+        function previousCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                flipped = false;
+                displayCard();
+            }
+        }
+
+        function nextCard() {
+            const topic = flashcardData.topics.find(t => t.id === currentSubject);
+            if (currentCardIndex < topic.cards.length - 1) {
+                currentCardIndex++;
+                flipped = false;
+                displayCard();
+            }
+        }
+
+        function markAsKnown() {
+            masteredCards.add(currentCardIndex);
+            updateStats();
+            nextCard();
+        }
+
+        function updateStats() {
+            const topic = flashcardData.topics.find(t => t.id === currentSubject);
+            const cards = topic.cards;
+            const mastered = masteredCards.size;
+            const remaining = cards.length - mastered;
+            const accuracy = cards.length > 0 ? Math.round((mastered / cards.length) * 100) : 0;
+
+            const masteredEl = document.getElementById('masteredCount');
+            const remainingEl = document.getElementById('remainingCount');
+            const accuracyEl = document.getElementById('accuracyPercent');
+
+            if (masteredEl) masteredEl.textContent = mastered;
+            if (remainingEl) remainingEl.textContent = remaining;
+            if (accuracyEl) accuracyEl.textContent = accuracy + '%';
+        }
+
+        // Load flashcards when page loads
+        loadFlashcards();
+    </script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+\documentclass[../main.tex]{subfiles}
+\graphicspath{{\subfix{../Images/}}}
+
+\begin{document}
+\onecolumn
+% =================================================================
+% Section IV -- Problem Formulation (rewritten, REVISION 2)
+%
+% Companion to method_implementation_skeleton.tex / Method_and_Implementation.md.
+%
+% This file is a concrete draft of fixes to problem_formulation.tex. It is a
+% full drop-in replacement, not a diff: every label from the original is kept
+% (so the Method skeleton's \eqref/\ref calls do not break), and a small number
+% of new labels are added for objects that previously had no formal equation.
+% See GAPS.tex for the rationale behind every change below; each change is
+% tagged inline with [Gxx] (internal-consistency fix) or [Kxx] (fix motivated
+% by comparison against Knippenberg, Holenderski & Menkovski 2021, the
+% non-lattice-MAPF-with-DRL paper this section's environment/observation model
+% is adapted from) matching the numbered entry in GAPS.tex.
+%
+% REQUIRES A BIBLIOGRAPHY ENTRY: \citet{knippenberg2021} is used three times
+% below (environment connectivity, scope/deadlines x2), in natbib author-year
+% form. The original problem_formulation.tex has no citations at all, so this
+% file cannot confirm what citation package main.tex loads; if it is not
+% natbib, replace \citet{knippenberg2021} with \cite{knippenberg2021} (or this
+% thesis's own citation macro) at each site. Add to your .bib:
+%   @inproceedings{knippenberg2021,
+%     author    = {van Knippenberg, Marijn and Holenderski, Mike and Menkovski, Vlado},
+%     title     = {Time-Constrained Multi-Agent Path Finding in Non-Lattice
+%                   Graphs with Deep Reinforcement Learning},
+%     booktitle = {Proceedings of the 13th Asian Conference on Machine
+%                   Learning (ACML)},
+%     series    = {Proceedings of Machine Learning Research},
+%     volume    = {157},
+%     year      = {2021}
+%   }
+%
+% CONTRACT (unchanged from the original)
+%   This section says WHAT the objects are, not HOW anything is computed.
+%   Every "how" is a forward reference to Section V (Method) or Section VI
+%   (Implementation). Per Method_and_Implementation.md, a full multi-entry
+%   notation table is Appendix material, not Problem Formulation material --
+%   this file only points to Appendix~\ref{app:notation} (see GAPS.tex for the
+%   appendix-ready table itself, since this repo has no appendix.tex to edit).
+%
+% Labels exported by this section (unchanged ones first, new ones marked NEW):
+%   eq:onestepcost  eq:actions      eq:transition    eq:vertexconflict
+%   eq:swapconflict eq:feasiblestorage  eq:storageupdate  eq:storageobjective
+%   eq:task         eq:coupling     eq:servicetime   eq:partition
+%   eq:localsubgraph eq:observation eq:potential     eq:commgraph
+%   eq:posg         eq:congestion   eq:objective     eq:throughput
+%   eq:movementcost eq:entropy      eq:concentration eq:functional
+%   eq:decisionproblem  eq:rqformal
+%   eq:lifecycle (NEW, [G5])  eq:waiting (NEW, [G7])  eq:potentialbound (NEW)
+% Section labels: sec:problem, sec:pf:env, sec:pf:agents, sec:pf:storage,
+%   sec:pf:tasks, sec:pf:controllers, sec:pf:observations, sec:pf:game,
+%   sec:pf:coupling, sec:pf:measures, sec:pf:notation (NEW, now a pointer to
+%   Appendix~\ref{app:notation} rather than an inline table -- see [G11]/GAPS.tex),
+%   sec:pf:scope
+%
+% Requires: amsmath, amssymb, graphicx, booktabs
+% =================================================================
+
+\section{Problem Formulation}
+\label{sec:problem}
+
+This section defines the coupled storage--routing system studied in this thesis.
+It proceeds in the order in which a simulation run unfolds: the environment, the
+agents that move in it, the storage state, the work that arrives, the controllers
+that decide, what a decentralised agent can see, the resulting learning problem,
+the loop that closes between the two layers, and the quantities used to score a
+run. Each object is described in plain terms before it is written formally.
+
+Throughout, this section states \emph{what} the objects are, not \emph{how} they
+are computed. Realisations --- heuristics, algorithms, network architectures and
+hyperparameters --- are deferred to Section~\ref{sec:method}, and software
+concerns to Section~\ref{sec:implementation}.
+
+% -----------------------------------------------------------------
+\subsection{The environment}
+\label{sec:pf:env}
+
+The warehouse is a finite \emph{directed} graph $G=(V,E)$. % [G10]
+For a one-way aisle, $(v,w) \in E$ does not imply $(w,v) \in E$, and the two
+directions may carry different costs; nothing below assumes $E$ is symmetric.
+Vertices are the discrete positions a robot can occupy: aisle cells, cross-aisle
+junctions, storage faces and drop-off points. Edges are the movements that are
+physically possible between two adjacent positions. A rectangular grid is one
+special case, but the formulation deliberately does not assume a lattice,
+because real warehouses contain one-way aisles, diagonal shortcuts and irregular
+blocks.
+
+Four roles label the vertices by what can happen at them; unlike a partition, % [G1]
+these roles are not required to be pairwise disjoint, and this section no longer
+calls them one. $V_{\mathrm{mov}} \subseteq V$ are the vertices an agent may
+occupy. $V_{\mathrm{str}} \subseteq V_{\mathrm{mov}}$ are storage faces, where
+items are held and from which pickups are made: a pickup at $s_j$ is completed
+by an agent occupying $s_j$, so storage faces must themselves be occupiable, and
+$V_{\mathrm{str}}$ is stated as a subset of $V_{\mathrm{mov}}$ rather than merely
+of $V$. $V_{\mathrm{del}} \subseteq V_{\mathrm{mov}}$ are delivery or drop-off
+points, where completed tasks terminate, occupiable for the same reason.
+$V_{\mathrm{ep}} \subseteq V_{\mathrm{mov}}$ are endpoints: vertices at which an
+idle agent may remain without blocking transit. $V_{\mathrm{str}}$,
+$V_{\mathrm{del}}$ and $V_{\mathrm{ep}}$ need not be pairwise disjoint from one
+another --- a generated instance will typically keep them so, but nothing in the
+formulation below relies on it. Each edge $e \in E$ carries a traversal cost
+$c(e) > 0$, and $d_G(v,w)$ denotes the shortest-path cost from $v$ to $w$ along
+directed edges of $G$. Throughout, $G$ is assumed rich enough that $d_G(v,w)$ is
+finite for every pair of vertices that appears in the constructions below (in
+particular, every occupiable vertex can reach every vertex it is ever assigned
+as a target); generated instances are checked against this in
+Section~\ref{sec:impl:instances}. % [G10]
+This is deliberately weaker than the blanket strong-connectivity assumption used
+for the same purpose by \citet{knippenberg2021}, whose non-lattice MAPF
+formulation this section otherwise closely follows for the environment and
+observation model: strong connectivity would be simpler to state and verify, at
+the cost of ruling out layouts with an unreachable side-room or a
+maintenance-only spur, which the ``irregular blocks'' motivation above is meant
+to admit. If that generality is not actually exercised by the generated
+instances, adopting strong connectivity outright is the simpler and equally
+sufficient choice and is worth reconsidering in Section~\ref{sec:impl:instances}. % [K1]
+
+Figure~\ref{fig:instance} shows a small instance with all four roles marked.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/instance.png}
+  \caption{A small warehouse instance. Vertex shape encodes role: storage faces,
+  delivery points, endpoints and plain transit vertices. A single task
+  $\tau_j = (r_j, s_j, g_j, k_j)$ is shown as a route from its pickup vertex
+  $s_j$ to its delivery vertex $g_j$. The layout is not a lattice: aisle
+  structure, not grid geometry, determines which movements exist.}
+  \label{fig:instance}
+\end{figure}
+
+At each timestep an agent at vertex $v$ either waits or traverses one outgoing
+edge. Writing $N^{+}(v) = \{w \in V_{\mathrm{mov}} : (v,w) \in E\}$ for the
+movable successors of $v$, the action set at $v$ is
+\begin{equation}
+  \mathcal{U}(v) = \{\mathrm{wait}\} \cup \{\mathrm{move}(w) : w \in N^{+}(v)\}.
+  \label{eq:actions}
+\end{equation}
+Waiting costs $c_{\mathrm{wait}} \geq 0$ and moving from $v$ to $w$ costs
+$c(v,w)$, so the realised one-step cost is
+\begin{equation}
+  \hat{c}(v,w) =
+  \begin{cases}
+    c_{\mathrm{wait}}, & v = w, \\
+    c(v,w),            & (v,w) \in E.
+  \end{cases}
+  \label{eq:onestepcost}
+\end{equation}
+The two cases are needed because a self-loop $(v,v)$ is not an element of $E$, so
+$c$ is undefined on a wait and any route cost containing a wait would otherwise be
+ill-typed.\footnote{The value of $c_{\mathrm{wait}}$ relative to edge costs
+determines whether an agent prefers to yield or to detour; it is therefore a
+parameter of the study rather than a constant of the model, and is reported in
+Section~\ref{sec:method:training}.}
+
+Some baseline algorithms are complete only on \emph{well-formed} instances. Where
+such a baseline is used, the following is imposed as an assumption on the
+generated instance rather than derived: at least $m$ non-task endpoints exist
+($m = |\mathcal{A}|$ is the fleet size, introduced in
+Section~\ref{sec:pf:agents}), and between any pair of endpoints there is a path
+that does not pass through a third endpoint. Instances are checked against this
+condition in Section~\ref{sec:impl:instances}, and the condition is reported only
+for the baselines to which it applies.
+
+% -----------------------------------------------------------------
+\subsection{Agents and collisions}
+\label{sec:pf:agents}
+
+A fleet $\mathcal{A} = \{a_1,\dots,a_m\}$ of homogeneous agents moves on $G$.
+Agent $a_i$ occupies $\ell_i(t) \in V_{\mathrm{mov}}$ at time $t$ and selects
+$u_i(t) \in \mathcal{U}(\ell_i(t))$. Its realised route over the horizon is
+$p_i = (\ell_i(0), \dots, \ell_i(T))$. A single agent's transition is legal when
+\begin{equation}
+  \ell_i(t+1) = \ell_i(t)
+  \quad \vee \quad
+  \bigl(\ell_i(t), \ell_i(t+1)\bigr) \in E .
+  \label{eq:transition}
+\end{equation}
+
+Legality of each agent's own move is not sufficient, because agents share the
+infrastructure. Two agents collide if they end a timestep at the same vertex, or
+if they exchange positions across a single edge. A joint transition is therefore
+\emph{collision-free} when both
+\begin{align}
+  \ell_i(t+1) &\neq \ell_j(t+1) && \forall i \neq j,
+  \label{eq:vertexconflict} \\
+  \neg\bigl( \ell_i(t) = \ell_j(t+1) \;\wedge\; \ell_j(t) = \ell_i(t+1) \bigr)
+      & && \forall i \neq j .
+  \label{eq:swapconflict}
+\end{align}
+The two conditions are logically independent. Constraint
+\eqref{eq:vertexconflict} inspects the successor state alone;
+\eqref{eq:swapconflict} inspects the pair (state, successor) and is invisible to
+any check performed only at $t+1$. Omitting it permits two agents to pass through
+one another in a single-lane aisle. Figure~\ref{fig:conflicts} illustrates both,
+together with the feasible alternative in which one agent waits.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/conflicts.png}
+  \caption{The two forbidden joint transitions and one feasible alternative.
+  Panel~(c) shows the resolution the model always admits: waiting is a legal
+  action at every vertex, so a collision-free joint action always exists. Which
+  agent yields is a decision, not a constraint, and is fixed in
+  Section~\ref{sec:method:resolution}.}
+  \label{fig:conflicts}
+\end{figure}
+
+Constraints \eqref{eq:vertexconflict}--\eqref{eq:swapconflict} are hard: a run in
+which they are violated is not a solution to this problem. They are stated here
+as feasibility conditions on the realised trace. A learned policy induces a
+distribution over joint actions whose support may contain infeasible ones, so
+feasibility cannot be delegated to a penalty term in a reward; the mechanism that
+enforces it is specified in Sections~\ref{sec:method:rl}
+and~\ref{sec:method:resolution} and verified in Section~\ref{sec:impl:validation}.
+That resolution mechanism is deterministic given the state (Section~\ref{sec:pf:scope}), and it is applied identically regardless of which $\pi \in \Pi$
+is in force; this fact is used in Section~\ref{sec:pf:measures} to clarify what
+work \eqref{eq:vertexconflict}--\eqref{eq:swapconflict} do inside the formal
+decision problem.
+
+% -----------------------------------------------------------------
+\subsection{Where the items are}
+\label{sec:pf:storage}
+
+Items are held at storage faces, and where they are held determines where pickups
+happen. Let $\mathcal{K}$ be the set of SKU types. The storage state must be able
+to represent split inventory, multiple units, and finite shelf space, so it is
+defined as a counting function
+\[
+  x_t : \mathcal{K} \times V_{\mathrm{str}} \to \mathbb{N}_0 ,
+\]
+where $x_t(k,v)$ is the number of units of SKU $k$ held at storage vertex $v$ at
+time $t$. Let $b_k > 0$ be the capacity consumed by one unit of SKU $k$ and
+$\mathrm{cap}(v) > 0$ the capacity of vertex $v$. The set of feasible
+configurations is
+\begin{equation}
+  \mathcal{X} =
+  \Bigl\{ x \in \mathbb{N}_0^{|\mathcal{K}| \times |V_{\mathrm{str}}|} :
+    \sum_{k \in \mathcal{K}} b_k\, x(k,v) \le \mathrm{cap}(v)
+    \quad \forall v \in V_{\mathrm{str}} \Bigr\}.
+  \label{eq:feasiblestorage}
+\end{equation}
+A simpler mapping $\sigma_t : \mathcal{K} \to V_{\mathrm{str}}$ would force one
+location per SKU, unit quantity and unlimited shelf space; it is admissible only
+if those three restrictions are stated explicitly. Note that
+\eqref{eq:feasiblestorage} is a system of $|V_{\mathrm{str}}|$ knapsack
+constraints, so capacity couples the placement decisions of different SKUs at a
+shared vertex. The system is initialised with a given feasible configuration % [G4]
+$x_0 \in \mathcal{X}$, supplied as part of the problem instance; the update rule
+below evolves $x_0$ forward at each storage epoch.
+
+The storage layer acts on a slow clock. At epochs
+$t \in \{\Delta, 2\Delta, \dots\}$ the configuration is updated by a rule $F$,
+\begin{equation}
+  x_t = F\bigl(x_{t-\Delta},\, \hat{\rho}_t,\, \hat{\mu}_t,\, \hat{w}_t\bigr)
+        \in \mathcal{X} ,
+  \label{eq:storageupdate}
+\end{equation}
+where $\hat{\rho}_t$ estimates per-SKU demand, $\hat{\mu}_t(e)$ estimates
+traversal counts per edge, and $\hat{w}_t(e)$ estimates waiting attributed to an
+edge or its downstream contention point. All three are computed only from data
+available strictly before the epoch, so \eqref{eq:storageupdate} is causal. The
+fixed-storage baseline is the identity rule $F_{\mathrm{fix}}(x,\cdot) = x$,
+defined directly rather than as the informal limit $\Delta = \infty$. Formally, % [G3]
+$\mathcal{F}$ is the set of measurable functions
+$F : \mathcal{X} \times \mathbb{R}_{\ge 0}^{|\mathcal{K}|} \times
+\mathbb{R}_{\ge 0}^{|E|} \times \mathbb{R}_{\ge 0}^{|E|} \to \mathcal{X}$ taking a
+prior configuration and the three estimates to a feasible configuration;
+$F_{\mathrm{fix}} \in \mathcal{F}$ is one particular element, and the decision
+problem of Section~\ref{sec:pf:measures} ranges over all of $\mathcal{F}$.
+
+Because capacity couples SKUs, the update cannot be a per-item greedy score
+applied independently. It is a joint constrained decision over $\mathcal{X}$,
+\begin{equation}
+  x_t \in \arg\min_{x \in \mathcal{X}}
+    \bigl[\, \alpha D(x; \hat{\rho}_t)
+       + \beta K(x; \hat{\mu}_t, \hat{w}_t)
+       + \chi R(x, x_{t-\Delta}) \,\bigr],
+  \label{eq:storageobjective}
+\end{equation}
+where $D$ measures demand-weighted access distance, $K$ measures predicted
+congestion exposure, and $R$ penalises reassignment. In words: $D$ says popular
+items should be close, $K$ says they should not all sit on the same corridor, and
+$R$ says the warehouse should not be rearranged every epoch. Because
+\eqref{eq:storageobjective} is an $\arg\min$, it may admit more than one % [G3]
+minimiser; $F$ is required to select a single element of the minimising set via a
+fixed tie-breaking rule, so that \eqref{eq:storageupdate} defines a genuine
+function rather than a set-valued correspondence. The three functional forms, the
+weights $\alpha, \beta, \chi$, the tie-breaking rule, and the heuristic that
+actually searches $\mathcal{X}$ are specified in Section~\ref{sec:method:storage};
+\eqref{eq:storageobjective} is an integer program and is not solved to
+optimality. Setting $\chi = 0$ removes relocation cost from the model entirely
+and is recorded in Section~\ref{sec:pf:scope} as a limitation rather than a
+simplification in passing.
+
+% -----------------------------------------------------------------
+\subsection{Where the work comes from}
+\label{sec:pf:tasks}
+
+Orders arrive continuously. At each timestep, orders are drawn from a
+distribution $P_{\mathrm{ord}}$, an order being a finite multiset of
+SKU--quantity pairs, and each order is converted into one or more transport tasks
+by a task-generation rule. A task is a quadruple % [G2]
+\begin{equation}
+  \tau_j = (r_j,\, s_j,\, g_j,\, k_j), \qquad
+  r_j \in \mathbb{N}_0,\quad s_j \in V_{\mathrm{str}},\quad
+  g_j \in V_{\mathrm{del}}, \quad k_j \in \mathcal{K},
+  \label{eq:task}
+\end{equation}
+consisting of a release time, a pickup vertex, a delivery vertex, and the
+requested SKU $k_j$. The expected number of tasks released per timestep is
+$\lambda_{\mathrm{task}}$.
+
+The pickup vertex is not free. For the requested SKU $k_j$ it must satisfy
+\begin{equation}
+  x_{r_j}(k_j,\, s_j) > 0 .
+  \label{eq:coupling}
+\end{equation}
+Equation~\eqref{eq:coupling} is the formal link between the two layers and the
+central object of this thesis: it makes the spatial distribution of pickup
+vertices a function of the storage configuration, so any change to $x_t$ changes
+the routing problem that the controller subsequently faces. If inventory
+depletion and replenishment are not simulated, $x_t$ is interpreted as a
+placement template rather than a physical inventory level, and this
+interpretation is stated with the results.
+
+A task passes through three disjoint sets over its life, defined directly from % [G5]
+three timestamps rather than only narratively. Let $y_j$ be the assignment time
+of $\tau_j$ --- the timestep at which task assignment selects an agent for it ---
+and $d_j$ the completion (delivery) time, so that $r_j \le y_j \le d_j$. Then
+\begin{equation}
+  \mathcal{Q}_t = \{\tau_j : r_j \le t < y_j\}, \qquad
+  \mathcal{B}_t = \{\tau_j : y_j \le t < d_j\}, \qquad
+  \mathcal{C}_t = \{\tau_j : d_j \le t\},
+  \label{eq:lifecycle}
+\end{equation}
+the waiting, active and completed sets. These are pairwise disjoint by
+construction, since the three defining half-open intervals partition
+$[r_j, \infty)$ for every task --- disjointness is therefore a consequence of
+\eqref{eq:lifecycle}, not a separately asserted property. The convention used
+throughout is that execution begins at \emph{assignment} ($t = y_j$), not at
+arrival of the agent at $s_j$. Writing $d_j$ for the completion time as above,
+the service time is
+\begin{equation}
+  \zeta_j = d_j - r_j ,
+  \label{eq:servicetime}
+\end{equation}
+which spans both phases and therefore cannot be improved by delaying assignment.
+Figure~\ref{fig:lifecycle} shows the lifecycle and the interval that
+\eqref{eq:servicetime} measures.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/lifecycle.png}
+  \caption{Lifecycle of a task. The service time $\zeta_j$ spans both the waiting
+  and the active phase, so a controller cannot improve it by delaying assignment.
+  The membership sets $\mathcal{Q}_t$, $\mathcal{B}_t$ and $\mathcal{C}_t$ of
+  \eqref{eq:lifecycle} are disjoint at every timestep by construction.}
+  \label{fig:lifecycle}
+\end{figure}
+
+% -----------------------------------------------------------------
+\subsection{Who decides}
+\label{sec:pf:controllers}
+
+A controller $\pi \in \Pi$ performs two logically distinct jobs. \emph{Task
+assignment} maps free agents and waiting tasks to agent--task pairs; \emph{routing}
+maps the resulting agent targets and the available system information to actions
+$u_i(t) \in \mathcal{U}(\ell_i(t))$. Both jobs are treated as part of $\pi$, so
+that a path planner is not described as though it also solves assignment.
+Formally, $\Pi$ is the set of pairs % [G3]
+$\pi = (\pi^{\mathrm{assign}}, \pi^{\mathrm{route}})$, where
+$\pi^{\mathrm{route}}$ is a (possibly stochastic) map from the information
+available under the regime in Table~\ref{tab:information} to a joint action in
+$\prod_{i=1}^m \mathcal{U}(\ell_i(t))$, and $\pi^{\mathrm{assign}}$ is a map from
+free agents and $\mathcal{Q}_t$ to a partial matching between them.
+Table~\ref{tab:information} constrains only the argument each map may depend on;
+$\Pi$ places no further restriction on how the maps are realised (heuristic,
+learned, or otherwise), and the decision problem of
+Section~\ref{sec:pf:measures} ranges over all of $\Pi$.
+
+Controllers differ in \emph{what information they may condition on}, and that is
+the only distinction the problem formulation needs. Three information regimes are
+studied and are summarised in Table~\ref{tab:information}. A centralised
+controller may condition on the global state. A section-based controller
+partitions the movable vertices into zones,
+\begin{equation}
+  \mathcal{Y} = \{Y_1,\dots,Y_p\}, \qquad
+  \bigcup_{q=1}^{p} Y_q = V_{\mathrm{mov}}, \qquad
+  Y_q \cap Y_{q'} = \emptyset \;\; (q \neq q'),
+  \label{eq:partition}
+\end{equation}
+and may condition only on zone-local information, plus an explicit protocol at
+zone boundaries. A decentralised controller conditions only on the local
+observation defined in Section~\ref{sec:pf:observations} and selects actions from
+a shared parameterised policy,
+\[
+  u_i(t) \sim \pi_\theta\bigl(\cdot \mid o_i(t)\bigr).
+\]
+Parameter sharing is appropriate for homogeneous agents and does not make
+execution centralised; where global information is used during training only, the
+method is described as centralised training with decentralised execution.
+
+\begin{table}[t]
+  \centering
+  \caption{Information regimes. The three architectures are distinguished at the
+  problem level only by what each component may condition on. Their algorithmic
+  realisations are given in Section~\ref{sec:method:controllers}.}
+  \label{tab:information}
+  \begin{tabular}{lll}
+    \toprule
+    Architecture & Assignment conditions on & Routing conditions on \\
+    \midrule
+    Centralised     & global state & global state \\
+    Section-based   & zone-local state, boundary protocol & zone-local state \\
+    Decentralised   & global state (held fixed across arms) & $o_i(t)$ only \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Task assignment is held identical across the three architectures. Only routing
+differs. This is a design decision of the study rather than a property of the
+problem, and it is made so that a difference in results is attributable to the
+routing architecture and not confounded with assignment quality.
+
+% -----------------------------------------------------------------
+\subsection{What a decentralised agent sees}
+\label{sec:pf:observations}
+
+A decentralised agent cannot see the warehouse. It sees a bounded neighbourhood
+of its own position, and it can exchange information with nearby agents. Both
+bounds are properties of the problem, because they define what a solution is
+permitted to depend on.
+
+For observation depth $d$, the visible vertex set and the induced subgraph are
+\begin{equation}
+  V^{(d)}_i(t) = \{ v \in V_{\mathrm{mov}} : d_G(\ell_i(t), v) \le d \},
+  \qquad
+  \mathcal{G}^{(d)}_i(t) = G\bigl[V^{(d)}_i(t)\bigr].
+  \label{eq:localsubgraph}
+\end{equation}
+The size of \eqref{eq:localsubgraph} is bounded independently of $|V|$, which is
+what allows a single policy to be evaluated on warehouses larger than those it
+was trained on. The price is that anything beyond $d$ hops is invisible, so an
+agent may commit to a move that becomes a conflict a few steps later.
+
+Direction to a distant target is restored inside the local window by annotating
+each visible vertex with its distance to the agent's current target $q_i(t)$,
+\begin{equation}
+  \eta_i(v,t) = d_G\bigl(v,\, q_i(t)\bigr).
+  \label{eq:potential}
+\end{equation}
+The annotation \eqref{eq:potential} is a potential: by the triangle inequality, % [G-eta]
+\begin{equation}
+  \eta_i(w,t) - \eta_i(v,t) \;\ge\; -c(v,w) \qquad \text{for every } (v,w) \in E,
+  \label{eq:potentialbound}
+\end{equation}
+with \emph{equality} if and only if $(v,w)$ lies on some shortest path from $v$
+to $q_i(t)$. Following an edge that attains equality in
+\eqref{eq:potentialbound} realises the shortest path; a merely negative
+difference $\eta_i(w,t) - \eta_i(v,t) < 0$ indicates progress toward the target
+but does not by itself certify that the move is shortest-path optimal, since the
+bound in \eqref{eq:potentialbound} can be strict. Congestion avoidance is
+precisely the choice to accept a smaller decrease of $\eta_i$ (or even a
+non-negative step) now, in exchange for a lower expected total cost later.
+Although $d_G$ may be precomputed, $\eta_i$ itself changes whenever the target
+changes, which happens at every reassignment.
+
+A second local quantity, distinct from the potential, summarises how crowded % [G6]
+the agent's neighbourhood currently is. For a congestion radius
+$r_{\mathrm{cng}}$ --- a parameter separate from the observation depth $d$ and
+the communication radius $r_{\mathrm{com}}$ introduced next, and not assumed
+equal to either --- and defined so that an agent does not count itself,
+\begin{equation}
+  \delta_i(t) =
+  \frac{\bigl|\{ a_j \in \mathcal{A}\setminus\{a_i\} :
+                 \ell_j(t) \in V^{(r_{\mathrm{cng}})}_i(t) \}\bigr|}
+       {\max\bigl\{1,\; |V^{(r_{\mathrm{cng}})}_i(t)| - 1\bigr\}} .
+  \label{eq:congestion}
+\end{equation}
+
+Agents within communication range form a second, time-varying graph whose nodes
+are agents rather than locations,
+\begin{equation}
+  G^{\mathcal{A}}_t = (\mathcal{A}, E^{\mathcal{A}}_t), \qquad
+  (a_i, a_j) \in E^{\mathcal{A}}_t \iff
+  i \neq j \;\wedge\; d_G(\ell_i(t), \ell_j(t)) \le r_{\mathrm{com}} .
+  \label{eq:commgraph}
+\end{equation}
+The environment graph $G$ and the communication graph $G^{\mathcal{A}}_t$ have
+different node sets, different cardinalities and different edge semantics
+(``can move to'' versus ``can exchange information with''); they must not be
+conflated. The full observation available to agent $a_i$ is
+\begin{equation}
+  o_i(t) = \bigl( \mathcal{G}^{(d)}_i(t),\; \eta_i(\cdot, t),\; \delta_i(t),\;
+                  \text{messages from } \{a_j : (a_i,a_j) \in E^{\mathcal{A}}_t\} \bigr).
+  \label{eq:observation}
+\end{equation}
+How $o_i(t)$ is encoded into a vector, and what a message contains, are modelling
+choices specified in Section~\ref{sec:method:model}.
+Figure~\ref{fig:observation} illustrates both bounds on one instance.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/observation.png}
+  \caption{The observation of a single agent. The depth-$d$ induced subgraph is
+  drawn at full strength and the rest of the warehouse is dimmed; numbers are the
+  target distances $\eta_i(v,t)$. The dashed circle is the communication radius
+  $r_{\mathrm{com}}$. One agent lies outside both bounds and is therefore
+  invisible, although it may cause a conflict within a few timesteps.}
+  \label{fig:observation}
+\end{figure}
+
+% -----------------------------------------------------------------
+\subsection{The learning problem}
+\label{sec:pf:game}
+
+Because each agent acts from $o_i(t)$ while the environment evolves under the
+joint action of all agents, the decentralised setting is a partially observable
+stochastic game
+\begin{equation}
+  \mathcal{M} = \bigl( \mathcal{A},\, \mathcal{S},\, \{\mathcal{U}_i\}_{i=1}^{m},\,
+                       P,\, \{\mathcal{O}_i\}_{i=1}^{m},\, \{O_i\}_{i=1}^{m},\,
+                       \{R_i\}_{i=1}^{m},\, \gamma \bigr),
+  \label{eq:posg}
+\end{equation}
+where $\mathcal{S}$ is the state space, $P$ the transition kernel,
+$\mathcal{O}_i$ the observation space, $O_i$ the observation function, and
+$R_i : \mathcal{S} \times \mathcal{U}^m \times \mathcal{S} \to \mathbb{R}$ the
+reward function. The distinction between spaces and functions on the one hand and
+realised states, observations and rewards on the other is maintained throughout;
+Appendix~\ref{app:notation} (pointed to from Section~\ref{sec:pf:notation})
+disambiguates $\mathcal{O}_i$, $O_i$ and other symbols that share a letter with
+an unrelated object elsewhere in this section.
+Each agent's action space in $\mathcal{M}$ is % [G-Ui]
+$\mathcal{U}_i := \bigcup_{v \in V_{\mathrm{mov}}} \mathcal{U}(v)$, i.e.\ the
+union over all vertices of the vertex-local action sets \eqref{eq:actions};
+at a state in which $\ell_i(t) = v$, only the subset $\mathcal{U}(v) \subseteq
+\mathcal{U}_i$ is enabled; the remaining actions in $\mathcal{U}_i$ have zero
+probability under $P$ from that state (equivalently, are masked out), which is
+how a graph problem with vertex-dependent action sets is embedded in a POSG with
+a fixed per-agent action space.
+
+The congestion feature $\delta_i(t)$ of \eqref{eq:congestion}, included in % [G6]
+$o_i(t)$, is available both to the policy and to a reward designer; it is used
+when $R_i$ is realised in Section~\ref{sec:method:rl}.
+Because the agents are homogeneous and cooperative and share one parameter
+vector, the learning objective is stated at team level,
+\begin{equation}
+  \max_{\theta} J(\theta)
+    = \max_{\theta} \mathbb{E}_{\pi_\theta}
+      \Bigl[ \sum_{t=0}^{T-1} \gamma^{t}\, \frac{1}{m} \sum_{i=1}^{m} R_i(t) \Bigr].
+  \label{eq:objective}
+\end{equation}
+Equation~\eqref{eq:objective} is written for a parameterised policy $\pi_\theta$; % [G-theta]
+it applies unchanged to whichever of the three information regimes of
+Table~\ref{tab:information} is realised as a learned controller, with $\theta$
+ranging over that regime's own parameters (for instance, the decentralised
+regime's shared network weights, or a centralised regime's global policy
+parameters). The reward functions $R_i$ are left unspecified here. A reward is an
+instrument for obtaining a policy that scores well on the system-level criterion
+of Section~\ref{sec:pf:measures}; it can be redesigned without changing the
+problem, and it is therefore specified in Section~\ref{sec:method:rl}.
+
+% -----------------------------------------------------------------
+\subsection{How the two layers close the loop}
+\label{sec:pf:coupling}
+
+Let $s_t \in \mathcal{S}$ contain the agent states, the task lifecycle sets and
+the current storage configuration. The system runs on two clocks. On every
+timestep, the fast dynamics advance under the controller,
+\[
+  s_{t+1} \sim P(\cdot \mid s_t, u_t), \qquad u_t \sim \pi(\cdot \mid s_t),
+\]
+with the corresponding product of local policies under decentralised execution.
+At storage epochs only, the slow dynamics additionally apply
+\eqref{eq:storageupdate}.
+
+The loop closes in two directions. Forward, a change in $x_t$ changes which
+vertices appear as pickups through the coupling condition
+\eqref{eq:coupling}, and therefore changes the routing problem. Backward, the
+realised routing statistics $\mu_t$ and $w_t$ enter the next storage update
+through \eqref{eq:storageupdate}. Neither direction exists in a study that fixes
+one layer, and Figure~\ref{fig:loop} shows that the fixed-storage baseline is
+exactly this diagram with the backward path removed.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/loop.png}
+  \caption{The two-timescale loop. The fast path runs every timestep; the slow
+  feedback path runs every $\Delta$ steps. Deleting the feedback path yields the
+  fixed-storage baseline, so the experimental contrast of this thesis is a
+  contrast between this diagram with and without one arrow.}
+  \label{fig:loop}
+\end{figure}
+
+The separation of timescales has a consequence that constrains the study. Between
+epochs, the fast process is approximately stationary and the storage rule sees
+only its aggregate statistics. If $\Delta$ is too small relative to the mixing
+time of the fast process, $F$ reacts to noise and the task distribution becomes
+non-stationary from the learner's point of view; if $\Delta$ is too large, the
+estimates $\hat{\rho}, \hat{\mu}, \hat{w}$ are stale. The choice of $\Delta$ is
+therefore an experimental variable, not a constant.
+
+% -----------------------------------------------------------------
+\subsection{How a run is scored}
+\label{sec:pf:measures}
+
+A run is scored on completed work, on the cost of producing it, and on how the
+traffic was distributed while producing it. For the completed set $\mathcal{C}_T$
+over a horizon $T$, throughput and mean service time are
+\begin{equation}
+  \Lambda_T = \frac{|\mathcal{C}_T|}{T}, \qquad
+  \bar{\zeta}_T = \frac{1}{|\mathcal{C}_T|}
+                  \sum_{\tau_j \in \mathcal{C}_T} (d_j - r_j),
+  \label{eq:throughput}
+\end{equation}
+and the movement cost per completed task is
+\begin{equation}
+  \bar{c}_T = \frac{\sum_{i=1}^{m} \sum_{t=0}^{T-1}
+                    \hat{c}\bigl(\ell_i(t), \ell_i(t+1)\bigr)}
+                   {|\mathcal{C}_T|} .
+  \label{eq:movementcost}
+\end{equation}
+Runs with $|\mathcal{C}_T| = 0$ are reported separately rather than assigned an
+arbitrary ratio. Because a completion-only statistic can improve while the system
+falls behind, the backlog $|\mathcal{Q}_T| + |\mathcal{B}_T|$ and the age
+distribution of unfinished tasks are always reported alongside
+\eqref{eq:throughput}.
+
+Traffic distribution is measured separately from delay. Let $\mu_T(e)$ be the
+number of traversals of edge $e$ over the evaluation window,
+$E^{+}_T = \{e \in E : \mu_T(e) > 0\}$, and
+$p_T(e) = \mu_T(e) / \sum_{e' \in E} \mu_T(e')$. For $|E^{+}_T| > 1$ the
+normalised entropy is
+\begin{equation}
+  H_T = -\frac{1}{\log |E^{+}_T|} \sum_{e \in E^{+}_T} p_T(e) \log p_T(e)
+        \;\in [0,1],
+  \label{eq:entropy}
+\end{equation}
+so $H_T = 1$ means perfectly uniform edge usage and $H_T \to 0$ means all traffic
+on one edge. By convention, when $|E^{+}_T| = 1$ usage is defined as maximally % [G8]
+concentrated, $H_T := 0$ (so $C_T := 1$ below); a run with $|E^{+}_T| = 0$ (no
+traversals at all) is reported separately, exactly as for $|\mathcal{C}_T| = 0$
+above. Since entropy measures dispersion, the concentration index is its
+complement,
+\begin{equation}
+  C_T = 1 - H_T .
+  \label{eq:concentration}
+\end{equation}
+The direction matters: adding $+H_T$ to a minimised cost would reward funnelling
+all agents down one aisle. Two caveats accompany \eqref{eq:entropy}. The
+normalisation depends on $|E^{+}_T|$, so runs using very different numbers of
+edges are not strictly comparable; and concentration is not congestion, because a
+concentrated flow at low load causes no delay. Congestion and concentration are
+therefore reported as separate outcomes.
+Figure~\ref{fig:concentration} illustrates the two extremes.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Images/concentration.png}
+  \caption{Two edge-usage patterns on the same graph, drawn on a shared width
+  scale, with the resulting $H_T$ and $C_T$. The panels are schematic
+  constructions that define the measure; measured values from experimental runs
+  are reported in Section~\ref{sec:experiments}.}
+  \label{fig:concentration}
+\end{figure}
+
+The system-level criterion aggregates the minimisation-oriented measures,
+\begin{equation}
+  \mathcal{J}(F,\pi) = q_{\mathrm{svc}}\, \mathbb{E}[\bar{\zeta}_T]
+                     + q_{\mathrm{mov}}\, \mathbb{E}[\bar{c}_T]
+                     + q_{\mathrm{wait}}\, \mathbb{E}[W_T]
+                     + q_{\mathrm{conc}}\, \mathbb{E}[C_T]
+                     + q_{\mathrm{back}}\, \mathbb{E}[B_T],
+  \label{eq:functional}
+\end{equation}
+with all $q_\bullet \ge 0$ and $B_T = |\mathcal{Q}_T| + |\mathcal{B}_T|$. $W_T$ is % [G7]
+a waiting measure, defined so as not to duplicate $B_T$: rather than queueing
+delay before assignment (already captured, in aggregate, by $B_T$'s $|\mathcal{Q}_T|$
+term), $W_T$ measures time lost \emph{after} assignment, while a task is
+active. For agent $i$ serving task $\tau_j$ over $t \in [y_j, d_j)$, let
+$\omega_j(t) \in \{0,1\}$ indicate that $i$ is \emph{blocked} at $t$: it chose
+$\mathrm{wait}$, or its chosen move was overridden into a wait by the
+conflict-resolution operator of Section~\ref{sec:method:resolution}. Then
+\begin{equation}
+  W_T = \frac{1}{|\mathcal{C}_T|} \sum_{\tau_j \in \mathcal{C}_T}
+        \sum_{t=y_j}^{d_j - 1} \omega_j(t) ,
+  \label{eq:waiting}
+\end{equation}
+using the assignment time $y_j$ of \eqref{eq:lifecycle}; $\omega_j(t)$ is logged
+operationally in Section~\ref{sec:impl:logging}. $W_T$ is distinct from the
+per-edge estimate $\hat{w}_t(e)$ of \eqref{eq:storageupdate}: the latter is a
+forward-looking, causal estimate of downstream contention used only to steer the
+storage rule $F$, whereas $W_T$ is a backward-looking, realised summary statistic
+used only to score a completed run; the two are never required to agree, and
+neither is derived from the other. Throughput is deliberately excluded from
+\eqref{eq:functional}: it is maximisation-oriented and, under a fixed arrival
+rate, largely redundant with $\bar{\zeta}_T$, so including it with a negative
+weight would double-count. It is reported separately.
+
+The formal decision problem is
+\begin{equation}
+  (F^{\star}, \pi^{\star}) \in
+  \arg\min_{F \in \mathcal{F},\, \pi \in \Pi} \mathcal{J}(F,\pi)
+  \quad \text{subject to \eqref{eq:feasiblestorage}, \eqref{eq:transition},
+  \eqref{eq:vertexconflict}, \eqref{eq:swapconflict} and \eqref{eq:coupling}.}
+  \label{eq:decisionproblem}
+\end{equation}
+Constraints \eqref{eq:vertexconflict}--\eqref{eq:swapconflict} are, by % [G9]
+Section~\ref{sec:pf:agents}, enforced by a resolution mechanism applied
+identically regardless of which $\pi \in \Pi$ is chosen; under that mechanism
+they hold for every $\pi$ and so do not prune $\Pi$ in
+\eqref{eq:decisionproblem}. They are listed as constraints to state explicitly
+that a solution is a statement about \emph{feasible realised trajectories}, not
+because any candidate $(F,\pi)$ could otherwise violate them. Constraints
+\eqref{eq:feasiblestorage} and \eqref{eq:coupling}, by contrast, do restrict which
+$F$ and which realised task streams are admissible.
+
+Equation~\eqref{eq:decisionproblem} is a framing device. This thesis does not
+solve it globally; it estimates the effect of selected $(F,\pi)$ combinations
+under a factorial design. Concretely, the empirical question is whether there
+exists an adaptive rule $F$ such that
+\begin{equation}
+  \mathcal{J}(F, \pi) \;<\; \mathcal{J}(F_{\mathrm{fix}}, \pi)
+  \quad \text{by a margin exceeding seed variance,}
+  \label{eq:rqformal}
+\end{equation}
+and whether the size of that margin depends on the information regime of $\pi$
+given in Table~\ref{tab:information} and on the load parameters $m$ and
+$\lambda_{\mathrm{task}}$. Section~\ref{sec:method} realises every symbol
+appearing in \eqref{eq:rqformal}.
+
+% -----------------------------------------------------------------
+\subsection{Notation used more than once}
+\label{sec:pf:notation}
+
+Several symbol families in this section share a base letter across unrelated % [G11]
+objects (for instance $c(e)$, $\hat c(v,w)$, $\bar c_T$, $C_T$ and
+$\mathcal{C}_t$ are five unrelated quantities). None of these are typos or the
+same object under different names. Per the reporting convention of this thesis
+--- a full symbol table read on first encounter is a reference manual, not
+prose --- the disambiguating table is given once, in
+Appendix~\ref{app:notation}, rather than here; consult it if a decorated symbol
+in Section~\ref{sec:pf:measures} in particular is unclear.
+
+% -----------------------------------------------------------------
+\subsection{Scope and assumptions}
+\label{sec:pf:scope}
+
+The model above is deliberately narrower than a physical warehouse, and the
+following are not represented. Agents are homogeneous, occupy exactly one vertex,
+and carry at most one task; there is no capacity, battery, or kinematic model, so
+turning and acceleration costs are absorbed into $c(e)$. Execution is
+deterministic: an accepted action always succeeds, so the transition kernel $P$
+is stochastic only through order arrivals. The conflict-resolution mechanism of % [G13]
+Section~\ref{sec:pf:agents} (which decides who yields) is itself deterministic
+given the state, so it introduces no further source of stochasticity. Human
+pickers and manual interventions are absent. Inventory relocation is abstract ---
+\eqref{eq:storageupdate} changes the placement used to generate future tasks, but
+the physical movement of stock is not simulated, and if $\chi = 0$ in
+\eqref{eq:storageobjective} that movement is also free. Replenishment and
+depletion are modelled only if stated, and otherwise $x_t$ is a placement
+template. Tasks carry no deadline: $\tau_j$ fixes only a release time $r_j$, and % [K2]
+timeliness is scored only in aggregate, after the fact, through
+$\bar{\zeta}_T$ \eqref{eq:throughput}. This is a deliberate narrowing relative to
+time-constrained MAPF formulations such as \citet{knippenberg2021}, in which a
+per-job deadline is a first-class part of the problem: there, a plan that misses
+its deadline is either infeasible (hard constraint) or explicitly penalised in
+the objective (soft constraint); here, an arbitrarily late delivery only
+degrades $\mathcal{J}(F,\pi)$ through the mean $\bar\zeta_T$, and no individual
+task can be said to have failed. Reintroducing deadlines, if the warehouse
+motivation calls for service-level guarantees, would mean adding a deadline
+$t_j^{\mathrm{d}}$ to \eqref{eq:task} and either a feasibility condition
+alongside \eqref{eq:transition}--\eqref{eq:swapconflict} or a term in
+\eqref{eq:functional} of the same shape as \citet{knippenberg2021}'s soft
+penalty; either is a Problem Formulation-level change, not a Method-level one,
+since it would redefine what a valid or well-scored solution is.
+
+Each of these exclusions bounds the claims that the experiments can support. In
+particular, results about the value of congestion feedback are conditional on
+relocation being cheap, and results about decentralised control are conditional
+on deterministic execution.
+\end{document}

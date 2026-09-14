@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  // Client app; math already rendered server-side
+  script(src='/javascripts/app.js')
+
+  .container
+    header
+      h1 📦 Thesis Study Cards
+      p(style='color: var(--color-text-secondary); margin-top: 10px;') Coupled Storage–Routing: Problem Formulation
+
+    #subjectSelector.subject-selector
+
+    .study-container
+      .progress-bar
+        #progressFill.progress-fill
+      #cardCounter.card-counter
+      #flashcard.flashcard
+        .flashcard-content
+          #cardLabel.flashcard-label Question
+          #cardText.flashcard-text
+          .flip-hint Click to reveal answer
+
+      .controls
+        button#prevBtn.btn.btn-secondary ← Previous
+        button#knowBtn.btn.btn-success ✓ I Know This
+        button#nextBtn.btn.btn-primary Next →
+
+      .stats
+        .stat-card
+          #masteredCount.stat-number 0
+          .stat-label Mastered
+        .stat-card
+          #remainingCount.stat-number 0
+          .stat-label Remaining
+        .stat-card
+          #accuracyPercent.stat-number 0%
+          .stat-label Accuracy

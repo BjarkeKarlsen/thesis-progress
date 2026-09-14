@@ -1,0 +1,22 @@
+{
+  "name": "flashcards",
+  "version": "0.0.0",
+  "description": "Thesis Problem Formulation Flashcard Study App",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "debug start": "node --inspect-brk ./bin/www",
+    "debug": "node --inspect-brk ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "katex": "^0.16.27",
+    "morgan": "~1.9.1",
+    "nodemon": "^3.1.11"
+  }
+}

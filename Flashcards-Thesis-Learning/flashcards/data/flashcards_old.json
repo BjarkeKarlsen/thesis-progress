@@ -1,0 +1,532 @@
+{
+  "topics": [
+    {
+      "id": "ml",
+      "name": "Machine Learning Fundamentals and Neural Networks",
+      "cards": [
+        {
+          "q": "What is linear regression?",
+          "a": "A method for modeling the relationship between a scalar response and one or more explanatory variables by fitting a linear equation to observed data."
+        },
+        {
+          "q": "Define the loss function in linear regression.",
+          "a": "The L2 loss function (Mean Squared Error): L = (1/n) Σ(y_i - ŷ_i)², measuring the average squared difference between predicted and actual values."
+        },
+        {
+          "q": "What is gradient descent?",
+          "a": "An optimization algorithm that iteratively updates model parameters by moving in the direction of the negative gradient to minimize the loss function."
+        },
+        {
+          "q": "What does the learning rate control?",
+          "a": "The learning rate controls the step size in each iteration of gradient descent. Too high causes divergence; too low causes slow convergence."
+        },
+        {
+          "q": "What is logistic regression?",
+          "a": "A classification method that uses the sigmoid function to map linear combinations of features to probabilities between 0 and 1."
+        },
+        {
+          "q": "Explain the sigmoid function.",
+          "a": "The sigmoid function σ(z) = 1/(1+e^(-z)) produces an S-shaped curve that maps any input to a value between 0 and 1, suitable for probability modeling."
+        },
+        {
+          "q": "What is cross-entropy loss?",
+          "a": "A loss function for classification: L = -Σ(y·log(ŷ) + (1-y)·log(1-ŷ)), measuring the difference between true and predicted probability distributions."
+        },
+        {
+          "q": "What is a perceptron?",
+          "a": "A basic neural network unit that computes a weighted sum of inputs and applies a step function. It is limited because it is not differentiable for gradient descent."
+        },
+        {
+          "q": "What is a logistic unit?",
+          "a": "An improved perceptron using sigmoid activation instead of a step function, making it differentiable and suitable for gradient descent optimization."
+        },
+        {
+          "q": "What is backpropagation?",
+          "a": "An algorithm that computes gradients of the loss with respect to weights using the chain rule, enabling efficient training of multi-layer neural networks."
+        },
+        {
+          "q": "What is regularization?",
+          "a": "A technique to prevent overfitting by adding a penalty term to the loss function (L1 or L2 weight decay) that discourages large weight values."
+        },
+        {
+          "q": "Explain weight decay (L2 regularization).",
+          "a": "Adds (λ/2)·Σ(w²) to the loss function, penalizing large weights and encouraging simpler models that generalize better to unseen data."
+        },
+        {
+          "q": "What is softmax regression?",
+          "a": "A multi-class classification method that uses the softmax function to convert model outputs into a probability distribution across multiple classes."
+        },
+        {
+          "q": "What is batch normalization?",
+          "a": "A technique that normalizes layer inputs to zero mean and unit variance, reducing internal covariate shift and enabling faster training with higher learning rates."
+        },
+        {
+          "q": "What is dropout?",
+          "a": "A regularization technique that randomly deactivates neurons during training with probability p, preventing co-adaptation and improving generalization."
+        }
+      ]
+    },
+    {
+      "id": "cnn",
+      "name": "Convolutional Neural Networks (CNNs)",
+      "cards": [
+        {
+          "q": "What is a 2D convolution?",
+          "a": "An operation that slides a filter over the input volume, computing element-wise multiplications and summing the results to extract local features."
+        },
+        {
+          "q": "Define filter/kernel in CNNs.",
+          "a": "Small weight matrices (e.g., 3×3) that slide over the input to extract features. Each filter learns to detect specific patterns like edges or textures."
+        },
+        {
+          "q": "What is a feature map?",
+          "a": "The output of a convolution operation: a multi-dimensional volume containing extracted features, with dimensions (height, width, channels/depth)."
+        },
+        {
+          "q": "What is parameter sharing?",
+          "a": "Using the same filter across the entire input volume instead of different weights for each position, reducing parameters and enabling translation invariance."
+        },
+        {
+          "q": "What is sparse interactions?",
+          "a": "Connections limited to a local receptive field rather than the entire input, reducing parameters and computation while capturing local patterns effectively."
+        },
+        {
+          "q": "What is a receptive field?",
+          "a": "The region of the input that influences a particular output neuron. It increases in deeper layers as information passes through convolutions and pooling."
+        },
+        {
+          "q": "Explain ReLU activation.",
+          "a": "The Rectified Linear Unit f(x) = max(0, x), a simple and fast nonlinearity that avoids saturation issues of sigmoid and tanh in most of the range."
+        },
+        {
+          "q": "What causes vanishing gradients in deep networks?",
+          "a": "With sigmoid/tanh activations, derivatives are small (< 1), so gradients shrink as they are backpropagated through many layers, making training difficult."
+        },
+        {
+          "q": "What is batch normalization and why use it in CNNs?",
+          "a": "It normalizes activations within a mini-batch, stabilizing distributions across layers, allowing higher learning rates and acting as a form of regularization."
+        },
+        {
+          "q": "What is max pooling?",
+          "a": "An operation that selects the maximum value from local regions (e.g., 2×2 window), reducing spatial dimensions and providing some translation invariance."
+        },
+        {
+          "q": "What is stride in convolution?",
+          "a": "The number of pixels the filter moves at each step. Larger stride reduces the output size. For 1D: output = (N − W)/stride + 1 (ignoring padding)."
+        },
+        {
+          "q": "What is zero padding and why use it?",
+          "a": "Adding zeros around the input borders to control the spatial size of the output, often to preserve input size ('same' padding)."
+        },
+        {
+          "q": "What is global average pooling?",
+          "a": "A layer that averages each feature map spatially to a single number, reducing parameters compared to flattening and fully connected layers."
+        },
+        {
+          "q": "Explain 1×1 convolution.",
+          "a": "A convolution with kernel size 1×1, used mainly for channel mixing and dimensionality reduction without changing spatial dimensions."
+        },
+        {
+          "q": "What is dropout in CNNs and how does it work?",
+          "a": "During training, it randomly sets activations to zero with probability p, forcing redundancy and improving generalization."
+        }
+      ]
+    },
+    {
+      "id": "cnn_arch",
+      "name": "CNN Architectures",
+      "cards": [
+        {
+          "q": "What is AlexNet and why was it important?",
+          "a": "AlexNet is a deep CNN that won ImageNet 2012 by a large margin, popularizing deep learning in computer vision with ReLU, dropout, and GPU training."
+        },
+        {
+          "q": "What is the key idea of VGG networks?",
+          "a": "VGG uses many stacked 3×3 convolutions instead of large kernels, increasing depth while keeping receptive fields and simplifying the architecture."
+        },
+        {
+          "q": "How does GoogLeNet's Inception module work?",
+          "a": "It computes parallel convolutions with different kernel sizes (1×1, 3×3, 5×5) plus pooling, then concatenates outputs, capturing multi-scale features."
+        },
+        {
+          "q": "What is the purpose of 1×1 convolutions in Inception?",
+          "a": "They reduce channel dimensions before expensive convolutions, lowering computation and acting as learnable feature mixers."
+        },
+        {
+          "q": "Why does VGG use multiple 3×3 convolutions instead of a single 7×7?",
+          "a": "Stacked 3×3 convolutions have similar receptive field to 7×7 but fewer parameters and more non-linearities, improving representational power."
+        },
+        {
+          "q": "What problem do residual networks (ResNets) solve?",
+          "a": "They address degradation when depth increases: training error stops decreasing. Residual connections ease optimization by learning residual functions."
+        },
+        {
+          "q": "Describe a residual block.",
+          "a": "A block where the input x is added to the output of some layers F(x), giving y = F(x) + x, enabling identity mappings through the network."
+        },
+        {
+          "q": "What is the difference between type 1 and type 2 skip connections in ResNet?",
+          "a": "Type 1 uses identity mapping (no change in dimension); type 2 uses a projection (e.g., 1×1 convolution) to match dimensions before addition."
+        },
+        {
+          "q": "What is the main idea behind MobileNet?",
+          "a": "MobileNet uses depthwise separable convolutions (depthwise + pointwise 1×1) to drastically reduce parameters and computation for mobile devices."
+        },
+        {
+          "q": "What is depthwise separable convolution?",
+          "a": "A factorization of standard convolution into depthwise (per-channel spatial conv) and pointwise (1×1 across channels), reducing cost."
+        },
+        {
+          "q": "What is transfer learning in CNN architectures?",
+          "a": "Using a network pre-trained on a large dataset (e.g., ImageNet) and adapting it (fine-tuning or feature extraction) to a new task with less data."
+        },
+        {
+          "q": "What does fine-tuning mean?",
+          "a": "Starting from pre-trained weights and continuing training on a new dataset, usually with a lower learning rate."
+        },
+        {
+          "q": "What does pre-training mean?",
+          "a": "Training a model on a large generic dataset to learn useful features before adapting it to more specific downstream tasks."
+        },
+        {
+          "q": "How is output shape of a convolution layer computed?",
+          "a": "For 2D: H_out = (H_in + 2P − K)/S + 1, W_out = (W_in + 2P − K)/S + 1, given kernel K, padding P, stride S."
+        },
+        {
+          "q": "What is an autoencoder in the context of CNN architectures?",
+          "a": "A network trained to reconstruct its input (input=output), often with convolutional layers in encoder/decoder for images."
+        }
+      ]
+    },
+    {
+      "id": "det_seg",
+      "name": "Object Detection and Segmentation",
+      "cards": [
+        {
+          "q": "What is the difference between classification, localization, and detection?",
+          "a": "Classification predicts a class for the whole image; localization predicts a class plus a bounding box; detection finds multiple objects with boxes and classes."
+        },
+        {
+          "q": "What are the usual components of a bounding box?",
+          "a": "Typically (x, y, w, h) where (x, y) is center or corner, and w, h are width and height."
+        },
+        {
+          "q": "What is Intersection over Union (IoU)?",
+          "a": "IoU = area of overlap / area of union between predicted and ground-truth boxes; used to measure localization quality."
+        },
+        {
+          "q": "Why is localization considered a regression problem?",
+          "a": "Because the model predicts continuous values (box coordinates), usually optimized with L2 or smooth L1 loss."
+        },
+        {
+          "q": "What is the drawback of naive sliding-window + CNN for detection?",
+          "a": "It is extremely slow because the CNN is run independently on a huge number of overlapping windows at multiple scales."
+        },
+        {
+          "q": "How does converting fully connected layers to convolutions speed up detection?",
+          "a": "It allows running the CNN once on the full image and then applying sliding window efficiently on the feature map."
+        },
+        {
+          "q": "What are region proposals?",
+          "a": "Candidate bounding boxes likely to contain objects, generated by algorithms like Selective Search to reduce the number of windows."
+        },
+        {
+          "q": "How does R-CNN work at a high level?",
+          "a": "It generates region proposals, warps each proposal, runs a CNN on each, then uses class-specific linear SVMs and bounding-box regressors."
+        },
+        {
+          "q": "How does Fast R-CNN improve over R-CNN?",
+          "a": "It runs the CNN once on the whole image, then uses RoI pooling on the feature map for each proposal, making it much faster."
+        },
+        {
+          "q": "How does Faster R-CNN further improve detection?",
+          "a": "It introduces a Region Proposal Network (RPN) that shares convolutional features with the detector instead of using an external proposal method."
+        },
+        {
+          "q": "What is the idea behind single-stage detectors like YOLO?",
+          "a": "They directly predict bounding boxes and class probabilities on a grid in a single pass, without a separate proposal stage, enabling real-time detection."
+        },
+        {
+          "q": "What is semantic segmentation?",
+          "a": "Pixel-wise classification where each pixel is assigned a class label, without distinguishing instances of the same class."
+        },
+        {
+          "q": "What is instance segmentation?",
+          "a": "Pixel-wise classification that also distinguishes individual object instances of the same class (e.g., multiple persons)."
+        },
+        {
+          "q": "What is a Fully Convolutional Network (FCN)?",
+          "a": "A CNN without fully connected layers, producing dense per-pixel predictions, often used for segmentation."
+        },
+        {
+          "q": "What is the overall architecture of U-Net?",
+          "a": "An encoder-decoder with skip connections: contracting path for context, expanding path for precise localization, using skip connections to combine low- and high-level features."
+        }
+      ]
+    },
+    {
+      "id": "gen",
+      "name": "Generative Models",
+      "cards": [
+        {
+          "q": "What is the difference between generative and discriminative models?",
+          "a": "Generative models learn the joint distribution p(x, y) or p(x) and can generate data; discriminative models learn p(y|x) for prediction."
+        },
+        {
+          "q": "What is an autoencoder (AE)?",
+          "a": "A neural network trained to reconstruct its input via a bottleneck latent representation, with an encoder and decoder."
+        },
+        {
+          "q": "What is the typical loss function for training autoencoders?",
+          "a": "Commonly L2 (MSE) or L1 reconstruction loss between input and output."
+        },
+        {
+          "q": "What is the difference between undercomplete and overcomplete AEs?",
+          "a": "Undercomplete AEs have a smaller latent dimension than input (forcing compression); overcomplete AEs have larger or equal latent dimension and rely on regularization."
+        },
+        {
+          "q": "What is a denoising autoencoder?",
+          "a": "An AE trained to reconstruct clean inputs from corrupted versions, encouraging robust feature learning."
+        },
+        {
+          "q": "What is a convolutional autoencoder?",
+          "a": "An AE that uses convolutional layers in the encoder and decoder, suitable for images and using upsampling/transposed convolutions."
+        },
+        {
+          "q": "What is a Variational Autoencoder (VAE)?",
+          "a": "A probabilistic generative model that learns a distribution over latent variables and uses a reparameterization trick to enable backpropagation."
+        },
+        {
+          "q": "Why is the KL divergence term used in a VAE loss?",
+          "a": "It regularizes the approximate posterior toward a prior (usually N(0, I)), encouraging a smooth, well-structured latent space."
+        },
+        {
+          "q": "How are new samples generated from a trained VAE?",
+          "a": "Sample z from the prior (e.g., N(0, I)) and pass it through the decoder to obtain a generated data point."
+        },
+        {
+          "q": "What is a GAN (Generative Adversarial Network)?",
+          "a": "A framework with a generator that produces fake samples and a discriminator that tries to distinguish real from fake, trained in an adversarial game."
+        },
+        {
+          "q": "How is a GAN trained in principle?",
+          "a": "Alternating between training the discriminator to maximize correct classification of real vs. fake and training the generator to fool the discriminator."
+        },
+        {
+          "q": "What is DCGAN?",
+          "a": "Deep Convolutional GAN: a GAN architecture that uses convolutional and transposed convolutional layers for image generation."
+        },
+        {
+          "q": "What is a conditional GAN?",
+          "a": "A GAN where both generator and discriminator receive additional information (e.g., class labels), allowing class-conditional generation."
+        },
+        {
+          "q": "What is latent space interpolation?",
+          "a": "Generating a sequence of samples by interpolating between two latent vectors, typically resulting in smooth transformations in output space."
+        },
+        {
+          "q": "What is a diffusion model in high-level terms?",
+          "a": "A generative model that learns to reverse a gradual noising process, iteratively denoising from pure noise to produce samples."
+        }
+      ]
+    },
+    {
+      "id": "vit",
+      "name": "Vision Transformers (ViTs) and Self-Attention",
+      "cards": [
+        {
+          "q": "What is self-attention?",
+          "a": "A mechanism that relates different positions of a sequence to compute a representation by weighting elements based on learned similarity."
+        },
+        {
+          "q": "What is scaled dot-product attention?",
+          "a": "Given queries Q, keys K, values V: Attention(Q,K,V) = softmax(QKᵀ / √d_k) V, where d_k is key dimension."
+        },
+        {
+          "q": "What is the difference between self-attention and cross-attention?",
+          "a": "Self-attention attends within a single sequence (Q,K,V from same source); cross-attention uses Q from one sequence and K,V from another."
+        },
+        {
+          "q": "What is an inductive bias in CNNs?",
+          "a": "Built-in assumptions such as locality and translation invariance due to convolution and weight sharing."
+        },
+        {
+          "q": "What is the general architecture of a Transformer encoder layer?",
+          "a": "Multi-head self-attention, followed by a position-wise feed-forward network, each with residual connections and layer normalization."
+        },
+        {
+          "q": "Why are positional embeddings needed in Transformers?",
+          "a": "Because self-attention is permutation-invariant; positional embeddings inject information about token order or position."
+        },
+        {
+          "q": "How does ViT represent an image for the Transformer?",
+          "a": "It splits the image into patches, flattens them, projects each to an embedding, adds positional embeddings, and feeds the sequence to a Transformer encoder."
+        },
+        {
+          "q": "What is the CLS token in ViT?",
+          "a": "A special token prepended to the patch sequence whose final embedding is used for classification."
+        },
+        {
+          "q": "Why do ViTs typically require more data than CNNs?",
+          "a": "They have weaker inductive bias, making them more flexible but requiring more data to learn good image priors."
+        },
+        {
+          "q": "Why do ViTs have a global receptive field?",
+          "a": "Every token can attend to every other token via self-attention in a single layer, covering the whole image."
+        },
+        {
+          "q": "Compare CNNs and ViTs briefly.",
+          "a": "CNNs use local convolutions with strong inductive bias; ViTs use global self-attention with more flexibility but higher data needs."
+        },
+        {
+          "q": "What task is imageGPT trained on?",
+          "a": "Next-pixel prediction in an image, similar to language models doing next-token prediction."
+        },
+        {
+          "q": "What is multi-head attention?",
+          "a": "Multiple parallel attention layers (heads) with different projections, whose outputs are concatenated, allowing the model to attend to information from different subspaces."
+        },
+        {
+          "q": "At a high level, what is Swin Transformer?",
+          "a": "A hierarchical ViT that computes self-attention within local windows and shifts windows between layers, scaling better to large images."
+        },
+        {
+          "q": "What is DETR and what task does it solve?",
+          "a": "DETR is a Transformer-based object detector that formulates detection as a set prediction problem with bipartite matching loss."
+        }
+      ]
+    },
+    {
+      "id": "train_ssl",
+      "name": "Training and Self-Supervised Learning",
+      "cards": [
+        {
+          "q": "What is stochastic gradient descent (SGD)?",
+          "a": "An optimization algorithm that updates parameters using the gradient computed on a mini-batch instead of the full dataset."
+        },
+        {
+          "q": "What is momentum in optimization?",
+          "a": "A technique that accumulates an exponentially decaying moving average of past gradients to accelerate learning in relevant directions and damp oscillations."
+        },
+        {
+          "q": "What is learning rate decay?",
+          "a": "A schedule that reduces the learning rate over time to allow larger steps initially and finer convergence later."
+        },
+        {
+          "q": "What is Adagrad?",
+          "a": "An adaptive learning rate method that scales learning rates by the inverse square root of the sum of past squared gradients per parameter."
+        },
+        {
+          "q": "What is Adam?",
+          "a": "An optimizer that combines momentum (first moment) and RMSProp (second moment) ideas, maintaining adaptive per-parameter learning rates."
+        },
+        {
+          "q": "What is early stopping?",
+          "a": "A regularization method that stops training when validation performance stops improving, preventing overfitting."
+        },
+        {
+          "q": "What is data augmentation in vision?",
+          "a": "Creating modified versions of training images (e.g., flips, crops, color jitter) to increase effective data size and improve generalization."
+        },
+        {
+          "q": "What are hyperparameters?",
+          "a": "Settings not learned from data (e.g., learning rate, batch size, depth, regularization strength) that control training behavior."
+        },
+        {
+          "q": "What is self-supervised learning (SSL)?",
+          "a": "Learning useful representations from unlabeled data using pretext tasks where labels are derived from the data itself."
+        },
+        {
+          "q": "How does SSL differ from supervised and unsupervised learning?",
+          "a": "Supervised uses human labels, unsupervised often models data distribution or clusters; SSL uses automatically generated labels from the data for predictive tasks."
+        },
+        {
+          "q": "What is contrastive learning?",
+          "a": "An SSL approach that pulls together representations of positive pairs (different views of the same sample) and pushes apart negatives."
+        },
+        {
+          "q": "What is the triplet loss?",
+          "a": "A loss that enforces d(anchor, positive) + margin < d(anchor, negative), encouraging correct relative distances in embedding space."
+        },
+        {
+          "q": "What is a pretext task in SSL?",
+          "a": "An artificial task (e.g., predicting rotation, solving jigsaw, masked patch prediction) that forces the model to learn meaningful features."
+        },
+        {
+          "q": "What is a masked autoencoder (MAE)?",
+          "a": "An SSL model that masks a large portion of input patches and trains a decoder to reconstruct them from visible patches."
+        },
+        {
+          "q": "How does SSL relate to transfer learning?",
+          "a": "SSL pre-training yields representations that can be fine-tuned on downstream tasks with fewer labeled examples."
+        }
+      ]
+    },
+    {
+      "id": "viz",
+      "name": "Visualizing and Understanding CNNs",
+      "cards": [
+        {
+          "q": "What do earlier and deeper layers in CNNs typically learn?",
+          "a": "Early layers capture simple features like edges and textures; deeper layers capture more abstract, semantic features like object parts."
+        },
+        {
+          "q": "Why are CNNs not invertible in general?",
+          "a": "Operations like pooling, ReLU, and many-to-one mappings lose information, so the exact input cannot be recovered from activations."
+        },
+        {
+          "q": "How can layer activations be visualized?",
+          "a": "By forwarding an image through the network and plotting activation maps for chosen channels in different layers."
+        },
+        {
+          "q": "What do smooth learned filters indicate?",
+          "a": "Smooth, interpretable filters often indicate that the network has learned useful, well-regularized feature detectors."
+        },
+        {
+          "q": "How can fully connected layers be visualized with k-NN?",
+          "a": "By using the layer’s activations as feature vectors and running k-NN to show semantically similar images clustering together."
+        },
+        {
+          "q": "What is t-SNE used for in CNN visualization?",
+          "a": "To embed high-dimensional feature vectors into 2D/3D for visualization, preserving local neighbor relationships."
+        },
+        {
+          "q": "What are maximally activating patches?",
+          "a": "Input patches that produce the highest activation for a given neuron, revealing what pattern the neuron is sensitive to."
+        },
+        {
+          "q": "What is a saliency map by occlusion?",
+          "a": "A map obtained by sliding a mask over the image and measuring classification score changes, highlighting important regions."
+        },
+        {
+          "q": "What is Grad-CAM?",
+          "a": "A method that uses gradients of the target class w.r.t. feature maps to produce a coarse localization heatmap over the input image."
+        },
+        {
+          "q": "What is reconstruction-based visualization?",
+          "a": "Optimizing an input image to produce a desired activation pattern, revealing what the network 'wants to see' for that pattern."
+        },
+        {
+          "q": "What is 'Inverting ConvNets'?",
+          "a": "A technique that reconstructs an image from intermediate feature activations, giving insight into the information preserved at each layer."
+        },
+        {
+          "q": "What is an adversarial example?",
+          "a": "An input perturbed by small, often imperceptible noise that causes the model to make a wrong prediction with high confidence."
+        },
+        {
+          "q": "What is a Gram matrix in style transfer?",
+          "a": "A matrix of feature correlations used to represent texture or style, computed as F Fᵀ over feature maps."
+        },
+        {
+          "q": "How does Neural Style Transfer work at a high level?",
+          "a": "By optimizing an input image to match content features of one image and style (Gram matrices) of another."
+        },
+        {
+          "q": "What do reconstructions from different layers typically look like?",
+          "a": "Shallow-layer reconstructions preserve fine details and textures; deep-layer reconstructions capture coarse shapes and semantics but lose detail."
+        }
+      ]
+    }
+  ]
+}
