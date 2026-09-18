@@ -1,0 +1,56 @@
+
+\section{Introduction}
+\label{sec:introduction}
+Automated warehouses combine two tightly related decision layers. The storage layer determines where stock-keeping units (SKUs) are placed, whereas the transport layer assigns pickup-delivery tasks to mobile agents and routes the agents through shared infrastructure. The former is commonly studied as the Storage Location Assignment Problem (SLAP), including dynamic variants in which assignments change over time. The latter is commonly studied through Multi-Agent Path Finding (MAPF) and Multi-Agent Pickup and Delivery (MAPD), where multiple agents repeatedly execute task while avoiding collisions. 
+
+These layers interact through the spatial demand they induce.(Rewrite this). Placing a frequently requested SKU at a storage location changes which vertices are used as pickup locations and which edges carry traffic. Conversely, congestion and waiting time change the effective cost of accessing a storage location, even when that location is close to a delivery station in shortest-path distance. Optimising either layer while treating the other as fixed ca therefore produce a configuration that is locally attractive but poor at system level.
+
+This thesis investigates that interaction as a closed-loop control problem on a common warehouse graph. A storage policy periodically updates the placement of SKUs using observed deman and traffic statistics. Between storage updates, a MAPD controller assigns and routes agents for the resulting stream of tasks. The study compares a fixed-storage baseline with close-loop variants under centralised, section-based and decentralised controllers. The comparison focuses on task service time, throughput, movement cost, congestion, traffic concentration, and computational cost.
+
+%The thesis is a simulation-based study of homogeneous mobile agents. Human workers, physical inventory relocation, robot kinematics, battery constraints, and uncertainty in execution are outside the primary model unless introduced explicitly as extensions. In particular, a storage update changes the assignment used to generate future pickup tasks; the cost and physical process
+of relocating inventory are not silently assumed to be free. This abstraction keeps the central research question feasible while making its limitations explicit.
+
+The main contribution is not a new general-purpose MAPF, MAPD, or SLAP solver. It is (i) a consistent mathematical model of the coupled storage-routing system, (ii) an implementation in which both layers use the same graph and observed traffic state, and (iii) a controlled empirical analysis of when feedback improves performance and when it amplifies congestion or concentrates traffic on a small part of the warehouse.
+
+\section{Project Description}
+\label{sec:project-description}
+
+\subsection{Aim and scope}
+\label{sec:pd-aim-and-scope}
+The project aims to determine how feedback between storage assignment and multi-agent pickup-and-delivery control affects warehouse performance. The warehouse is represented by a finite graph. Orders generate pickup-delivery tasks whose pickup locations depend on the current storage configuration. A fleet of agent serves these task online, and measurements from their movement are subsequently  used by the storage policy.
+
+The independent experimental variables are:
+\begin{enumerate}
+    \item storage mode: fixed or periodically updated
+    \item controller architecture: centralised, section-based, or decentralised
+    \item congestion sensitivity: disabled or enabled in the storage and routing layers
+    \item communication: absent or local for the decentralised controller
+    \item system load: number of agents and task-arrival rate
+\end{enumerate}
+The dependent variables are mean service time, throughput, movement cost per completed task, waiting cause by contention, traffic concentration, backlog, and controller runtime.
+
+\subsection{Research question}
+\label{sec:pd-rq}
+The main research question is: \newline
+\textbf{RQ:} How does closed-loop coupling between storage assignment and MAPD
+control affect efficiency, congestion, traffic concentration, and robustness
+in a graph-based warehouse?\\
+
+it is decomposed into four primary questions: 
+\begin{description}
+  \item[RQ1:] Does closed-loop storage adaptation improve service time,
+  throughput, or movement cost relative to fixed storage under otherwise
+  matched conditions?
+  \item[RQ2:] How does the effect of coupling differ among centralised,
+  section-based, and decentralised controllers?
+  \item[RQ3:] Do congestion-sensitive storage and routing policies reduce
+  waiting and traffic concentration, and what efficiency trade-offs do they
+  introduce?
+  \item[RQ4:] How do these effects change as the number of agents and the task
+  arrival rate increase?
+\end{description}
+
+%Local communication is treated as an ablation within the decentralised architecture rather than as a separate research topic. This keeps the scope centred on storage-routing coupling while still testing whether communication moderates congestion under partial observability. 
+
+\subsection{Expected outcome}
+This project will produce an experimental comparison rather than claim a universally optimal controller. Each conclusion will be conditional on the warehouse graphs, demand processes, controller implementations, and parameter ranges used in the experiments. The intended outcome is a map of operation conditions under which coupling is beneficial neutral, or destabilising.

@@ -1,0 +1,694 @@
+% =====================================================================
+%  Self-Organising Warehouse Systems:
+%  Graph-Based Coupling of Storage Location Assignment (SLAP)
+%  and Multi-Agent Pickup and Delivery (MAPD) with RL Controllers
+%
+%  Notation follows the standard MAPF/MAPD convention G = (V, E)
+%  (Ma et al., 2017; van Knippenberg et al., 2021; Pham & Bera, 2024)
+% =====================================================================
+
+% Suggested preamble packages:
+% \usepackage{amsmath, amssymb, booktabs, longtable, array}
+
+% ---------------------------------------------------------------------
+\section{Introduction}
+% ---------------------------------------------------------------------
+
+Modern warehouses increasingly operate as tightly coupled sociotechnical
+systems in which fleets of autonomous mobile robots and human co-workers
+share the same physical infrastructure for order picking, replenishment and
+internal transport. Two decisions dominate the efficiency of such systems.
+The first is \emph{where items are placed}, studied as the Storage Location
+Assignment Problem (SLAP) and, in its time-varying form, as the Dynamic
+Storage Location Assignment Problem (DSLAP). The second is \emph{how agents
+move and coordinate} in order to pick up and deliver items without
+collisions, studied as Multi-Agent Path Finding (MAPF) and its lifelong,
+online extension, Multi-Agent Pickup and Delivery (MAPD).
+
+Both problems are naturally expressed on the same discrete structure. A
+warehouse can be represented as a graph \( G = (V, E) \) whose vertices
+\( V \) correspond to locations and whose edges \( E \) correspond to
+connections between locations along which agents can move. In the MAPD
+formulation, agents attend to a stream of delivery tasks, each characterised
+by a pickup location and a delivery location in \( V \), and the quality of
+a controller is measured by the average \emph{service time} needed to finish
+a task after it entered the system. Storage assignment determines
+\emph{which} vertices become pickup locations and how often, and therefore
+directly shapes the spatial distribution of demand over \( V \) and \( E \).
+Conversely, the routing policy determines which storage positions are
+practically attractive, because a nominally close vertex is of little value
+if the corridors leading to it are congested.
+
+Despite this mutual dependence, the two problems are almost always studied
+in isolation. Storage assignment is typically optimised under an assumed,
+static routing cost such as a shortest-path or travel-time estimate, while
+MAPF and MAPD are typically studied under a fixed layout and a fixed storage
+policy. The resulting picture is incomplete: it cannot express the feedback
+loop in which placement decisions change traffic patterns, and changed
+traffic patterns in turn change which placements are good. Nor can it
+express the failure mode that this feedback loop makes possible, namely that
+individually rational decisions concentrate flow on a small subset of
+aisles, storage vertices and paths, producing congestion and a commons-like
+overuse of shared infrastructure.
+
+This thesis studies exactly that feedback loop. The warehouse is modelled as
+a single static graph \( G = (V, E) \). Storage assignment is modelled as a
+time-varying map from items to storage vertices, updated from observed
+transport and congestion outcomes. Routing is modelled as an online,
+lifelong MAPD problem on the same graph, solved by controllers of three
+different architectures: centralised, section-based, and decentralised
+reinforcement-learning (RL) controllers that act on local projections of the
+graph. The central question is whether closing the loop between storage
+assignment and multi-agent routing improves collective behaviour, or whether
+it destabilises it.
+
+The choice of RL for the decentralised controller is deliberate rather than
+incidental. Decentralised controllers must act under partial observability,
+must react to congestion that they can only observe locally, and must do so
+in real time as tasks arrive. RL provides a principled way to obtain such
+reactive local policies without hand-designing a heuristic for every layout,
+and recent work on graph-based MAPF shows that graph neural networks can
+process arbitrary, non-lattice local neighbourhoods and support local
+communication between nearby agents. This makes it possible to ask a
+question that is not answerable with classical solvers alone: does giving
+agents congestion-sensitive rewards and local communication change the
+\emph{emergent} spatial organisation of the warehouse, and does it interact
+constructively or destructively with a congestion-sensitive storage policy?
+
+The contribution of the thesis is therefore not a new solver for either
+subproblem. It is a graph-based formalisation of the coupled system, an
+implementation of that system in simulation, and a controlled comparison
+between decoupled and closed-loop configurations across controller
+architectures, evaluated on travel distance per completed task, throughput,
+congestion, flow concentration, and robustness under scaling in the number
+of agents and the task arrival rate.
+
+% ---------------------------------------------------------------------
+\section{Notation}
+% ---------------------------------------------------------------------
+
+\begin{table}[htbp]
+\centering
+\caption{Notation used throughout the thesis. Graph, agent and task
+notation follows the standard MAPF/MAPD convention.}
+\label{tab:notation}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Warehouse graph (environment)}}\\
+\( G = (V, E) \)            & Warehouse graph: vertices are locations, edges are connections \\
+\( V \)                     & Finite set of vertices (locations) \\
+\( E \subseteq V \times V \)& Set of edges; agents may move along an edge in one timestep \\
+\( v, v' \in V \)           & Individual vertices \\
+\( e = (v, v') \in E \)     & Individual edge \\
+\( c(e) \geq 0 \)           & Traversal cost (time or distance) of edge \( e \) \\
+\( \mathcal{N}(v) \)        & Neighbourhood of \( v \), i.e.\ \( \{ v' : (v,v') \in E \} \) \\
+\( \mathcal{N}_d(v) \)      & Set of vertices within graph distance \( d \) of \( v \) \\
+\( d_G(v, v') \)            & Shortest-path distance in \( G \) from \( v \) to \( v' \) \\
+\( V_{\mathrm{str}} \subseteq V \)  & Storage vertices (shelves, bins, pallet positions) \\
+\( V_{\mathrm{del}} \subseteq V \)  & Delivery vertices (pick stations, drop-off points) \\
+\( V_{\mathrm{ep}} \subseteq V \)   & Endpoints: vertices at which agents may rest \\
+\( V_{\mathrm{tsk}} \subseteq V_{\mathrm{ep}} \) & Task endpoints: possible pickup and delivery vertices \\
+\( V_{\mathrm{ep}} \setminus V_{\mathrm{tsk}} \) & Non-task endpoints (parking / idle vertices) \\
+\( \mathcal{Y} \)           & Partition of \( V \) into zones, \( V = \bigcup_{Y \in \mathcal{Y}} Y \) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Agents}}\\
+\( A = \{a_1, \dots, a_m\} \) & Set of agents; \( m = |A| \) \\
+\( a_i \in A \)             & Agent \( i \) \\
+\( t \in \{0, 1, \dots, T\} \) & Discrete timestep; \( T \) is the horizon \\
+\( \ell_i(t) \in V \)       & Vertex occupied by agent \( a_i \) at timestep \( t \) \\
+\( \ell_i(0) \)             & Initial vertex of agent \( a_i \) \\
+\( \pi_i(t) \)              & Path of agent \( a_i \): mapping from timesteps to vertices \\
+\( u_i(t) \)                & Action of agent \( a_i \) at timestep \( t \) (wait or move) \\
+\( \mathcal{U}(v) \)        & Admissible actions at vertex \( v \) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Items, orders and storage assignment (SLAP)}}\\
+\( \mathcal{K} \)           & Set of item types (SKUs) \\
+\( k \in \mathcal{K} \)     & An item type \\
+\( \mathcal{Z} \)           & Order arrival distribution \\
+\( z \in \mathcal{Z} \)     & An order, \( z = \{(k_1,q_1), \dots, (k_n,q_n)\} \) \\
+\( q \in \mathbb{N} \)      & Requested quantity of an item type \\
+\( \sigma_t : \mathcal{K} \to V_{\mathrm{str}} \) & Storage assignment at timestep \( t \) \\
+\( \Sigma \)                & Class of admissible storage assignments \\
+\( \rho_t(k) \)             & Estimated demand rate of item type \( k \) at timestep \( t \) \\
+\( \mathrm{cap}(v) \)       & Storage capacity of vertex \( v \in V_{\mathrm{str}} \) \\
+\( F \)                     & Storage update rule, \( \sigma_{t+1} = F(\sigma_t, \cdot) \) \\
+\( \Delta \)                & Re-assignment interval (storage updated every \( \Delta \) timesteps) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Tasks (MAPD)}}\\
+\( \mathcal{T}(t) \)        & Task set: unexecuted tasks present at timestep \( t \) \\
+\( \tau_j \in \mathcal{T}(t) \) & Task \( j \) \\
+\( s_j \in V_{\mathrm{tsk}} \)  & Pickup vertex of task \( \tau_j \) \\
+\( g_j \in V_{\mathrm{tsk}} \)  & Delivery vertex of task \( \tau_j \) \\
+\( t^{\mathrm{arr}}_j \)    & Timestep at which task \( \tau_j \) enters \( \mathcal{T} \) \\
+\( t^{\mathrm{fin}}_j \)    & Timestep at which task \( \tau_j \) is finished \\
+\( \zeta_j \)               & Service time of task \( \tau_j \), \( t^{\mathrm{fin}}_j - t^{\mathrm{arr}}_j \) \\
+\( f \)                     & Task arrival frequency (tasks added per timestep) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Controllers and RL}}\\
+\( \Pi \)                   & Class of routing controllers \\
+\( \Pi_{\mathrm{cen}} \)    & Centralised controllers \\
+\( \Pi_{\mathrm{sec}} \)    & Section-based (zone-decomposed) controllers \\
+\( \Pi_{\mathrm{dec}} \)    & Decentralised RL controllers \\
+\( \pi_\theta \)            & Parameterised policy with parameters \( \theta \) \\
+\( o_i(t) \in \mathcal{O}_i \) & Local observation of agent \( a_i \) at timestep \( t \) \\
+\( G_i(t) \)                & Local projection of \( G \) around \( \ell_i(t) \) \\
+\( G^{A}(t) = (A, E^{A}(t)) \) & Agent interaction graph at timestep \( t \) \\
+\( E^{A}(t) \)              & Interaction edges between agents within communication range \\
+\( r \)                     & Interaction (communication) radius in \( G \) \\
+\( x_i(t) \)                & Feature vector of agent \( a_i \) \\
+\( h_i(t) \)                & GNN embedding of agent \( a_i \) after message passing \\
+\( R_i(t) \)                & Reward of agent \( a_i \) at timestep \( t \) \\
+\( \gamma \in (0,1) \)      & Discount factor \\
+\( J(\pi_\theta) \)         & Expected discounted return of policy \( \pi_\theta \) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Metrics}}\\
+\( \bar{\zeta} \)           & Mean service time over all tasks \\
+\( \Lambda \)               & Throughput: finished tasks per unit time \\
+\( \bar{c} \)               & Mean travel cost per completed task \\
+\( \mu(e) \)                & Traffic load on edge \( e \) (traversals per unit time) \\
+\( \omega(e) \)             & Mean waiting time / queue length attributed to edge \( e \) \\
+\( H \)                     & Flow-concentration index over \( E \) (e.g.\ Gini or entropy) \\
+\( \mathcal{J} \)           & System-level cost functional of the coupled system \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\section{Problem Statement}
+% ---------------------------------------------------------------------
+
+The thesis studies a coupled decision problem that is usually separated in
+the literature. Storage location assignment is optimised under assumed
+routing costs, while MAPF and MAPD are studied under a fixed layout and a
+fixed storage policy, even though storage placement directly changes the
+demand pattern over vertices and edges, and movement policies feed back into
+which storage positions are practically attractive.
+
+Informally, the problem is the following. A warehouse is given as a static
+graph \( G = (V, E) \). Item types \( \mathcal{K} \) are stored at storage
+vertices \( V_{\mathrm{str}} \) according to an assignment \( \sigma_t \).
+Orders arrive from a distribution \( \mathcal{Z} \) and are decomposed into
+delivery tasks, each with a pickup vertex determined by \( \sigma_t \) and a
+delivery vertex in \( V_{\mathrm{del}} \). A fleet of \( m \) agents must
+attend to this stream of tasks in an online, lifelong fashion while avoiding
+collisions. Periodically, the storage assignment is revised using observed
+transport and congestion outcomes, which changes the task distribution that
+the routing controller faces. The question is under what conditions this
+closed-loop coupling improves efficiency, congestion and robustness relative
+to a decoupled baseline, and whether it induces commons-like concentration
+of flow on a small subset of shared resources.
+
+Formally, we require the following.
+
+\paragraph{Given.}
+\begin{itemize}
+  \item a warehouse graph \( G = (V, E) \) with edge costs \( c : E \to \mathbb{R}_{\geq 0} \)
+        and distinguished vertex subsets \( V_{\mathrm{str}} \), \( V_{\mathrm{del}} \),
+        \( V_{\mathrm{ep}} \) and \( V_{\mathrm{tsk}} \);
+  \item a set of item types \( \mathcal{K} \) with capacities \( \mathrm{cap}(v) \)
+        for \( v \in V_{\mathrm{str}} \);
+  \item an order arrival distribution \( \mathcal{Z} \) and task frequency \( f \);
+  \item a set of agents \( A = \{a_1, \dots, a_m\} \) with initial vertices \( \ell_i(0) \);
+  \item a class of admissible storage assignments \( \Sigma \) and an update
+        interval \( \Delta \);
+  \item controller classes \( \Pi_{\mathrm{cen}} \), \( \Pi_{\mathrm{sec}} \) and
+        \( \Pi_{\mathrm{dec}} \).
+\end{itemize}
+
+\paragraph{Find.}
+A pair \( (\sigma, \pi) \), consisting of a storage update rule
+\( \sigma_{t+\Delta} = F(\sigma_t, \cdot) \) with \( \sigma_t \in \Sigma \) and a
+routing controller \( \pi \in \Pi_{\mathrm{cen}} \cup \Pi_{\mathrm{sec}} \cup
+\Pi_{\mathrm{dec}} \), such that the closed-loop system minimises the
+system-level cost
+\begin{equation}
+  \mathcal{J}(\sigma, \pi)
+  = \lambda_{\mathrm{trv}}\, \mathbb{E}\!\left[ \bar{c} \right]
+  + \lambda_{\mathrm{svc}}\, \mathbb{E}\!\left[ \bar{\zeta} \right]
+  + \lambda_{\mathrm{cng}}\, \mathbb{E}\!\left[ \textstyle\sum_{e \in E} \omega(e) \right]
+  + \lambda_{\mathrm{cnc}}\, \mathbb{E}\!\left[ H \right],
+  \label{eq:system-cost}
+\end{equation}
+where the expectation is taken over the order process \( \mathcal{Z} \) and any
+randomness in the controller, and \( \lambda_{\bullet} \geq 0 \) are weights.
+
+\paragraph{Compare.}
+The closed-loop system is compared against the decoupled baseline in which
+\( \sigma_t \equiv \sigma_0 \) for all \( t \), holding \( G \),
+\( \mathcal{Z} \), \( f \), \( m \) and \( \pi \) fixed, and this comparison
+is repeated across the three controller classes and across increasing
+\( m \) and \( f \).
+
+% ---------------------------------------------------------------------
+\section{Formalisation}
+% ---------------------------------------------------------------------
+
+\subsection{Warehouse graph}
+
+The warehouse is a graph
+\begin{equation}
+  G = (V, E),
+\end{equation}
+whose vertices \( V \) correspond to locations and whose edges
+\( E \subseteq V \times V \) correspond to connections between locations
+along which agents can move. Each edge \( e \in E \) carries a cost
+\( c(e) \geq 0 \). The vertex set contains the distinguished subsets
+\begin{equation}
+  V_{\mathrm{str}} \subseteq V, \qquad
+  V_{\mathrm{del}} \subseteq V, \qquad
+  V_{\mathrm{tsk}} \subseteq V_{\mathrm{ep}} \subseteq V,
+\end{equation}
+where \( V_{\mathrm{str}} \) are storage vertices, \( V_{\mathrm{del}} \) are
+delivery vertices, \( V_{\mathrm{ep}} \) are endpoints at which agents may
+rest without blocking others, and \( V_{\mathrm{tsk}} = V_{\mathrm{str}} \cup
+V_{\mathrm{del}} \) are the task endpoints. The graph is assumed connected,
+and instances are assumed \emph{well-formed}: the number of non-task
+endpoints is at least \( m \), and for any two endpoints there exists a path
+between them traversing no other endpoint. Well-formedness is the standard
+sufficient condition guaranteeing that lifelong instances remain solvable.
+
+For hierarchical and section-based control we additionally fix a partition
+\begin{equation}
+  \mathcal{Y} = \{Y_1, \dots, Y_p\}, \qquad
+  V = \bigcup_{n=1}^{p} Y_n, \qquad
+  Y_n \cap Y_{n'} = \emptyset \ \ (n \neq n'),
+\end{equation}
+whose blocks correspond to aisles, sections or zones of the warehouse.
+
+\subsection{Agents, actions and collisions}
+
+Let \( A = \{a_1, \dots, a_m\} \). Agent \( a_i \) occupies vertex
+\( \ell_i(t) \in V \) at timestep \( t \) and starts at \( \ell_i(0) \). At
+each timestep an agent either waits or moves to an adjacent vertex,
+\begin{equation}
+  \ell_i(t+1) = \ell_i(t)
+  \quad \text{or} \quad
+  \big(\ell_i(t), \ell_i(t+1)\big) \in E ,
+\end{equation}
+so the admissible action set at vertex \( v \) is
+\begin{equation}
+  \mathcal{U}(v) = \{\textsf{wait}\} \cup \{ \textsf{move to } v' : v' \in \mathcal{N}(v) \}.
+\end{equation}
+Two collision constraints are imposed. Vertex collisions are forbidden,
+\begin{equation}
+  \ell_i(t) \neq \ell_{i'}(t)
+  \qquad \forall\, a_i \neq a_{i'},\ \forall t,
+  \label{eq:vertex-collision}
+\end{equation}
+and edge (swap) collisions are forbidden,
+\begin{equation}
+  \neg \big( \ell_i(t) = \ell_{i'}(t+1) \ \wedge\ \ell_{i'}(t) = \ell_i(t+1) \big)
+  \qquad \forall\, a_i \neq a_{i'},\ \forall t.
+  \label{eq:edge-collision}
+\end{equation}
+A path of agent \( a_i \) is a mapping from an interval of timesteps to
+vertices; two paths collide iff the agents moving along them violate
+\eqref{eq:vertex-collision} or \eqref{eq:edge-collision}.
+
+\subsection{Storage assignment layer (SLAP)}
+
+Let \( \mathcal{K} \) be the set of item types. A storage assignment at
+timestep \( t \) is a map
+\begin{equation}
+  \sigma_t : \mathcal{K} \to V_{\mathrm{str}},
+\end{equation}
+subject to the capacity constraints
+\begin{equation}
+  \big| \{ k \in \mathcal{K} : \sigma_t(k) = v \} \big| \leq \mathrm{cap}(v)
+  \qquad \forall v \in V_{\mathrm{str}} .
+\end{equation}
+The class of assignments satisfying these constraints is denoted \( \Sigma \).
+
+Orders arrive from \( \mathcal{Z} \). An order is a finite multiset
+\begin{equation}
+  z = \{ (k_1, q_1), \dots, (k_n, q_n) \}, \qquad k_j \in \mathcal{K},\ q_j \in \mathbb{N},
+\end{equation}
+and each order line \( (k_j, q_j) \) induces one or more delivery tasks whose
+pickup vertex is \( \sigma_t(k_j) \) and whose delivery vertex lies in
+\( V_{\mathrm{del}} \). The storage assignment therefore determines the
+spatial distribution of pickup vertices, and hence the demand induced on
+\( V \) and \( E \).
+
+Let \( \mu_t(e) \) denote the observed traffic load on edge \( e \) and
+\( \omega_t(e) \) the observed waiting time attributed to \( e \), both
+estimated from agent trajectories over the window \( [t-\Delta, t] \), and let
+\( \rho_t(k) \) denote the estimated demand rate of item type \( k \). The
+closed-loop storage update is
+\begin{equation}
+  \sigma_{t+\Delta}
+  = F\big( \sigma_t,\ \rho_t,\ \mu_t,\ \omega_t \big),
+  \qquad \sigma_{t+\Delta} \in \Sigma ,
+  \label{eq:storage-update}
+\end{equation}
+where \( F \) trades off proximity against congestion. A concrete
+instantiation assigns to each candidate storage vertex the score
+\begin{equation}
+  \phi_t(k, v)
+  = \rho_t(k) \cdot \Big[
+      \alpha \, \bar{d}_G\big(v, V_{\mathrm{del}}\big)
+      + \beta \, \psi_t(v)
+    \Big],
+  \qquad
+  \sigma_{t+\Delta}(k) \in \arg\min_{v} \phi_t(k, v),
+  \label{eq:storage-score}
+\end{equation}
+where \( \bar{d}_G(v, V_{\mathrm{del}}) \) is the mean shortest-path distance
+from \( v \) to the delivery vertices, \( \psi_t(v) \) aggregates congestion
+on the edges leading to \( v \), and \( \alpha, \beta \geq 0 \) are weights.
+Setting \( \beta = 0 \) recovers a purely distance-driven (congestion-blind)
+storage heuristic; setting \( \Delta = \infty \) recovers the decoupled
+baseline.
+
+\subsection{Routing layer (MAPD)}
+
+At each timestep the system adds all newly arrived tasks to the task set
+\( \mathcal{T}(t) \). Each task
+\begin{equation}
+  \tau_j = (s_j, g_j), \qquad s_j, g_j \in V_{\mathrm{tsk}} ,
+\end{equation}
+is characterised by a pickup vertex \( s_j \) and a delivery vertex
+\( g_j \). An agent is \emph{free} if it is not currently executing a task
+and \emph{occupied} otherwise. A free agent may be assigned any task
+\( \tau_j \in \mathcal{T}(t) \); it must then move from its current vertex via
+\( s_j \) to \( g_j \). Upon reaching \( s_j \) it starts executing the task,
+which is removed from \( \mathcal{T} \); upon reaching \( g_j \) it finishes
+the task and becomes free again.
+
+The service time of task \( \tau_j \) is
+\begin{equation}
+  \zeta_j = t^{\mathrm{fin}}_j - t^{\mathrm{arr}}_j ,
+\end{equation}
+and the primary routing objective is the mean service time
+\begin{equation}
+  \bar{\zeta} = \frac{1}{|\mathcal{T}_{\mathrm{fin}}|}
+    \sum_{\tau_j \in \mathcal{T}_{\mathrm{fin}}} \zeta_j ,
+\end{equation}
+with throughput \( \Lambda = |\mathcal{T}_{\mathrm{fin}}| / T \) and mean travel
+cost per completed task
+\begin{equation}
+  \bar{c} = \frac{1}{|\mathcal{T}_{\mathrm{fin}}|}
+    \sum_{i=1}^{m} \sum_{t=0}^{T-1}
+      c\big(\ell_i(t), \ell_i(t+1)\big).
+\end{equation}
+
+\subsection{Controller classes}
+
+Three controller classes are considered on the same graph \( G \).
+
+\paragraph{Centralised (\( \Pi_{\mathrm{cen}} \)).}
+A single planner assigns endpoints to all agents and plans collision-free
+paths for all agents jointly, re-planning at every timestep. This yields
+strong global coordination at a computational cost that grows steeply with
+\( m \).
+
+\paragraph{Section-based (\( \Pi_{\mathrm{sec}} \)).}
+Assignment and planning are decomposed over the zones \( \mathcal{Y} \).
+Within a zone \( Y_n \) a local planner operates as in the centralised case;
+coordination between zones is restricted to boundary vertices
+\( \partial Y_n = \{ v \in Y_n : \mathcal{N}(v) \setminus Y_n \neq \emptyset \} \).
+
+\paragraph{Decentralised RL (\( \Pi_{\mathrm{dec}} \)).}
+Each agent selects its own action from a local observation using a shared
+parameterised policy \( \pi_\theta \).
+
+\subsection{Local projections and the agent interaction graph}
+
+For the decentralised controller, agent \( a_i \) does not observe \( G \)
+globally. Define the depth-\( d \) local projection of \( G \) at vertex
+\( v \) as the induced subgraph
+\begin{equation}
+  G_i(t) = \mathrm{LocProj}\big(G, \ell_i(t), d\big)
+         = G\big[\, \mathcal{N}_d(\ell_i(t)) \,\big],
+  \qquad
+  \mathcal{N}_d(v) = \{ v' \in V : d_G(v, v') \leq d \}.
+  \label{eq:locproj}
+\end{equation}
+Because a goal vertex may lie outside \( G_i(t) \), each vertex
+\( v' \in \mathcal{N}_d(\ell_i(t)) \) is annotated with the scalar potential
+\begin{equation}
+  \eta_i(v') = d_G\big(v', g_{j(i)}\big),
+  \label{eq:potential}
+\end{equation}
+where \( g_{j(i)} \) is the current target of agent \( a_i \). These
+potentials replace the Euclidean direction vector available on a grid:
+progress towards the goal corresponds to selecting a neighbour with lower
+\( \eta_i \), and \eqref{eq:potential} is precomputed once per instance.
+
+Local interaction between agents is captured by the time-varying agent
+interaction graph
+\begin{equation}
+  G^{A}(t) = \big(A, E^{A}(t)\big),
+  \qquad
+  (a_i, a_{i'}) \in E^{A}(t) \iff d_G\big(\ell_i(t), \ell_{i'}(t)\big) \leq r ,
+  \label{eq:agent-graph}
+\end{equation}
+with communication radius \( r \). Note the deliberate distinction between
+the static environment graph \( G = (V,E) \), whose vertices are locations,
+and the dynamic interaction graph \( G^{A}(t) \), whose vertices are agents.
+
+\subsection{Observations, policy and reward}
+
+The multi-agent interaction is modelled as a partially observable stochastic
+game
+\begin{equation}
+  \big( A,\ S,\ \{\mathcal{U}_i\}_{i},\ \{\mathcal{O}_i\}_{i},\ P,\ \{R_i\}_{i},\ \gamma \big),
+\end{equation}
+where \( S \) is the global state (agent positions, task set, storage
+assignment) and \( P \) the transition kernel induced by the joint action and
+the collision-resolution rule. The observation of agent \( a_i \) is
+\begin{equation}
+  o_i(t) = \Big(
+    G_i(t),\ \eta_i,\
+    \{ x_{i'}(t) : (a_i, a_{i'}) \in E^{A}(t) \},\
+    \iota_i(t)
+  \Big),
+  \label{eq:observation}
+\end{equation}
+where \( x_{i'}(t) \) are features of neighbouring agents and \( \iota_i(t) \)
+encodes task information (current pickup and delivery targets, and, for
+section-based variants, the assigned zone).
+
+Features are embedded by a graph neural network over \( G_i(t) \) and
+\( G^{A}(t) \). With \( h_i^{(0)}(t) = x_i(t) \), layer \( \kappa \) computes
+\begin{equation}
+  h_i^{(\kappa+1)}(t)
+  = \varphi\Big(
+      W^{(\kappa)} h_i^{(\kappa)}(t)
+      + \!\!\sum_{(a_i,a_{i'}) \in E^{A}(t)}\!\! W_{\mathrm{msg}}^{(\kappa)} h_{i'}^{(\kappa)}(t)
+    \Big),
+  \label{eq:gnn}
+\end{equation}
+with nonlinearity \( \varphi \). The action is drawn from
+\begin{equation}
+  u_i(t) \sim \pi_\theta\big( \cdot \mid h_i^{(L)}(t) \big),
+  \qquad u_i(t) \in \mathcal{U}\big(\ell_i(t)\big),
+\end{equation}
+where inadmissible actions are masked out.
+
+The per-agent reward decomposes into a movement term, a task-completion
+term, a collision term and a congestion term,
+\begin{equation}
+  R_i(t)
+  = w_{\mathrm{mov}} R_i^{\mathrm{mov}}(t)
+  + w_{\mathrm{tsk}} R_i^{\mathrm{tsk}}(t)
+  + w_{\mathrm{col}} R_i^{\mathrm{col}}(t)
+  + w_{\mathrm{cng}} R_i^{\mathrm{cng}}(t),
+  \label{eq:reward}
+\end{equation}
+where the congestion term penalises entering locally crowded regions of
+\( G \) and rewards leaving them, measured by the local occupancy
+\begin{equation}
+  \delta_i(t)
+  = \frac{\big| \{ a_{i'} \in A : d_G(\ell_i(t), \ell_{i'}(t)) \leq r_{\mathrm{cng}} \} \big|}
+         {\big| \mathcal{N}_{r_{\mathrm{cng}}}(\ell_i(t)) \big|},
+  \qquad
+  R_i^{\mathrm{cng}}(t) = -\,\mathrm{sgn}\big( \delta_i(t) - \delta_i(t-1) \big).
+  \label{eq:congestion-reward}
+\end{equation}
+Setting \( w_{\mathrm{cng}} = 0 \) yields the congestion-blind ablation.
+The learning objective is
+\begin{equation}
+  \max_{\theta}\ J(\pi_\theta)
+  = \mathbb{E}\Big[ \textstyle\sum_{t=0}^{T} \gamma^t R_i(t) \Big].
+\end{equation}
+
+\subsection{Coupled system and evaluation}
+
+The coupled system alternates two timescales. On the fast timescale, at every
+timestep, tasks arrive, the routing controller acts, and agents move subject
+to \eqref{eq:vertex-collision} and \eqref{eq:edge-collision}. On the slow
+timescale, every \( \Delta \) timesteps, the storage assignment is revised by
+\eqref{eq:storage-update}, which changes the pickup vertices of future tasks
+and therefore the distribution the routing controller faces.
+
+Flow concentration is quantified on the edge-load distribution
+\( \{ \mu(e) \}_{e \in E} \). Writing \( \hat{\mu}(e) = \mu(e) / \sum_{e'} \mu(e') \),
+we report the normalised entropy
+\begin{equation}
+  H = -\frac{1}{\log |E|} \sum_{e \in E} \hat{\mu}(e) \log \hat{\mu}(e),
+  \label{eq:entropy}
+\end{equation}
+so that low \( H \) indicates commons-like concentration of traffic on few
+edges. The experimental design varies (i) coupling, \( \Delta \) finite versus
+\( \Delta = \infty \); (ii) controller class, \( \Pi_{\mathrm{cen}} \),
+\( \Pi_{\mathrm{sec}} \), \( \Pi_{\mathrm{dec}} \); (iii) congestion sensitivity,
+\( \beta \) and \( w_{\mathrm{cng}} \) zero or nonzero; (iv) local communication,
+\( r = 0 \) versus \( r > 0 \); and (v) load, the number of agents \( m \) and
+the task frequency \( f \). Reported measures are
+\( \bar{\zeta} \), \( \Lambda \), \( \bar{c} \), \( \sum_e \omega(e) \), \( H \),
+runtime per timestep, and their degradation as \( m \) and \( f \) increase.
+
+% ---------------------------------------------------------------------
+\section{Background to be Covered}
+% ---------------------------------------------------------------------
+
+The following material must be understood and presented before the
+contribution can be stated precisely.
+
+\subsection{Warehouse operations and storage assignment}
+\begin{itemize}
+  \item Warehouse order-picking systems: picker-to-goods versus
+        goods-to-picker paradigms; the pick rate (order lines per hour) as
+        the dominant industrial key performance indicator; zoning strategies
+        (no zoning, progressive zoning) and their effect on picker
+        utilisation and travel.
+  \item The Storage Location Assignment Problem (SLAP): objectives (travel
+        reduction, space utilisation, picking efficiency), constraints
+        (capacity, class-based storage, item affinity), and standard
+        heuristics such as demand-frequency (ABC/turnover) placement and
+        proximity-to-depot placement.
+  \item The Dynamic Storage Location Assignment Problem (DSLAP): why
+        placement must be revised as demand and inventory change, and how
+        deep reinforcement learning has been applied to it.
+  \item Integrated storage-location and order-picking planning: existing
+        attempts to couple placement with picking policy, and the gap that
+        remains regarding routing-level congestion feedback.
+  \item AGV-assisted order picking: exact routing algorithms for
+        single-block parallel-aisle warehouses, order batching and batch
+        sequencing, and handover-zone architectures with heterogeneous
+        (human plus robotic) workers.
+\end{itemize}
+
+\subsection{Multi-agent path finding}
+\begin{itemize}
+  \item The classical MAPF formulation on a graph \( G = (V,E) \):
+        vertex and edge (swap) collision constraints, objective functions
+        (makespan versus sum-of-costs / flowtime), and complexity results
+        (NP-hardness of optimal solving; inapproximability of makespan below
+        a constant factor).
+  \item Optimal centralised solvers: Conflict-Based Search and its
+        improvements (ICBS), Increasing Cost Tree Search, M*, Enhanced
+        Partial Expansion A*, Independence Detection with Operator
+        Decomposition, and reductions to SAT / ILP / ASP.
+  \item Bounded-suboptimal and anytime solvers: prioritised and
+        hierarchical cooperative A*, Push-and-Swap / Push-and-Rotate, large
+        neighbourhood search (MAPF-LNS, MAPF-LNS2), and LaCAM for
+        large-scale instances.
+  \item MAPF benchmarks and standard maps, together with the definitions,
+        variants and reporting conventions used in the field.
+  \item Generalisations relevant to warehouses: kinematic constraints,
+        delay probabilities, combined target assignment and path finding,
+        and MAPF with deadlines.
+  \item MAPF on non-lattice graphs: why grid-specific machinery
+        (convolutional encoders, Euclidean direction vectors, coordinate
+        inputs) does not transfer, and how distance-to-goal node potentials
+        replace direction on arbitrary graphs.
+\end{itemize}
+
+\subsection{Lifelong and online extensions: MAPD}
+\begin{itemize}
+  \item The Multi-Agent Pickup and Delivery problem: online arrival of
+        tasks, lifelong operation, tasks as pickup-delivery vertex pairs,
+        free versus occupied agents, and service time as the evaluation
+        measure.
+  \item Well-formed instances: endpoints, task endpoints and non-task
+        endpoints; the sufficient condition for solvability; why agents must
+        rest only where they cannot block others.
+  \item Decoupled MAPD algorithms: Token Passing (TP) and Token Passing with
+        Task Swaps (TPTS), their completeness guarantees on well-formed
+        instances, and the communication-versus-effectiveness trade-off
+        against a centralised baseline.
+  \item The empirical trade-off surface: effectiveness ordering (centralised,
+        TPTS, TP) versus runtime ordering (TP, TPTS, centralised), and the
+        scalability limits that motivate decentralised learned controllers.
+  \item Lifelong MAPF in large-scale warehouses with bounded re-planning,
+        and cooperative MAPD variants requiring explicit multi-agent
+        cooperation beyond collision avoidance.
+  \item The relationship between task assignment and path finding: why MAPD
+        is usually split into a task-assignment subproblem and a path-finding
+        subproblem, and what is lost by that split.
+\end{itemize}
+
+\subsection{Reinforcement learning and multi-agent reinforcement learning}
+\begin{itemize}
+  \item Markov decision processes, partially observable MDPs, and partially
+        observable stochastic games; value functions, policy gradients and
+        the advantage function.
+  \item Core algorithms needed for implementation: deep Q-networks with
+        experience replay and target networks; asynchronous advantage
+        actor-critic (A3C); advantage actor-critic (A2C) and proximal policy
+        optimisation (PPO).
+  \item Multi-agent reinforcement learning: independent learning and its
+        non-stationarity problem; centralised training with decentralised
+        execution; parameter sharing among homogeneous agents; shared
+        experience actor-critic.
+  \item Practical mechanisms: invalid action masking and its bias; curriculum
+        learning over environment size and density; learning from
+        demonstrations to seed high-reward regions; reward shaping and its
+        pitfalls.
+  \item Evaluation methodology for deep RL: seed variance, stratified
+        bootstrap confidence intervals, and reporting standards.
+\end{itemize}
+
+\subsection{Graph neural networks for multi-agent systems}
+\begin{itemize}
+  \item Graph convolutional networks and message passing: node and edge
+        attributes, graph filters, permutation equivariance, and the
+        depth-versus-receptive-field trade-off.
+  \item GNNs for decentralised multi-robot path planning: agents as nodes,
+        proximity as edges, dynamically computed adjacency from the local
+        field of view, and learned local communication.
+  \item Crowd-aware decentralised MAPF: density-based reward terms, local
+        communication via GNNs, and their measured contribution in ablation.
+  \item Prioritised and implicit-priority communication learning as
+        alternatives to symmetric message passing.
+  \item Local observation design on graphs: fixed-depth subgraph extraction,
+        the quality-versus-cost trade-off in the depth parameter, and
+        generalisation to arbitrary graph sizes.
+\end{itemize}
+
+\subsection{Hierarchical and multi-level control}
+\begin{itemize}
+  \item Feudal reinforcement learning and Feudal Multi-Agent Hierarchies:
+        manager agents producing goals for worker agents.
+  \item Macro-actions under partial observability, and action-space
+        decomposition by spatial zones.
+  \item Hierarchical MARL for warehouse order picking: a manager assigning
+        warehouse zones to heterogeneous workers, workers selecting item
+        locations within the assigned zone, and a low-level controller
+        (typically A*) executing primitive navigation.
+  \item Industrial heuristic baselines that hierarchical controllers must
+        beat: Follow-Me, Pick-Don't-Move, and closest-task assignment.
+  \item Bridging centralised and decentralised path finding: hybrid
+        architectures and the coordination-versus-scalability trade-off.
+\end{itemize}
+
+\subsection{Self-organisation, congestion and commons dynamics}
+\begin{itemize}
+  \item Sociotechnical systems framing of automated warehouses: humans and
+        robots as co-workers on shared infrastructure.
+  \item Emergence and self-organisation in multi-agent systems: how locally
+        beneficial decisions can reinforce one another into either efficient
+        global organisation or pathological concentration.
+  \item Tragedy-of-the-commons dynamics in shared infrastructure, and MARL
+        studies of commons problems; individual versus congestion-sensitive
+        reward structures.
+  \item Congestion measurement on graphs: edge loads, queue lengths, waiting
+        times, deadlock frequency, and concentration indices (entropy, Gini)
+        over the edge-load distribution.
+  \item Related routing formulations for context: vehicle routing problems
+        and their relation to warehouse-internal transport.
+\end{itemize}

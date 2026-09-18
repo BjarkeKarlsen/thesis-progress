@@ -1,0 +1,556 @@
+\documentclass[../main.tex]{subfiles}
+\graphicspath{{\subfix{../Images/}}}
+
+\begin{document}
+\onecolumn
+% =================================================================
+% Sections V-VI -- Method and Implementation (skeleton)
+%
+% Companion to problem_formulation.tex / problem_formulation_fixed.tex.
+% Realises every forward reference that Section IV already makes into this
+% file's namespace: sec:method, sec:method:storage, sec:method:controllers,
+% sec:method:rl, sec:method:model, sec:method:resolution, sec:method:training,
+% sec:implementation, sec:impl:instances, sec:impl:logging, sec:impl:validation
+% all match exactly, so \ref/\eqref calls already written in Section IV
+% resolve against this file with no changes needed there.
+%
+% CONTRACT (from Method_and_Implementation.md, restated for enforcement here)
+%   Section V may only refer to Section IV by equation number, never restate a
+%   definition. If a paragraph below needs to define something Section IV
+%   already defines (a task, a conflict, the coupling condition, the storage
+%   capacity constraint, Pi, F), that is a bug in this file -- it should be an
+%   \eqref, not a restatement. Every equation label already used by
+%   problem_formulation_fixed.tex is treated as read-only here.
+%
+% This is a SKELETON: every numeric value in the parameter tables is marked
+% TBD and is meant to be filled in after the first stable runs (see
+% Method_and_Implementation.md, "Recommended order of work", Pass 5). The
+% algorithmic choices (which greedy heuristic, which priority rule, which
+% reward shape) are concrete enough to implement and test, but are Method-level
+% choices, not yet validated by any experiment -- treat them as the first
+% reasonable draft, not as settled design.
+%
+% REQUIRES BIBLIOGRAPHY ENTRIES (natbib \citet/\citep form; see the equivalent
+% note in problem_formulation_fixed.tex if main.tex does not load natbib):
+%   knippenberg2021, ng1999policy, devlin2012dynamic -- already required by
+%     problem_formulation_fixed.tex and GAPS.tex; add once, used in all three.
+%   @article{schulman2017ppo,
+%     author = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and
+%               Radford, Alec and Klimov, Oleg},
+%     title  = {Proximal Policy Optimization Algorithms},
+%     journal = {arXiv preprint arXiv:1707.06347}, year = {2017} }
+%   @misc{rllibmultiagent,
+%     author = {{Ray Project}}, title = {Multi-Agent Environments --- RLlib},
+%     howpublished = {\url{https://docs.ray.io/en/latest/rllib/multi-agent-envs.html}},
+%     year = {2026} }
+%   @misc{pettingzooparallel,
+%     author = {{Farama Foundation}}, title = {Parallel API --- PettingZoo},
+%     howpublished = {\url{https://pettingzoo.farama.org/api/parallel/}},
+%     year = {2026} }
+%   @inproceedings{sartoretti2019primal,
+%     author = {Sartoretti, Guillaume and Kerr, Justin and Shi, Yunfei and
+%               Wagner, Glenn and Satish Kumar, T. K. and Koenig, Sven and
+%               Choset, Howie},
+%     title  = {{PRIMAL}: Pathfinding via Reinforcement and Imitation
+%               Multi-Agent Learning},
+%     journal = {IEEE Robotics and Automation Letters}, volume = {4}, number = {3},
+%     pages = {2378--2385}, year = {2019} }
+%
+% Labels defined by this file:
+%   Section: sec:method, sec:method:overview, sec:method:storage,
+%     sec:method:controllers, sec:method:rl, sec:method:model,
+%     sec:method:resolution, sec:method:training, sec:implementation,
+%     sec:impl:simulator, sec:impl:instances, sec:impl:logging,
+%     sec:impl:cost, sec:impl:validation
+%   Equation: eq:storagegreedy eq:assignmentrule eq:features eq:mask
+%     eq:reward eq:msgpass eq:readout
+%   Figure: fig:methodloop fig:architecture
+%   Table: tab:storageparams tab:rlparams tab:modelparams tab:trainparams
+% =================================================================
+
+\section{Method}
+\label{sec:method}
+
+Section~\ref{sec:problem} fixed what the objects are: the sets, the
+constraints, the coupling condition, and the objective
+$\mathcal{J}(F,\pi)$ as a framing device. This section realises every
+component that section left open --- the storage rule $F \in \mathcal{F}$
+(\ref{sec:pf:storage}), the three controllers $\pi \in \Pi$
+(\ref{sec:pf:controllers}), the reward $R_i$
+(\eqref{eq:objective}), and the conflict-resolution mechanism whose
+existence \eqref{eq:vertexconflict}--\eqref{eq:swapconflict} already assume
+(\ref{sec:pf:agents}). Nothing below changes a definition from
+Section~\ref{sec:problem}; every reference to an object defined there is by
+equation or section number.
+
+% -----------------------------------------------------------------
+\subsection{Overview}
+\label{sec:method:overview}
+
+All three controllers of Table~\ref{tab:information} are embedded in the same
+six-stage loop, so that a controller swap changes only stages 2--3 and the
+comparison stays matched. At each timestep: (1)~orders drawn from
+$P_{\mathrm{ord}}$ are converted into new tasks \eqref{eq:task} and enter
+$\mathcal{Q}_t$; (2)~task assignment (Section~\ref{sec:method:controllers},
+identical across all three architectures) matches free agents to tasks in
+$\mathcal{Q}_t$; (3)~routing produces one intended action
+$u_i(t)\in\mathcal{U}(\ell_i(t))$ per agent, using whichever information the
+active architecture permits (Table~\ref{tab:information}); (4)~the
+conflict-resolution operator (Section~\ref{sec:method:resolution}) revises
+the joint intended action into one satisfying
+\eqref{eq:vertexconflict}--\eqref{eq:swapconflict}, flagging any agent it
+overrides; (5)~the environment applies the resolved joint action, advancing
+$\ell_i(t)$, the lifecycle sets \eqref{eq:lifecycle}, and the log
+(Section~\ref{sec:impl:logging}); (6)~if $t$ is a storage epoch, the storage
+rule additionally applies \eqref{eq:storageupdate}. Figure~\ref{fig:methodloop}
+shows the loop; a reader who stops here already knows the shape of the system
+that the rest of this section fills in piece by piece.
+
+\begin{figure}[t]
+  \centering
+  \fbox{\parbox{0.9\linewidth}{\centering\vspace{2cm}
+    \emph{[Figure: the six-stage loop above, drawn as a cycle diagram in the
+    style of Figure~\ref{fig:loop}, with the three controller-specific
+    boxes (centralised / section-based / decentralised) shown as
+    interchangeable inserts at stage 3.]}
+    \vspace{2cm}}}
+  \caption{The environment step. Stages 1, 2, 4, 5 and 6 are shared by every
+  controller; only stage 3 (routing) differs, which is what makes a result
+  difference attributable to the routing architecture.}
+  \label{fig:methodloop}
+\end{figure}
+
+% -----------------------------------------------------------------
+\subsection{Storage update rule}
+\label{sec:method:storage}
+
+Three named rules realise $F \in \mathcal{F}$ (\ref{sec:pf:storage}), ordered
+as a ladder rather than presented as one sophisticated rule, because the gap
+between the second and third isolates exactly this thesis's contribution: the
+value of \emph{traffic} information over \emph{demand} information alone.
+
+\textbf{$F_{\mathrm{fix}}$} is the identity rule already fixed in
+\eqref{eq:storageupdate}'s surrounding text; it is not re-derived here.
+
+\textbf{$F_{\mathrm{dem}}$} (demand-only) is the classical slotting
+heuristic: sort $\mathcal{K}$ by $\hat\rho_t(k)$ descending, sort
+$V_{\mathrm{str}}$ by $\min_{g\in V_{\mathrm{del}}} d_G(v,g)$ ascending, and
+place SKUs into vertices in that joint order, skipping a vertex once it is at
+capacity \eqref{eq:feasiblestorage}. This is $\arg\min_{x\in\mathcal{X}}
+D(x;\hat\rho_t)$ from \eqref{eq:storageobjective} with $\beta=\chi=0$, solved
+greedily rather than exactly.
+
+\textbf{$F_{\mathrm{cng}}$} (congestion-aware) extends $F_{\mathrm{dem}}$'s
+ranking with a congestion penalty: SKU $k$'s score at candidate vertex $v$
+becomes
+\begin{equation}
+  \mathrm{score}(k,v) = \hat\rho_t(k)\cdot d_G\bigl(v, \textstyle\min_{g}\bigr)
+  \;+\; \beta \sum_{e \in \mathrm{path}(v)} \hat\mu_t(e)\,\hat w_t(e) ,
+  \label{eq:storagegreedy}
+\end{equation}
+where $\mathrm{path}(v)$ is the shortest path used to reach $v$ from the
+nearest delivery point and $\beta \ge 0$ weights congestion exposure against
+access distance; SKUs are placed in ascending score order, subject to the same
+capacity check. \eqref{eq:storagegreedy} realises $D+\beta K$ from
+\eqref{eq:storageobjective} greedily.
+
+The reassignment term $R$ is realised as a \emph{hard cap} rather than a
+smooth penalty: at most $\nu$ units may be relocated relative to
+$x_{t-\Delta}$ per epoch, i.e.\ $R(x,x_{t-\Delta}) = 0$ if the number of
+relocated units is $\le \nu$ and $R = \infty$ otherwise, so any finite
+$\chi > 0$ in \eqref{eq:storageobjective} enforces the cap and $\chi$ itself
+is fixed rather than swept. When $F_{\mathrm{dem}}$ or $F_{\mathrm{cng}}$
+would relocate more than $\nu$ units, only the $\nu$
+highest-marginal-value relocations are applied, processed in strictly
+descending marginal score, ties broken by SKU id then vertex id --- this is
+the tie-breaking rule that \eqref{eq:storageupdate} requires to be a genuine
+function rather than a set-valued $\arg\min$ (see \ref{sec:pf:storage}'s
+requirement). $\Delta=\infty$ is not a separate rule to implement:
+$F_{\mathrm{fix}}$ already covers it exactly.
+
+\begin{table}[h]
+  \centering
+  \caption{Storage-rule parameters. TBD columns are filled after the first
+  stable runs (Method\_and\_Implementation.md, Pass 5).}
+  \label{tab:storageparams}
+  \begin{tabular}{lll}
+    \toprule
+    Parameter & Meaning & Value \\
+    \midrule
+    $\beta$ & congestion weight in \eqref{eq:storagegreedy} & TBD (sweep) \\
+    $\nu$ & max relocated units per epoch & TBD (sweep) \\
+    $\Delta$ & storage epoch length & TBD (sweep, per \ref{sec:pf:coupling}) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% -----------------------------------------------------------------
+\subsection{Controller realisations}
+\label{sec:method:controllers}
+
+The three architectures of Table~\ref{tab:information} realise
+$\pi=(\pi^{\text{assign}},\pi^{\text{route}}) \in \Pi$
+(\ref{sec:pf:controllers}). Task assignment is realised once and shared by
+all three, so that a result difference is never confounded with assignment
+quality: at every timestep, agents free per \eqref{eq:free} are matched to
+tasks in $\mathcal{Q}_t$ ordered by $r_j$ ascending (oldest first), each
+matched greedily to the free agent minimising $d_G(\ell_i(t), s_j)$,
+\begin{equation}
+  i^\star(j) = \arg\min_{i \,:\, a_i \text{ free}} d_G(\ell_i(t), s_j) ,
+  \label{eq:assignmentrule}
+\end{equation}
+removing $a_{i^\star(j)}$ from the free pool before considering the next
+task. This is a greedy heuristic for bipartite matching, not the Hungarian
+algorithm's optimum; using the optimum instead is a one-line ablation, not a
+change to $\Pi$.
+
+\textbf{Centralised} $\pi^{\text{route}}$: prioritised planning
+(space-time A$^\star$) over the full graph, agents planned in a fixed order
+(earliest $y_j$ first); each agent after the first plans around the
+space-time cells already reserved by higher-priority agents for the current
+planning horizon.
+
+\textbf{Section-based} $\pi^{\text{route}}$: the same prioritised planner run
+independently inside each zone $Y_q$ of \eqref{eq:partition}, using only
+zone-local state. The boundary protocol: an agent whose planned route crosses
+$Y_q \to Y_{q'}$ yields at the boundary to whichever zone currently has fewer
+active agents, ties broken by agent id --- one explicit, stated rule, not left
+implicit.
+
+\textbf{Decentralised} $\pi^{\text{route}}$: the learned policy
+$\pi_\theta(\cdot\mid o_i(t))$ of Sections~\ref{sec:method:rl}
+and~\ref{sec:method:model}.
+
+% -----------------------------------------------------------------
+\subsection{Reinforcement-learning formulation}
+\label{sec:method:rl}
+
+Four components realise the decentralised regime's $\pi_\theta$: how
+$o_i(t)$ \eqref{eq:observation} is encoded, the action space and its mask,
+the reward, and the objective (already \eqref{eq:objective}, not restated).
+
+\textbf{Observation features.} Each visible vertex $v \in
+\mathcal{G}_i^{(d)}(t)$ contributes a feature vector
+\begin{equation}
+  f(v,t) = \bigl(\, \mathrm{onehot}(\mathrm{role}(v)),\;\; \eta_i(v,t),\;\;
+                    \mathbb{1}[v \text{ occupied by another agent}] \,\bigr) ,
+  \label{eq:features}
+\end{equation}
+where $\mathrm{role}(v) \in \{V_{\mathrm{str}}, V_{\mathrm{del}}, V_{\mathrm{ep}},
+\text{transit}\}$ (\ref{sec:pf:env}) and $\eta_i(v,t)$ is
+\eqref{eq:potential}. Each message from $a_j$ with $(a_i,a_j)\in
+E^{\mathcal{A}}_t$ \eqref{eq:commgraph} carries $(d_G(\ell_i(t),\ell_j(t)),\,
+\eta_j(\ell_j(t),t))$. The congestion feature $\delta_i(t)$
+\eqref{eq:congestion} is appended once, agent-level rather than per-node.
+
+\textbf{Action space and masking.} With $d_{\max} = \max_{v\in V_{\mathrm{mov}}}
+|N^{+}(v)|$, the policy head outputs $d_{\max}+1$ logits (one wait, $d_{\max}$
+move slots). At a state with $\ell_i(t)=v$, logits for slots beyond
+$|N^{+}(v)|$ --- i.e.\ for $\mathcal{U}_i \setminus \mathcal{U}(v)$
+(\ref{sec:pf:game}) --- are set to $-\infty$ before the softmax,
+\begin{equation}
+  \Pr[u_i(t) = \cdot] = \mathrm{softmax}\bigl(\, \ell(\cdot) + M(v,\cdot) \,\bigr),
+  \qquad M(v,\cdot) = \begin{cases} 0 & \cdot \in \mathcal{U}(v) \\
+                                     -\infty & \cdot \in \mathcal{U}_i\setminus\mathcal{U}(v) \end{cases}
+  \label{eq:mask}
+\end{equation}
+which is what makes each individual action legal \emph{by construction}
+rather than in expectation. This is a deliberate departure from
+\citet{knippenberg2021}, who instead let the policy select an out-of-range
+move and have the environment silently reinterpret it as a wait, penalised
+after the fact: that approach spends training signal teaching the policy not
+to attempt moves already known to be illegal from $N^{+}(\ell_i(t))$, and it
+lets the executed action (wait) diverge from the sampled one (move) at
+exactly the state the value function most needs to be reliable. Masking
+costs nothing extra to obtain: $N^{+}(v)$ is already required to define
+$\mathcal{U}(v)$ (\ref{sec:pf:env}), so $M(v,\cdot)$ reuses information the
+environment computes regardless, rather than adding a second mechanism.
+RLlib's newer multi-agent API does not ship
+action masking as a built-in and it must be implemented as a custom module or
+connector \citep{rllibmultiagent}; budget implementation time for it
+separately from the training-procedure work of
+Section~\ref{sec:method:training}.
+
+\textbf{Reward.} Writing $\Phi_i(t) = -\eta_i(\ell_i(t),t)$ for the
+progress potential built from \eqref{eq:potential},
+\begin{equation}
+  R_i(t) = \gamma\Phi_i(t+1) - \Phi_i(t)
+           \;+\; r_{\mathrm{deliver}}\,\mathbb{1}[a_i \text{ completes a task at } t]
+           \;-\; r_{\mathrm{blk}}\,\mathbb{1}[a_i \text{ is overridden at } t]
+           \;-\; r_{\mathrm{cng}}\,\delta_i(t) .
+  \label{eq:reward}
+\end{equation}
+The first term is potential-based shaping in the form of
+\citet{ng1999policy}: it does not alter the underlying stochastic game's
+equilibria, and the guarantee extends to dynamic potentials
+\citep{devlin2012dynamic} -- required here specifically, since $q_i(t)$ and
+hence $\Phi_i$ change at every reassignment \eqref{eq:lifecycle}, making
+$\Phi_i$ non-stationary by construction. A naive ``reward for decreasing
+distance'' term lacks this guarantee and admits policies that loiter near a
+target to farm shaping reward; \eqref{eq:reward} does not, by the same
+argument. The override indicator $\mathbb{1}[a_i \text{ is overridden at }
+t]$ is produced by the conflict-resolution operator of
+Section~\ref{sec:method:resolution} and is the same flag that operationally
+defines $\omega_j(t)$ in \eqref{eq:waiting} --- one piece of instrumentation
+serves both the reward and the run-level metric, logged once
+(Section~\ref{sec:impl:logging}). Do not finalise $r_{\mathrm{blk}}$ before
+the resolution operator is verified: the penalty is meaningless until
+overrides are detected correctly, and a mis-scaled feasibility penalty is
+among the most common causes of a MAPF policy that learns to stand still.
+The last term, $-r_{\mathrm{cng}}\,\delta_i(t)$, is a plain per-step penalty,
+\emph{not} shaping --- unlike the first term, it can in principle shift the
+equilibrium, which is an accepted, stated trade-off for giving the policy a
+direct congestion-avoidance signal, not an oversight.
+
+\begin{table}[h]
+  \centering
+  \caption{RL formulation parameters. TBD columns are filled after the first
+  stable runs.}
+  \label{tab:rlparams}
+  \begin{tabular}{lll}
+    \toprule
+    Parameter & Meaning & Value \\
+    \midrule
+    $r_{\mathrm{deliver}}, r_{\mathrm{blk}}, r_{\mathrm{cng}}$ & reward weights, \eqref{eq:reward} & TBD (sweep) \\
+    $\gamma$ & discount, \eqref{eq:objective} & TBD \\
+    $d$ & observation depth, \eqref{eq:localsubgraph} & TBD (sweep) \\
+    $r_{\mathrm{com}}$ & communication radius, \eqref{eq:commgraph} & TBD \\
+    $r_{\mathrm{cng}}$ & congestion radius, \eqref{eq:congestion} & TBD \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% -----------------------------------------------------------------
+\subsection{Model architecture}
+\label{sec:method:model}
+
+The overall policy/value architecture descends from the same PRIMAL lineage
+\citep{sartoretti2019primal} that \citet{knippenberg2021} already adapted from
+a CNN-on-lattice encoder to a single-layer GCN-on-arbitrary-graph encoder; the
+step taken here is the same kind of substitution one level further, from a
+single GCN pass to explicit multi-round message passing so that information
+can travel more than one hop within $\mathcal{G}_i^{(d)}(t)$ per decision.
+The encoder embeds $\mathcal{G}_i^{(d)}(t)$ into $z_i$ via $Q$ rounds of
+message passing over node features \eqref{eq:features}: writing
+$h_v^{(0)} = f(v,t)$,
+\begin{align}
+  m_v^{(q)} &= \phi_q\bigl(h_v^{(q-1)},\, \{h_w^{(q-1)} : w \in
+               \mathcal{G}_i^{(d)}(t),\, (w,v)\in E \text{ or } (v,w)\in E\}\bigr),
+  \label{eq:msgpass} \\
+  h_v^{(q)} &= \psi_q\bigl(h_v^{(q-1)},\, m_v^{(q)}\bigr), \qquad q = 1,\dots,Q,
+  \notag \\
+  z_i &= h_{\ell_i(t)}^{(Q)} \;\Vert\; \mathrm{AGG}\bigl(\{\text{messages
+        from } a_j : (a_i,a_j)\in E^{\mathcal{A}}_t\}\bigr) \;\Vert\; \delta_i(t) ,
+  \label{eq:readout}
+\end{align}
+concatenating the agent's own final-layer embedding, an aggregation (e.g.\
+mean) of incoming messages, and the congestion feature. $\pi_\theta(\cdot\mid
+o_i(t))$ and a value head $V_\theta(o_i(t))$ (for training,
+Section~\ref{sec:method:training}) are fully connected layers with ReLU
+activations over $z_i$, masked per \eqref{eq:mask} before the softmax.
+$Q=0$ collapses \eqref{eq:msgpass}--\eqref{eq:readout} to raw node/message
+features with no propagation at all, which ablates \emph{both} local
+structural aggregation and inter-agent communication at once; if the two are
+meant to be isolated separately (structure vs.\ communication), a cleaner
+ablation replaces the single $Q$ with two independent round-counts, one for
+propagation within $\mathcal{G}_i^{(d)}(t)$ and one for propagation across
+$E^{\mathcal{A}}_t$ --- noted here as an open refinement, not yet adopted, to
+avoid overstating what a single $Q=0$ run actually isolates.
+
+\begin{figure}[t]
+  \centering
+  \fbox{\parbox{0.9\linewidth}{\centering\vspace{2cm}
+    \emph{[Figure: local observation $\mathcal{G}_i^{(d)}(t)$ and incoming
+    messages $\to$ $Q$ rounds of $\phi_q,\psi_q$ $\to$ $z_i$ $\to$ FC+ReLU
+    $\to$ masked softmax / value head, in the style of the source paper's
+    Figure~3 but with the message-passing block expanded.]}
+    \vspace{2cm}}}
+  \caption{Per-agent model. Weights are shared across all agents (parameter
+  sharing, \ref{sec:pf:controllers}).}
+  \label{fig:architecture}
+\end{figure}
+
+\begin{table}[h]
+  \centering
+  \caption{Model architecture parameters.}
+  \label{tab:modelparams}
+  \begin{tabular}{lll}
+    \toprule
+    Parameter & Meaning & Value \\
+    \midrule
+    $Q$ & message-passing rounds, \eqref{eq:msgpass} & TBD (sweep, incl.\ $Q=0$) \\
+    hidden width & $\phi_q,\psi_q$, FC layers & TBD \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% -----------------------------------------------------------------
+\subsection{Conflict resolution operator}
+\label{sec:method:resolution}
+
+Masking \eqref{eq:mask} makes each individual action legal; it does not make
+the \emph{joint} action legal, since two masked-legal individual choices can
+still violate \eqref{eq:vertexconflict} or \eqref{eq:swapconflict}. A
+deterministic operator removes the remainder. At the start of each episode, a
+priority permutation $\sigma$ of $\{1,\dots,m\}$ is drawn once from the
+episode seed and held fixed for the episode. At each timestep, given the
+proposed joint action $(u_1(t),\dots,u_m(t))$:
+\begin{enumerate}
+  \item process agents in order $\sigma$;
+  \item for agent $a_{\sigma(k)}$, tentatively accept its proposed successor
+    vertex if it violates neither \eqref{eq:vertexconflict} nor
+    \eqref{eq:swapconflict} against the already-finalised successors of
+    $a_{\sigma(1)},\dots,a_{\sigma(k-1)}$;
+  \item otherwise, override $a_{\sigma(k)}$'s action to $\mathrm{wait}$
+    (always legal, \eqref{eq:actions}) and set its override flag for $t$.
+\end{enumerate}
+Because waiting never conflicts with an already-finalised successor other
+than by occupying the same current vertex (impossible, since the joint state
+at $t$ was itself collision-free), this always terminates in a feasible joint
+action, realising the guarantee stated in \ref{sec:pf:agents} that a
+collision-free joint action always exists. The operator is a fixed function
+of the state and the episode seed, with no additional randomness --- this is
+exactly the determinism that Section~\ref{sec:pf:scope} states is required
+for $P$ to be stochastic only through order arrivals; that scope claim holds
+because of this construction, not independently of it. Determinism here is
+also what makes paired-seed comparisons across $(F,\pi)$ combinations valid:
+the same seed and the same realised trace up to any policy difference imply
+the same resolution decisions.
+
+The override flag set in step~3 is logged (Section~\ref{sec:impl:logging})
+and used identically in two places already committed to above: as
+$\mathbb{1}[a_i\text{ is overridden at }t]$ in \eqref{eq:reward}, and to
+compute $\omega_j(t)$ in \eqref{eq:waiting}.
+
+% -----------------------------------------------------------------
+\subsection{Training procedure}
+\label{sec:method:training}
+
+Training uses PPO \citep{schulman2017ppo} with full parameter sharing: every
+agent maps to one shared policy id, RLlib's standard multi-agent scaling
+lever \citep{rllibmultiagent}. Seeds are split disjointly between training
+and evaluation before any run starts. Two training regimes are distinguished
+and reported as an experimental variable, not folded together: training under
+$F_{\mathrm{fix}}$ only (then evaluated against all three storage rules), and
+training under the same storage rule used at evaluation (``matched''
+training). The latter is harder: training under an adaptive $F$ makes the
+task distribution non-stationary from the learner's perspective
+(\ref{sec:pf:coupling}), since \eqref{eq:coupling} routes pickups differently
+as $x_t$ changes underneath the policy. $c_{\mathrm{wait}}$
+(\ref{sec:pf:env}, footnote) is reported alongside training configuration,
+since it is a parameter of the study, not a training hyperparameter.
+
+\begin{table}[h]
+  \centering
+  \caption{PPO training parameters.}
+  \label{tab:trainparams}
+  \begin{tabular}{lll}
+    \toprule
+    Parameter & Meaning & Value \\
+    \midrule
+    learning rate, clip $\epsilon$, GAE $\lambda$ & PPO core & TBD \\
+    minibatch size, epochs/update, rollout length & PPO core & TBD \\
+    entropy coeff., value-loss coeff. & PPO core & TBD \\
+    train/eval seed counts & disjoint split & TBD \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% =================================================================
+\section{Implementation}
+\label{sec:implementation}
+
+This section describes how the model of Sections~\ref{sec:problem}
+and~\ref{sec:method} is built and verified. It contains no new modelling
+decisions --- anything that would count as one belongs in
+Section~\ref{sec:method} instead, per the contract stated at the top of this
+file.
+
+% -----------------------------------------------------------------
+\subsection{Simulator}
+\label{sec:impl:simulator}
+
+All-pairs shortest paths are precomputed once per instance, since $G$
+(\ref{sec:pf:env}) is static and $d_G$ is queried every timestep by both the
+observation builder \eqref{eq:potential} and the storage rule
+\eqref{eq:storagegreedy}. Task generation, assignment, routing, resolution,
+storage update, and logging are separate modules with explicit interfaces, so
+a controller swap (Section~\ref{sec:method:controllers}) touches only the
+routing module. Agents act simultaneously; observations, rewards and actions
+are returned as dictionaries keyed by agent id, matching the POSG formalism
+of \eqref{eq:posg} directly and the conventions of RLlib's
+\texttt{MultiAgentEnv} and PettingZoo's Parallel API
+\citep{rllibmultiagent,pettingzooparallel}.
+
+% -----------------------------------------------------------------
+\subsection{Instance generation}
+\label{sec:impl:instances}
+
+Warehouse graphs are generated from parameters (aisle count, aisle length,
+cross-aisle count, one-way fraction) rather than hand-drawn, which is what
+substantiates the ``non-lattice'' claim of \ref{sec:pf:env}. Each generated
+instance is checked against the finiteness/connectivity assumption of
+\ref{sec:pf:env} (the choice between the weaker per-pair assumption and full
+strong connectivity, noted as open there, is resolved concretely here: a
+generated instance is discarded if any vertex needed as a target is
+unreachable from any occupiable vertex) and, only when a baseline requires
+it, against the well-formedness condition of \ref{sec:pf:env} ($\ge m$
+non-task endpoints, path between any two not through a third). The discard
+rate is reported. The order generator ($P_{\mathrm{ord}}$,
+\ref{sec:pf:tasks}) is seeded separately from the policy and the environment,
+so the same order stream replays identically under every controller and
+storage rule, which is what makes the paired comparison in
+\eqref{eq:rqformal} meaningful.
+
+% -----------------------------------------------------------------
+\subsection{Instrumentation}
+\label{sec:impl:logging}
+
+Every metric is accumulated online, not recomputed at the horizon. Per-edge
+counters give $\mu_T(e)$ and hence $H_T$ \eqref{eq:entropy}. A per-task record
+of $r_j$, $y_j$, arrival-at-$s_j$ time, and $d_j$ gives $\zeta_j$
+\eqref{eq:servicetime}, with the waiting and active phases reported
+separately per \eqref{eq:lifecycle}. $\omega_j(t)$ \eqref{eq:waiting} is
+logged directly from the conflict-resolution operator's override flag
+(\ref{sec:method:resolution}): for the agent serving each active task, one bit
+per timestep records whether it chose $\mathrm{wait}$ or was overridden,
+summed per task to give $W_T$ with no separate instrumentation needed. Backlog
+$B_T$ is logged every timestep, not only at the horizon, so a diverging queue
+is visible in the trace rather than only in the final summary.
+
+% -----------------------------------------------------------------
+\subsection{Computational cost}
+\label{sec:impl:cost}
+
+Runtime is a dependent variable, not an aside: wall-clock per decision is
+logged separately for assignment \eqref{eq:assignmentrule} and routing, on
+the same hardware across controllers. For the learned controller, training
+time and inference time are reported separately, since the practical case for
+a learned router rests specifically on cheap inference, not on cheap training.
+
+% -----------------------------------------------------------------
+\subsection{Correctness and reproducibility}
+\label{sec:impl:validation}
+
+Four assertions run on \emph{every} experiment, not once in development:
+\begin{enumerate}
+  \item no vertex or swap conflict on the realised trace
+    (\eqref{eq:vertexconflict}--\eqref{eq:swapconflict});
+  \item every realised storage configuration lies in $\mathcal{X}$
+    \eqref{eq:feasiblestorage};
+  \item every released task is a member of exactly one of $\mathcal{Q}_t$,
+    $\mathcal{B}_t$, $\mathcal{C}_t$ at every timestep --- which
+    \eqref{eq:lifecycle} now makes a checkable invariant rather than merely
+    an assumed one, since disjointness follows from the interval definition
+    and can be asserted directly against $y_j$ and $d_j$;
+  \item bitwise replay determinism under fixed seeds, following from
+    Section~\ref{sec:method:resolution}'s determinism and
+    Section~\ref{sec:impl:instances}'s separated seeding.
+\end{enumerate}
+These four checks are cheap, and they are also the answer to ``how do you
+know the simulator implements the model of Section~\ref{sec:problem}.''
+Section~\ref{sec:experiments} reports the resulting estimates of
+\eqref{eq:rqformal}, having verified through this section that the estimates
+are of the model actually specified, not of an implementation drift from it.
+
+\end{document}

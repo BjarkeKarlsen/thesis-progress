@@ -1,0 +1,957 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref,natbib}
+\usepackage[T1]{fontenc}
+
+% =================================================================
+% GAPS.tex -- Validation notes on the Problem Formulation.
+%
+% Supersedes GAPS.md (kept as markdown was the wrong format for a document
+% whose whole content is thesis equations, cross-references, and a table
+% meant to be pasted into the thesis's own appendix -- it belongs typeset
+% alongside the thesis it discusses, not as a loose Markdown file).
+%
+% This file stands alone (compiles with `pdflatex GAPS.tex`) but its
+% equation numbers/labels intentionally mirror problem_formulation_fixed.tex,
+% so \eqref calls below refer to that file's labels, not local equations,
+% wherever they cite eq:xxx from Section IV. Re-numbering is not attempted
+% here; this is a companion document, not a subfile of the thesis itself.
+%
+% Three parts:
+%   Part I   -- internal-consistency review of problem_formulation.tex
+%              ([G1]-[G17], matching the inline tags in the fixed .tex)
+%   Part II  -- comparison against Knippenberg, Holenderski & Menkovski (2021),
+%              the closest prior-art paper this section's environment and
+%              observation model is adapted from ([K1]-[K8])
+%   Part III -- comparison against Ma, Li, Kumar & Koenig (2017), the paper
+%              this section's MAPD terminology and well-formedness condition
+%              are adapted from ([M1]-[M4])
+%   Appendix -- the notation-disambiguation table, appendix-ready LaTeX to
+%              paste into the thesis's own appendix chapter (not present in
+%              this repo) rather than left inline in Section IV, per the
+%              Problem Formulation / Method / Implementation contract in
+%              Method_and_Implementation.md.
+% =================================================================
+
+\title{Validation Notes on the Problem Formulation}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\section*{How to use this document}
+\texttt{problem\_formulation\_fixed.tex} is a complete, label-preserving
+drop-in revision of \texttt{problem\_formulation.tex}. Every fix there is
+tagged inline (\texttt{\% [Gxx]}, \texttt{\% [Kxx]} or \texttt{\% [Mxx]});
+this document is the rationale for each tag, split into three parts by where
+the finding came from: Part~\ref{sec:internal} was found by checking the
+section against itself (does every symbol get defined, do the claimed
+properties actually follow); Part~\ref{sec:knippenberg} was found by checking
+it against the paper its environment and observation model is adapted from;
+Part~\ref{sec:ma2017} was found by checking it against the paper its MAPD
+terminology and well-formedness condition are adapted from. Severity key used
+throughout: \textbf{Error} = mathematically wrong as stated; \textbf{Gap} =
+not wrong, but undefined/underspecified where the section otherwise commits
+to full formality; \textbf{Deviation} = a considered, defensible difference
+from a source, not necessarily a defect; \textbf{Clarity} = correct and
+complete, but hard to read.
+
+\part*{}
+\section{Internal-consistency review}
+\label{sec:internal}
+
+\subsection*{[Error] The potential-function claim (target-distance annotation)}
+\textbf{Original text:} ``The annotation is a potential: its difference along
+an edge, $\eta_i(w,t) - \eta_i(v,t)$, is negative exactly on shortest-path
+moves.''
+
+\textbf{Why it's wrong:} by the triangle inequality on $d_G$,
+\[
+  \eta_i(w,t) - \eta_i(v,t) \;\ge\; -c(v,w) \qquad \text{for every } (v,w)\in E,
+\]
+with \emph{equality iff} $(v,w)$ lies on a shortest path from $v$ to
+$q_i(t)$. ``Negative'' is necessary for a shortest-path move but not
+sufficient: a move can strictly satisfy the inequality (decrease $\eta_i$ by
+less than $c(v,w)$) while not lying on any shortest path. Concretely:
+$c(v,w)=1$, $d_G(v,q)=5$, and some other route makes $d_G(w,q)=4.5$ -- the
+difference is $-0.5$ (negative), but $(v,w)$ is not on a shortest path (that
+would require $d_G(w,q)=4$ exactly).
+
+\textbf{Fix:} restated as the inequality with the correct equality condition
+(\texttt{eq:potentialbound} in the fixed .tex); surrounding prose now says a
+negative difference indicates \emph{progress}, not \emph{optimality}. This is
+the one place a formally stated property was actually false, not merely
+underspecified.
+
+\subsection*{[G1] \texorpdfstring{$V_{mov}$}{Vmov} vs. \texorpdfstring{$V_{str}$}{Vstr}/\texorpdfstring{$V_{del}$}{Vdel} -- can an agent ever reach a pickup or delivery vertex?}
+Agents only ever occupy $\ell_i(t) \in V_{mov}$. The original text declares
+$V_{str}, V_{del} \subseteq V$ (not $\subseteq V_{mov}$) while calling all
+four roles a ``partition'' -- which $V_{ep}\subseteq V_{mov}$ already
+contradicts, since a partition requires disjoint blocks. If $V_{str}$ and
+$V_{del}$ are disjoint from $V_{mov}$, as ``partition'' suggests, an agent can
+never occupy a pickup or delivery vertex, leaving pickup/delivery physically
+undefined. \textbf{Fix:} $V_{str}, V_{del} \subseteq V_{mov}$ now stated
+explicitly (they must be occupiable), ``partition'' replaced by ``label,''
+and pairwise disjointness explicitly not assumed.
+
+\subsection*{[G2] The task tuple is missing the SKU it names}
+$\tau_j = (r_j, s_j, g_j)$ in the original, but the coupling condition
+immediately after it, $x_{r_j}(k_j, s_j) > 0$, uses $k_j$ -- the requested
+SKU -- which is never introduced anywhere. The thesis's central equation
+rests on an undefined symbol. \textbf{Fix:} \texttt{eq:task} is now a
+quadruple $\tau_j = (r_j, s_j, g_j, k_j)$, $k_j \in \mathcal{K}$.
+
+\subsection*{[G3] \texorpdfstring{$\Pi$}{Pi} and \texorpdfstring{$\mathcal{F}$}{F} are never defined as sets}
+The formal decision problem optimises over $F \in \mathcal{F}$, $\pi \in
+\Pi$, but neither space's domain/codomain is ever written down -- only
+\emph{what information} each may condition on (Table~I) is described.
+\textbf{Fix:} $\mathcal{F}$ defined as the set of measurable functions
+$F : \mathcal{X} \times \mathbb{R}_{\ge0}^{|\mathcal{K}|} \times
+\mathbb{R}_{\ge0}^{|E|} \times \mathbb{R}_{\ge0}^{|E|} \to \mathcal{X}$;
+$\Pi$ defined as the set of pairs $\pi=(\pi^{\text{assign}},
+\pi^{\text{route}})$ of an assignment map and a routing map with stated
+domains, constrained only by Table~I. A related loose end fixed in the same
+place: eq.~8 ($x_t \in \arg\min$) can be set-valued while eq.~7 ($x_t =
+F(\ldots)$) claims a function; the fix adds a tie-breaking-rule requirement
+so eq.~7 is well-defined.
+
+\subsection*{[G4] No initial storage configuration}
+$x_t = F(x_{t-\Delta}, \ldots)$ needs $x_0$ to bootstrap it at $t=\Delta$;
+$x_0$ is never introduced. \textbf{Fix:} $x_0 \in \mathcal{X}$ stated as
+supplied with the problem instance.
+
+\subsection*{[G5] \texorpdfstring{$\mathcal{Q}_t, \mathcal{B}_t, \mathcal{C}_t$}{Qt, Bt, Ct} are only described narratively}
+Disjointness is asserted (``a property asserted at runtime'') rather than
+derived, unlike every other object in the section. \textbf{Fix:} introduces
+the assignment time $y_j$ ($r_j \le y_j \le d_j$) and defines
+\[
+\mathcal{Q}_t = \{\tau_j : r_j \le t < y_j\}, \quad
+\mathcal{B}_t = \{\tau_j : y_j \le t < d_j\}, \quad
+\mathcal{C}_t = \{\tau_j : d_j \le t\}.
+\]
+Disjointness now follows from the three intervals partitioning
+$[r_j,\infty)$, rather than being separately asserted.
+
+\subsection*{[G6] The congestion feature \texorpdfstring{$\delta_i(t)$}{delta\_i(t)} is defined but never wired in}
+$\delta_i(t)$ appears in the Learning Problem subsection, but $o_i(t)$ was
+fixed earlier and never amended, and $\delta_i(t)$ is never connected to
+$R_i$ either. \textbf{Fix:} moved \texttt{eq:congestion} into the
+Observations subsection, right after $\eta_i$, and added $\delta_i(t)$ as a
+third component of \texttt{eq:observation}.
+
+\subsection*{[G7] \texorpdfstring{$W_T$}{WT} has no formula and an ambiguous relationship to \texorpdfstring{$\hat{w}_t(e)$}{what(e)}}
+$W_T$ appears only inside the system-level criterion, described as having an
+operational definition deferred to Implementation, with zero conceptual
+description here -- and a name close enough to the already-used per-edge
+estimate $\hat{w}_t(e)$ that the two could be mistaken for the same object.
+
+\textbf{First-pass fix (superseded below):} an initial revision gave
+$W_T = \frac{1}{|\mathcal{C}_T|}\sum_{\tau_j \in \mathcal{C}_T}(y_j - r_j)$,
+mean pre-assignment queueing delay, using $y_j$ from [G5]. This was internally
+consistent but, once \texttt{Method\_and\_Implementation.md}'s operational
+suggestion for $W_T$ (``timesteps in which an agent waited or was overridden
+while holding an active task'') was checked against it, turned out to describe
+a \emph{different} quantity -- and queueing delay is largely redundant with the
+backlog term $B_T = |\mathcal{Q}_T|+|\mathcal{B}_T|$ already in
+\texttt{eq:functional}, the same double-counting concern the section already
+raises for throughput vs.\ $\bar\zeta_T$.
+
+\textbf{Current fix:} $W_T$ now measures time lost \emph{after} assignment
+instead, which is not redundant with $B_T$: for agent $i$ serving $\tau_j$ over
+$t\in[y_j,d_j)$, let $\omega_j(t)\in\{0,1\}$ indicate agent $i$ is blocked at
+$t$ (chose wait, or had a move overridden into a wait by the conflict-resolution
+operator, Section~\ref{sec:method-mapping}/\texttt{sec:method:resolution}).
+Then
+\[
+W_T = \frac{1}{|\mathcal{C}_T|} \sum_{\tau_j\in\mathcal{C}_T}
+      \sum_{t=y_j}^{d_j-1} \omega_j(t).
+\]
+This version also gives the resolution operator's ``overridden'' flag (needed
+anyway for the feasibility mechanism) a direct second use as $W_T$'s data
+source, rather than requiring separate instrumentation. $W_T$ remains distinct
+from $\hat w_t(e)$ for the same reason as before: one is a realised scoring
+statistic, the other a forward-looking estimate feeding $F$.
+
+\subsection*{[G8] Entropy is undefined at the boundary}
+\texttt{eq:entropy} is stated ``for $|E_T^+| > 1$'' only; at
+$|E_T^+|\in\{0,1\}$ the denominator $\log|E_T^+|=0$. \textbf{Fix:}
+$|E_T^+|=1$ defined as maximally concentrated by convention ($H_T := 0$,
+$C_T := 1$); $|E_T^+|=0$ reported separately, like $|\mathcal{C}_T|=0$.
+
+\subsection*{[G9] Are constraints (4)--(5) actually constraining anything in the decision problem?}
+Section~B already states vertex/swap-conflict feasibility is enforced by a
+mechanism applied regardless of which $\pi$ is chosen. If so, every $\pi$
+satisfies them by construction, and listing them in the $\arg\min$ over
+$(F,\pi)$ doesn't prune the search space. \textbf{Fix:} one clarifying
+paragraph: these constraints are retained to state explicitly that a
+solution is a claim about \emph{feasible realised trajectories}, unlike
+\texttt{eq:feasiblestorage} and \texttt{eq:coupling}, which genuinely do
+restrict $F$ and the realised task stream.
+
+\subsection*{[G10] Is \texorpdfstring{$G$}{G} directed, and is it connected?}
+One-way aisles imply $G$ must be directed, but this is never stated; $d_G$ is
+used pervasively as if always finite, with no connectivity assumption
+stated. \textbf{Fix:} $G$ explicitly stated as directed; a finiteness
+assumption added (tightened further in Part~\ref{sec:knippenberg}, [K1]).
+
+\subsection*{[Gap] \texorpdfstring{$\mathcal{U}_i$}{Ui} (POSG action space) vs. \texorpdfstring{$\mathcal{U}(v)$}{U(v)} (vertex-local action set)}
+\texttt{eq:actions} is explicitly vertex-dependent, but the POSG tuple lists
+a fixed per-agent $\mathcal{U}_i$, with no statement of how one becomes the
+other. \textbf{Fix:} $\mathcal{U}_i := \bigcup_{v\in V_{mov}}\mathcal{U}(v)$,
+with only $\mathcal{U}(\ell_i(t))$ enabled at a given state (the rest masked
+to probability zero).
+
+\subsection*{[Gap] Does \texorpdfstring{$J(\theta)$}{J(theta)} apply to all three controller architectures?}
+$\theta$ is only introduced for the decentralised architecture, but
+\texttt{eq:objective} is presented as though general. \textbf{Fix:} one
+sentence: it applies to whichever regime is realised as a learned
+controller, with $\theta$ ranging over that regime's own parameters.
+
+\subsection*{[G13] Is the conflict-resolution mechanism itself deterministic?}
+Section~J claims execution is deterministic with $P$ stochastic only through
+order arrivals, but never confirms the yield-resolution mechanism is itself
+deterministic -- if it used randomised tie-breaking, that would be a second
+stochasticity source. \textbf{Fix:} one sentence confirming it is
+deterministic given the state.
+
+\subsection*{[G11 / Clarity] Symbol collisions: five unrelated concepts spelled with the letter ``C,'' three with ``Q,'' two with ``O''}
+Not an error, but slows careful reading (eq.~21 has both $\bar c_T$ and
+$\mathcal{C}_T$ in the same line). \textbf{Fix:} rather than renaming
+established symbols this late -- Method/Implementation may already reference
+them, and a rename should touch the whole thesis at once, not one section in
+isolation -- a disambiguation table is provided in
+Appendix~\ref{app:notation} of \emph{this} document, ready to paste into the
+thesis's own appendix chapter, with only a one-line pointer left inline in
+Section~IV (per \texttt{Method\_and\_Implementation.md}'s own rule that a
+full notation table is appendix material).
+
+\subsection*{Left open / not changed}
+\begin{itemize}
+  \item \textbf{$m$ used before being defined} (Section~A uses it,
+    Section~B defines $m=|\mathcal{A}|$) -- fixed with a one-line forward
+    pointer rather than reordering subsections.
+  \item \textbf{A full rename of the C/Q/O-family symbols} -- flagged via
+    the appendix table rather than executed; out of scope for a
+    Problem-Formulation-only fix.
+  \item \textbf{Unit/scale normalisation across the five terms of
+    $\mathcal{J}(F,\pi)$} -- summing time, cost, task-count and
+    dimensionless quantities under weights $q_\bullet$ with no stated
+    calibration scheme is a Method-level concern (how $q_\bullet$ are
+    chosen), not a Problem-Formulation error, but worth having an answer
+    ready for: linear scalarisation across unlike units needs either
+    normalisation or explicit justification for the weights.
+  \item \textbf{Section~H's $u_t\sim\pi(\cdot\mid s_t)$ vs.\ the
+    decentralised $\pi_\theta(\cdot\mid o_i(t))$} -- already reconciled
+    informally (``with the corresponding product of local policies under
+    decentralised execution''); not tightened further.
+\end{itemize}
+
+\subsection{[G14] Congestion sensitivity in routing was decentralised-only, which breaks the cross-architecture comparison}
+The Project Description added to this file (Section~\ref{sec:pd-aim-and-scope})
+lists ``congestion sensitivity: disabled or enabled in the storage and routing
+layers'' as an independent variable, orthogonal to controller architecture
+(Table~\ref{tab:information}). Storage already had this: $\beta$ in
+\texttt{eq:storageobjective} toggles it. Routing did not: $\delta_i(t)$
+\texttt{eq:congestion} was defined only for the decentralised agent's local
+window, so ``congestion sensitivity: enabled'' had no realisable meaning for
+the centralised or section-based architectures at all -- two of the three
+levels of the controller-architecture factor could not actually take both
+levels of the congestion-sensitivity factor. This is not a readability gap;
+it is a factorial-design defect: RQ2 (does the effect of coupling differ by
+architecture) and RQ3 (does congestion sensitivity help) cannot both be asked
+cleanly if one factor is only realisable at one level of the other.
+
+\textbf{Fix:} \texttt{eq:congestion}'s formula and label are unchanged (so
+every existing \eqref{eq:congestion} in \texttt{method\_implementation\_-
+skeleton.tex}, i.e.\ \texttt{eq:reward} and \texttt{eq:readout}, still resolves
+identically). A general occupancy fraction $\delta(S,t;\mathrm{excl})$,
+\texttt{eq:occupancy}, is introduced in \ref{sec:pf:controllers} -- the
+earliest point in the document where all three architectures and the zone
+partition \texttt{eq:partition} are already in scope -- and $\delta_i(t)$ is
+restated as its decentralised instance ($S=V^{(r_{\mathrm{cng}})}_i(t)$,
+$\mathrm{excl}=\{a_i\}$), with the centralised and section-based instances
+given in prose ($S=V_{\mathrm{mov}}$ and $S=Y_q$ respectively, both with
+$\mathrm{excl}=\emptyset$, since a coordinator is not itself an occupant the
+way an agent asking about its own neighbourhood is). Concretely realising
+this signal inside the centralised/section-based planners --- a
+congestion-weighted variant of each, mirroring the storage layer's
+$F_{\mathrm{dem}}/F_{\mathrm{cng}}$ ladder --- is left as a named, forward-
+pointed Method-level task (\ref{sec:method:controllers}), not written here,
+per this document's own Problem-Formulation/Method boundary.
+
+\subsection{[G15] Computational cost was promised in the new Introduction but never formalised}
+The Introduction and Project Description name ``computational cost'' /
+``controller runtime'' as an outcome measure and dependent variable, but
+\texttt{eq:functional} had no term of that kind and \ref{sec:pf:measures}
+never defined one. \textbf{Fix:} $\kappa_T$, \texttt{eq:runtime}, mean
+per-decision wall-clock cost, defined and explicitly excluded from
+\texttt{eq:functional} for the same reason throughput already is (different
+unit family; a $q_\bullet$ weight would fix an arbitrary seconds-to-quality
+exchange rate). No Method-file edit was needed for this one:
+\texttt{method\_implementation\_skeleton.tex}'s \ref{sec:impl:cost} already
+specifies wall-clock logging split by $\pi^{\mathrm{assign}}$ vs
+$\pi^{\mathrm{route}}$ and training vs inference time -- the operational
+``how'' was already in the right place, waiting for a ``what'' to point at it.
+\texttt{eq:rqformal} is also extended to range over the congestion-sensitivity
+toggle from [G14], closing the RQ3 gap the same review surfaced.
+
+\subsection*{Correction to prior advice in this review: do not trim \ref{sec:pf:observations}}
+An earlier round of this discussion (not in this document) suggested
+compressing the observation subsection's proof-level detail --
+\texttt{eq:potentialbound}'s equality condition, the congestion radius, the
+communication graph -- to rebalance it against the comparatively short
+storage/coupling treatment. Re-reading \texttt{Method\_and\_Implementation.md}
+in full shows this was the wrong prescription: that document's own cut list
+already checked subsection F against exactly this question (``what Section IV
+must define is the observation $o_i(t)$ -- the induced subgraph, the potential
+$\eta_i$, and the communication graph -- because those specify what an agent
+is allowed to know, which is a property of the problem'') and kept it,
+routing only the encoder/message-passing equations to
+\ref{sec:method:model}, where \texttt{problem\_formulation\_fixed.tex}
+already has them. The size imbalance documented under [G14] above is real and
+numeric, but it is not evidence of misplaced Method content -- there isn't
+any to move. It reflects that defining what a bounded, local observer may
+know legitimately takes more apparatus than defining an abstract storage
+update does; treating that as a defect and cutting it to match a line count
+would itself be the kind of drift this section is supposed to resist. The
+right response to the imbalance was narrower than ``trim Observations'': fix
+the one place the imbalance was load-bearing, which is the congestion-signal
+asymmetry above.
+
+\subsection*{[G16] $d_G$ was defined over all of $G$, not just the occupiable subgraph}
+$N^{+}(v) = \{w \in V_{\mathrm{mov}} : (v,w)\in E\}$ already restricts every
+real move to land in $V_{\mathrm{mov}}$, so no agent trajectory can ever pass
+through a vertex outside it. But $d_G(v,w)$ was defined as the shortest-path
+cost ``along directed edges of $G$'' -- the full graph, $V_{\mathrm{mov}}$
+included or not. If a future instance ever has $V_{\mathrm{mov}} \subsetneq
+V$ (the environment section explicitly permits this: $V_{\mathrm{mov}}
+\subseteq V$, not $=$), $d_G$ could report a shortest-path cost that routes
+through a non-occupiable waypoint -- a number no real agent could ever
+achieve, since every real hop is constrained to $V_{\mathrm{mov}}$. Every
+downstream use of $d_G$ ($\eta_i$'s potential, the connectivity assumption,
+the communication-graph radius, all of \ref{sec:pf:observations}) would then
+silently be using an inadmissible distance. \textbf{Fix:} $d_G(v,w)$ is now
+defined only for $v,w\in V_{\mathrm{mov}}$, over $G[V_{\mathrm{mov}}]$ (the
+same induced-subgraph notation \texttt{eq:localsubgraph} already uses),
+with a parenthetical noting the restriction is currently vacuous since every
+generated instance so far has $V_{\mathrm{mov}}=V$. Found while explaining,
+not auditing -- a reminder that ``why does this indirection exist'' questions
+are worth asking even after a section has already been reviewed twice.
+
+\subsection*{[G17] ``Free agent'' was used but never defined}
+$\pi^{\mathrm{assign}}$'s own domain (\ref{sec:pf:controllers}) is stated as
+``free agents and $\mathcal{Q}_t$,'' and \texttt{method\_implementation\_-
+skeleton.tex}'s \texttt{eq:assignmentrule} matches ``the free agent'' to each
+task -- both use the term as if self-evident, and neither states what makes
+an agent free rather than occupied. Nothing else in \ref{sec:pf:tasks} names
+\emph{which} agent is serving an active task either: $y_j$ (assignment
+\emph{time}) was defined, but not \emph{to whom}. \textbf{Fix:} $\sigma(j)\in
+\{1,\dots,m\}$ added alongside $y_j$ in \texttt{eq:lifecycle}'s paragraph
+(the agent task assignment selects at $y_j$), and \texttt{eq:free} defines
+free/occupied directly from $\sigma$ and $\mathcal{B}_t$: agent $a_i$ is free
+at $t$ iff no active task is served by it. \texttt{eq:assignmentrule} in the
+Method skeleton now points back to \texttt{eq:free} instead of relying on the
+same informal term it previously left undefined.
+
+\section{Comparison against Knippenberg, Holenderski \& Menkovski (2021)}
+\label{sec:knippenberg}
+
+\citet{knippenberg2021} (``Time-Constrained Multi-Agent Path Finding in
+Non-Lattice Graphs with Deep Reinforcement Learning,'' ACML 2021) is the
+closest prior-art paper to this thesis's environment and observation model:
+a directed, non-lattice graph; a local observation of fixed depth $d$
+centred on the agent; a per-node distance-to-goal annotation; a shared
+policy over a wait-or-move action space. The thesis's problem formulation is
+best read as taking that architecture and (a) embedding it inside a
+lifelong/online MAPD setting with continuous task arrivals rather than
+\citeauthor{knippenberg2021}'s batch/episodic one-job-per-agent setting, and
+(b) coupling it to a new second layer -- storage placement -- that has no
+counterpart in \citeauthor{knippenberg2021} at all. What follows is organised
+by what carried over unchanged, what was correctly adapted, what is a new
+extension, and one place the comparison surfaces an actual gap.
+
+\subsection{Carried over directly (and appropriately)}
+\begin{itemize}
+  \item \textbf{Directed, non-lattice graph.} Identical framing in both.
+  \item \textbf{Local observation of fixed depth $d$.}
+    \citeauthor{knippenberg2021}'s observation is ``centered on the agent's
+    current location'' with size ``determined by a global depth parameter
+    $d$''; this is exactly $V_i^{(d)}(t)$, \texttt{eq:localsubgraph}.
+  \item \textbf{Distance-to-goal node annotation.}
+    \citeauthor{knippenberg2021} includes, per visible node, ``the distance
+    of each node to the goal node,'' precomputed once per instance -- this
+    is exactly $\eta_i(v,t) = d_G(v,q_i(t))$, \texttt{eq:potential}.
+  \item \textbf{Wait-or-move action space, shared policy.} Identical in
+    both.
+\end{itemize}
+
+\subsection{Correctly, non-trivially adapted}
+\begin{itemize}
+  \item \textbf{Dynamic vs.\ static target.} \citeauthor{knippenberg2021}'s
+    distance-to-goal values ``need only be pre-computed once for every
+    problem instance,'' because each agent has exactly one job (one fixed
+    goal) for the whole episode. The thesis is lifelong: an agent's target
+    changes at every reassignment, and the thesis states this explicitly
+    (``$\eta_i$ itself changes whenever the target changes, which happens at
+    every reassignment''). This is a correct and necessary generalisation
+    the source paper didn't need to make -- a good sign, not a borrowed
+    shortcut.
+  \item \textbf{Vertex/swap-conflict as two orthogonal equations vs.\ one
+    prose definition.} \citeauthor{knippenberg2021} defines a ``node
+    collision'' (two cases in prose: moving onto an occupied node, or two
+    agents moving to the same node) and an ``edge collision'' (explicitly
+    qualified to \emph{bi-directional} edges only). The thesis's
+    \texttt{eq:vertexconflict} covers both node-collision cases with one
+    inequality, and its \texttt{eq:swapconflict} needs no ``bi-directional''
+    qualifier: a swap is only physically reachable when
+    \texttt{eq:transition} already requires both $(v,w)\in E$ and
+    $(w,v)\in E$ to hold for the two agents involved, so the bidirectionality
+    falls out of constraint composition instead of being hand-added to the
+    collision definition. This is a tighter formalisation than the source.
+\end{itemize}
+
+\subsection{Genuine extensions (no counterpart in the source paper)}
+\begin{itemize}
+  \item \textbf{The entire storage layer} -- $x_t$, $\mathcal{X}$,
+    \texttt{eq:storageupdate}, \texttt{eq:storageobjective}, and the
+    coupling condition \texttt{eq:coupling} that links it back to routing.
+    \citeauthor{knippenberg2021} is a single-layer routing problem; this
+    second, slower-timescale layer and its feedback loop is the thesis's
+    actual contribution over the source paper, and is worth stating this
+    plainly wherever the thesis positions itself against MAPF/MAPD
+    literature.
+  \item \textbf{Explicit communication graph $G_t^{\mathcal{A}}$ and
+    messages.} \citeauthor{knippenberg2021} states explicitly they consider
+    only ``implicit communication'' (agents observe each other's state, but
+    nothing is explicitly communicated). \texttt{eq:commgraph} and the
+    message component of \texttt{eq:observation} are a genuine addition.
+  \item \textbf{The congestion feature $\delta_i(t)$.} No counterpart in
+    the source.
+  \item \textbf{Three information regimes (centralised / section-based /
+    decentralised) with a shared assignment mechanism.}
+    \citeauthor{knippenberg2021} studies a single decentralised regime and
+    has no assignment sub-problem at all (each agent's one job is given, not
+    chosen online) -- the thesis's Table~I and the assignment/routing split
+    are new, driven by the lifelong setting's need to keep deciding who does
+    what.
+  \item \textbf{Throughput, backlog, entropy/concentration.} All specific
+    to the continuous/lifelong framing; \citeauthor{knippenberg2021}'s
+    objective (a single scalar per solved batch instance, eq.~1--2 in the
+    source) has no analogue for an ongoing system with no end state.
+\end{itemize}
+
+\subsection{[K1, Deviation] Strong connectivity}
+\citeauthor{knippenberg2021} state plainly: ``environment graphs are assumed
+to be strongly connected, i.e.\ each node is reachable from all other
+nodes.'' The thesis (even after [G10]'s fix) states the weaker ``$d_G(v,w)$
+is finite for every pair of vertices that appears in the constructions
+below.'' The source's version is simpler to state and to verify computationally
+(one graph-level check, independent of what gets used later); the thesis's
+version is strictly weaker and therefore more permissive of the ``irregular
+blocks'' / unreachable side-room layouts its own motivating paragraph gestures
+at. \textbf{This is a judgement call, not a correctness issue}: if generated
+instances never actually exercise a disconnected pocket, the weaker statement
+buys nothing and the source's crisper assumption should probably be adopted
+outright; if partial reachability is a deliberate stress case for the
+decentralised controller (an agent whose target briefly becomes unreachable),
+the weaker version is doing real work and is worth keeping, explicitly framed
+as a deviation from the more common assumption. The fixed .tex takes the
+conservative option -- keeps the weaker statement, adds one sentence
+contrasting it with \citeauthor{knippenberg2021}'s choice and naming the
+tradeoff -- and leaves the actual decision to Section~VI (\emph{Instance
+generation}), where it is checkable against what instances are actually
+generated.
+
+\subsection{[K2, Gap] No task deadlines}
+This is the most substantial finding from the comparison. Time constraints
+are \citeauthor{knippenberg2021}'s entire contribution -- their title is
+literally ``Time-\emph{Constrained} MAPF'' -- realised as a job 4-tuple
+$(t_i^s, t_i^d, v_i^s, v_i^g)$ with an explicit deadline $t_i^d$, and an
+objective that is either a hard feasibility cut (a plan that misses its
+deadline is invalid, eq.~1 in the source) or a soft penalty term
+$w\cdot\max(0, t_{\pi,\text{actual}} - t_{\pi,\text{deadline}})$ added to the
+cost (eq.~2). The thesis's task tuple \texttt{eq:task} carries only a release
+time $r_j$; there is no deadline anywhere, and timeliness is scored only in
+aggregate, after the fact, via the mean $\bar\zeta_T$ (\texttt{eq:throughput}).
+Under the thesis's formulation, no individual task can be said to have
+\emph{failed} -- an arbitrarily late delivery only nudges an average.
+
+Given the thesis explicitly reuses \citeauthor{knippenberg2021}'s
+architecture (built specifically to handle deadlines) while dropping the one
+thing that architecture was built for, this needed to be an explicit,
+stated choice rather than a silent omission -- warehouse SLAs are a real
+business constraint, so a reader familiar with the source paper would
+reasonably ask why deadlines didn't carry over too. \textbf{Fix (already
+applied in \texttt{problem\_formulation\_fixed.tex}, Section~J):} one
+paragraph stating the omission explicitly, alongside the other scope
+exclusions, and naming what reintroducing deadlines would require: a
+$t_j^{\mathrm{d}}$ field added to \texttt{eq:task}, plus either a feasibility
+condition (hard) or a term in \texttt{eq:functional} of the same shape as
+\citeauthor{knippenberg2021}'s eq.~2 (soft). Both are Problem-Formulation-level
+changes, not Method-level ones, since either would redefine what a valid or
+well-scored solution \emph{is} -- consistent with how the thesis already
+treats \texttt{eq:coupling} and the conflict constraints as problem-level
+because they define validity, not merely score it.
+
+\subsection{[K3--K6, Deviation] Smaller, favourable deviations}
+\begin{itemize}
+  \item \textbf{[K3] Edge cost $c(e) > 0$ (thesis) vs.\ $c(v,v') \ge 0$
+    (source).} The thesis's strict positivity rules out zero-cost cycles,
+    which keeps $d_G$ well-behaved as a strictly hop-sensitive quantity and
+    keeps the corrected potential-bound argument ([Error] above) free of
+    degenerate edge cases. A defensible tightening, not a regression.
+  \item \textbf{[K4] No \texttt{canWait}-style per-node restriction.}
+    \citeauthor{knippenberg2021} give each node a boolean attribute
+    controlling whether waiting is allowed there (e.g.\ a mainline track
+    where a train cannot simply stop); the thesis assumes waiting is legal
+    everywhere via a single $c_{\mathrm{wait}}$. This underwrites the
+    thesis's ``a collision-free joint action always exists'' claim
+    (Section~B) for free, but is a real loss of expressiveness relative to
+    the source if a future revision wants to model genuinely
+    non-stoppable segments -- worth a one-line note in Scope if that
+    generality is ever wanted; not fixed here since it is not currently
+    claimed as a capability.
+  \item \textbf{[K5] No dummy-node start-time mechanism needed.}
+    \citeauthor{knippenberg2021} materialise each agent at a private dummy
+    node until its individual start time $t_i^s$ elapses, to avoid an agent
+    appearing mid-graph and causing a spurious collision. The thesis avoids
+    this entirely by construction: the fleet $\mathcal{A}$ is fixed and
+    persistent (agents idle at $V_{ep}$ between tasks), and it is
+    \emph{tasks}, not agents, that have release times $r_j$. A structural
+    consequence of the lifelong framing, not a borrowed mechanism -- correctly
+    absent, not simply omitted.
+  \item \textbf{[K6] Reward design (Method-level, noted here for
+    completeness).} \citeauthor{knippenberg2021} use a fixed table of
+    empirically-tuned per-action penalties (Table~1 in the source: e.g.\
+    move $-0.1$, collision $-2$, goal completion $+10$) with no stated
+    invariance guarantee. \texttt{Method\_and\_Implementation.md} instead
+    specifies potential-based shaping, $\gamma\Phi_i(t{+}1)-\Phi_i(t)$ with
+    $\Phi_i(t) = -\eta_i(\ell_i(t),t)$, which provably preserves the
+    underlying game's equilibria (\citealp{ng1999policy}; extended to
+    dynamic potentials by \citealp{devlin2012dynamic}) -- directly relevant
+    here since $\Phi_i$ is non-stationary by construction (the target $q_i(t)$
+    changes at every reassignment). \citeauthor{knippenberg2021} even flag
+    their own use of DQN as a limitation and name PPO as future work (their
+    Section~8); \texttt{Method\_and\_Implementation.md}'s planned PPO
+    training procedure directly answers that. Correctly scoped to Method, not
+    Problem Formulation -- noted here only because the comparison is what
+    surfaced it as a deliberate, citable improvement rather than an
+    arbitrary choice.
+\end{itemize}
+
+\subsection{[K7, Clarity] Cost-asymmetry sentence was untethered, and $c(v,w)$ was never tied to $c(e)$}
+An earlier revision of \texttt{problem\_formulation\_fixed.tex} added a
+standalone sentence under the \texttt{[G10]} tag stating that
+$(v,w)\in E$ does not imply $(w,v)\in E$ and that the two directions ``may
+carry different costs.'' Directional cost asymmetry is not wrong --
+\citeauthor{knippenberg2021}'s own formalism defines cost per ordered pair
+$c(v,v')$ on a directed graph too -- but it is a free corollary of
+directedness, not an independent modelling choice, and no generated instance
+in either this thesis or \citeauthor{knippenberg2021} actually exercises a
+bidirectional edge with unequal costs in each direction (their bidirectional
+edges are drawn as a single shared cost, e.g.\ Figure~1's ``cost~$=1$''). The
+sentence was therefore carrying a \texttt{[G10]} tag without matching
+\texttt{[G10]}'s own rationale in this document, i.e.\ an undocumented claim.
+\textbf{Fix:} folded into the directedness explanation itself (``directedness
+matters concretely here \ldots aisles are often one-way, so $(v,w)\in E$ does
+not by itself imply $(w,v)\in E$, nor does it imply the two directions cost
+the same where both exist''), so the asymmetry reads as a consequence of
+being directed rather than a separately asserted feature.
+
+Separately, $c(v,w)$ was used three times (in \texttt{eq:onestepcost} and
+\texttt{eq:potentialbound}) without ever being identified with $c(e)$ for
+$e=(v,w)$, the only place the cost function is actually defined -- a gap the
+section's own notation-disambiguation paragraph (\texttt{sec:pf:notation})
+did not catch, since it lists $c(e)$, $\hat c(v,w)$, $\bar c_T$, $C_T$ and
+$\mathcal{C}_t$ as the family needing disambiguation but never states that
+plain $c(v,w)$ \emph{is} $c(e)$. \textbf{Fix:} one clause added where $c(e)$
+is first defined -- ``written $c(v,w)$ when $e=(v,w)$'' -- closing the gap
+without introducing a sixth symbol into the disambiguation table.
+
+\subsection*{[K8, Deviation] Action masking vs.\ Knippenberg's penalised-invalid-move handling}
+Re-reading \S3 of \citeauthor{knippenberg2021} closely: ``If an agent chooses
+a move action that is not valid, i.e.\ a move action outside the range of
+outgoing edges of its current location, the action is treated as a `wait'
+action, and it is penalised accordingly.'' Their fixed-size action head can
+select a nonexistent edge; the environment silently reinterprets that choice
+as a wait and lets the reward signal teach the policy not to do that. This
+thesis's \texttt{eq:mask} (\texttt{method\_implementation\_skeleton.tex},
+\ref{sec:method:rl}) instead sets the logits for nonexistent moves to
+$-\infty$ before the softmax, so an illegal move has probability zero rather
+than a penalised nonzero one -- legal \emph{by construction}, not learned by
+penalty. This was already the right design and already correctly cross-tied
+to $\mathcal{U}(v)$ vs.\ $\mathcal{U}_i$ in \ref{sec:pf:game} (the
+\texttt{[Gap]} entry above), but the comparison to
+\citeauthor{knippenberg2021}'s own mechanism -- and the actual argument for
+why masking is preferable, not just different -- lived only in this
+document, not in the thesis text itself. \textbf{Fix:} two sentences added
+to the masking paragraph naming \citet{knippenberg2021}'s penalised
+approach explicitly and stating why masking is preferred: it never spends
+training signal on moves already known illegal from $N^{+}(\ell_i(t))$, it
+keeps the executed action identical to the sampled one (their reinterpretation
+lets a sampled ``move'' execute as ``wait,'' which the value function then
+has to reconcile), and it costs nothing extra since $N^{+}(v)$ is already
+required to define $\mathcal{U}(v)$ regardless. Same lesson as \texttt{[K6]}:
+a citable improvement over the source is only citable if the thesis actually
+says so.
+
+\section{Comparison against Ma, Li, Kumar \& Koenig (2017)}
+\label{sec:ma2017}
+
+\citet{ma2017lifelong} (``Lifelong Multi-Agent Path Finding for Online
+Pickup and Delivery Tasks,'' AAMAS 2017) is where the term MAPD and the
+notion of a well-formed MAPD instance both come from; this thesis uses both
+throughout without, until now, ever citing the source or fully carrying over
+what it defines.
+
+\subsection*{[M1, Gap] MAPD and well-formedness cited but not attributed}
+Two uncredited borrowings: ``Multi-Agent Pickup and Delivery (MAPD)'' at its
+first use in the Introduction, and the well-formed-instances condition in
+\ref{sec:pf:env} (at least $m$ non-task endpoints; no path between two
+endpoints blocked by a third), which is \citeauthor{ma2017lifelong}'s
+Definition~1, restated in this thesis's own words but previously with no
+citation at all. \textbf{Fix:} \citep{ma2017lifelong} added at MAPD's first
+use; the well-formedness paragraph now reads ``\citet{ma2017lifelong}'s
+well-formed MAPD instances'' rather than stating the condition as though it
+were invented here. A new three-panel figure, \texttt{fig:wellformed},
+mirrors \citeauthor{ma2017lifelong}'s own Figure~2 (which contrasts a
+well-formed instance against two ways the condition can fail) rather than
+inventing a new pedagogical device: (a) well-formed, (b) too few non-task
+endpoints, (c) a path between two endpoints blocked by a third.
+
+\subsection*{[M1, continued] Re-tasking: permitted in the source, silently absent here}
+\citeauthor{ma2017lifelong} explicitly allow an agent to be re-tasked --
+reassigned to a different job -- any time before it reaches its current
+task's pickup location, and give the reason: ``agents can often be re-tasked
+before they have picked up a good but have to deliver it afterward.'' This
+thesis's \texttt{eq:lifecycle} moves a task from $\mathcal{Q}_t$ to
+$\mathcal{B}_t$ at $y_j$ with no path back, which \emph{implies} no
+re-tasking, but nothing said so before now. Given the source paper is cited
+specifically for the MAPD problem class, a reader who knows it would
+reasonably assume re-tasking carried over too. \textbf{Fix:} one paragraph
+added to \ref{sec:pf:scope} stating the narrowing explicitly, using the
+$\sigma$ notation from [G17]: $\sigma(j)$ is fixed for the lifetime of
+$\mathcal{B}_t$-membership, so re-tasking is a Problem-Formulation-level
+change (it would let $\pi^{\mathrm{assign}}$ revise $\sigma$ for
+already-assigned, not-yet-picked-up tasks), not a Method-level one --
+consistent with how deadlines ([K2]) are already treated as the same kind of
+change.
+
+\subsection*{[M2, Gap] The restated well-formedness clause checked a narrower endpoint set than the source's}
+\citeauthor{ma2017lifelong}'s own $V_{\mathrm{ep}}$ already contains every
+pickup and delivery location ($V_{\mathrm{tsk}} \subseteq V_{\mathrm{ep}}$),
+so their path-condition clause (c) -- ``for any two endpoints, a path exists
+that traverses no other endpoints'' -- ranges over task \emph{and} non-task
+endpoints together. This thesis keeps $V_{\mathrm{str}}$, $V_{\mathrm{del}}$
+and $V_{\mathrm{ep}}$ as three separate, typically-disjoint roles (a
+deliberate and more general choice than the source's nesting, discussed on
+its own merits elsewhere), which means the restated condition -- ``between
+any pair of endpoints some path avoids every third endpoint'' -- silently
+ranged over a narrower set than \citeauthor{ma2017lifelong}'s original if
+``endpoint'' were read as this section's $V_{\mathrm{ep}}$ alone: it said
+nothing about a path between, say, two storage vertices, even though the
+source's completeness guarantee needs exactly that. \textbf{Fix:} one clause
+added stating that for this specific check, ``endpoint'' means
+$V_{\mathrm{ep}} \cup V_{\mathrm{str}} \cup V_{\mathrm{del}}$ together,
+matching \citeauthor{ma2017lifelong}'s convention for exactly the well-
+formedness test and nowhere else -- $V_{\mathrm{str}}$, $V_{\mathrm{del}}$
+and $V_{\mathrm{ep}}$ remain separate roles everywhere else in the section,
+so this does not quietly redefine any of the three. Found by working through
+what ``more general than the source, not more limited'' actually requires
+of a condition borrowed \emph{from} the source: generality in the role
+structure does not automatically carry over to a check stated in terms of
+those roles unless it is checked.
+
+\subsection*{[M3, Gap] ``A path exists'' needs a direction on a directed graph}
+\citeauthor{ma2017lifelong}'s graph is undirected, so their clause (c) --
+``a path exists between any two endpoints'' -- is automatically symmetric: a
+path from $v$ to $w$ \emph{is} a path from $w$ to $v$, walked backwards. This
+thesis's $G$ is directed (\ref{sec:pf:env}, and the whole point of the
+[G10]/[K1] departure from Knippenberg's own graph choice), so the same
+sentence is ambiguous here: does the check need a path from $v$ to $w$, from
+$w$ to $v$, or both? Since Token Passing-style algorithms route an agent
+between whichever pair of endpoints a task assignment happens to produce --
+not a fixed direction chosen in advance -- only requiring \emph{both}
+directions preserves the completeness guarantee the citation is for; a
+single-direction reading would silently be a weaker (and wrong) condition.
+\textbf{Fix:} the path-condition clause now states explicitly that, because
+$G$ is directed, it requires a path from $v$ to $w$ \emph{and} a path from
+$w$ to $v$ for every pair, each avoiding every third endpoint. Found in the
+same conversation as [M2] and for the same underlying reason: a property
+proved on the source's graph does not automatically transfer to a strictly
+more general graph class without checking which of the source's implicit
+assumptions (here, undirectedness) the property actually used.
+
+\subsection*{[M4, Deviation] The active phase starts at assignment, not pickup arrival, and this thesis never said so}
+\citeauthor{ma2017lifelong} state plainly: ``When the agent reaches the
+pickup location, it starts to execute the task and the task is removed from
+$\mathcal{T}$'' -- their task set only drops a task, i.e.\ their active
+phase only begins, at \emph{pickup arrival}, not at assignment. This
+thesis's \texttt{eq:lifecycle} already uses a different boundary --
+$\mathcal{B}_t$ begins at $y_j$ (assignment) -- and the surrounding prose
+already explicitly rejects ``arrival of the agent at $s_j$'' as the
+boundary. What it did not do, before now, is note that the rejected
+alternative is \citeauthor{ma2017lifelong}'s own convention, or say why this
+thesis picks the earlier one. Given the source is now cited repeatedly for
+this exact lifecycle structure, a reader who knows it would notice the
+silent divergence. \textbf{Fix:} one clause naming
+\citet{ma2017lifelong}'s convention and the reason for departing from it:
+using $y_j$ rather than pickup arrival means time lost travelling to $s_j$
+is attributed to the active phase and is therefore eligible for the
+blocking measure $W_T$ \eqref{eq:waiting}, instead of being folded into
+generic pre-assignment queueing (which $B_T$'s $|\mathcal{Q}_T|$ term
+already covers). This is a considered choice, not an oversight -- but it
+was an unstated one until this pass.
+
+\subsection*{[M4, continued] This same boundary is why \texttt{[G17]} and \texttt{[M1]} agree with each other, not just with the source}
+Re-checking the section once more surfaces that \texttt{[G17]}'s
+\texttt{eq:free} is built directly on $\mathcal{B}_t$, which this entry just
+pinned to $y_j$. So an agent becomes \emph{occupied} the instant it is
+assigned, not when it reaches the pickup -- and that is precisely why
+\texttt{[M1]}'s re-tasking prohibition holds \emph{before} pickup as well as
+after: an assigned-but-travelling agent is already occupied under this
+thesis's boundary, so there is no ``free'' window in which
+\citeauthor{ma2017lifelong}'s reassignment could happen even if it were
+permitted. In their model, the later (pickup-arrival) boundary is exactly
+what leaves that window open, which is why they can allow it and this
+thesis's own choice of boundary is why it cannot. \texttt{[G17]},
+\texttt{[M1]} and \texttt{[M4]} are not three independent findings that
+happen to be consistent -- they are one decision (where $\mathcal{B}_t$
+begins) examined from the free/occupied side, the re-tasking side, and the
+$W_T$-measurement side respectively. No further fix: the three passages are
+already individually correct and mutually consistent; this is a note for
+whoever reads GAPS.tex next; so the connection does not have to be
+rediscovered from scratch.
+
+\section{Where does this leave Method\_and\_Implementation.md?}
+\label{sec:method-mapping}
+
+Checking \texttt{problem\_formulation.tex} (as given, not a hypothetical
+denser draft) against \texttt{Method\_and\_Implementation.md}'s own
+six-item cut list:
+
+\begin{enumerate}
+  \item \emph{Controller-architecture algorithmic detail (prioritised
+    planning, matching costs, zone hand-off protocols)} -- \textbf{not
+    present.} Section~E as given only states the abstract information
+    signature and Table~I; no algorithm-level content to cut.
+  \item \emph{Encoder / message-passing equations
+    ($z_i=\mathrm{Enc}_G(\cdot)$, $\phi_q,\psi_q$)} -- \textbf{not present.}
+    Section~F as given defines only $V_i^{(d)}$, $\eta_i$, $\delta_i$,
+    $G_t^{\mathcal{A}}$, $o_i(t)$ -- no architecture equations.
+  \item \emph{Exact functional forms of $D$, $K$, $R$ and weights
+    $\alpha,\beta,\chi$} -- \textbf{already deferred} in the text as given
+    (``specified in Section~\ref{sec:method:storage}'').
+  \item \emph{The reward function} -- \textbf{already deferred}
+    (\texttt{eq:objective}'s prose: ``$R_i$ are left unspecified here'').
+  \item \emph{Defensive justification passages} -- \textbf{present, low
+    priority.} These exist (paraphrased in
+    \texttt{Method\_and\_Implementation.md} rather than quoted verbatim) but
+    are one-line footnote-style asides, not misplaced algorithmic content;
+    rephrasing them is a copy-edit, not a structural fix, and wasn't applied
+    here.
+  \item \emph{Full notation table $\to$ appendix} -- \textbf{applies, but
+    only to the table added in this review} (the original had none). Fixed:
+    see [G11] above and Appendix~\ref{app:notation} below.
+\end{enumerate}
+
+The short version: \textbf{almost nothing from this review belongs in
+Method\_and\_Implementation.md.} Every fix in
+\texttt{problem\_formulation\_fixed.tex} is definitional (``what the object
+is''), which is exactly what Section~IV is supposed to contain per that
+document's own contract table. The one piece of content that needed to move
+doesn't belong in Method either -- by \texttt{Method\_and\_Implementation.md}'s
+own instruction, a full notation table is \emph{Appendix} material, a third
+location distinct from both Problem Formulation and Method. That relocation
+is done in Appendix~\ref{app:notation} of this document (ready to paste into
+the thesis's own appendix chapter, which is not a file present in this
+repository).
+
+\appendix
+\section{Notation}
+\label{app:notation}
+
+Two tables. The first is the full glossary requested during review: every
+symbol introduced in Section~IV, in the order it first appears, with a
+plain-language gloss and where it is defined. The second (unchanged from the
+earlier version of this appendix) is the narrower disambiguation table for
+symbol families that share a base letter across unrelated objects -- keep
+both, since the first is for looking a symbol up and the second is for the
+specific worry ``is this the same $c$ as that $c$.''
+
+\begin{table}[h]
+  \centering
+  \caption{Every symbol used in Section~IV, in order of first appearance.}
+  \label{tab:notation-full}
+  \begin{tabular}{ll}
+    \toprule
+    Symbol & Meaning (first defined at) \\
+    \midrule
+    \multicolumn{2}{l}{\textit{The environment (\ref{sec:pf:env})}} \\
+    $G=(V,E)$ & the directed warehouse graph \\
+    $V_{\mathrm{mov}}$ & vertices an agent may occupy \\
+    $V_{\mathrm{str}}$ & storage faces (pickup locations) \\
+    $V_{\mathrm{del}}$ & delivery points \\
+    $V_{\mathrm{ep}}$ & endpoints: safe to idle at without blocking transit \\
+    $c(e)=c(v,w)$ & cost of traversing edge $e=(v,w)$, eq.~(env def.) \\
+    $d_G(v,w)$ & cheapest directed path cost, over $G[V_{\mathrm{mov}}]$ only \\
+    $N^{+}(v)$ & movable successors of $v$ \\
+    $\mathcal{U}(v)$ & legal actions at vertex $v$, eq.~(actions) \\
+    $c_{\mathrm{wait}}$ & cost of waiting one timestep \\
+    $\hat c(v,w)$ & realised one-step cost (handles waiting too), eq.~(onestepcost) \\
+    $m=|\mathcal{A}|$ & fleet size (defined in \ref{sec:pf:agents}, used here) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Agents and collisions (\ref{sec:pf:agents})}} \\
+    $\mathcal{A}=\{a_1,\dots,a_m\}$ & the fleet \\
+    $\ell_i(t)$ & agent $a_i$'s location at time $t$ \\
+    $u_i(t)$ & agent $a_i$'s chosen action at time $t$ \\
+    $p_i$ & agent $a_i$'s realised route over the horizon \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Where the items are (\ref{sec:pf:storage})}} \\
+    $\mathcal{K}$ & set of SKU types \\
+    $x_t$ & storage configuration: units of each SKU at each storage vertex \\
+    $b_k$ & shelf capacity one unit of SKU $k$ consumes \\
+    $\mathrm{cap}(v)$ & shelf capacity of storage vertex $v$ \\
+    $\mathcal{X}$ & feasible storage configurations, eq.~(feasiblestorage) \\
+    $x_0$ & initial storage configuration, supplied with the instance \\
+    $F$ & the storage update rule \\
+    $\Delta$ & storage epoch length (the slow clock's period) \\
+    $\hat\rho_t,\hat\mu_t,\hat w_t$ & causal estimates: demand, edge traffic, waiting \\
+    $F_{\mathrm{fix}}$ & the do-nothing baseline, $F_{\mathrm{fix}}(x,\cdot)=x$ \\
+    $\mathcal{F}$ & the set of admissible storage rules \\
+    $D,K,R$ & storage objective terms: access distance, congestion, reassignment \\
+    $\alpha,\beta,\chi$ & weights on $D,K,R$ in eq.~(storageobjective) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Where the work comes from (\ref{sec:pf:tasks})}} \\
+    $P_{\mathrm{ord}}$ & the order-arrival distribution \\
+    $\tau_j=(r_j,s_j,g_j,k_j)$ & a task: release time, pickup, delivery, requested SKU \\
+    $\lambda_{\mathrm{task}}$ & expected tasks released per timestep \\
+    $y_j$ & assignment time of $\tau_j$ \\
+    $\sigma(j)$ & the agent assigned to $\tau_j$ at $y_j$ \\
+    $d_j$ & completion (delivery) time of $\tau_j$ \\
+    $\mathcal{Q}_t,\mathcal{B}_t,\mathcal{C}_t$ & waiting / active / completed task sets, eq.~(lifecycle) \\
+    $\zeta_j$ & service time of $\tau_j$, eq.~(servicetime) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{Who decides (\ref{sec:pf:controllers})}} \\
+    $\pi=(\pi^{\mathrm{assign}},\pi^{\mathrm{route}})$ & a controller: assignment map + routing map \\
+    $\Pi$ & the set of admissible controllers \\
+    $\mathcal{Y}=\{Y_1,\dots,Y_p\}$ & the zone partition for section-based control \\
+    $\delta(S,t;\mathrm{excl})$ & occupancy fraction of window $S$, excluding agents in $\mathrm{excl}$ \\
+    $\theta$ & a learned controller's parameters \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{What a decentralised agent sees (\ref{sec:pf:observations})}} \\
+    $d$ & observation depth \\
+    $V_i^{(d)}(t),\mathcal{G}_i^{(d)}(t)$ & visible vertices / induced subgraph, eq.~(localsubgraph) \\
+    $q_i(t)$ & agent $a_i$'s current target vertex \\
+    $\eta_i(v,t)$ & potential: distance from $v$ to $q_i(t)$, eq.~(potential) \\
+    $r_{\mathrm{cng}}$ & congestion radius \\
+    $\delta_i(t)$ & decentralised instance of $\delta(S,t;\mathrm{excl})$, eq.~(congestion) \\
+    $r_{\mathrm{com}}$ & communication radius \\
+    $G^{\mathcal{A}}_t=(\mathcal{A},E^{\mathcal{A}}_t)$ & who-can-talk-to-whom graph, eq.~(commgraph) \\
+    $o_i(t)$ & the full observation agent $a_i$ receives, eq.~(observation) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{The learning problem (\ref{sec:pf:game})}} \\
+    $\mathcal{M}$ & the POSG tuple, eq.~(posg) \\
+    $\mathcal{S}$ & the state space \\
+    $P$ & the transition kernel \\
+    $\mathcal{O}_i,O_i$ & observation space / observation function \\
+    $R_i$ & agent $a_i$'s reward function \\
+    $\gamma$ & discount factor \\
+    $\mathcal{U}_i$ & agent $a_i$'s fixed action space in $\mathcal{M}$ (union over vertices) \\
+    $J(\theta)$ & the team-level learning objective, eq.~(objective) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{How the two layers close the loop (\ref{sec:pf:coupling})}} \\
+    $s_t$ & the full system state (agents, task sets, storage config.) \\
+    \addlinespace
+    \multicolumn{2}{l}{\textit{How a run is scored (\ref{sec:pf:measures})}} \\
+    $\Lambda_T$ & throughput, eq.~(throughput) \\
+    $\bar\zeta_T$ & mean service time \\
+    $\bar c_T$ & mean movement cost per completed task, eq.~(movementcost) \\
+    $\mu_T(e)$ & traversal count of edge $e$ over the evaluation window \\
+    $E^{+}_T$ & edges with at least one traversal \\
+    $p_T(e)$ & normalised traversal share of edge $e$ \\
+    $H_T$ & normalised entropy of edge usage, eq.~(entropy) \\
+    $C_T$ & concentration index, $1-H_T$, eq.~(concentration) \\
+    $\kappa_T$ & mean per-decision controller runtime, eq.~(runtime) \\
+    $B_T$ & backlog, $|\mathcal{Q}_T|+|\mathcal{B}_T|$ \\
+    $W_T$ & blocking measure (time lost after assignment), eq.~(waiting) \\
+    $\omega_j(t)$ & indicator that the agent serving $\tau_j$ is blocked at $t$ \\
+    $\mathcal{J}(F,\pi)$ & the system-level criterion, eq.~(functional) \\
+    $q_{\mathrm{svc}},q_{\mathrm{mov}},q_{\mathrm{wait}},q_{\mathrm{conc}},q_{\mathrm{back}}$ & weights in $\mathcal{J}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\noindent As with the disambiguation table below, replace each
+\texttt{eq.~(xxx)} with \verb|\eqref{eq:xxx}| when pasting this into the
+thesis's own appendix -- labels already match
+\texttt{problem\_formulation\_fixed.tex} verbatim.
+
+Several symbol families in Section~IV share a base letter across unrelated
+objects. None are typos or the same object under different names; each pair
+below denotes two genuinely different things that happen to look alike.
+
+\begin{table}[h]
+  \centering
+  \caption{Symbols that share a base letter but denote unrelated objects.}
+  \label{tab:notation}
+  \begin{tabular}{ll}
+    \toprule
+    Symbols & Distinct meanings \\
+    \midrule
+    $c(e)$, $c_{\mathrm{wait}}$ & edge cost / wait cost (instance parameters) \\
+    $\hat{c}(v,w)$ & realised one-step cost, eq.~(onestepcost) \\
+    $\bar{c}_T$ & mean movement cost per completed task, eq.~(movementcost) \\
+    $C_T$ & concentration index, eq.~(concentration) \\
+    $\mathcal{C}_t$ & completed-task set, eq.~(lifecycle) \\
+    \addlinespace
+    $\mathcal{Q}_t$ & waiting-task set, eq.~(lifecycle) \\
+    $q_i(t)$ & agent $i$'s current target vertex, eq.~(potential) \\
+    $q_{\mathrm{svc}}, q_{\mathrm{mov}}, q_{\mathrm{wait}}, q_{\mathrm{conc}}, q_{\mathrm{back}}$
+      & weights in the system-level criterion, eq.~(functional) \\
+    \addlinespace
+    $\mathcal{O}_i$ & observation space, eq.~(posg) \\
+    $O_i$ & observation function, eq.~(posg) \\
+    \addlinespace
+    $\mathcal{U}(v)$ & action set at vertex $v$, eq.~(actions) \\
+    $\mathcal{U}_i = \bigcup_{v} \mathcal{U}(v)$ & agent $i$'s fixed action space in $\mathcal{M}$, eq.~(posg) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\noindent When pasted into the thesis's actual appendix, replace each
+\texttt{eq.~(xxx)} above with \verb|\eqref{eq:xxx}| -- the labels already
+match \texttt{problem\_formulation\_fixed.tex} verbatim, so this table can be
+dropped in without renumbering anything.
+
+\begin{thebibliography}{9}
+\bibitem[van Knippenberg et~al.(2021)]{knippenberg2021}
+Marijn van Knippenberg, Mike Holenderski, and Vlado Menkovski.
+\newblock Time-Constrained Multi-Agent Path Finding in Non-Lattice Graphs
+  with Deep Reinforcement Learning.
+\newblock In \emph{Proceedings of the 13th Asian Conference on Machine
+  Learning}, volume 157 of \emph{PMLR}, 2021.
+
+\bibitem[Ng et~al.(1999)]{ng1999policy}
+Andrew~Y. Ng, Daishi Harada, and Stuart Russell.
+\newblock Policy Invariance Under Reward Transformations: Theory and
+  Application to Reward Shaping.
+\newblock In \emph{ICML}, 1999.
+
+\bibitem[Devlin and Kudenko(2012)]{devlin2012dynamic}
+Sam~Michael Devlin and Daniel Kudenko.
+\newblock Dynamic Potential-Based Reward Shaping.
+\newblock In \emph{AAMAS}, 2012.
+
+\bibitem[Ma et~al.(2017)]{ma2017lifelong}
+Hang Ma, Jiaoyang Li, T.~K. Satish Kumar, and Sven Koenig.
+\newblock Lifelong Multi-Agent Path Finding for Online Pickup and Delivery
+  Tasks.
+\newblock In \emph{Proceedings of the 16th International Conference on
+  Autonomous Agents and Multiagent Systems (AAMAS)}, pages 837--845, 2017.
+\end{thebibliography}
+
+\end{document}
