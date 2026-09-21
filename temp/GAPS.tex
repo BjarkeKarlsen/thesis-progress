@@ -371,6 +371,32 @@ task $\tau_j$ the agent serves ($\sigma(j)=i$); the free-agent case is
 explicitly named as unresolved here and forward-pointed to
 \ref{sec:method:model} rather than left implicit.
 
+\subsection*{[G18, continued] ``Before pickup'' / ``after'' needed a mechanism, not just a boundary word}
+\ref{sec:method:model} (the forward pointer this fix's own text promises)
+never actually returns to resolve either half of \texttt{[G18]}: it covers
+the GNN encoder, not the pickup transition or the free-agent case. This
+surfaced while implementing \texttt{controllers/centralised.py}
+(\texttt{slap-mapd-coupling}, M2): a routing controller cannot tell whether
+an active agent's sub-goal is $s_j$ or $g_j$ from $\ell_i(t)$ alone -- once
+the agent leaves $s_j$, $\ell_i(t) \ne s_j$ again, which a location-only
+check would misread as ``not yet picked up'' and send the agent back.
+\textbf{Fix:} a fourth task timestamp, $p_j$ (pickup time), with
+$y_j \le p_j \le d_j$: the first $t$ at which the agent serving $\tau_j$
+reaches $s_j$. Then $q_i(t) = s_j$ if $t < p_j$ (or $\tau_j$ has not yet been
+picked up), $g_j$ otherwise, for whichever $\tau_j$ is active under
+$\sigma(j)=i$. $p_j$ sits alongside $y_j$/$d_j$ in \eqref{eq:lifecycle}'s
+family of timestamps but is not itself a lifecycle-set boundary --
+$\mathcal{Q}_t/\mathcal{B}_t/\mathcal{C}_t$ are unchanged by it, since an
+active task is still just $y_j \le t < d_j$ regardless of pickup. Implemented
+as \texttt{Task.pickup\_time} / \texttt{Task.pick\_up(t)} /
+\texttt{Task.current\_goal}, mirroring how $y_j$/$d_j$ are already handled.
+The free-agent case remains genuinely open: this fix only ties down $q_i(t)$
+for an agent currently serving a task, not what $q_i(t)$ should be for a
+free one, which \ref{sec:method:model} still owes a decision (this is a
+Method-level design choice -- e.g.\ the agent's own current vertex, a
+designated rest vertex, or something else -- not something the
+implementation should guess at silently).
+
 \subsection*{Editorial: forward references resolved during the first-eight-pages readability pass}
 Three further cases of a symbol used before its own definition were found and
 fixed the same way as the existing $m$ item above -- a forward pointer or a
