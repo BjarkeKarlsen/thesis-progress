@@ -1,0 +1,230 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+\onecolumn
+\section{Formal environment and agent definitions}
+
+\subsection{Environment graph}
+Let the warehouse environment be a directed graph
+\[
+  G_{\mathcal{W}} = (V, E), \qquad E \subseteq V \times V ,
+\]
+where $V$ is a finite set of vertices (traversable cells, intersections, stations)
+and $E$ is a finite set of directed edges representing traversable segments.
+Each edge carries a positive traversal cost
+\[
+  c : E \to \mathbb{R}_{>0}.
+\]
+For $v \in V$ we write $\mathcal{N}_{G}(v) = \{ u \in V : (v,u) \in E \}$ for the
+set of successors of $v$, and
+$B_r(v) = \{ u \in V : d_G(v,u) \le r \}$ for the $r$-hop neighbourhood of $v$
+under the hop distance $d_G$.
+
+\paragraph{Relation to CRAMP.}
+CRAMP formulates MAPF in a discrete grid world rather than on an explicit graph
+\cite{cramp}. The grid world is the special case in which
+$V \subseteq \mathbb{Z}^2$ is the set of free cells,
+$E = \{ (v,u) \in V \times V : \lVert v-u \rVert_1 = 1 \}$ is the
+4-neighbour relation, and $c \equiv 1$. All definitions below therefore reduce
+to the CRAMP setting when $G_{\mathcal{W}}$ is a unit-cost 4-connected grid.
+
+\subsection{Agents, states and actions}
+Let
+\[
+  \mathcal{N} = \{1, \dots, n\}
+\]
+be the finite set of agents, following CRAMP's agent indexing $a_i$,
+$i \in \mathcal{N}$ \cite{cramp}. Each agent $i$ has a start vertex
+$s_i \in V$ and a goal vertex $g_i \in V$, and its state is
+\[
+  x^i_t = \bigl( \mathrm{pos}^i_t, \sigma^i_t \bigr) \in \mathcal{X}^i = V \times \Sigma^i ,
+\]
+where $\mathrm{pos}^i_t \in V$ is the occupied vertex at discrete time
+$t \in \mathbb{N}$ and $\sigma^i_t \in \Sigma^i$ encodes internal variables.
+The global state space is
+\[
+  \mathcal{S} = \prod_{i \in \mathcal{N}} \mathcal{X}^i ,
+  \qquad s_t = (x^1_t, \dots, x^n_t) \in \mathcal{S},
+\]
+and $\mathrm{pos}^i : \mathcal{X}^i \to V$ is the position projection.
+CRAMP corresponds to $\Sigma^i = \emptyset$, i.e.\ the state of an agent is
+exactly its vertex.
+
+The action space of agent $i$ is the local move set
+\[
+  \mathcal{A}^i(v) = \mathcal{N}_G(v) \cup \{v\}, \qquad v = \mathrm{pos}^i_t ,
+\]
+i.e.\ move along one outgoing edge or wait. The joint action space is
+$\mathcal{A} = \mathcal{A}^1 \times \dots \times \mathcal{A}^n$.
+On a 4-connected grid this yields exactly the five discrete CRAMP actions
+$\{\mathrm{N}, \mathrm{E}, \mathrm{S}, \mathrm{W}, \mathrm{stay}\}$
+\cite{cramp}.
+
+\subsection{Feasibility and collision constraints}
+A joint action $a_t = (a^1_t, \dots, a^n_t)$ is \emph{admissible} in state $s_t$ if
+\begin{align}
+  a^i_t &\in \mathcal{A}^i(\mathrm{pos}^i_t) && \text{(edge feasibility)} \\
+  a^i_t &\neq a^j_t && \forall i \neq j \ \text{(vertex conflict)} \\
+  \neg \bigl( a^i_t = \mathrm{pos}^j_t \wedge a^j_t = \mathrm{pos}^i_t \bigr)
+        && \forall i \neq j \ \text{(edge / swap conflict)} .
+\end{align}
+Transitions are $\mathrm{pos}^i_{t+1} = a^i_t$ for admissible joint actions.
+A plan for agent $i$ is a path
+$P_i = (p_0, p_1, \dots, p_{T_i})$ with $p_0 = s_i$, $p_{T_i} = g_i$ and
+$(p_k, p_{k+1}) \in E \cup \{(v,v) : v \in V\}$; a solution is a set
+$\{P_i\}_{i \in \mathcal{N}}$ satisfying (2)--(3) at every timestep.
+The objective follows CRAMP's metrics, the makespan
+$\max_{i} T_i$ and the flowtime $\sum_i T_i$ \cite{cramp}.
+
+\subsection{Partial observability}
+Each agent observes only a bounded region of $G_{\mathcal{W}}$. Define the
+\emph{observation subgraph} of agent $i$ at time $t$ as the induced subgraph
+\[
+  G^i_t = G_{\mathcal{W}}\bigl[ B_r(\mathrm{pos}^i_t) \bigr]
+\]
+on the $r$-hop neighbourhood of its current vertex, together with a vertex
+feature map
+\[
+  \phi^i_t : B_r(\mathrm{pos}^i_t) \to \mathbb{R}^{d_v}
+\]
+assigning to each visible vertex features for obstacle status, occupancy by
+other agents, goals of visible agents, and local congestion statistics
+(queue length, recent edge flow, expected travel time). The observation of
+agent $i$ is the pair
+\[
+  o^i_t = \bigl( G^i_t, \phi^i_t, g_i \bigr) \in \mathcal{O}^i ,
+  \qquad
+  \mathcal{O} = \mathcal{O}^1 \times \dots \times \mathcal{O}^n .
+\]
+This generalises CRAMP's observation, which is a
+$10 \times 10 \times 4$ tensor over the agent's field of view --
+obstacles, positions of visible neighbours, goals of those neighbours, and the
+agent's own goal channel -- plus its own goal position \cite{cramp}:
+on a grid with $r$ chosen so that $|B_r(v)| = 100$ and $d_v = 4$,
+$(G^i_t, \phi^i_t)$ is exactly that tensor.
+
+\subsection{Communication graph and GNN policy}
+Following CRAMP, local communication is defined on a second, agent-level graph
+that must be distinguished from $G_{\mathcal{W}}$. At each timestep let
+\[
+  G^{\mathrm{c}}_t = \bigl( \mathcal{N}, E^{\mathrm{c}}_t \bigr),
+  \qquad
+  E^{\mathrm{c}}_t = \bigl\{ (i,j) \in \mathcal{N}^2 :
+      \mathrm{pos}^j_t \in B_r(\mathrm{pos}^i_t) \bigr\},
+\]
+so nodes are agents and edges encode mutual visibility (proximity), with
+adjacency matrix $A_t \in \{0,1\}^{N \times N}$ computed dynamically from each
+agent's local observation, where $N$ is the maximum number of visible agents
+\cite{cramp}.
+
+Each agent encodes its observation into a node embedding
+\[
+  h^i_t = f^{\mathrm{enc}}_\theta ( o^i_t ) \in \mathbb{R}^{d}, \qquad d = 512,
+\]
+yielding a node embedding matrix $H_t \in \mathbb{R}^{N \times d}$
+\cite{cramp}. A graph neural network $f_\theta$ with $L$ message-passing layers
+operates on $(H_t, A_t)$,
+\[
+  H^{(\ell+1)}_t = \psi\Bigl( \hat{A}_t H^{(\ell)}_t W^{(\ell)} \Bigr),
+  \qquad \ell = 0, \dots, L-1, \quad H^{(0)}_t = H_t ,
+\]
+where $\hat{A}_t$ is the gated (attention-weighted) adjacency controlling how
+much influence each node exerts on its neighbours, $W^{(\ell)}$ are learnable
+weights and $\psi$ a nonlinearity \cite{cramp}. The resulting per-agent graph
+signal is pooled and mapped to the policy heads, giving a stochastic
+decentralised policy
+\[
+  \pi^i_\theta \bigl( a^i_t \mid o^i_t, G^{\mathrm{c}}_t \bigr),
+\]
+with parameters $\theta$ shared across agents, together with auxiliary
+heads for the value $V_\theta(o^i_t)$, action validity and blocking prediction
+\cite{cramp}.
+
+\subsection{Learning objective}
+Agent $i$ maximises the discounted return
+\[
+  R^i_t = \sum_{k \ge 0} \gamma^k r^i_{t+k}, \qquad \gamma \in [0,1),
+\]
+with advantage
+\[
+  A(o^i_t, a^i_t) = \sum_{k=0}^{K-1} \gamma^k r^i_{t+k}
+      + \gamma^K V_\theta(o^i_{t+K}) - V_\theta(o^i_t)
+\]
+as in CRAMP's actor--critic formulation \cite{cramp}. The reward follows
+CRAMP's crowd-aware structure
+\[
+  r^i_t = R_m \mathbb{1}[\text{move}] + R_s \mathbb{1}[\text{stay}]
+        + R_c \mathbb{1}[\text{collision}]
+        + R_e \mathbb{1}[\text{all goals reached}] + R_n ,
+\]
+with $R_m = -0.3$, $R_c = -2.0$, $R_e = +20.0$ and $R_n$ the crowd-aware term
+rewarding movement into less densely occupied regions \cite{cramp}. In the
+graph setting the crowd-aware term is defined on $G_{\mathcal{W}}$ as a function
+of the occupancy of $\mathcal{N}_G(v)$ rather than of grid neighbours.
+Policy classes are written $\Pi^{\mathrm{arch}}$, and a policy
+$\pi = (\pi^1, \dots, \pi^n) \in \Pi^{\mathrm{arch}}$ maps observations to
+admissible joint actions.
+
+\section{Extension: storage, depots and pickup-and-delivery}
+The formalism above is complete for MAPF on $G_{\mathcal{W}}$. The following
+layer is an \emph{extension} used only for the coupled-policy study; the graph
+and GNN definitions are unchanged.
+
+\subsection{Vertex roles}
+Partition the vertex set as
+\[
+  V = V^{S} \,\dot\cup\, V^{D} \,\dot\cup\, V^{B} \,\dot\cup\, V^{O},
+\]
+where $V^{S}$ are storage vertices, $V^{D}$ depot / pickup--dropoff stations,
+$V^{B}$ base or charging vertices, and $V^{O}$ transit-only vertices.
+When roles are ignored, $V^{S} = V^{D} = V^{B} = \emptyset$ and the setting
+collapses to CRAMP's start--goal MAPF.
+
+\subsection{Items, orders and tasks}
+Let $I$ be the finite set of item types and $Q$ the finite set of item units,
+with type map $\iota : Q \to I$. A storage placement at time $t$ is a map
+\[
+  p_t : Q \to V^{S},
+\]
+and the induced storage configuration is
+$s_t : I \to 2^{V^{S}}$, $s_t(\kappa) = \{ p_t(q) : \iota(q) = \kappa \}$.
+Orders are sampled from a demand distribution $Z$; each realised order
+$z \in \mathcal{Z}$ is a finite multiset of item units, $z \subseteq Q$.
+Each order induces one or more tasks
+\[
+  \tau = \bigl( q, v^{\mathrm{pick}}, v^{\mathrm{del}} \bigr)
+  \in T \subseteq Q \times V^{S} \times V^{D},
+  \qquad v^{\mathrm{pick}} = p_t(q),
+\]
+and tasks arrive as a stream $(\tau_t)_{t \in \mathbb{N}}$ driven by $Z$.
+Under this extension the goal $g_i$ of agent $i$ is no longer static but is set
+by its currently assigned task, so that the MAPF objective is replaced by a
+throughput objective.
+
+\subsection{Coupled and decoupled policies}
+A policy pair $(s, \pi)$ is \emph{decoupled}, $(s,\pi) \in \mathcal{P}^{\mathrm{dec}}$,
+if $s_t \equiv s_0$ or evolves by exogenous rules independent of realised flows
+on $G_{\mathcal{W}}$, and $\pi$ is trained under a fixed assumed
+placement and demand. CRAMP and comparable decentralised MAPF learners fall in
+$\mathcal{P}^{\mathrm{dec}}$: placement is fixed and only $\pi$ is learned.
+
+A pair is \emph{closed-loop coupled}, $(s,\pi) \in \mathcal{P}^{\mathrm{cpl}}$,
+if there exists a feedback map $F$ with
+\[
+  s_{t+1} = F(s_t, H_t),
+  \qquad
+  H_t = \bigl( (s_k, a_k, o_k, \tau_k) \bigr)_{k \le t},
+\]
+so that observed edge flows, queue lengths and travel times on $G_{\mathcal{W}}$
+alter placement, which in turn alters the task-induced goal distribution and
+hence the trajectories generated by $\pi_\theta$.
+
+\subsection{Problem statement}
+Given a fixed environment graph $G_{\mathcal{W}} = (V,E)$ with costs $c$,
+item and order data $(I, Q, Z)$, agent set $\mathcal{N}$, and policy classes
+$\mathcal{P}^{\mathrm{dec}}, \mathcal{P}^{\mathrm{cpl}}$, the thesis designs and
+trains an RL-GNN controller $\pi_\theta \in \mathcal{P}^{\mathrm{cpl}}$ and
+compares its induced performance functionals -- average travel distance per
+completed task, average edge congestion, throughput, and robustness under
+scaling of $|\mathcal{N}|$ and $|V|$ -- against decoupled baselines.
+
+\end{document}

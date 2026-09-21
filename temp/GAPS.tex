@@ -356,6 +356,42 @@ at $t$ iff no active task is served by it. \texttt{eq:assignmentrule} in the
 Method skeleton now points back to \texttt{eq:free} instead of relying on the
 same informal term it previously left undefined.
 
+\subsection*{[G18] The decentralised agent's ``current target'' \texorpdfstring{$q_i(t)$}{q\_i(t)} was named but never tied to the task model}
+The potential annotation $\eta_i(v,t) = d_G(v, q_i(t))$ (\texttt{eq:potential})
+introduced $q_i(t)$ only as ``the agent's current target,'' with no link back
+to $s_j$, $g_j$, or $\sigma$ -- the objects \ref{sec:pf:tasks} already defines
+for exactly this purpose. A reader had no way to tell whether $q_i(t)$ meant
+the pickup vertex before pickup, the delivery vertex after, or something
+else, and the free-agent case (no task to serve) was left entirely
+unaddressed. Found during a readability pass over the first eight pages, not
+an audit -- the same pattern as \texttt{[G16]}: a symbol used fluently enough
+that the missing tie to earlier notation is easy to read past. \textbf{Fix:}
+$q_i(t)$ is now defined as $s_j$ before pickup and $g_j$ after, for whichever
+task $\tau_j$ the agent serves ($\sigma(j)=i$); the free-agent case is
+explicitly named as unresolved here and forward-pointed to
+\ref{sec:method:model} rather than left implicit.
+
+\subsection*{Editorial: forward references resolved during the first-eight-pages readability pass}
+Three further cases of a symbol used before its own definition were found and
+fixed the same way as the existing $m$ item above -- a forward pointer or a
+plain-words description at the early use-site, no reordering of subsections:
+\begin{itemize}
+  \item \textbf{$V^{(r_{\mathrm{cng}})}_i(t)$ used before its own definition}
+    -- \ref{sec:pf:controllers} named the decentralised congestion window by
+    its full notation before \ref{sec:pf:observations} defines it. Fixed by
+    describing the window in words at first use and leaving the notation
+    itself only at its actual definition site.
+  \item \textbf{$N^{+}(v)$ named before \texttt{eq:actions} defines it} --
+    \ref{sec:pf:env}'s distance discussion named the successor set a few
+    lines before its formal definition. Fixed by describing the restriction
+    in words and pointing forward to \texttt{eq:actions} instead of naming
+    the symbol early.
+  \item \textbf{$W_T$ cited in \ref{sec:pf:tasks}, several subsections before
+    \texttt{eq:waiting} defines it in \ref{sec:pf:measures}} -- fixed with an
+    explicit ``defined in Section~\ref{sec:pf:measures}'' pointer at first
+    use, matching the convention the $m$ item above already relies on.
+\end{itemize}
+
 \section{Comparison against Knippenberg, Holenderski \& Menkovski (2021)}
 \label{sec:knippenberg}
 
