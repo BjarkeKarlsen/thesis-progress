@@ -397,6 +397,98 @@ Method-level design choice -- e.g.\ the agent's own current vertex, a
 designated rest vertex, or something else -- not something the
 implementation should guess at silently).
 
+\subsection{[G19] Three local radii ($d_{\mathrm{obs}}$, $r_{\mathrm{cng}}$,
+$r_{\mathrm{com}}$) and \texttt{[G14]}'s general $\delta(S,t;\mathrm{excl})$
+collapsed into one field of view}
+\texttt{[G14]}'s own fix introduced a general occupancy fraction
+$\delta(S,t;\mathrm{excl})$, \texttt{eq:occupancy}, precisely so congestion
+sensitivity could be realised at every architecture level, with three named
+instances (whole graph for centralised, one zone for section-based, one
+neighbourhood, radius $r_{\mathrm{cng}}$, for decentralised). Checked against
+the actual independent variables in \ref{sec:pd-aim-and-scope}, none of the
+three local radii this thesis had accumulated -- $d_{\mathrm{obs}}$
+(observation depth), $r_{\mathrm{cng}}$ (congestion radius), $r_{\mathrm{com}}$
+(communication radius) -- was ever itself an experimental factor. Congestion
+sensitivity and communication are both on/off toggles; nothing sweeps their
+range. So keeping three separately-named, separately-justified radii, and a
+general $S$ that let the three architectures' congestion readings differ in
+kind (a single whole-graph average for centralised versus a per-neighbourhood
+reading for decentralised) as well as in scope, bought generality nothing in
+this study's design actually uses, and the whole-graph instance specifically
+meant a centralised controller had no way to act on congestion in any
+particular region, only a single system-wide average. Found while checking
+this against \citet{pham2024optimizingcrowdawaremultiagentpath} (CRAMP), whose
+crowd-density feature uses exactly one local window for vision, crowd-density,
+and inter-agent communication at once, no separate range for each.
+\textbf{Fix:} $r_{\mathrm{cng}}$ and $r_{\mathrm{com}}$ are removed;
+$d_{\mathrm{obs}}$'s induced subgraph (\texttt{eq:localsubgraph}, unchanged in
+form) is renamed \emph{field of view} in prose and moved from
+\ref{sec:pf:observations} into \ref{sec:pf:env}, since it is now a graph
+primitive reused everywhere, not a decentralised-only bound.
+\texttt{eq:commgraph}'s edge condition now reads $d_G(\ell_i(t),\ell_j(t)) \le
+d_{\mathrm{obs}}$. \texttt{[G14]}'s general $\delta(S,t;\mathrm{excl})$ and its
+three-instance description list are both removed; \texttt{eq:congestion} is
+now the one definition, $\delta_i(t)$, the occupancy fraction of any agent
+$i$'s own field of view, with nothing architecture-specific written into it
+at all. Which agents' $\delta_j(t)$ a given controller gets to read is no
+longer a congestion-specific rule, it falls out of Table~\ref{tab:information}
+applied to one more quantity in the state (decentralised: its own only;
+section-based: every agent in its own zone; centralised: every agent). A
+section-based agent's field of view is explicitly \emph{not} clipped at its
+own zone boundary: Table~\ref{tab:information} already lists ``boundary
+protocol'' as part of what section-based conditions on, and clipping every
+local reading exactly at the boundary would blind that protocol at exactly
+the place it exists to help. This does not reopen \texttt{[G14]}: congestion
+sensitivity remains realisable at every architecture level, just via one
+narrower, comparable feature instead of three differently-scoped ones.
+\texttt{fig:congestion} (\texttt{congestion\_mini.py}) and \texttt{fig:observation}
+(\texttt{observation.py}) were regenerated to match; \texttt{2.Notation.tex}
+and \texttt{4.Implementation.tex}'s hyperparameter table had their
+$r_{\mathrm{cng}}$/$r_{\mathrm{com}}$ rows removed.
+
+\subsection{[G20] Decentralised communication was an independent
+variable with no research question behind it}
+Aim and Scope (\ref{sec:pd-aim-and-scope}) lists ``communication: absent or
+local for the decentralised controller'' as independent variable \#4. None
+of RQ1-RQ4 (\ref{sec:pd-rq}) mention communication, and \texttt{eq:rqformal},
+which restates every symbol the RQs formally range over (the information
+regime via \texttt{tab:information}, congestion sensitivity via $\beta$ and
+\texttt{eq:congestion}, load via $m$ and $\lambda_{\mathrm{task}}$), omits
+it too. The one sentence that would tie it to a purpose is commented out
+directly after RQ4: ``Local communication is treated as an ablation within
+the decentralised architecture... testing whether communication moderates
+congestion under partial observability.'' Not visible in the compiled
+document. So the feature (\texttt{eq:commgraph}, a subsubsection, a table
+row, a figure legend note, and a clarifying paragraph distinguishing it
+from $\delta_i(t)$) currently has no stated research question, despite
+being real, working code in \texttt{slap-mapd-coupling}
+(\texttt{gnn\_encoder.py}, \texttt{observation.py}, \texttt{rl\_module.py},
+\texttt{experiment\_config.py}, \texttt{controllers/decentralised.py}), with
+message content already concretely specified in
+\texttt{4.Implementation.tex} ($(d_G(\ell_i(t),\ell_j(t)),\,
+\eta_j(\ell_j(t),t))$ per message) and a free ablation ($Q=0$ collapses to
+no message passing). \textbf{Fix:} given a research question rather than
+removed. A conditional \textbf{RQ5} was added after RQ4 in
+\ref{sec:pd-rq}: ``Does local communication improve decentralised routing
+beyond field-of-view sensing alone, and does that benefit depend on how
+well hop-adjacency predicts route overlap in this thesis's non-lattice
+graph? Addressed after RQ1-RQ4 if time permits. If not reached,
+communication remains implemented but unevaluated.'' \texttt{eq:rqformal}
+now notes the communication term is conditional and not required for the
+main factorial design. \ref{sec:pf:scope} states explicitly that if RQ5 is
+not reached, communication stays in the model as an unexercised capability,
+not a claim the results support. The previously commented-out sentence in
+Aim and Scope is now active prose reflecting the conditional framing. No
+code change was needed, $Q=0$ already gives the free ablation. Chosen over
+outright removal because the non-lattice angle (hop-adjacency not
+reliably predicting route overlap, unlike in
+\citet{pham2024optimizingcrowdawaremultiagentpath}'s lattice world) is a
+genuinely different question CRAMP itself cannot test, so it was worth
+keeping as a deliberately conditional, not required, question rather than
+cutting real working code for a question with no examiner-visible cost to
+leaving unanswered. Full argument in
+\texttt{communication\_scope\_decision.md} at the workspace root.
+
 \subsection*{Editorial: forward references resolved during the first-eight-pages readability pass}
 Three further cases of a symbol used before its own definition were found and
 fixed the same way as the existing $m$ item above -- a forward pointer or a

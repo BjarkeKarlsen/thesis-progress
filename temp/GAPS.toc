@@ -1,0 +1,14 @@
+\contentsline {section}{\numberline {1}Internal-consistency review}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}[G14] Congestion sensitivity in routing was decentralised-only, which breaks the cross-architecture comparison}{5}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}[G15] Computational cost was promised in the new Introduction but never formalised}{5}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Comparison against Knippenberg, Holenderski \& Menkovski (2021)}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Carried over directly (and appropriately)}{8}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Correctly, non-trivially adapted}{8}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Genuine extensions (no counterpart in the source paper)}{8}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}[K1, Deviation] Strong connectivity}{9}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}[K2, Gap] No task deadlines}{9}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}[K3--K6, Deviation] Smaller, favourable deviations}{10}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}[K7, Clarity] Cost-asymmetry sentence was untethered, and $c(v,w)$ was never tied to $c(e)$}{10}{subsection.2.7}%
+\contentsline {section}{\numberline {3}Comparison against Ma, Li, Kumar \& Koenig (2017)}{11}{section.3}%
+\contentsline {section}{\numberline {4}Where does this leave Method\_and\_Implementation.md?}{13}{section.4}%
+\contentsline {section}{\numberline {A}Notation}{14}{appendix.A}%

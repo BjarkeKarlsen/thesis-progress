@@ -1,0 +1,77 @@
+% The two-timescale loop (fig:loop). TikZ replacement for loop.py.
+% Build:  latexmk -pdf loop.tex  -> loop.pdf, copy to Images/loop.pdf.
+% Fonts match the thesis (lmodern + T1, see styles/myreport.sty).
+\documentclass[border=2pt]{standalone}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,backgrounds,arrows.meta,calc}
+
+% Palette shared with base.py (C dict).
+\definecolor{storeF}{HTML}{CFE3F7}
+\definecolor{taskF}{HTML}{F6E7C1}
+\definecolor{ctrlF}{HTML}{D7F0D8}
+\definecolor{estF}{HTML}{F7D6D6}
+\definecolor{ink}{HTML}{43505C}
+\definecolor{fb}{HTML}{C0392B}
+\definecolor{muted}{HTML}{5A6673}
+
+\tikzset{
+  box/.style={draw=ink, line width=0.8pt, rounded corners=3pt, align=center,
+              minimum width=4.1cm, minimum height=1.55cm, inner sep=4pt,
+              font=\small},
+  flow/.style={-{Stealth[length=2.6mm]}, line width=1pt, draw=ink},
+  slow/.style={-{Stealth[length=2.6mm]}, line width=1.1pt, draw=fb},
+  lbl/.style={font=\small, text=fb, fill=white, inner sep=2pt},
+  fastzone/.style={draw=muted, dashed, rounded corners=6pt, inner sep=7pt},
+}
+
+% #1 = feedback (1) or F_fix (0), #2 = panel title
+\newcommand{\looppanel}[2]{%
+\begin{tikzpicture}
+  \ifnum#1=1
+    \node[box, fill=storeF] (S) {\textbf{Storage layer} $F$\\
+      slow, every $\Delta$ steps\\
+      $x_t = F(x_{t-\Delta}, \hat\rho_t, \hat\mu_t, \hat w_t)$};
+  \else
+    \node[box, fill=storeF] (S) {\textbf{Storage layer} $F_{\mathrm{fix}}$\\
+      $F_{\mathrm{fix}}(x,\cdot) = x$\\
+      ignores the estimates};
+  \fi
+  \node[box, fill=taskF, right=0.9cm of S] (T) {\textbf{Task generation}\\
+    $\tau_j = (r_j, s_j, g_j)$\\ pickup $s_j$ drawn from $x_t$};
+  \node[box, fill=ctrlF, right=0.9cm of T] (P) {\textbf{MAPD controller} $\pi$\\
+    fast, every timestep\\ assignment and routing};
+  \node[box, fill=estF, below=1.5cm of T] (E) {\textbf{Causal traffic estimate}\\
+    $\hat\mu_t(e),\ \hat w_t(e),\ \hat\rho_t$};
+
+  \begin{scope}[on background layer]
+    \node[fastzone, fit=(T)(P)] (Z) {};
+  \end{scope}
+  \node[font=\footnotesize, text=muted, anchor=south east]
+    at (Z.north east) {fast loop, one environment timestep};
+
+  \draw[flow] (S) -- node[above, font=\footnotesize] {$x_t$} (T);
+  \draw[flow] (T) -- node[above, font=\footnotesize] {$\tau_j$} (P);
+
+  \draw[slow] (P.south) |- node[lbl, pos=0.25] {measure} (E.east);
+  \ifnum#1=1
+    \draw[slow] (E.west) -| node[lbl, pos=0.75] {feedback, every $\Delta$} (S.south);
+  \else
+    % Genuine absence, not a ghosted arrow: under F_fix nothing connects
+    % the estimate to storage.
+    \node[font=\small\itshape, text=muted, align=center]
+      at (S.south |- E) {no feedback\\ $x_t$ held fixed};
+  \fi
+
+  \node[anchor=south west, font=\normalsize]
+    at ($(S.north west)+(0,0.45)$) {#2};
+\end{tikzpicture}}
+
+\begin{document}
+\begin{tabular}{@{}c@{}}
+  \looppanel{1}{(a) Adaptive storage, the coupled model of this thesis}\\[10pt]
+  \looppanel{0}{(b) $F_{\mathrm{fix}}$ baseline, feedback removed}
+\end{tabular}
+\end{document}

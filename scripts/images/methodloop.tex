@@ -1,0 +1,73 @@
+% The six-stage environment step (fig:methodloop), in the style of loop.tex.
+% Build:  latexmk -pdf methodloop.tex  -> methodloop.pdf, copy to Images/.
+% Fonts match the thesis (lmodern + T1, see styles/myreport.sty).
+\documentclass[border=2pt]{standalone}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,backgrounds,arrows.meta,calc}
+
+% Palette shared with base.py (C dict).
+\definecolor{storeF}{HTML}{CFE3F7}
+\definecolor{taskF}{HTML}{F6E7C1}
+\definecolor{ctrlF}{HTML}{D7F0D8}
+\definecolor{estF}{HTML}{F7D6D6}
+\definecolor{delF}{HTML}{FFD9B3}
+\definecolor{accent}{HTML}{2F6FAE}
+\definecolor{ink}{HTML}{43505C}
+\definecolor{fb}{HTML}{C0392B}
+\definecolor{muted}{HTML}{5A6673}
+
+\tikzset{
+  box/.style={draw=ink, line width=0.8pt, rounded corners=3pt, align=center,
+              text width=4.1cm, minimum height=1.9cm, inner sep=4pt,
+              font=\small},
+  insert/.style={draw=accent, line width=0.7pt, fill=white, rounded corners=2pt,
+                 font=\scriptsize, inner sep=2pt, minimum height=0.45cm,
+                 inner xsep=3pt},
+  flow/.style={-{Stealth[length=2.6mm]}, line width=1pt, draw=ink},
+  back/.style={-{Stealth[length=2.6mm]}, line width=1.1pt, draw=fb},
+  shared/.style={draw=muted, dashed, rounded corners=6pt, inner sep=6pt},
+}
+
+\begin{document}
+\begin{tikzpicture}
+  % top row, left to right
+  \node[box, fill=taskF] (O) {\textbf{1. Orders to tasks}\\
+    orders from $P_{\mathrm{ord}}$ become\\ tasks, enter $\mathcal{Q}_t$};
+  \node[box, fill=storeF, right=0.9cm of O] (A) {\textbf{2. Task assignment}\\
+    free agents matched\\ to tasks in $\mathcal{Q}_t$};
+  % stage 3 is a text node plus a row of inserts, framed together
+  \node[align=center, font=\small, text width=4.9cm, right=1.1cm of A,
+        yshift=0.35cm] (Rt) {\textbf{3. Routing}\\
+    one intended action\\ $u_i(t) \in \mathcal{U}(\ell_i(t))$ per agent};
+  \node[insert, below=0.12cm of Rt] (i2) {section-based};
+  \node[insert, left=0.1cm of i2] (i1) {centralised};
+  \node[insert, right=0.1cm of i2] (i3) {decentralised};
+  \begin{scope}[on background layer]
+    \node[draw=ink, line width=0.8pt, rounded corners=3pt, fill=ctrlF,
+          inner sep=4pt, fit=(Rt)(i1)(i3)] (R) {};
+  \end{scope}
+
+  % bottom row, right to left
+  \node[box, fill=estF, below=1.0cm of R] (C) {\textbf{4. Conflict resolution}\\
+    revise joint action to satisfy\\ vertex and swap constraints};
+  \node[box, fill=delF] (E) at (A |- C) {\textbf{5. Environment step}\\
+    apply resolved action,\\ update $\ell_i(t)$, lifecycle, log};
+  \node[box, fill=storeF, dashed] (S) at (O |- C) {\textbf{6. Storage epoch}\\
+    apply $F$ to update $x_t$\\ \emph{only on epoch steps}};
+
+  \draw[flow] (O) -- (A);
+  \draw[flow] (A.east) -- (A.east -| R.west);
+  \draw[flow] (R) -- (C);
+  \draw[flow] (C) -- (E);
+  \draw[flow] (E) -- (S);
+  \draw[back] (S) -- node[left, font=\small, text=fb, align=right]
+    {next\\ timestep} (O);
+
+  % caption-level annotation of what is shared
+  \node[font=\footnotesize, text=accent, anchor=south]
+    at ($(R.north)+(0,0.05)$) {swaps with the controller};
+\end{tikzpicture}
+\end{document}

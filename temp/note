@@ -1,0 +1,54 @@
+The three sets in \Cref{eq:lifecycle} do not overlap: at each timestep after
+its release, a task is either waiting, active, or completed. In this thesis,
+a task becomes active when it is assigned to an agent, not when that agent
+reaches the pickup vertex $s_j$.
+
+Therefore, the travel from the agent's current position to $s_j$ is part of
+the active phase. If the assigned agent is delayed by other agents during
+this journey, that delay is counted as post-assignment blocking in $W_T$
+(\Cref{eq:waiting}), rather than as queueing before assignment. This differs
+from \citet{ma2017lifelong_mapf}, who keep a task in their task set until the
+agent reaches its pickup location.
+
+Let $t_j^{\mathrm{pickup}}$ be the first timestep at which the agent assigned
+to task $\tau_j$ reaches its pickup vertex $s_j$. Then
+\begin{equation}
+  t_j^{\mathrm{assigned}}
+  \leq
+  t_j^{\mathrm{pickup}}
+  \leq
+  t_j^{\mathrm{finish}}.
+\end{equation}
+The pickup time does not change the task's state: the task remains active
+from assignment until delivery. It only marks when the agent's target changes
+from the pickup vertex $s_j$ to the delivery vertex $g_j$, as defined in
+\Cref{eq:currenttarget}.
+
+Only free agents can receive a new task. An agent is free when it is not
+currently assigned to an active task:
+\begin{equation}
+  \text{agent } a_i \text{ is free at time } t
+  \iff
+  \nexists\, j \text{ such that }
+  \tau_j \in \mathcal{B}_t
+  \text{ and }
+  \sigma(j)=i.
+  \label{eq:free}
+\end{equation}
+Otherwise, the agent is occupied. For example, if task $\tau_1$ is assigned
+to agent $a_2$, then $a_2$ is occupied from the assignment of $\tau_1$ until
+the task is delivered. It becomes free again after delivery.
+
+The service time of task $\tau_j$ is the time from its release until its
+delivery:
+\begin{equation}
+  \zeta_j
+  =
+  t_j^{\mathrm{finish}}
+  -
+  t_j^{\mathrm{released}}.
+  \label{eq:servicetime}
+\end{equation}
+This includes both the time spent waiting for assignment and the time spent
+being handled by the assigned agent. Therefore, delaying assignment does not
+reduce service time. For $\tau_1$, the service time is $\zeta_1=9$.

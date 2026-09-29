@@ -21,7 +21,7 @@ def instance_simple():
                label=r"endpoint $\mathcal{V}_{\mathrm{ep}}$"),
         Line2D([], [], marker="o", ls="", mfc="white", mec=C["node"], ms=12,
                label="transit vertex"),
-        Line2D([], [], color=C["accent"], lw=2.4, marker=">", markersize=9,
+        Line2D([], [], color=C["accent"], lw=0, marker=">", markersize=9,
                label=r"one-way segment: $(v,w)\in E$, $(w,v)\notin E$"),
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.02),

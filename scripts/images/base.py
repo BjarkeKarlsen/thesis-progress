@@ -86,6 +86,28 @@ def draw_base(ax, dim=False):
         nx.draw_networkx_nodes(G, POS, nodelist=nl, node_color=fc, edgecolors=ec,
                                node_shape=shape, node_size=size, ax=ax, alpha=a)
 
+def draw_base_mini(ax, dim=False):
+    """Draw the warehouse graph; dim=True greys it out as a background."""
+    a = 0.35 if dim else 1.0
+    two_way = [(u, v) for u, v in G.edges() if (v, u) in G.edges()]
+    one_way = [(u, v) for u, v in G.edges() if (v, u) not in G.edges()]
+    nx.draw_networkx_edges(G, POS, edgelist=two_way, ax=ax, edge_color=C["edge"],
+                           width=1.6, alpha=a, arrows=False)
+    nx.draw_networkx_edges(G, POS, edgelist=one_way, ax=ax, edge_color=C["accent"],
+                           width=2.0, alpha=a, arrows=True, arrowsize=18,
+                           node_size=460, connectionstyle="arc3,rad=0.0")
+    other = [n for n in G if n not in STORAGE + DELIVERY + ENDPOINTS]
+    for nl, fc, ec, shape, size in (
+        (other, "white", C["node"], "o", 460),
+        (STORAGE, C["store_f"], C["store_e"], "o", 460),
+        (DELIVERY, C["del_f"], C["del_e"], "s", 560),
+        (ENDPOINTS, C["ep_f"], C["ep_e"], "D", 470),
+    ):
+        nx.draw_networkx_nodes(G, POS, nodelist=nl, node_color=fc, edgecolors=ec,
+                               node_shape=shape, node_size=size, ax=ax, alpha=a)
+
+
+
 
 def put_agent(ax, node, label, dx=0, dy=16):
     ax.scatter(*POS[node], s=260, c=C["agent"], zorder=5,
