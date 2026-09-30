@@ -37,6 +37,11 @@ def observation(ego="4_1", depth=2, target="0_0"):
     # Solid white fill so the edges through them do not cross the letters.
     nx.draw_networkx_nodes(G, POS, nodelist=["4_0", "4_2"], node_size=470, node_color="white",
                            edgecolors=C["accent"], linewidths=3.0, ax=ax)
+    # a_2 stands on storage vertex A, the pickup of tau_1 in fig:taskroute:
+    # this is the same warehouse at t=11, when a_2 picks up the tea.
+    ax.annotate("A", POS["3_0"], textcoords="offset points", xytext=(15, -17),
+                ha="center", va="center", fontsize=12, fontweight="bold",
+                color=C["store_e"], zorder=6)
     for n, lab in (("4_0", "B"), ("4_2", "C")):
         ax.annotate(lab, POS[n], ha="center", va="center", fontsize=12,
                     fontweight="bold", color=C["text"], zorder=6)
