@@ -309,11 +309,22 @@ regenerates `loop.png`.
 - [ ] Decide the TBD rows added in [A8] and [A9]. The credit signal is
       now cited from `sec:pf:game` ([A12]), so deciding it also fixes what
       that sentence commits to.
-- [ ] **Tie-break in `eq:assignmentrule`** ([A12] follow-up). "The free
-      agent minimising `d_G`" has no tie-break, and ties are common with
-      uniform edge costs. Now that assignment is stated to be part of `P`,
-      `P` needs it to be a function. Needs a decision (e.g. lowest agent
-      index, or the resolution priority order), not a silent default.
+- [x] **Tie-break in `eq:assignmentrule`** ([A12] follow-up, done
+      2026-09-30). Two ties were unbroken: tasks released in the same
+      timestep, and free agents at equal `d_G` to `s_j`. Now tasks go in
+      task index order, and equal agents are ranked by the conflict-resolution
+      priority order of `sec:method:resolution`. Chosen because that order
+      is already in the state ([A12]), adds no parameter, and is redrawn
+      each episode, so no agent is systematically favoured (lowest agent
+      index would be). Rejected: settling ties by communication within
+      range. Assignment must be identical across controllers and is part of
+      `P`, while communication exists only for the decentralised arm and
+      only if RQ5 is reached. PICO (`2202.03634`) was checked as a model
+      and does not fit. Its learned priorities decide who yields on
+      conflicting paths, with fixed goals, not who gets a task. A learned,
+      PICO-style priority would belong to the conflict-resolution
+      operator, and would put a learned component inside `P`, so it is a
+      separate question.
 - [ ] **Which critic each arm uses** ([A12] follow-up). `sec:pf:controllers`
       defines CTDE conditionally ("where global information is used during
       training only"), and `sec:method:model` gives the decentralised arm a
