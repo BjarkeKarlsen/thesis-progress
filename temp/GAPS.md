@@ -271,6 +271,33 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Not yet done.** `slap-mapd-coupling`: the policy head, and placing
   messages on the sender's vertex.
 
+### [A19] The reference planner leaves the formulation, stays as a baseline (Design change)
+
+- **Where.** `2.Introduction.tex`: the opening paragraph, Aim and scope
+  item 2, the [A2] paragraph in `sec:pf:controllers`, `tab:information`,
+  the objective paragraph of `sec:pf:game`, the paragraph after
+  `eq:rqformal`. `4.Implementation.tex`: the section intro,
+  `sec:method:overview`, `sec:method:controllers`. Also
+  `learning_problem_guide.tex`.
+- **Change.** The prioritised planner is no longer part of the problem
+  formulation. It is removed from `tab:information` (row and the
+  now-redundant "Routing rule" column), from `Pi`, from the factor list
+  and from `eq:rqformal`. It stays in the Method chapter as a "Reference
+  baseline", reported next to the learned routers under a few main
+  conditions (fixed storage, main loads), not across the full factorial
+  design. The Introduction's opening paragraph says it is reported as a
+  classical reference point outside the main comparison.
+- **Why.** Decided by the author. No research question is about the
+  planner, and as a fourth member of `Pi` it broke the "three
+  architectures that differ only in their window" story and added a fourth
+  arm to every factorial condition. It is kept, not removed, because it is
+  the only check that the learned controllers are competitive with a
+  classical method, and its code already exists.
+- **Partly reverses.** [A2] (reference row, routing-rule column, planner in
+  `Pi`) and the planner part of [A4].
+- **Still to decide.** Exactly which conditions the baseline is reported
+  under, once the experiment chapter is written.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
