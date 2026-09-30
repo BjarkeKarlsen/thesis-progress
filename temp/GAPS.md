@@ -442,20 +442,24 @@ regenerates `loop.png`.
       decentralised policy. Options, reasons, costs and the list of edits
       are in `message_design.md` at the workspace root. Only needed if
       RQ5 is reached.
-- [ ] **Per-edge policy head** (surfaced by [A15], open Method decision).
-      The policy head reads `d_max + 1` logits from `z_i`, which starts
-      from the embedding of the agent's own vertex. `eq:msgpass` combines
-      neighbours as an unordered set, so `z_i` does not say which
-      neighbour is move 1 and which is move 2. The network is asked to
-      pick "edge k" without being able to tell which edge that is, and the
-      vertex numbering then leaks into what the policy learns. The usual
-      fix is a per-edge head: score each possible move from the embedding
-      of the vertex it leads to together with `z_i`, plus one score for
-      wait. The numbering then no longer matters to the policy, only to
-      the bookkeeping. Affects all three learned controllers. Check
-      against the action head of van Knippenberg et al. (2021) before
-      deciding, then update `sec:method:rl` (`eq:mask`), `sec:method:model`
-      and the model figure.
+- [x] **Per-edge policy head** (decided 2026-09-30, [A16]). Not adopted.
+      Checked against van Knippenberg et al. (2021), sec. 4.1: their
+      action space is "local movement options", one move per adjacent
+      outgoing edge plus wait, shared by all agents and instances, and
+      their head is GCN embedding, then fully connected ReLU layers, then a
+      softmax over that fixed vector. That is the thesis's slot head, so
+      the author chose to keep it. `sec:method:rl` now cites them for the
+      action space and states the one difference, masking instead of
+      their penalised wait (the [K8] deviation, now also in the text).
+      **Remaining caveat.** They give every node a node ID as an
+      attribute, which is the only thing in their input that can tell two
+      outgoing edges apart, and they never say how move k is matched to an
+      edge. The thesis fixes the order (increasing vertex number, [A15])
+      but `f(v,t)` carries no vertex number, so the network still cannot
+      see which neighbour is which slot. Adding the vertex number as a
+      feature would copy them more closely but would not carry over to a
+      different warehouse. Worth a sentence in the limitations, or a
+      decision, once results show whether it matters.
 - [ ] **Code for [A15].** Sort each vertex's outgoing neighbours by vertex
       number in `slap-mapd-coupling` (`graph.py` `legal_actions`), so
       `move_k` means the same as in the thesis.
