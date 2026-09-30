@@ -293,6 +293,15 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Rejected alternatives.** Zones exchanging embeddings (that is
   communication and would blur into RQ5). Overlapping zones with both
   proposing actions (needs an arbiter and duplicate heads).
+- **Noted variant, not adopted (2026-09-30).** Halo plus learned messages
+  from the agents standing in the halo, the [A14] message head applied
+  across the zone edge. It would keep the halo, so the boundary protocol
+  and the meaning of `delta_i(t)` at the boundary are unchanged, and add a
+  learned channel on top. Not adopted because it makes the section-based
+  window depend on `theta`, moves it toward the centralised one, and mixes
+  a communication effect into the section-based results that RQ5 is meant
+  to isolate. Replacing the halo by messages alone was ruled out, since
+  boundary crowding counts need the halo's occupancy.
 
 ### [A8] Model: two open points for full-graph and zone passes (Gap)
 
