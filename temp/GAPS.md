@@ -233,6 +233,14 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Why.** Easier to read, and it is what `eq:mask` in the Method chapter
   already implements (`d_max + 1` logits), so the two chapters now agree.
   The union form did not match the slot-based mask.
+- **Order of the moves.** `move_k` needs each vertex's outgoing edges in
+  a fixed order, which neither chapter stated. `sec:pf:env` now numbers
+  the vertices once, `V = {v_1, ..., v_|V|}`, and the action-space
+  paragraph lists each vertex's outgoing neighbours in increasing vertex
+  number. The code currently uses the order in which edges were added
+  when the graph was built (`graph.py` `legal_actions`, and the
+  `spaces.py` docstring says the thesis gave no rule), so it should sort
+  by vertex number to match.
 
 ### [A7] Section-based assignment in `tab:information` (Error)
 
@@ -434,6 +442,23 @@ regenerates `loop.png`.
       decentralised policy. Options, reasons, costs and the list of edits
       are in `message_design.md` at the workspace root. Only needed if
       RQ5 is reached.
+- [ ] **Per-edge policy head** (surfaced by [A15], open Method decision).
+      The policy head reads `d_max + 1` logits from `z_i`, which starts
+      from the embedding of the agent's own vertex. `eq:msgpass` combines
+      neighbours as an unordered set, so `z_i` does not say which
+      neighbour is move 1 and which is move 2. The network is asked to
+      pick "edge k" without being able to tell which edge that is, and the
+      vertex numbering then leaks into what the policy learns. The usual
+      fix is a per-edge head: score each possible move from the embedding
+      of the vertex it leads to together with `z_i`, plus one score for
+      wait. The numbering then no longer matters to the policy, only to
+      the bookkeeping. Affects all three learned controllers. Check
+      against the action head of van Knippenberg et al. (2021) before
+      deciding, then update `sec:method:rl` (`eq:mask`), `sec:method:model`
+      and the model figure.
+- [ ] **Code for [A15].** Sort each vertex's outgoing neighbours by vertex
+      number in `slap-mapd-coupling` (`graph.py` `legal_actions`), so
+      `move_k` means the same as in the thesis.
 - [ ] **Code for [A14].** `slap-mapd-coupling` message builder and the
       decentralised forward pass (all agents of a timestep together) must
       follow `eq:message`.
