@@ -102,6 +102,50 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Why.** The old text allowed any one regime to be learned. Now all
   three are.
 
+### [A12] The learning problem still described one learned arm (Error + Gap)
+
+- **Where.** `sec:pf:game` throughout, one sentence in
+  `sec:method:resolution`. New label `eq:obsfunction`.
+- **Change.**
+  - **Observation function per architecture.** New `eq:obsfunction`:
+    `O_i(s_t) = (s_t, i)` centralised, `(s_t^(q), i)` with `ℓ_i(t) ∈ Y_q`
+    section-based, `o_i(t)` decentralised. Every other element of `M` is
+    shared, so the three learned arms play three versions of one game that
+    differ only in `O_i`, which is RQ2. The centralised version is fully
+    observed. Apart from messages, each narrower observation can be
+    computed from the next wider one. `tab:posg`'s `𝒪_i` and `O_i` rows
+    point to `eq:obsfunction` instead of `o_i(t)`.
+  - **Opening paragraph.** No longer says every agent acts "without seeing
+    the whole warehouse" or "from `o_i(t)`".
+  - **`P` contains the shared, non-learned rules.** `tab:posg`'s `P` row
+    now lists conflict resolution and the assignment rule next to
+    `eq:transition` and `eq:storageupdate`, with one sentence saying why
+    (neither is any agent's action, both are the same for every
+    controller). This is what [A6] relies on when it calls conflict
+    resolution part of the environment.
+  - **Priority order is part of the state.** `sec:method:resolution` draws
+    the resolution priority once per episode from the seed, and called the
+    operator a function of "the state and the episode seed", while
+    `sec:pf:scope` said "deterministic given the state". Now the order is
+    in `tab:posg`'s `𝒮` row, and the Method sentence says the state
+    includes it. Both chapters agree and `P` stays stochastic only through
+    order arrivals.
+  - **Objective vs. credit signal.** New sentence after the [A4]
+    paragraph. `eq:objective` is the shared target, and how an update
+    credits reward (team mean over controlled agents, or own `R_i`) is the
+    [A9] training choice. Removes the apparent contradiction between one
+    shared objective and the predicted commons ordering.
+  - **Smaller fixes in the same section.** Masked actions get zero
+    probability under the policy, not under `P`. `R_i(t)` is stated as
+    shorthand for `R_i(s_t, u_t, s_{t+1})`. `O_i` is stated as deterministic
+    including messages, since the message payload of `sec:method:rl` reads
+    positions and targets from `s_t`. `δ_i(t)` is readable from every
+    window, not only part of `o_i(t)`.
+- **Why.** [A4] patched only the paragraph after `eq:objective`. The rest
+  of the section still assumed only the decentralised arm was learned.
+  These were also points 1 to 3 of `learning_problem_guide.tex`, which is
+  updated to match.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
@@ -262,6 +306,23 @@ regenerates `loop.png`.
       commons for the system as a whole. It could now state the predicted
       order (centralised least exposed, then section-based, then
       decentralised) as a hypothesis.
-- [ ] Decide the TBD rows added in [A8] and [A9].
+- [ ] Decide the TBD rows added in [A8] and [A9]. The credit signal is
+      now cited from `sec:pf:game` ([A12]), so deciding it also fixes what
+      that sentence commits to.
+- [ ] **Tie-break in `eq:assignmentrule`** ([A12] follow-up). "The free
+      agent minimising `d_G`" has no tie-break, and ties are common with
+      uniform edge costs. Now that assignment is stated to be part of `P`,
+      `P` needs it to be a function. Needs a decision (e.g. lowest agent
+      index, or the resolution priority order), not a silent default.
+- [ ] **Which critic each arm uses** ([A12] follow-up). `sec:pf:controllers`
+      defines CTDE conditionally ("where global information is used during
+      training only"), and `sec:method:model` gives the decentralised arm a
+      local value head `V_θ(o_i(t))`. Not a contradiction, but neither
+      chapter says whether this thesis uses CTDE, and neither says what the
+      value head conditions on for the centralised and section-based arms.
+      Decide local or global critic per arm, then state it in both
+      chapters.
+- [ ] **Guide item 4** in `learning_problem_guide.tex`: the task example
+      uses `a_2` and the observation figure uses `a_1`. Cosmetic.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
       arms match the thesis contract wording.
