@@ -242,6 +242,35 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   `spaces.py` docstring says the thesis gave no rule), so it should sort
   by vertex number to match.
 
+### [A17] Per-edge policy head (Design change)
+
+- **Where.** `sec:method:rl` ("Action space and masking"),
+  `sec:method:model` (new "Per-edge policy head" paragraph, `eq:edgescore`,
+  `fig:edgescore`), `tab:modelparams`, `2.Notation.tex`, `references.bib`.
+  New figure source `thesis-progress/scripts/images/edgescore.tex`.
+- **Change.** Each move's logit is now computed from the vertex it leads
+  to, `logit(move to w) = SCORE_theta(z_i || h_w^(L) || xibar_w(t))`, with
+  one small network shared by every edge, and `logit(wait) =
+  SCORE^wait_theta(z_i)`. `xibar_w(t)` is the message of the agent
+  standing on `w`, zero if `w` is free, and is dropped with communication
+  off. The scores go into the move slots by vertex number and are masked
+  by `eq:mask`, so the action space `U_i` is unchanged.
+- **Why.** On a graph a move has no name of its own. A head reading all
+  move logits from `z_i` cannot tell which neighbour is which slot,
+  because `eq:msgpass` combines neighbours as an unordered set. Checked:
+  van Knippenberg et al. (2021) use a fixed output vector and have the same
+  gap, and CRAMP avoids it only because its grid gives fixed directions
+  (N, E, S, W). Scoring each candidate and taking a softmax over the
+  candidates is the pointer mechanism of Vinyals, Fortunato and Jaitly
+  (2015), cited for that idea only. Kool et al. (2019) was considered and
+  not cited, since it would suggest a Transformer encoder, which the
+  thesis does not use. Placing messages on the sender's vertex ties a
+  message to a direction, which the averaged messages in `z_i` could not.
+- **Supersedes.** The [A16] decision to keep the fixed-vector head, and
+  its caveat about node IDs.
+- **Not yet done.** `slap-mapd-coupling`: the policy head, and placing
+  messages on the sender's vertex.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
@@ -442,7 +471,7 @@ regenerates `loop.png`.
       decentralised policy. Options, reasons, costs and the list of edits
       are in `message_design.md` at the workspace root. Only needed if
       RQ5 is reached.
-- [x] **Per-edge policy head** (decided 2026-09-30, [A16]). Not adopted.
+- [x] **Per-edge policy head** (first decided 2026-09-30 as [A16], not adopted, then adopted as [A17], see there). History of the [A16] decision:
       Checked against van Knippenberg et al. (2021), sec. 4.1: their
       action space is "local movement options", one move per adjacent
       outgoing edge plus wait, shared by all agents and instances, and
@@ -460,6 +489,8 @@ regenerates `loop.png`.
       feature would copy them more closely but would not carry over to a
       different warehouse. Worth a sentence in the limitations, or a
       decision, once results show whether it matters.
+- [ ] **Code for [A17].** Per-edge policy head in `slap-mapd-coupling`,
+      with the message of the agent on each neighbour vertex as an input.
 - [ ] **Code for [A15].** Sort each vertex's outgoing neighbours by vertex
       number in `slap-mapd-coupling` (`graph.py` `legal_actions`), so
       `move_k` means the same as in the thesis.
