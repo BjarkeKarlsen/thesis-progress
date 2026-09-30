@@ -146,6 +146,34 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   These were also points 1 to 3 of `learning_problem_guide.tex`, which is
   updated to match.
 
+### [A13] The critic sees the same window as the policy (Design change)
+
+- **Where.** `sec:pf:controllers`, the sentence after "Parameter sharing
+  is appropriate". `sec:method:model`, new paragraph after [A8], and a new
+  "critic input" row in `tab:modelparams`.
+- **Change.** The conditional definition of centralised training with
+  decentralised execution is replaced by a commitment. This thesis does
+  not use it. Every router's value head reads the same embedding `z_i` as
+  its policy head, so the critic conditions on `(s_t, i)`, `(s_t^(q), i)`
+  or `o_i(t)`, the same window as that router's policy (`eq:obsfunction`).
+  The critic's target is the return under the router's credit signal
+  (`tab:trainparams`), which for the decentralised router is its own
+  `R_i`.
+- **Why.** Chosen by the author over a global critic for every router
+  (MAPPO style). Two reasons. It is better for the commons contrast. A
+  decentralised learner with a local critic and its own `R_i` gets no
+  training signal that prices the congestion it causes outside its
+  window, which is the effect the contrast is meant to measure. A global
+  critic would partly teach it that cost and blur the contrast. It is
+  also the cleaner concept. The architectures then differ in how they
+  train as well as in how they act, so "the architecture is its window"
+  holds end to end, not only at execution. The accepted cost is that a
+  weaker decentralised result combines seeing less when acting with
+  learning from a noisier critic. The text states the global critic as
+  the standard alternative that is not used.
+- **Code.** No change needed. `slap-mapd-coupling`'s `rl_module.py`
+  already feeds one `z_i` to both actor and critic.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
@@ -325,14 +353,11 @@ regenerates `loop.png`.
       PICO-style priority would belong to the conflict-resolution
       operator, and would put a learned component inside `P`, so it is a
       separate question.
-- [ ] **Which critic each arm uses** ([A12] follow-up). `sec:pf:controllers`
-      defines CTDE conditionally ("where global information is used during
-      training only"), and `sec:method:model` gives the decentralised arm a
-      local value head `V_θ(o_i(t))`. Not a contradiction, but neither
-      chapter says whether this thesis uses CTDE, and neither says what the
-      value head conditions on for the centralised and section-based arms.
-      Decide local or global critic per arm, then state it in both
-      chapters.
+- [x] **Which critic each arm uses** ([A12] follow-up, done 2026-09-30,
+      see [A13]). Critic sees the same window as the policy in every arm,
+      no centralised training with decentralised execution. The credit
+      signal for the centralised and section-based arms is still open
+      ([A9]), and the critic's target follows it.
 - [ ] **Guide item 4** in `learning_problem_guide.tex`: the task example
       uses `a_2` and the observation figure uses `a_1`. Cosmetic.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
