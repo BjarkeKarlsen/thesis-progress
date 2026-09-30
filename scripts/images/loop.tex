@@ -42,12 +42,12 @@
       ignores the estimates};
   \fi
   \node[box, fill=taskF, below=0.9cm of S] (T) {\textbf{Task generation}\\
-    $\tau_j = (r_j, s_j, g_j)$\\ pickup $s_j$ drawn from $x_t$};
+    $\tau_j = (t_j^{\mathrm{released}}, s_j, g_j, k_j)$\\ pickup $s_j$ holds $k_j$ under $x_t$};
   \node[box, fill=ctrlF, below=0.9cm of T] (P) {\textbf{MAPD controller} $\pi$\\
     fast, every timestep\\ assignment and routing};
   \node[box, fill=estF, minimum width=3.3cm, right=1.9cm of P] (E)
-    {\textbf{Causal traffic}\\ \textbf{estimate}\\
-     $\hat\mu_t(e),\ \hat w_t(e),\ \hat\rho_t$};
+    {\textbf{Causal estimates}\\ demand $\hat\rho_t(k)$\\
+     traffic $\hat\mu_t(e),\ \hat w_t(e)$};
 
   \begin{scope}[on background layer]
     \node[fastzone, fit=(T)(P)] (Z) {};
