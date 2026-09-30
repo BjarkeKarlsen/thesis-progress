@@ -174,6 +174,51 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Code.** No change needed. `slap-mapd-coupling`'s `rl_module.py`
   already feeds one `z_i` to both actor and critic.
 
+### [A14] Messages are learned embeddings, part of the policy (Design change)
+
+- **Where.** `sec:pf:controllers` (decentralised policy and
+  `tab:information`), `sec:pf:observations` (intro, "Messages from nearby
+  agents", `eq:observation`, `tab:observationexample`), `sec:pf:game` (the
+  nesting paragraph), `3.Background.tex` ("Precedents for local
+  communication"), `sec:method:controllers`, `sec:method:rl`,
+  `sec:method:model` (new `eq:message`), `tab:modelparams`,
+  `2.Notation.tex`, `references.bib`, and the architecture figure.
+- **Change.**
+  - The hand-picked message `(d_G(l_i, l_j), eta_j)` is replaced by a
+    learned message `xi_j(t) = MSG_theta(h^(L)_{l_j(t)})`, a fully
+    connected head over the sender's own final embedding, trained end to
+    end through the policy loss, as in CRAMP and PICO. The receiver
+    aggregates the messages from its neighbours in `G^A_t` in
+    `eq:readout`.
+  - Because a learned message depends on `theta`, not only on the state,
+    messages move out of the observation. `o_i(t)` now has three pieces
+    (field of view, direction, crowding), and messages are a communication
+    step inside the decentralised policy. The nesting of the observation
+    functions in `sec:pf:game` now holds with no exception.
+  - Messages travel one hop of `G^A_t` per timestep. More rounds would
+    relay what agents beyond the field of view send and widen the
+    decentralised window past `d_obs`.
+  - Communication has its own switch (drop the message term), so `L = 0`
+    now only removes structural aggregation. This settles the old open
+    refinement that one `L = 0` removed both.
+  - The forward pass takes all agents of a timestep together. Execution
+    stays decentralised.
+  - PICO (`li2022pico`) is added to the bibliography and to
+    `3.Background.tex`, next to CRAMP. The thesis takes from both the
+    learned message content, and keeps who may talk to whom and conflict
+    priority fixed, so the only learned element of communication is what
+    is sent.
+- **Why.** Decided by the author, reasoning in `message_design.md`. The
+  network rather than the designer decides what is worth sending, it
+  matches CRAMP and PICO, and a failure of communication to help cannot be
+  put down to a poorly chosen message. The hand-picked payload also could
+  not say which way the sender is heading, which is what RQ5 is about.
+- **Reverses.** The [A12] sentence that messages keep `O_i` deterministic
+  because they are read from the state.
+- **Not yet done.** `slap-mapd-coupling` still builds the hand-picked
+  two-number message and batches agents separately. Its message builder
+  and the decentralised forward pass need to follow `eq:message`.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
@@ -358,7 +403,17 @@ regenerates `loop.png`.
       no centralised training with decentralised execution. The credit
       signal for the centralised and section-based arms is still open
       ([A9]), and the critic's target follows it.
-- [ ] **Guide item 4** in `learning_problem_guide.tex`: the task example
+- [x] **Message content for RQ5** (done 2026-09-30, see [A14]). The hand-picked payload
+      `(d_G, eta_j)` cannot tell the receiver which way the sender is
+      heading. Leaning towards learned message embeddings as in CRAMP and
+      PICO, which would move messages from the observation into the
+      decentralised policy. Options, reasons, costs and the list of edits
+      are in `message_design.md` at the workspace root. Only needed if
+      RQ5 is reached.
+- [ ] **Code for [A14].** `slap-mapd-coupling` message builder and the
+      decentralised forward pass (all agents of a timestep together) must
+      follow `eq:message`.
+- [x] **Guide item 4** in `learning_problem_guide.tex`: the task example
       uses `a_2` and the observation figure uses `a_1`. Cosmetic.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
       arms match the thesis contract wording.

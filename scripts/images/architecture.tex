@@ -38,12 +38,12 @@
 \begin{tikzpicture}
   % ---------------------------------------------------------- the network
   \node[layer, fill=storeF] (in) {local subgraph
-    $\mathcal{G}_i^{(d_{\mathrm{obs}})}(t)$, features $f(v,t)$\\
-    messages from $a_j$ with $(a_i,a_j)\in E^{\mathcal{A}}_t$};
+    $\mathcal{G}_i^{(d_{\mathrm{obs}})}(t)$, features $f(v,t)$};
   \node[layer, above=0.45cm of in] (mp) {message passing, $L$ rounds\\
     $m_v^{(r)} = \phi_r(\cdot)$, \ $h_v^{(r)} = \psi_r(\cdot)$};
   \node[layer, above=0.45cm of mp] (ro) {readout\\
-    $z_i = h^{(L)}_{\ell_i(t)} \,\Vert\, \mathrm{AGG} \,\Vert\, \delta_i(t)$};
+    $z_i = h^{(L)}_{\ell_i(t)} \,\Vert\, \mathrm{AGG}(\xi_j) \,\Vert\, \delta_i(t)$\\
+    learned messages $\xi_j$ from $a_j$ with $(a_i,a_j)\in E^{\mathcal{A}}_t$};
   \node[layer, above=0.45cm of ro] (fc) {fully connected + ReLU};
   \node[head, above=0.55cm of fc.north west, anchor=south west] (pi)
     {masked softmax\\ $\pi_\theta(\cdot \mid o_i(t))$};
