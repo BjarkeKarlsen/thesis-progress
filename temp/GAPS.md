@@ -271,6 +271,16 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Not yet done.** `slap-mapd-coupling`: the policy head, and placing
   messages on the sender's vertex.
 
+### [A18] Future work: attention-based controller parts (Design note)
+
+- **Where.** `6.Conclusion.tex`, new subsection `sec:future`.
+- **Change.** One paragraph noting that the encoder, the communication
+  step and the per-edge head could each become an attention version
+  without changing the formulation, cheapest first (head, then
+  communication, then encoder), and that any such change must be made for
+  all three learned controllers at once. Cites SePar only. The full plan
+  is in `transformer_extension_guide.tex` at the workspace root.
+
 ### [A19] The reference planner leaves the formulation, stays as a baseline (Design change)
 
 - **Where.** `2.Introduction.tex`: the opening paragraph, Aim and scope
