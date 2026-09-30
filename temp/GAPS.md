@@ -219,6 +219,21 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   two-number message and batches agents separately. Its message builder
   and the decentralised forward pass need to follow `eq:message`.
 
+### [A15] Per-agent action space as numbered moves (Gap)
+
+- **Where.** `sec:pf:game`, the action-space paragraph, and `tab:posg`'s
+  `U_i` row. `2.Notation.tex` gains `d_max`.
+- **Change.** `U_i` was the union of every vertex's action set, so it held
+  a move toward every vertex in the graph. It is now
+  `{wait, move_1, ..., move_{d_max}}`, where `move_k` is the k-th outgoing
+  edge of the current vertex in a fixed order and `d_max` is the largest
+  out-degree. Moves beyond the current vertex's out-degree are masked,
+  leaving exactly `U(v)`. The paragraph explains this in words with an
+  example before the equation.
+- **Why.** Easier to read, and it is what `eq:mask` in the Method chapter
+  already implements (`d_max + 1` logits), so the two chapters now agree.
+  The union form did not match the slot-based mask.
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
