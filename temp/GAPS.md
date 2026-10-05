@@ -308,6 +308,59 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Still to decide.** Exactly which conditions the baseline is reported
   under, once the experiment chapter is written.
 
+### [A20] A simple score for a run, following lifelong MAPD (Design change)
+
+- **Where.** `2.Introduction.tex`: `sec:pf:measures` rewritten, the
+  opening paragraph, contribution (iii), the dependent variables, the main
+  RQ, RQ1, RQ3 and RQ4, and the [K2] deadline paragraph of `sec:pf:scope`.
+  `4.Implementation.tex`: the section intro, `sec:impl:logging` and the new
+  `tab:evalparams`. `2.Notation.tex`: the cost group and the scoring group.
+  New figure `fig:timeline` (`thesis-progress/scripts/images/timeline.py`).
+- **Change.** The weighted criterion `J(F,pi)` (`eq:functional`) and its
+  five weights `q` are removed, and so are traffic concentration (`H_T`,
+  `C_T`, `E^+_T`, `p_T`, `mu_T`, `eq:entropy`, `eq:concentration`, the [G8]
+  convention, `fig:concentration`), movement cost `c_T` (`eq:movementcost`)
+  and robustness as a term of the main RQ. The score now has six parts.
+  1. Keeping up, `Lambda_T >= f_up * lambda_task` (`eq:throughput`), with
+     the backlog `B_t` logged every timestep. A check, applied first.
+  2. Mean service time (`eq:meanservice`), the result.
+  3. Its split into waiting for an agent, travel and blocked time
+     (`eq:split`), which add up to it. `W_T` (`eq:waiting`) is the blocked
+     part.
+  4. Crowding, the mean of `delta_i(t)` (`eq:crowding`), the congestion
+     measure.
+  5. Units relocated per storage update (`eq:relocation`), the slow-loop
+     cost.
+  6. Runtime per timestep (`eq:runtime`).
+  The decision problem minimises expected service time subject to keeping
+  up. `eq:rqformal` is a paired t-test over seeds, the 95% confidence
+  interval of the mean per-seed gain lying above zero.
+- **Why.** Decided by the author after the proposals in
+  `scoring_proposal/` at the workspace root (versions 2 to 4). The weights
+  `q` were never set anywhere, so `eq:rqformal` could not be computed, and
+  any choice of weights would have set exchange rates between timesteps,
+  cost units, task counts and a fraction. Ma et al. (2017), who define
+  lifelong MAPD, judge an algorithm by service time and accept a run only
+  if service time stays bounded, which the keep-up check states. Each
+  measure is a count or an average, and each source is named. Service
+  time, the keep-up condition and runtime come from Ma et al., throughput
+  from the pick rate of Krnjaic et al. (2022), and the crowding density
+  follows CRAMP, which uses it only in its reward. The split of service
+  time, the averaging of crowding and the relocation count are the
+  thesis's own. Concentration was dropped because it costs nothing unless
+  it causes crowding and blocking, which are measured, and the storage
+  rule already guards against it through `K`. Movement cost was dropped
+  because the travel part shows the storage effect in the unit of the
+  result. Robustness was dropped as a term because none of the papers in
+  `thesis-progress/papers/` measures it as a quantity. They report means
+  over many runs and vary the load, which `eq:rqformal` and RQ4 do. The
+  paired test is possible because the order stream is seeded apart from
+  the policy and the environment (`sec:impl:instances`).
+- **Supersedes.** [G7] in part (`W_T` stays, as the blocked part of
+  service time), [G8], and the objective part of [A4].
+- **Still to decide.** `f_up`, the evaluation horizon `T` and the number
+  of evaluation seeds (`tab:evalparams`).
+
 ### [A7] Section-based assignment in `tab:information` (Error)
 
 - **Where.** `tab:information`, Section-based row, and the zone sentence
@@ -536,5 +589,12 @@ regenerates `loop.png`.
       follow `eq:message`.
 - [x] **Guide item 4** in `learning_problem_guide.tex`: the task example
       uses `a_2` and the observation figure uses `a_1`. Cosmetic.
+- [ ] **Code for [A20].** `slap-mapd-coupling` `evaluation/metrics.py` and
+      `evaluator.py` still compute entropy, concentration and movement
+      cost. They should compute the keep-up check, the three parts of
+      service time, crowding and relocations per update, and the paired
+      per-seed gain of `eq:rqformal`.
+- [ ] **Values for [A20].** `f_up`, the evaluation horizon and the number
+      of evaluation seeds in `tab:evalparams`.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
       arms match the thesis contract wording.
