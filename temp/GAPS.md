@@ -374,6 +374,56 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   routing differs. The table was the inconsistent side. This error
   existed before the GCN change.
 
+### [A21] Field of view counts hops (Design change)
+
+- **Where.** `sec:pf:env` (the field-of-view sentence and
+  `eq:localsubgraph`, the paragraph after it), `sec:pf:observations` (the
+  "anything past" sentence, `eq:commgraph`, `tab:observationexample`),
+  `eq:halo` in the Method, and `tab:notation` (new row for
+  `d^hop_G`, rows for `H_q`, `d_obs`, `V_i^(d_obs)`).
+- **Change.** The field of view, the halo and the communication graph are
+  bounded by a new hop distance `d^hop_G(v,w)`, the fewest edges on a
+  directed path, instead of the travel cost `d_G`. `d_G` keeps every other
+  use (the direction label `eta`, storage distances, assignment). The
+  sentence about "earlier drafts" of the model is replaced by the reason
+  one depth suffices.
+- **Why.** The prose said "hops" while the formulas bounded the cost
+  `d_G`, and edge costs are general (the `eta` example uses `c=2`). The
+  author chose hops. The field of view describes what an agent can see,
+  not what a trip costs, it is read by a GCN whose layers each reach one
+  hop further, and the observation figure (`observation.py`) already draws
+  it with unweighted hop counts. Under the unit edge costs of the
+  generated instances the two give the same sets.
+
+### [A22] Hearing is one way in the communication graph (Error)
+
+- **Where.** `sec:pf:observations`, the paragraph before `eq:commgraph`
+  and the sentence after it. `tab:notation`, the `G^A_t` row.
+- **Change.** The text now says an agent hears every agent inside its own
+  field of view, and that on the directed graph hearing is one way. An
+  edge `(a_i,a_j)` means `a_i` hears `a_j`.
+- **Why.** The text said "each lies inside the other's field of view",
+  but `eq:commgraph` tests one direction only, `eq:readout` aggregates over
+  exactly those edges, and `communication_neighbours` in
+  `slap-mapd-coupling` does the same. Three places agreed, so the
+  sentence changed. (The code still takes a separate `communication_radius`
+  instead of `d_obs`. Open item below.)
+
+### [A23] The learning problem explained in words first (Clarity)
+
+- **Where.** `sec:pf:game`, the opening up to `tab:posg`, the caption of
+  `tab:posg`, and the paragraph on the assignment rule and conflict
+  resolution.
+- **Change.** The eight elements of the game are named in words before
+  `eq:posg`. Two new paragraphs separate the policy (what each agent
+  tries to do, a probability over its legal actions) from the transition
+  kernel (the rule that turns state and joint action into the next state).
+  The reward's domain now reads `U_1 x ... x U_m` instead of the undefined
+  `U^m`.
+- **Why.** The validation report flagged `U^m` as undefined and the
+  section as equation-led. A citation for the POSG definition is still
+  missing (`% TODO` in the text).
+
 ---
 
 ## Method (`4.Implementation.tex`)
@@ -499,6 +549,20 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   conflict resolution before the environment.
 - **Source.** `thesis-progress/scripts/images/architecture.tex`.
 
+### [A24] One definition of the blocked indicator (Error)
+
+- **Where.** `sec:method:rl` (the override-flag sentences after
+  `eq:reward`), `sec:method:resolution` (the paragraph on the override
+  flag), `sec:impl:logging`.
+- **Change.** The Method now follows `eq:split` in the Introduction.
+  `omega_j(t)` is 1 when the serving agent stands still, either by a chosen
+  wait or by an override. The override flag is one of the two inputs to
+  it, and alone it is the reward's override indicator.
+- **Why.** The Method said the override flag "defines" `omega_j(t)`,
+  which would leave chosen waits out of blocked time and break the
+  three-part split of service time. The author confirmed the Introduction
+  is the intended definition.
+
 ---
 
 ## Figures redrawn in TikZ (same session, not tagged)
@@ -598,3 +662,10 @@ regenerates `loop.png`.
       of evaluation seeds in `tab:evalparams`.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
       arms match the thesis contract wording.
+- [ ] **Code for [A22].** `slap-mapd-coupling` `communication_neighbours`
+      takes `communication_radius`; the thesis uses `d_obs` for it.
+- [ ] **Citation for [A23].** A source for the POSG definition.
+- [ ] **Code for [A21].** `slap-mapd-coupling` bounds the field of view and
+      communication with the cost distance `graph.distance`. It should use
+      a hop distance (breadth-first search) for those, as `eq:localsubgraph`,
+      `eq:commgraph` and `eq:halo` now say.
