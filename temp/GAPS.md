@@ -1208,8 +1208,13 @@ wrong under [A32] are marked.
   (2022) define it. Adopted by the author on 2026-10-18
   (`thesis-progress/desicion/arrival_storage_plan.md`).
 - **Open.** The values of epsilon, x_min and Delta (`tab:storageparams`, TBD).
-  Figures `fig:storageexample` and `fig:dkr` still show a relocation and an R
-  bar (sources in `thesis-progress/scripts/images/`). Replaces the proposals
+  `fig:dkr` was redrawn on 2026-10-18 with D and K only, the bars labelled
+  fixed storage and adaptive rule (`storage_update_example.py`).
+  `fig:storageexample` was redrawn on 2026-10-18 as `arrival_storage.png`
+  (`arrival_storage.py`): fixed storage sends arriving tea to its far home
+  shelf, an adaptive rule to the nearest shelf with room, the old tea stays,
+  and an order walks 3 edges against 1. The sentences before the figure and
+  before `fig:dkr` were reworded to match. Replaces the proposals
   `[A38]` to `[A40]` of `stock_template_2026-10-17.md`, which were never
   applied.
 - **Code.** PR G to J of `arrival_storage_plan.md`, uncommitted, acceptance
@@ -1255,9 +1260,8 @@ wrong under [A32] are marked.
 
 ## Still open
 
-- [ ] **Figures for [A38].** Redraw `fig:storageexample` (tea arriving, not
-      moved) and `fig:dkr` (D and K only, no R) from
-      `thesis-progress/scripts/images/`, then copy them into `thesis/Images/`.
+- [x] **Figures for [A38].** Done 2026-10-18. `fig:storageexample` is
+      `arrival_storage.png`, `fig:dkr` shows D and K only.
 - [ ] **Values for [A38].** epsilon (probe value 1), x_min (8 in the
       configs), Delta (100), the receiving vertices, and beta under the
       arrival model (1 in `configs/medium_arrival`).

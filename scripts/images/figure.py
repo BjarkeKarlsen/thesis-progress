@@ -50,6 +50,7 @@ from two_layer_feedback import two_layer_feedback
 from scoring_run import scoring_run
 from decision_problem_grid import decision_problem_grid
 from timeline import timeline
+from arrival_storage import arrival_storage
 
 if __name__ == "__main__":
     instance(); instance_simple(); observation(); loop()
@@ -62,5 +63,5 @@ if __name__ == "__main__":
     graph_basics(); actions_example(); storage_matrix()
     storage_update_example(); controllers_example(); posg_schematic()
     two_layer_feedback(); scoring_run(); decision_problem_grid()
-    timeline()
+    timeline(); arrival_storage()
     print("wrote figures to", os.path.abspath(OUT))

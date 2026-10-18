@@ -89,8 +89,9 @@ Alternatives considered, each set aside in one line:
 **Applied 2026-10-18, uncommitted in `thesis/`, as `[A38]` (storage at arrival), `[A39]` (pickup
 rule, waiting orders) and `[A40]` (put-away distance), with `GAPS.md` entries.** The text below
 was the proposal. The applied wording differs in detail. `eq:relocation` became `eq:putaway`, and
-the new equations are `eq:arrivals` and `eq:pickuprule`. Still open: the two figures and the
-values of `tab:storageparams`.
+the new equations are `eq:arrivals` and `eq:pickuprule`. The two figures were redrawn on
+2026-10-18 (`fig:storageexample` as `arrival_storage.png`, `fig:dkr` with D and K only). Still
+open: the values of `tab:storageparams`.
 
 Tags are given when applied, after those reserved by `stock_template_2026-10-17.md` and
 `research_goals_2026-10-18.md`. Each gets a `GAPS.md` entry. Symbols to check against
