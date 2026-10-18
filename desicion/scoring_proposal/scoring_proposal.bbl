@@ -1,0 +1,33 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Krnjaic et~al.(2022)Krnjaic, Steleac, Thomas, Papoudakis, Sch{\"a}fer, To, Lao, Cubuktepe, Haley, B{\"o}rsting, and Albrecht]{krnjaic2022warehouse_marl}
+Aleksandar Krnjaic, Raul~D. Steleac, Jonathan~D. Thomas, Georgios Papoudakis, Lukas Sch{\"a}fer, Andrew Wing~Keung To, Kuan-Ho Lao, Murat Cubuktepe, Matthew Haley, Peter B{\"o}rsting, and Stefano~V. Albrecht.
+\newblock Scalable multi-agent reinforcement learning for warehouse logistics with robotic and human co-workers, 2022.
+\newblock URL \url{https://arxiv.org/abs/2212.11498}.
+
+\bibitem[Lau and Sengupta(2022)]{lau2022mapd}
+Tim Tsz-Kit Lau and Biswa Sengupta.
+\newblock The multi-agent pickup and delivery problem: Mapf, marl and its warehouse applications.
+\newblock \emph{arXiv preprint arXiv:2203.07092}, 2022.
+\newblock URL \url{https://arxiv.org/abs/2203.07092}.
+\newblock Version 1, submitted 14 March 2022. Accessed: 2026-06-08.
+
+\bibitem[Ma et~al.(2020)Ma, Li, Kumar, and Koenig]{ma2017lifelong_mapf}
+Hang Ma, Jiaoyang Li, T.~K.~Satish Kumar, and Sven Koenig.
+\newblock Lifelong multi-agent path finding for online pickup and delivery tasks.
+\newblock \emph{Transportation Science}, 54\penalty0 (2):\penalty0 473--489, 2020.
+\newblock \doi{10.1287/trsc.2018.0826}.
+\newblock URL \url{https://doi.org/10.1287/trsc.2018.0826}.
+\newblock Originally published in AAMAS 2017 proceedings; journal version accessed 2026-06-08.
+
+\bibitem[Pham and Bera(2024)]{pham2024optimizingcrowdawaremultiagentpath}
+Phu Pham and Aniket Bera.
+\newblock Optimizing crowd-aware multi-agent path finding through local communication with graph neural networks, 2024.
+\newblock URL \url{https://arxiv.org/abs/2309.10275}.
+
+\end{thebibliography}

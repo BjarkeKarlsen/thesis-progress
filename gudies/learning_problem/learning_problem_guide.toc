@@ -1,0 +1,21 @@
+\contentsline {section}{\numberline {1}What the section is for}{1}{section.1}%
+\contentsline {section}{\numberline {2}One timestep in plain words}{2}{section.2}%
+\contentsline {section}{\numberline {3}The tuple, element by element}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Spaces versus realisations}{3}{subsection.3.1}%
+\contentsline {section}{\numberline {4}Three games, one difference}{3}{section.4}%
+\contentsline {section}{\numberline {5}The transition kernel $P$}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}What a transition kernel is}{3}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}What is inside $P$ in this thesis}{4}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Why ``stochastic only via order arrivals'' matters}{4}{subsection.5.3}%
+\contentsline {paragraph}{Small example.}{5}{section*.2}%
+\contentsline {subsection}{\numberline {5.4}Where the storage layer sits}{5}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Actions and masking}{5}{section.6}%
+\contentsline {section}{\numberline {7}The objective $J(\theta )$}{5}{section.7}%
+\contentsline {paragraph}{One objective, different credit.}{6}{section*.3}%
+\contentsline {paragraph}{The critic sees what the policy sees.}{6}{section*.4}%
+\contentsline {paragraph}{Why $R_i$ is left open.}{6}{section*.5}%
+\contentsline {section}{\numberline {8}Messages belong to the policy}{6}{section.8}%
+\contentsline {section}{\numberline {9}Where the congestion feature fits}{6}{section.9}%
+\contentsline {section}{\numberline {10}Points worth checking in the thesis text}{7}{section.10}%
+\contentsline {paragraph}{Fixed.}{7}{section*.6}%
+\contentsline {section}{\numberline {11}Summary in five lines}{7}{section.11}%

@@ -1,0 +1,28 @@
+\contentsline {part}{I\hspace {1em}The short version}{2}{part.1}%
+\contentsline {section}{\numberline {1}The idea in plain words}{2}{section.1}%
+\contentsline {paragraph}{How it works today.}{2}{section*.2}%
+\contentsline {paragraph}{The fix.}{2}{section*.3}%
+\contentsline {paragraph}{Why that is better.}{2}{section*.4}%
+\contentsline {paragraph}{What it costs.}{3}{section*.5}%
+\contentsline {paragraph}{What could go wrong.}{3}{section*.6}%
+\contentsline {paragraph}{Why not something fancier.}{3}{section*.7}%
+\contentsline {section}{\numberline {2}Words used here}{3}{section.2}%
+\contentsline {part}{II\hspace {1em}The idea in more detail}{3}{part.2}%
+\contentsline {section}{\numberline {3}The problem}{3}{section.3}%
+\contentsline {section}{\numberline {4}What the current head sees}{3}{section.4}%
+\contentsline {section}{\numberline {5}The fix}{4}{section.5}%
+\contentsline {section}{\numberline {6}What has to be built}{4}{section.6}%
+\contentsline {section}{\numberline {7}Formally}{5}{section.7}%
+\contentsline {part}{III\hspace {1em}The reasoning}{5}{part.3}%
+\contentsline {section}{\numberline {8}What the thesis needs from a head}{5}{section.8}%
+\contentsline {section}{\numberline {9}The options}{6}{section.9}%
+\contentsline {section}{\numberline {10}Why not an LSTM}{6}{section.10}%
+\contentsline {paragraph}{As memory across timesteps.}{6}{section*.8}%
+\contentsline {paragraph}{As a sequence over the exits.}{6}{section*.9}%
+\contentsline {paragraph}{Inside the message passing.}{6}{section*.10}%
+\contentsline {section}{\numberline {11}Van Knippenberg and PRIMAL}{6}{section.11}%
+\contentsline {section}{\numberline {12}Arguments for the per-edge head}{7}{section.12}%
+\contentsline {section}{\numberline {13}Arguments against, and weak points}{7}{section.13}%
+\contentsline {section}{\numberline {14}Decision 14, the extra trunk}{8}{section.14}%
+\contentsline {section}{\numberline {15}What is not verified}{8}{section.15}%
+\contentsline {section}{\numberline {16}What the change does}{8}{section.16}%

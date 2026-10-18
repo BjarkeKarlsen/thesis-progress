@@ -22,6 +22,15 @@ objective internalises congestion by construction, a zone learner does so
 only inside its zone, and a decentralised learner with its own `R_i` does
 not.
 
+**Revised 2026-10-16, [A32].** The arms no longer differ only in their
+window. The centralised arm lets the agents choose one at a time, each
+seeing the earlier choices, the section-based arm does the same per zone,
+and the decentralised arm is unchanged. They differ in how many agents one
+decision covers. The commons question is no longer part of the study, so
+the internalisation argument above is history. Entries [A1] to [A6],
+[A8], [A9], [A12], [A13] and [A29] are rewritten to match the chapters as
+they now stand, each with a short History line for what it said before.
+
 **Where the edits live.** The changes were drafted in `_gcn` copies and
 adopted on 2026-09-29 by renaming them over
 `thesis/Chapters/2.Introduction.tex` and
@@ -42,67 +51,97 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 
 ## Problem Formulation (`2.Introduction.tex`)
 
-### [A1] Framing: learned arms plus a reference planner (Design change)
+### [A1] Framing: learned arms plus a reference baseline (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** Introduction paragraph "This thesis investigates", Aim and
   scope item "controller architecture", RQ2.
-- **Change.** Says all three controllers are graph-neural policies trained
-  by one RL procedure and differ only in what they condition on, with a
-  non-learned prioritised planner as reference. RQ2 now asks about
-  controllers "that share one learning method and differ only in the
-  information they condition on".
-- **Why.** States the new experimental contrast where a reader meets the
+- **Change.** All three controllers are graph-neural policies trained by
+  one RL procedure. They differ in how many agents one decision covers, the
+  whole fleet, one zone or a single agent, and what each sees follows from
+  that. Token Passing is named as the reference baseline ([A28]). The
+  controller factor reads "each a learned policy that decides for the whole
+  fleet, one zone, or one agent". RQ2 asks about controllers "that share
+  one learning method and differ in how many agents one decision covers".
+- **Why.** States the experimental contrast where a reader meets the
   research questions.
+- **History.** Until [A32] the text said the controllers "differ only in
+  the information they condition on", with a prioritised planner as
+  reference.
 
-### [A2] Who decides: reference controller and routing-rule column (Design change)
+### [A2] Who decides: one learned family and the table of architectures (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** `sec:pf:controllers`, after "heuristics, optimisation methods,
   or learned policies", and `tab:information`.
 - **Change.** A paragraph states that every architecture's routing rule is
-  a learned policy from one family, and adds one reference controller
-  outside that family. `tab:information` gains a "Routing rule" column
-  (learned / planner) and a "Reference" row with the global window. The
-  two long columns are now `p{4.2cm}` so the table fits the text width.
-- **Why.** Π must name the planner explicitly if it is evaluated under
-  `eq:rqformal`. The planner plays the role that A\*, ICBS and ICTS play
-  in Knippenberg's Table 2.
+  a learned policy from one family, trained by one procedure, and that the
+  architectures differ in how many agents one decision covers.
+  `tab:information` has the columns Architecture, One decision covers,
+  Assignment conditions on, and Routing conditions on. The centralised row
+  routes on the global state and the earlier agents' actions, the
+  section-based row on the zone-local state, the boundary protocol and the
+  earlier agents' actions in the zone, and the decentralised row on
+  `o_i(t)` plus messages. There is no reference row.
+- **Why.** `Π` holds only the learned controllers, so RQ2 compares one
+  learning family. The new column names what separates the architectures.
+- **History.** The first version added a "Routing rule" column (learned or
+  planner) and a "Reference" row. [A19] took the planner out of the
+  formulation, and [A32] added the "One decision covers" column and the
+  earlier actions.
 
-### [A3] Policy forms for the centralised and section-based arms (Design change)
+### [A3] Policy forms for the centralised and section-based arms (Design change, revised 2026-10-16 by [A32])
 
-- **Where.** `sec:pf:controllers`, new paragraph after "centralised training
-  with decentralised execution". New labels `eq:centralisedpolicy`,
-  `eq:sectionpolicy`.
-- **Change.** Centralised arm:
-  `u_t ~ ∏_i π^cen_θ(u_i(t) | s_t, i)`. Section-based arm, for `ℓ_i(t) ∈ Y_q`:
-  `u_i(t) ~ π^sec_θ(· | s_t^(q), i)`, where `s_t^(q)` is the zone-local
-  state including what the boundary protocol passes across. The
-  decentralised policy keeps the plain `π_θ`.
-- **Why.** A factored policy, one action distribution per agent, avoids a
-  distribution over the exponentially large joint action set. This is
-  Knippenberg's "single-agent RL" setup. The factors are sampled
-  independently, so the paragraph also states that conflict resolution
-  handles the remaining infeasible joint actions identically for all
-  controllers.
-- **Correction to an earlier claim.** An earlier discussion draft rejected a
-  learned centralised arm because of the exponential joint action space.
-  The factored form removes that objection. The real cost is poor scaling
-  with graph size (Knippenberg Table 4, 14% solved at 2048 nodes vs 63%
-  for the decentralised setup).
+- **Where.** `sec:pf:controllers`, the block after the critic paragraph.
+  Labels `eq:centralisedpolicy`, `eq:sectionpolicy`.
+- **Change.**
+  - Centralised. The agents choose one at a time in the episode priority
+    order, each from the global state and the earlier choices,
+    `u_t ~ ∏_i π^cen_θ(u_i(t) | s_t, u_{≺i}(t), i)`, drawn in priority order.
+    This is the chain rule, so any joint distribution can be written this
+    way, at `m` evaluations per decision.
+  - A collision rule. An agent may not move onto a vertex an earlier agent
+    has chosen, may not swap with an earlier agent, and may not move onto a
+    vertex whose agent has not chosen yet. Waiting is always allowed, so a
+    centralised decision never needs conflict resolution.
+  - Section-based. The same per zone, for `ℓ_i(t) ∈ Y_q`,
+    `u_i(t) ~ π^sec_θ(· | s_t^(q), u^(q)_{≺i}(t), i)`. Zones choose in
+    parallel and do not see each other's choices, so cross-zone clashes go
+    to conflict resolution. With one zone it is the centralised arm.
+  - Decentralised. Unchanged, each agent chooses independently.
+- **Why.** With independent factors the centralised arm was the
+  decentralised arm with a large view, since no agent saw another's choice.
+  The chain rule keeps the joint action tractable and gives the arm real
+  coordination. It is prioritised planning one timestep ahead with a
+  learned policy in place of the path search. Knippenberg's single pass
+  over the complete graph was rejected because no agent sees another's
+  choice. A distribution over all joint actions was rejected because it is
+  exponential in `m`. The scaling cost now shows as runtime, `m` network
+  runs per timestep. Two `% TODO cite` comments mark where prioritised
+  planning and turn-by-turn policies are to be cited.
+- **History.** The first version sampled the factors independently,
+  `∏_i π^cen_θ(u_i(t) | s_t, i)`, called it Knippenberg's single-agent
+  setup, and left all clashes to conflict resolution. It quoted only the
+  graph-size half of Knippenberg's Table 4. The table shows that a larger
+  fleet degrades the single-agent setup too.
 
-### [A4] Objective, loop and research formula (Design change)
+### [A4] Objective, loop and research formula (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** Paragraph after `eq:objective`, the loop sentence in
   `sec:pf:coupling`, and the paragraph after `eq:rqformal`.
 - **Change.** `eq:objective` applies to each of the three learned
-  controllers, with θ ranging over that controller's own parameters. The
-  planner has no θ and is not trained against it. The loop sentence now
-  says every learned controller factors into per-agent distributions. The
-  planner is evaluated under the same factorial design, so each learned
-  arm's margin can also be read against it.
+  controllers, with θ ranging over that controller's own parameters. Token
+  Passing has no θ, is not trained against it, and stays outside the
+  factorial design ([A19]). The loop sentence says every learned
+  controller's `π(· | s_t)` is a product of per-agent distributions, and
+  that under the centralised and section-based controllers each factor also
+  reads the choices of the earlier agents in the same decision. The
+  paragraph after `eq:rqformal` names the first factor as "the controller,
+  how many agents one decision of π covers".
 - **Why.** The old text allowed any one regime to be learned. Now all
   three are.
+- **History.** Until 2026-10-16 the loop sentence said each agent chooses
+  "from its own window", and the first factor was "the window of π".
 
-### [A12] The learning problem still described one learned arm (Error + Gap)
+### [A12] The learning problem still described one learned arm (Error + Gap, revised 2026-10-16 by [A32])
 
 - **Where.** `sec:pf:game` throughout, one sentence in
   `sec:method:resolution`. New label `eq:obsfunction`.
@@ -110,13 +149,21 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   - **Observation function per architecture.** New `eq:obsfunction`:
     `O_i(s_t) = (s_t, i)` centralised, `(s_t^(q), i)` with `ℓ_i(t) ∈ Y_q`
     section-based, `o_i(t)` decentralised. Every other element of `M` is
-    shared, so the three learned arms play three versions of one game that
-    differ only in `O_i`, which is RQ2. The centralised version is fully
-    observed. Apart from messages, each narrower observation can be
-    computed from the next wider one. `tab:posg`'s `𝒪_i` and `O_i` rows
-    point to `eq:obsfunction` instead of `o_i(t)`.
-  - **Opening paragraph.** No longer says every agent acts "without seeing
-    the whole warehouse" or "from `o_i(t)`".
+    shared. The controllers differ in what each agent observes and in
+    which agents choose together ([A32]). The earlier agents' choices are
+    made inside the policy within the timestep, so they are not part of
+    the state or of any observation, and `eq:posg` and `eq:obsfunction`
+    stay as they are. The centralised version is fully observed. Apart
+    from messages, each narrower observation can be computed from the next
+    wider one. `tab:posg`'s `𝒪_i` and `O_i` rows point to
+    `eq:obsfunction` instead of `o_i(t)`.
+  - **Opening paragraph.** No longer says every agent acts "from
+    `o_i(t)`". Since [A32] it says that, except under the centralised
+    controller, an agent neither sees the whole warehouse nor knows what
+    every other agent will do.
+  - **Policy paragraph.** Since [A32], under the centralised controller the
+    agents draw their actions one after another, each seeing the earlier
+    draws, and the section-based controller does the same inside each zone.
   - **`P` contains the shared, non-learned rules.** `tab:posg`'s `P` row
     now lists conflict resolution and the assignment rule next to
     `eq:transition` and `eq:storageupdate`, with one sentence saying why
@@ -130,11 +177,14 @@ Severity key, same as `GAPS.tex`, plus one new kind.
     in `tab:posg`'s `𝒮` row, and the Method sentence says the state
     includes it. Both chapters agree and `P` stays stochastic only through
     order arrivals.
-  - **Objective vs. credit signal.** New sentence after the [A4]
-    paragraph. `eq:objective` is the shared target, and how an update
-    credits reward (team mean over controlled agents, or own `R_i`) is the
-    [A9] training choice. Removes the apparent contradiction between one
-    shared objective and the predicted commons ordering.
+  - **Objective vs. credit.** Paragraph after the [A4] paragraph.
+    `eq:objective` is the shared target. Since [A32] each update credits
+    an agent's action with the mean reward of the agents that chose
+    together with it (`eq:credit`), the whole fleet, one zone or the agent
+    alone, because agents that choose together act as one decision-maker.
+    This is why one shared objective still gives controllers that differ
+    in how much congestion they cause. Before [A32] the credit was an open
+    [A9] choice tied to a predicted commons ordering.
   - **Smaller fixes in the same section.** Masked actions get zero
     probability under the policy, not under `P`. `R_i(t)` is stated as
     shorthand for `R_i(s_t, u_t, s_{t+1})`. `O_i` is stated as deterministic
@@ -146,33 +196,37 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   These were also points 1 to 3 of `learning_problem_guide.tex`, which is
   updated to match.
 
-### [A13] The critic sees the same window as the policy (Design change)
+### [A13] The critic sees the same window as the policy (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** `sec:pf:controllers`, the sentence after "Parameter sharing
-  is appropriate". `sec:method:model`, new paragraph after [A8], and a new
+  is appropriate". `sec:method:model`, the critic paragraph, and the
   "critic input" row in `tab:modelparams`.
 - **Change.** The conditional definition of centralised training with
   decentralised execution is replaced by a commitment. This thesis does
   not use it. Every router's value head reads the same embedding `z_i` as
-  its policy head, so the critic conditions on `(s_t, i)`, `(s_t^(q), i)`
-  or `o_i(t)`, the same window as that router's policy (`eq:obsfunction`).
-  The critic's target is the return under the router's credit signal
-  (`tab:trainparams`), which for the decentralised router is its own
-  `R_i`.
+  its policy head. The critic therefore conditions on
+  `(s_t, u_{≺i}(t), i)` for the centralised router,
+  `(s_t^(q), u^(q)_{≺i}(t), i)` for the section-based router, and `o_i(t)`
+  plus messages for the decentralised router, the same window as that
+  router's policy. The critic's target is the return under the credit
+  `eq:credit` ([A32]), the mean reward of the whole fleet, of the agent's
+  zone, or of the agent alone.
 - **Why.** Chosen by the author over a global critic for every router
-  (MAPPO style). Two reasons. It is better for the commons contrast. A
-  decentralised learner with a local critic and its own `R_i` gets no
-  training signal that prices the congestion it causes outside its
-  window, which is the effect the contrast is meant to measure. A global
-  critic would partly teach it that cost and blur the contrast. It is
-  also the cleaner concept. The architectures then differ in how they
-  train as well as in how they act, so "the architecture is its window"
-  holds end to end, not only at execution. The accepted cost is that a
-  weaker decentralised result combines seeing less when acting with
-  learning from a noisier critic. The text states the global critic as
-  the standard alternative that is not used.
-- **Code.** No change needed. `slap-mapd-coupling`'s `rl_module.py`
-  already feeds one `z_i` to both actor and critic.
+  (MAPPO style). Two reasons. A decentralised learner with a local critic
+  and its own `R_i` gets no training signal that prices the congestion it
+  causes outside its window, which is the congestion contrast the
+  comparison is meant to show. A global critic would partly teach it that
+  cost and blur the contrast. And what a controller sees is set by the
+  agents it decides for, so it should limit how the controller learns as
+  well as how it acts. The accepted cost is that a weaker decentralised
+  result combines seeing less when acting with learning from a noisier
+  critic. The text states the global critic as the standard alternative
+  that is not used.
+- **History.** The second reason used to read "the architecture is its
+  window", and the first was framed as the commons contrast, which is no
+  longer a research question.
+- **Code.** `rl_module.py` feeds one `z_i` to both actor and critic, so
+  the critic follows the claim feature of [A32] once that is built.
 
 ### [A14] Messages are learned embeddings, part of the policy (Design change)
 
@@ -374,7 +428,7 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   routing differs. The table was the inconsistent side. This error
   existed before the GCN change.
 
-### [A21] Field of view counts hops (Design change)
+### [A21] Field of view counts hops (Design change, superseded by [A25])
 
 - **Where.** `sec:pf:env` (the field-of-view sentence and
   `eq:localsubgraph`, the paragraph after it), `sec:pf:observations` (the
@@ -428,7 +482,7 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 
 ## Method (`4.Implementation.tex`)
 
-### [A5] Controller realisations and overview (Design change)
+### [A5] Controller realisations and overview (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** Section intro, `sec:method:overview`,
   `sec:method:controllers`, and the opening of `sec:method:rl`.
@@ -437,34 +491,55 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   - "Stages 2--3" becomes "stage 3". Stage 2 (assignment) is shared, so it
     never changes with the controller. This also matches the caption of
     `fig:methodloop`.
-  - The space-time A\* text moves unchanged to a **Reference** router.
-  - **Centralised** is now `π^cen_θ`, the encoder of `sec:method:model` run
-    once per timestep on all of `G`, with agent `a_i`'s head read out at
-    `ℓ_i(t)`.
-  - A new paragraph states that the three learned routers share the
-    encoder family, action mask, reward, training procedure and budget,
-    and differ only in the graph the encoder runs on and which agents it
-    has heads for.
+  - The reference router is Token Passing ([A28]).
+  - **Centralised** is `π^cen_θ`, one network over all movable vertices,
+    run once for each agent in priority order. Each run sees the agent's
+    own `η_i` and the vertices the earlier agents have chosen, and its
+    drawn move becomes part of what the next agent sees. A timestep takes
+    `m` runs, so runtime grows with the fleet. Conflict resolution never
+    overrides a centralised agent, so the override term of `eq:reward` is
+    always zero for it. The text no longer calls this Knippenberg's
+    centralised setup.
+  - **Full-view setting** ([A32]). The decentralised router with every
+    movable vertex in view and the pooled readout, each agent choosing
+    alone on its own reward. It separates seeing more from choosing
+    together with a shared reward. It runs under a few main conditions
+    only and is not in `Π`.
+  - The closing paragraph says the three learned routers share the encoder
+    family, the masks, the reward, the training procedure and the budget,
+    and differ in which agents choose together, so a difference in results
+    is a difference in how many agents one decision covers.
   - `sec:method:rl` says the four RL components are reused on the larger
-    graph (`V`, or `Y_q ∪ H_q`).
+    graph (`V_mov`, or `Y_q ∪ H_q`), with two additions, the claim feature
+    in `eq:features` and the claim mask `eq:claimmask`.
 - **Why.** Realises [A2] and [A3].
+- **History.** The centralised encoder ran once per timestep on all of `G`
+  (first version), then once per agent ([A29]), and now once per agent in
+  priority order with the earlier choices ([A32]). The closing paragraph
+  said the routers "differ only in the graph the encoder runs on".
 
-### [A6] Section-based boundary rule: ownership plus halo (Design change)
+### [A6] Section-based boundary rule: ownership plus halo (Design change, revised 2026-10-16 by [A32])
 
 - **Where.** `sec:method:controllers`, Section-based paragraph. New label
   `eq:halo`.
 - **Change.**
-  - **Ownership.** Zone `Y_q` owns the agents with `ℓ_i(t) ∈ Y_q` and has
-    action heads for them only.
+  - **Ownership.** Zone `Y_q` owns the agents with `ℓ_i(t) ∈ Y_q` and runs
+    the network once for each of them in priority order, as the
+    centralised router does over the whole graph ([A32]).
   - **Halo.** Its network runs on `Y_q ∪ H_q`, where
     `H_q = { v ∉ Y_q : d_G(w,v) ≤ d_obs for some w ∈ Y_q }`. Halo vertices
     carry role and occupancy features, but no heads and no loss. The halo
     *is* the boundary protocol of `tab:information`.
+  - **Other zones' agents.** A zone does not know their choices, so an
+    agent treats every occupied halo vertex as a vertex whose agent has not
+    chosen yet and does not move onto it ([A32]).
   - **Handover.** Ownership passes to the next zone on the timestep an
     agent enters it. Weights are shared across zones, so handover changes
     context, not policy.
-  - **Cross-boundary conflicts.** Removed by the existing
-    conflict-resolution operator, as everywhere else.
+  - **Cross-boundary conflicts.** Zones run in parallel. Two zones may
+    still send agents onto the same empty vertex at the boundary, and the
+    existing conflict-resolution operator removes these, as everywhere
+    else.
   - **Nesting.** With `p = 1` the halo is empty and `π^sec_θ = π^cen_θ`.
 - **Why.** The old rule ("yield at the boundary to whichever zone has
   fewer active agents") compared planned routes. A learned policy acts one
@@ -478,7 +553,8 @@ Severity key, same as `GAPS.tex`, plus one new kind.
     controller's information (`sec:pf:agents`), so using it at boundaries
     does not widen the section-based window.
   - The `p = 1` property makes centralised, section-based and
-    decentralised a continuum in how much each controller sees.
+    decentralised a continuum in how many agents one decision covers. It
+    used to read "in how much each controller sees", before [A32].
   - η_i is computed from `d_G` on the whole graph, so a boundary agent
     still knows which way a goal in another zone lies. That is the agent's
     own task information, as for the decentralised arm.
@@ -495,7 +571,7 @@ Severity key, same as `GAPS.tex`, plus one new kind.
   to isolate. Replacing the halo by messages alone was ruled out, since
   boundary crowding counts need the halo's occupancy.
 
-### [A8] Model: two open points for full-graph and zone passes (Gap)
+### [A8] Model: two open points for full-graph and zone passes (Gap, resolved by [A29] on 2026-10-13)
 
 - **Where.** `sec:method:model`, new paragraph after the `Q = 0` ablation,
   and two new rows in `tab:modelparams`.
@@ -515,19 +591,43 @@ Severity key, same as `GAPS.tex`, plus one new kind.
 - **Why.** Both decide whether the centralised arm really is "global". If
   they were left implicit, a weak centralised result could come from the
   architecture rather than from the information regime.
+- **Resolution, as it now stands (2026-10-16, [A32]).** Point 1, one pass
+  per agent, now run in priority order with the earlier choices in the
+  features. The single pass with each agent's task marked at its vertex is
+  rejected because no agent would see another's choice. Before [A32] the
+  reason given was that it replaces the vertex features. Point 2, the
+  pooled readout stays, and it is also how an agent learns of earlier
+  choices further away than `L` hops.
 
-### [A9] Training: equal budget and the credit signal (Design change + Gap)
+### [A9] Training: equal budget and credit (Design change, credit decided 2026-10-16 by [A32])
 
-- **Where.** `sec:method:training`, and two new rows in `tab:trainparams`.
-- **Change.** Each learned router is trained separately under the same
-  PPO procedure with the same environment-step budget, and both training
-  regimes (under `F_fix` only, and matched) apply to each. Left open, as
-  TBD: whether the centralised and section-based networks are updated on
-  the team-mean reward of the agents they control, or on per-agent `R_i`.
-- **Why.** An equal budget keeps the comparison about information, not
-  training effort. The credit signal decides how much of the congestion
-  externality each arm internalises, so it is the lever behind the commons
-  contrast. It must be stated, not left to an RLlib default.
+- **Where.** `sec:method:training`, `eq:credit`, and `tab:trainparams`.
+- **Change.**
+  - Each learned router is trained separately under the same PPO procedure
+    with the same environment-step budget, and both training regimes
+    (under `F_fix` only, and matched) apply to each.
+  - One environment step is one timestep of the warehouse, however many
+    agents choose within it.
+  - Each agent's choice is one training sample with its own value
+    estimate, credited with `eq:credit`, the mean reward of the agents that
+    chose together with it at that timestep. These are the whole fleet for
+    the centralised router, the agents in the same zone at `t` for the
+    section-based router, and the agent alone for the decentralised router
+    and the full-view setting.
+  - The credit row of `tab:trainparams` is gone. The budget row says "one
+    per timestep".
+- **Why.** An equal budget keeps the comparison about the controller, not
+  training effort. Counting a timestep as one step means the centralised
+  arm's `m` network runs per timestep show as runtime and training time,
+  not as extra experience. Knippenberg's 24-hour wall-clock budget mixes
+  compute speed with learning, and the step budget keeps the two apart.
+  Credit follows the agents that choose together, because they act as one
+  decision-maker.
+- **History.** The credit choice was left TBD as the lever behind the
+  commons contrast. The commons question is no longer part of the study.
+- **Open.** Each agent's choice is its own PPO sample with its own ratio.
+  Updating on the whole joint action of one decision is the alternative.
+  To be settled in the code, not stated in the thesis yet.
 
 ### [A10] Computational cost reporting (Design change)
 
@@ -580,23 +680,628 @@ sources are in `thesis-progress/scripts/images/`, and the PDFs are in
 `loop.py` and `methodloop_simple.py` still exist, and `figure.py` still
 regenerates `loop.png`.
 
+### [A25] Field of view is measured by travel cost, not hops (Error)
+
+- **Where.** `sec:pf:env` (the field-of-view paragraph and
+  `eq:localsubgraph`), `eq:congestion` (one sentence before it),
+  `sec:pf:observations` (the field-of-view subsection, the "anything past"
+  sentence, `eq:commgraph`, `tab:observationexample`), `eq:halo` and the
+  `d_obs` row of the parameter table in the Method, and `tab:notation`
+  (the `d^hop_G` row is removed, rows for `H_q`, `d_obs`, `V_i^(d_obs)` and
+  `G^A_t` reworded).
+- **Change.** The field of view, the halo, the congestion feature and the
+  communication graph are bounded by the travel cost `d_G`. `d^hop_G` is
+  gone. `d_obs` is a positive real in the unit of edge cost, not an
+  integer hop count. Hearing stays one way, with the distance taken from
+  the listener's position to the sender's. The value of `d_obs` stays TBD.
+  Replaces the hop count of [A21].
+- **Why.** An edge's cost is its length. With every cost equal to 1 the
+  world behaves like a lattice, and an edge of cost 5 behaves like five
+  cells, so how far an agent sees or hears must depend on edge cost. The
+  hop count of [A21] came from a misunderstanding of one word. The code
+  already uses the cost distance.
+
+### [A26] Storage estimates cover one storage period, per step (Design change)
+
+- **Where.** `sec:pf:storage` (new paragraph and `eq:estimates` after the
+  causality sentence of `eq:storageupdate`), the "steady pattern" paragraph
+  in `sec:pf:coupling` (two-timescale consequence), the `W_T` versus
+  `\hat w_t(e)` paragraph in the service-time section, the storage ladder
+  in the Method (new paragraph after `eq:storagegreedy`), and the
+  `\hat\rho`, `\hat\mu`, `\hat w` rows of `tab:notation`.
+- **Change.** The three estimates are computed over a tumbling window equal
+  to the storage period. At an update an estimate covers only the steps
+  since the previous update, and the next window starts fresh. They are
+  per step (a count divided by the number of steps), so their size does not
+  depend on `Delta`. If no order was released in the window, for example
+  before the first update, the update is skipped and the placement stays.
+  `\hat w_t(e)` is described as a forecast from past data only, not as
+  looking ahead.
+- **Why.** A short fixed window matches what the thesis already says about
+  traffic settling between updates and adds no new parameter. Per step
+  units keep `beta` comparable across the sweep of `Delta`. Skipping an
+  empty first update avoids relocating stock on no evidence.
+- **Open.** Which edge a wait is charged to is not decided. The thesis
+  still says "attributed to an edge or its downstream contention point"
+  (`sec:pf:storage`, the sentence after `eq:storageupdate`) and
+  `eq:estimates` says "waits attributed to `e`".
+
+### [A27] The message is the sender's embedding, with no message head (Design change)
+
+- **Where.** `sec:method:model` (`eq:message` and the paragraph after
+  `eq:readout`), `tab:modelparams` (the message-width row is gone) and the
+  `\xi_j(t)` row of `2.Notation.tex`.
+- **Change.** `xi_j(t) = h^(L)_{l_j(t)}` replaces
+  `MSG_theta(h^(L)_{l_j(t)})`. A message is the sender's own final-layer
+  embedding, sent as it is, with the width of that embedding (the hidden
+  width, or the raw vertex features at `L = 0`). Messages are still trained
+  end to end, because the receiver's loss reaches the sender's embedding
+  through the shared weights.
+- **Why.** The readout takes a mean of the messages and feeds it to a
+  linear layer. A plain linear message head in front of that adds only a
+  narrowing step and an undecided width, so it is dropped. Sharing the
+  embedding follows CRAMP (check its Figure 2, "Local broadcasting"). Chosen
+  with the L2 design in `fix_prs_plan.md` ("L2a and L2b design"), which also
+  rejected storing the sender's embedding in the sample (it needs RLlib
+  connectors) in favour of carrying the senders' views in the receiver's
+  sample.
+- **Code.** L2b (`fix/learned-messages`).
+- **Open.** Both citations after "as in" in the new paragraph should be
+  checked against the sources. PICO uses a message head, and CRAMP may
+  share the encoder vector directly.
+
+### [A28] Deadlock in dead-end corridors, Token Passing as the baseline (Design change, thesis text edited 2026-10-13)
+
+- **Where.** `4.Implementation.tex`, the "Reference baseline" paragraph and
+  the sentence on the shared assignment above it, and `2.Introduction.tex`,
+  the well-formedness paragraphs in `sec:pf:agents` (`fig:wellformed`). All
+  four places carry a `% [A28]` tag.
+- **What the edit says (2026-10-13).**
+  - The reference baseline is Token Passing. It chooses its own tasks and
+    does not use the assignment rule, so the sentence saying the reference
+    planner shares the assignment is removed. Prioritised A\* is not
+    described in the thesis. It stays in the code as a second reference.
+  - Agents ask for the token in order of agent index. "Closest" is the
+    number of moves. A planned path treats a vertex as taken from one step
+    before another agent arrives on it until one step after it leaves, so
+    conflict resolution never has to change a plan. Ma et al. allow agents
+    to follow each other and conflict resolution here does not.
+  - The well-formedness paragraph names Token Passing as the one baseline
+    (the mention of the centralised MAPD baseline is gone), defines a
+    non-task endpoint as a vertex of $V_{\mathrm{ep}}$ in neither
+    $V_{\mathrm{str}}$ nor $V_{\mathrm{del}}$, and says the guarantee
+    depends on the baseline's task rule and planning, that it means no
+    deadlock, and that it says nothing about how the backlog develops.
+  - Condition a) of Ma et al.'s Definition 1, a finite number of tasks, is
+    left out on purpose. It is a property of the order stream, not of the
+    instance. Well-formedness is required of every instance as an
+    assumption. In the paper it is a sufficient condition, so the text does
+    not call it necessary for solvability.
+  - Open in the code, not in the text. `check_well_formedness` counts
+    $V_{\mathrm{ep}} \cup V_{\mathrm{str}} \cup V_{\mathrm{del}}$ against
+    $m$, and the environment needs $m$ vertices in $V_{\mathrm{ep}}$ to
+    place the agents. The text now says non-task endpoints, so the
+    validator should count those.
+- **What was found (2026-10-13).** On the example 04 instance (seed 42,
+  `slap-mapd-coupling` at `0c7b08b`) delivery vertex 22 has one exit,
+  vertex 21, at the end of a one-lane corridor (19, 20, 21, 22). An agent
+  rests at 22 after delivering and needs 21 to leave, while another agent
+  arrives at 21 to deliver to 22. Swapping places is forbidden by the swap
+  rule, and conflict resolution only turns a conflicting move into a wait,
+  so neither ever moves again.
+  - Reference planner: 12 tasks complete by t = 84 of 2000, none after,
+    and every agent stands still for about 1,980 steps.
+  - Learned policy after only 7 PPO iterations: 166, 25 and 26 tasks in
+    three evaluation episodes. In the two low episodes all agents ended in
+    the corridor.
+  - The instance passes the well-formedness check, because a dead end is
+    never on the route between two other endpoints.
+- **Cause in the planner.** Prioritised A\* plans the earliest-assigned
+  agent first and treats a lower-priority agent's resting vertex as free.
+  The lower-priority agent then finds every way out crossing the reserved
+  route, waits, and the whole thing is replanned from scratch every tick
+  with the same result. Nothing makes an agent back off.
+- **Decision (author, 2026-10-13).** The reference baseline is Token Passing
+  (Ma et al.), not prioritised A\*. The well-formedness assumption exists
+  for its guarantee, and `2.Introduction.tex` already calls it a baseline.
+  The Method paragraph must be rewritten to match. For now the thesis text
+  names one baseline, Token Passing, and does not describe prioritised A\*.
+- **Proposed for the three learned arms (not yet confirmed).** No change to
+  the arms, the shared assignment rule or conflict resolution for now.
+  The thesis already says a run that does not keep up is reported as such
+  (`eq:throughput`). First measure how often a trained policy ends in a
+  jam, as a stall rate per arm over the evaluation seeds, from the episode
+  trace. The 7-iteration result says little about a trained policy, and the
+  reward already charges `n_blocked` every step. If trained policies still
+  jam often, choose between two fixes, trying the first:
+  1. Tighten the instance assumption so that no storage or delivery vertex
+     sits in a dead-end corridor (a generator check and a sentence in the
+     well-formedness paragraph). It applies equally to every arm and
+     touches no decision logic, but it only reduces the problem, since
+     head-on agents in any one-lane corridor can still jam.
+  2. Add Token Passing's task rule to the shared assignment, so a task is
+     handed out only if its pickup and delivery vertices are not another
+     agent's goal. Fair to every arm, but it changes `eq:assignmentrule`.
+  Undecided: ending a training episode early on a stall, since a jammed
+  episode wastes the rest of its 2000 steps on stuck agents. It is a
+  training rule the thesis does not have, and it needs a threshold for how
+  many steps count as a stall (the study value is TBD, no default). The
+  trace command uses 50 as a display setting (`DEFAULT_DEAD_AFTER`), about
+  3.5 times the longest healthy still run measured so far, 14 steps, which is
+  one episode of a barely trained policy. The stall is defined as
+  the whole fleet standing still (no agent changing vertex, overridden or
+  chosen wait alike) for N steps in a row while a task is active. The
+  per-agent version, an agent holding a task that has not moved for N
+  steps, fires earlier and may be better. N must exceed the longest still
+  run in healthy trained episodes, measured in B20. Measured so far, the
+  planner jams for good (about 1900 steps) while a sampled policy recovers
+  from stretches of 94 and 223 steps, so a small N would cut runs that
+  recover. In evaluation it is only a flag in the trace, never a stop.
+  It could also make a jam
+  cheaper, because the override penalty stops being charged once the
+  episode is cut. If chosen, it should truncate and bootstrap, not
+  terminate, apply to training only, and get a sentence in
+  `sec:method:training`. Measure the stall rate in training first.
+- **Why.** The study compares learned arms that differ only in their
+  window. Giving a controller Token Passing logic would make it a planner
+  and remove that contrast. The guarantee of Token Passing comes from how it
+  plans and assigns, not from the instance property alone, which the
+  well-formedness paragraph already says.
+- **Open.**
+  - Whether Token Passing runs on its own task selection or on the shared
+    assignment. Its guarantee needs its own rule, so the planner would have
+    to take over stage 2 of the loop for that run.
+  - Whether prioritised A\* stays in the code as a second reference. The
+    thesis text names one baseline for now, so this does not hold up the
+    thesis edit.
+  - Noticed while reading, not part of this change: the proof in
+    `sec:method:resolution` that a wait is always feasible does not hold
+    for a higher-priority agent moving into a lower-priority agent's vertex.
+    The code works around it with a current-vertex reservation and says so
+    in the `conflict_resolution.py` docstring.
+- **Code.** Specs B15 to B20 and D2 in `fix_prs_plan.md` (workspace root).
+
+### [A29] The wider routers: one pass per agent, a pooled readout, and a window that is never truncated (Design change, thesis text edited 2026-10-13, revised 2026-10-16 by [A32])
+
+**Revision note ([A32]).** The per-agent pass, the pooled readout and the
+padding cap all stay. Three things changed. The passes now run in priority
+order, and each sees the vertices the earlier agents have chosen. The
+single shared pass is rejected because no agent would see another's
+choice, not because it replaces the vertex features. The credit is no
+longer open (`eq:credit`). The arm this entry describes, a per-agent pass
+over the whole graph with independent choices, is kept as the full-view
+setting. The text below is the 2026-10-13 entry, and the points it gets
+wrong under [A32] are marked.
+
+- **Where.** `4.Implementation.tex`, the [A8] paragraph in `sec:method:model`
+  (replaced), `tab:modelparams` (the two [A8] rows replaced and two rows
+  added), the centralised paragraph in `sec:method:controllers`, and the
+  visible vertex set in `sec:method:rl`. `2.Notation.tex` gets one row and
+  `styles/eqnames.tex` gets `eq:pooledreadout`. The places carry a `% [A29]`
+  tag.
+- **What the edit says.**
+  - Each agent runs the network on its own copy of the window, with its own
+    η_i in the vertex features and shared weights. This is the first option
+    of [A8]. A single pass with each agent's task marked at the vertex it
+    occupies is named and not used, because it replaces the vertex features.
+  - The centralised and section-based readouts add the mean of the
+    final-layer embeddings over the vertices the router owns, all movable
+    vertices for the centralised router and the zone for the section-based
+    router.
+    The halo is left out. The decentralised readout has no such term. The
+    pooled term sits between the own embedding and δ_i(t), a placement the
+    code makes and the text now states (`eq:pooledreadout`).
+  - The centralised window is all movable vertices, not all of V, so the
+    sentence in `sec:method:rl` now says V_mov.
+  - The sentence that said the encoder runs once per timestep on G now says it
+    runs on G for each agent, and the sentence that said agents share one
+    graph pass is gone.
+  - New `tab:modelparams` rows: the padding cap (set to the largest window so
+    that none is truncated) and the number of zones p (TBD, sweep). The
+    pooling row says "none" is an ablation.
+- **Why.** The study compares learned arms that differ only in their window
+  (no longer true under [A32]).
+  Without pooling a window larger than L hops adds nothing, so the
+  centralised arm would carry the same information as a decentralised arm with
+  no messages. One pass per agent keeps `eq:features` as written. The cost
+  was measured in the code (spike 0B in `L4_design.md`): the whole-graph
+  window costs about 1.1 to 2.5 times the example 04 field of view per
+  rollout step and 3.3 to 4.7 times per training minibatch, and about 1.5
+  times an untruncated field of view. Each arm pools over its own space so
+  that the pooled term follows the window and adds no other difference.
+- **Open.**
+  - The zone rule. The thesis defines the zone partition (`eq:partition`)
+    and not how zones are drawn. The code draws blocks of consecutive aisles
+    as equal as possible (design choice, no citation), and the thesis has no
+    sentence for it yet.
+  - Mean pooling is a plausible choice and has not been tested for
+    learning. A sum or a max would behave differently, and a mean dilutes a
+    local signal in a large graph. The `none` setting is kept as an ablation.
+  - The credit signal of [A9] stays TBD. The code supports both options and
+    has no default. Decided by [A32], `eq:credit`. The code default is to be
+    set when the controllers are rebuilt.
+  - Example 04 truncated its field of view at 12 nodes while most were
+    larger. The code now raises when a window exceeds the cap (decision 15
+    of `thesis_decisions.md`), and the examples are being changed to set the
+    cap from the graph.
+- **Code.** `L4_design.md` and `L4_agent_plans/` (workspace root). Packages
+  B1 (zones by aisle), B2 (the window), B3 (pooling).
+
+### [A30] A standing-still step costs `c_wait` in the reward (Design change, thesis text edited 2026-10-14)
+
+- **Where.** `4.Implementation.tex`, `eq:reward` and the paragraph after it in
+  the Reward paragraph, one row in `tab:rlparams`, and the sentence at the end
+  of `sec:method:training`. `2.Notation.tex`, the `c_wait` row. The places
+  carry a `% [A30]` tag.
+- **What the edit says.**
+  - `eq:reward` gets a fifth term, `- c_wait * omega_i(t)`. `omega_i(t)` is
+    the blocked indicator of `eq:split` for the task agent i serves, and 0
+    for an idle agent, so a parked free agent pays nothing.
+  - A chosen wait and an override both cost `c_wait`, and an override also
+    costs `n_blocked`. Yielding is therefore never dearer than being
+    overridden.
+  - The shaping term and `c_wait` are in the units of an edge cost, so the
+    policy weighs a step of waiting against a step away from the target. The
+    wait term is not shaping, as the congestion term is not.
+  - `tab:rlparams` gets `c_wait` = 0.1, below the cheapest edge (0.5 in the
+    example instance). The sentence at the end of `sec:method:training`
+    now says `c_wait` is a reward weight reported with the training
+    configuration, where it used to point at a footnote.
+  - The `% [A24]` sentence that said an override is one of two ways to stand
+    still moved into this paragraph, where the same fact is now stated through
+    `omega_i(t)`. The `[A24]` tags in the logging text are unchanged.
+- **Why.** `c_wait` was defined (`eq:onestepcost`) and nothing read it, so the
+  sentence that it decides whether an agent yields or detours was not true
+  of any result (issue #147). With a flat penalty on chosen waits alone, a
+  forced stop would have been cheaper than yielding, because an override
+  costs `n_blocked` = 0.5. Counting every standing-still step of a serving agent
+  fixes that order. The trained arms stand still in about 4 to 15% of their
+  steps (waited plus overridden), so at 0.1 the term is of the order of the
+  override term and well below shaping and delivery. That is measured on the
+  fixed-storage runs of 2026-10-14 and inferred for the new reward.
+- **Open.**
+  - 0.1 is a starting value. Whether the wait term changes behaviour, or
+    only adds noise, is not known until the retrained arms are compared with
+    the old ones.
+  - Token Passing still minimises timesteps and does not price a wait at
+    `c_wait`. The thesis says so in the Reference baseline paragraph, and
+    that choice is not changed here.
+- **Code.** `environment/reward_function.py` needs the term, a
+  `wait_cost` argument and a fifth key in the logged reward terms, and
+  example 04 sets `WAIT_COST` to 0.1. Not done yet.
+
+### [A31] Keep-up threshold, horizon and load levels (Thesis values set 2026-10-14)
+
+- **Where.** `4.Implementation.tex`, `tab:evalparams` (values, one new row)
+  and the paragraph after it. `2.Introduction.tex`, the "Keeping up"
+  paragraph after `eq:throughput`. The places carry a `% [A31]` tag.
+- **What the edit says.** `f_up` = 0.8, `T` = 630 and the load levels
+  `lambda_task` = 0.15, 0.25, 0.3 and 0.4 tasks per step. The paragraph says
+  where they come from, a Token Passing pilot on the example instance with
+  three agents, and that they are set again when the fleet or the instance
+  changes. The Keeping up paragraph says arrivals are random and tasks under
+  way at the horizon do not count as finished, so `f_up` is below 1.
+- **Why (measured, `slap-mapd-coupling` sweep of 2026-10-14, 6 seeds).**
+  Token Passing finishes about 0.3 tasks per step at most. `eq:throughput` divides by
+  the nominal `lambda_task`, but the tasks released vary by run (85 to 108
+  against a nominal 94 at 0.15). At `f_up` = 0.9 Token Passing failed 2 of 6
+  healthy seeds at 0.15 and 3 of 6 at 0.25. At 0.8 it passes 6 of 6 at 0.15,
+  0.25 and 0.3 and 0 of 6 at 0.4, so the threshold sits where the fleet
+  stops keeping up. The learned arms, trained at 0.15, pass 6 of 6 at 0.15
+  and mostly fail at 0.25, so one policy per load level is needed (issue
+  #146).
+- **Open.**
+  - The alternative, dividing by the tasks actually released, would remove
+    the arrival noise from the check. It changes `eq:throughput` and is not
+    adopted.
+  - The values rest on one instance, three agents and 6 seeds. The training
+    regime (one policy per load level or one policy at every load) and the
+    rollout length, which now equals `T`, are still open in
+    `tab:trainparams`.
+- **Code.** `keep_up_threshold` is still unset in the examples. Setting it
+  to 0.8 in examples 04 and 05 is not done yet.
+
+### [A32] Real centralised and section-based controllers (Design change, thesis text edited from 2026-10-16, in progress)
+
+- **Where.** So far `2.Introduction.tex`, the overview paragraph, the
+  controller factor in `sec:pd-aim-and-scope` and RQ2. `5.Experiments.tex`,
+  the RQ2 results placeholder and the "What deciding together changes"
+  discussion placeholder. `sec:pf:controllers`, the joint action sentence,
+  `tab:information` (new column "One decision covers"),
+  `eq:centralisedpolicy`, `eq:sectionpolicy`, the collision rule and the
+  critic reason. `2.Notation.tex`, the `u_{\prec i}(t)` row. The places
+  carry a `% [A32]` tag. `sec:pf:game`, the cycle paragraph, the policy
+  paragraph, the paragraph after `eq:obsfunction` (the controllers differ
+  in what an agent observes and in which agents choose together), the
+  nested observations paragraph and the credit paragraph (credit follows
+  the agents that choose together). `eq:posg` and `eq:obsfunction` are
+  unchanged, since earlier agents' choices are made inside the policy and
+  are not part of the state. `4.Implementation.tex`,
+  `sec:method:controllers`, the centralised and section-based paragraphs
+  (one run per agent in priority order, occupied halo vertices are not
+  entered, zones in parallel), a new "Full-view setting" paragraph and the
+  closing paragraph. The false claim that the centralised router is
+  Knippenberg's centralised setup is gone. The override term of
+  `eq:reward` is always zero for a centralised agent. `sec:method:rl`, the
+  opening paragraph, a fourth entry in `eq:features` (vertex chosen by an
+  earlier agent, set `V_{\prec i}(t)`, empty for the decentralised router),
+  the claim mask `eq:claimmask` added to `eq:mask`. `sec:method:model`, the
+  per-agent copy paragraph (runs follow the priority order), one sentence
+  on why the pooled readout stays, the critic paragraph, two rows of
+  `tab:modelparams`. `2.Notation.tex`, rows for `V_{\prec i}(t)` and
+  `M^{\prec}_i`. `styles/eqnames.tex`, `eq:claimmask`.
+  `sec:method:training`, one environment step is one timestep, and the
+  open credit choice is replaced by the credit `eq:credit`, the mean reward
+  of the agents that choose together. The credit row of `tab:trainparams`
+  is gone. `2.Notation.tex`, the `A_i(t)`, `bar R_i(t)` row.
+  `styles/eqnames.tex`, `eq:credit`. Chapter text done 2026-10-16.
+  - The full-view comparison separates seeing more from choosing together
+    with a shared reward, since a full-view agent is credited with its own
+    reward. A fourth setting to split choosing together from the shared
+    reward is not added.
+- **What the edit says.**
+  - The controllers differ in how many agents one decision covers, the whole
+    fleet, one zone or a single agent, and what each sees follows from that.
+    They no longer "differ only in the information they condition on".
+  - RQ2 asks how the coupling effect differs between controllers that differ
+    in how many agents one decision covers. Its results placeholder reports
+    mean runtime `kappa_T` next to the gain.
+  - The discussion uses the full-view setting (the decentralised controller
+    with the whole graph in view) to tell seeing more apart from deciding
+    together.
+  - The overview paragraph names Token Passing as the reference baseline. It
+    still said "prioritised planner", which `[A28]` had replaced.
+- **Why.** The arms as built after `[A3]` and `[A29]` are one per-robot policy
+  with a wider window, sampled independently, so the centralised arm is the
+  decentralised arm with a large view (Knippenberg's multi-agent setup, not
+  his single-agent one). The design decided with the author is in
+  `thesis-progress/desicion/real_centralised_design.md`, Part 3.
+  - Centralised. Agents decide one at a time in the episode priority order,
+    each seeing the vertices earlier agents have claimed this timestep. The
+    policy is the chain rule over agents, so it can represent any joint
+    distribution at a cost linear in `m`.
+  - Section-based. The same per zone on the zone plus halo, zones in
+    parallel, cross-zone clashes to conflict resolution.
+  - An agent may enter an occupied vertex only if its agent has already
+    decided to leave it, so a unit never produces a clash.
+  - Credit is the unit's mean reward. The credit row of `tab:trainparams`
+    goes.
+  - The training budget stays in environment steps. Runtime `kappa_T` is
+    where the cost of deciding for more agents shows.
+  - The original "which architecture degrades slowest" question and the
+    commons question are not used.
+- **Open.**
+  - Citations for policies that choose agents' actions one after another
+    (Wen et al. 2022, Fu et al. 2022), not yet verified.
+  - The chain-rule sentence after `eq:centralisedpolicy` says any joint
+    distribution can be written as the product. The network sees only
+    occupancy and an unlabelled set of chosen vertices, within L hops plus
+    the pooled readout, and only its own target. A sentence saying so was
+    added on 2026-10-16.
+  - First in the priority order means choosing first, not right of way. An
+    earlier agent may not enter the vertex of a later agent that has not
+    chosen, so in a corridor the later agent is the one that steps aside.
+    A sentence after "prioritised planning one timestep ahead" was added on
+    2026-10-16.
+  - The fleet size RQ2 is run at. Decided by the author later on
+    2026-10-16, not yet in the thesis: the first result uses a generated
+    warehouse with 8 agents and 94 vertices (9 aisles, 3 zones), at load
+    0.3, which is an overload there (Token Passing finishes 0.26 to 0.27).
+    `sec:impl:instances` and `tab:evalparams` still need the wording
+    (`ROADMAP.md`, Milestone 1).
+  - Resolved. RLlib's turn-based multi-agent environment supports the
+    sub-steps (step 0 spike of `real_controllers_plan.md`, 2026-10-16).
+  - `[A1]`, `[A2]`, `[A3]`, `[A4]`, `[A5]`, `[A6]`, `[A8]`, `[A9]`, `[A12]`,
+    `[A13]` and `[A29]` rewritten to match on 2026-10-16. The two `[A4]`
+    sentences (the loop sentence and the first factor after
+    `eq:rqformal`) and `3.Background.tex` ("the same three controllers of
+    `tab:information`") were brought into line the same day.
+- **Code.** Plan in `real_controllers_plan.md` at the workspace root.
+  Every step merged into `main` on 2026-10-16 (#161 claim mask, #162 claim
+  feature, #163 credit and full-view setting, #164 turn-based adapter, #165
+  budget per timestep and the seed fix), then #166 (evaluation through
+  turns) and #167 (configs and docs). Checkpoints from before #162 no longer load,
+  since the vertex features grew from 6 to 7 entries.
+
+### [A34] Skewed demand that drifts (Design change, thesis text edited 2026-10-17)
+
+- **Where.** `2.Introduction.tex`, `sec:pf:tasks`, after `P_ord` is named.
+  `4.Implementation.tex`, `sec:impl:instances` (three paragraphs) and two
+  rows of `tab:evalparams`. The places carry a `% [A34]` tag.
+- **What the edit says.** Popularity is skewed and changes over time, and
+  the storage layer only sees the orders. In the realisation each order asks
+  for one SKU, the SKU in rank r is asked for in proportion to 1/(r+1) (Zipf,
+  skew 1), and the ranking moves five places every 200 steps. Pickup and
+  delivery are drawn as before. The draw uses the same random numbers
+  whatever is in stock, so the orders are identical under every controller
+  and storage rule. No new symbols, since the values are fixed.
+- **Why (measured, demand probe of 2026-10-17,
+  `thesis-progress/desicion/demand_probe_2026-10-17.md`).** Uniform demand
+  gives adaptive storage nothing to gain, so RQ1 was empty
+  (`thesis_decisions.md` #1). With a fixed skew the demand rule gained almost
+  nothing over a good starting stock. With the drift, Token Passing under
+  fixed storage lost about 15% throughput and the demand rule won most of it
+  back, and at load 0.3 service time fell by 27% (Token Passing) and 44% to
+  59% (the night's decentralised policies).
+- **Open.** The values come from one instance, one planner and two policies
+  trained under uniform demand. A sweep of the skew and the drift is not
+  planned yet.
+- **Code.** PR A of `adaptive_storage_impl_plan.md` (workspace root), in
+  progress.
+
+### [A35] Starting stock from expected demand, in blocks (Design change, thesis text edited 2026-10-17)
+
+- **Where.** `4.Implementation.tex`, `sec:impl:instances`, after the [A34]
+  paragraphs. Tagged `% [A35]`.
+- **What the edit says.** Every storage rule starts from the same `x_0`,
+  computed once from the popularity at t = 0. Storage vertices are ordered by
+  mean distance to the delivery vertices, and the most popular SKUs fill the
+  nearest vertex, ceil(|K| / |V_str|) SKUs per vertex, then the next.
+- **Why.** A random start makes fixed storage a weak baseline (#95). In the
+  probe the block placement beat one popular SKU per vertex under fixed
+  storage (0.443 against 0.391 throughput with 100 SKUs). The mean distance
+  is used because an order picks its delivery vertex uniformly.
+- **Open.** `F_dem` and `F_cng` still rank storage vertices by the nearest
+  delivery vertex (`thesis_decisions.md` #9, decided to stay until the
+  congestion rule is settled).
+- **Code.** PR B of `adaptive_storage_impl_plan.md`.
+
+### [A36] How a wait is attributed to an edge (Gap, thesis text edited 2026-10-17)
+
+- **Where.** `4.Implementation.tex`, `sec:method:storage`, after the [A26]
+  paragraph. Tagged `% [A36]`.
+- **What the edit says.** Whenever the agent serving a task stands still,
+  one wait is counted on the next edge of its shortest route to its current
+  goal, whether it chose to wait or was overridden. No wait for an agent
+  without a task or at its goal.
+- **Why.** `eq:estimates` only said "waits attributed to e"
+  (`thesis_decisions.md` #21). The code counted only overridden moves, so
+  for Token Passing and the centralised arm, which never collide, `w_hat`
+  was always 0 and `F_cng` equalled `F_dem`. The rule was decided in
+  `adaptive_storage_plan.md` section 2, and on 2026-10-17 the author agreed
+  it also replaces how overridden moves are charged.
+- **Code.** PR C of `adaptive_storage_impl_plan.md`.
+
+### [A37] Storage rule wording fixes (Error, thesis text edited 2026-10-17)
+
+- **Where.** `4.Implementation.tex`, `sec:method:storage`, the opening
+  paragraph and `eq:storagegreedy` with the sentence after it. Tagged
+  `% [A37]`.
+- **What the edit says.** The ladder sentence no longer calls the
+  `F_dem` to `F_cng` gap "exactly this thesis's contribution". It is the
+  storage half of RQ3 (`thesis_decisions.md` #20). The access term reads
+  `min_{g in V_del} d_G(v, g)` (#10, was the typo `d_G(v, min_g)`). SKUs are
+  placed in descending order of demand, each to the free vertex with the
+  lowest score (#8, read literally the old text gave rarely ordered SKUs the
+  best vertices first).
+- **Code.** None, the code already did this.
+
+### [A38] Storage decided when stock arrives (Design change, thesis text edited 2026-10-18, uncommitted)
+
+- **Where.** `2.Introduction.tex`, `sec:pf:storage`: the paragraphs from "Stock
+  changes in two ways" to the storage objective, the estimates paragraph,
+  the new `eq:arrivals`, the fixed-storage paragraph, the definition of F, and
+  `eq:storageobjective` with the paragraphs after it; `sec:pf:coupling`, two
+  sentences of the loop paragraph. `4.Implementation.tex`,
+  `sec:method:storage` (the three rules, the [A26] sentence, the paragraph
+  that replaces the hard cap, the pilot result, `tab:storageparams`) and
+  `sec:impl:instances` (starting stock). `2.Notation.tex` and
+  `styles/eqnames.tex`. All tagged `% [A38]`.
+- **What the edit says.** Picking uses stock up. Every Delta timesteps new
+  stock arrives at the receiving vertices V_rcv (the delivery vertices), and
+  the storage rule decides which shelves it goes to. Stock already on a shelf
+  never moves. The storage update becomes `x_t = F(x_t^-, y_t, estimates)`
+  with `x_t >= x_t^-` and at most `y_t(k)` units added per SKU. The arrivals
+  `eq:arrivals` fill each SKU up to `max(x_min, ceil((1 + epsilon) Delta
+  rho_hat))` plus its waiting orders, the same under every rule. F_fix is
+  dedicated storage (arrivals to the home shelf), F_dem and F_cng place
+  arrivals by access distance and by the congestion-aware score. The
+  reassignment term R, its weight chi and the cap nu are gone. New symbols:
+  `V_rcv`, `x_t^-`, `y_t(k)`, `x^up_t(k)`, `epsilon`, `x_min`. Removed:
+  `R`, `chi`, `nu` (the cap).
+- **Why (measured, arrival probe of 2026-10-18,
+  `thesis-progress/desicion/arrival_probe_2026-10-18.md`).** Relocation under
+  a cap moved stock for free and left split SKUs with leftover units. Deciding
+  at arrival cut service time at load 0.3 by 43% against fixed storage (25%
+  with relocation), with the same fixed baseline, and its put-away is shorter
+  than fixed storage's. Matches the dynamic SLAP as Waubert de Puiseau et al.
+  (2022) define it. Adopted by the author on 2026-10-18
+  (`thesis-progress/desicion/arrival_storage_plan.md`).
+- **Open.** The values of epsilon, x_min and Delta (`tab:storageparams`, TBD).
+  Figures `fig:storageexample` and `fig:dkr` still show a relocation and an R
+  bar (sources in `thesis-progress/scripts/images/`). Replaces the proposals
+  `[A38]` to `[A40]` of `stock_template_2026-10-17.md`, which were never
+  applied.
+- **Code.** PR G to J of `arrival_storage_plan.md`, uncommitted, acceptance
+  passed.
+
+### [A39] Orders take a unit from the nearest shelf, or wait for stock (Design change, thesis text edited 2026-10-18, uncommitted)
+
+- **Where.** `2.Introduction.tex`, `sec:pf:tasks` (the stock condition and
+  the new `eq:pickuprule` paragraph, replacing the "placement template"
+  sentence), `sec:pf:measures` (the backlog and one sentence in the
+  service-time split). `4.Implementation.tex`, `sec:impl:instances` (how an
+  order is drawn). Tagged `% [A39]`.
+- **What the edit says.** An order takes one unit from the vertex holding its
+  SKU that is nearest its delivery vertex, ties by vertex index. With no unit
+  anywhere it waits and becomes a task once stock arrives, keeping its release
+  time, so the wait for stock counts in its service time and in the wait
+  before assignment. The stock condition holds at the step the unit is taken.
+  The backlog counts waiting orders, `B_t = |Q_t| + |B_t| + |Z^wait_t|`. The SKU
+  is drawn without looking at stock. New symbol: `Z^wait_t(k)`.
+- **Why.** Units must run out for the nearest-shelf pickup to make sense, or
+  one unit near each delivery vertex would serve every order. The arrival
+  probe attributes about 2 timesteps of the 8 extra gain at load 0.3 to the
+  pickup rule.
+- **Code.** PR H and J.
+
+### [A40] Put-away distance replaces relocations per update (Design change, thesis text edited 2026-10-18, uncommitted)
+
+- **Where.** `2.Introduction.tex`, the dependent variables, the opening of
+  `sec:pf:measures`, "Reported costs" (`eq:relocation` is now `eq:putaway`),
+  `tab:measures`, the scope list (two items) and its closing paragraph.
+  `4.Implementation.tex`, `sec:impl:logging`. `5.Experiments.tex`, "Scoring a
+  condition". Tagged `% [A40]`.
+- **What the edit says.** The cost of storage is the put-away distance,
+  each placed unit counted with the distance from the nearest receiving
+  vertex to its shelf, averaged over updates. Fixed storage pays it too. The
+  scope says put-away is not carried by the robots, and stored stock never
+  moves, so cold stock can hold the best shelves.
+- **Why.** Nothing is relocated any more, and measuring put-away for every
+  rule shows what adaptive storage adds or saves.
+- **Code.** PR I and J.
+
 ---
 
 ## Still open
 
+- [ ] **Figures for [A38].** Redraw `fig:storageexample` (tea arriving, not
+      moved) and `fig:dkr` (D and K only, no R) from
+      `thesis-progress/scripts/images/`, then copy them into `thesis/Images/`.
+- [ ] **Values for [A38].** epsilon (probe value 1), x_min (8 in the
+      configs), Delta (100), the receiving vertices, and beta under the
+      arrival model (1 in `configs/medium_arrival`).
+
 - [x] Read the `_gcn` chapters through and rename them over
       `2.Introduction.tex` and `4.Implementation.tex` (done 2026-09-29).
-- [ ] `2.Introduction*.tex` (well-formedness paragraph) still calls Token
+- [x] `2.Introduction*.tex` (well-formedness paragraph) called Token
       Passing and Ma et al.'s centralised baseline "two of the baselines
-      this thesis compares against". The Method chapter uses neither. This
-      was already true before the GCN change, and needs a decision.
+      this thesis compares against". Done 2026-10-13, see [A28]: Token
+      Passing is the one baseline and the centralised mention is gone.
+- [x] **Thesis edit for [A28].** Done 2026-10-13. The "Reference baseline"
+      paragraph of the Method is rewritten for Token Passing, and the
+      well-formedness paragraph says the no-deadlock guarantee belongs to
+      its planning and task rule, not to the instance property alone.
+- [ ] **Validator for [A28].** `check_well_formedness` in
+      `slap-mapd-coupling` counts non-task endpoints against $m$, as the
+      text now says. Today it counts all endpoints, and an instance with
+      fewer than $m$ vertices in $V_{\mathrm{ep}}$ passes it and then
+      fails when the environment places the agents.
+- [ ] **Stall rate for [A28].** After a realistic training run, also take
+      the longest whole-fleet still run over the healthy episodes, which
+      sets N for the training truncation. Then count the
+      evaluation episodes in which an agent holding a task stops moving for
+      a quarter of the episode, per arm. Then pick between the instance rule
+      and the assignment rule. The real centralised and section-based arms
+      are built ([A32]), so measure all three arms after the first retrain.
+- [ ] **Code for [A28].** Episode trace, training progress metrics and the
+      Token Passing baseline in `slap-mapd-coupling`. Specs B15 to B20 in
+      `fix_prs_plan.md`.
 - [ ] `3.Background.tex`, "Congestion and emergence", still frames the
-      commons for the system as a whole. It could now state the predicted
-      order (centralised least exposed, then section-based, then
-      decentralised) as a hypothesis.
-- [ ] Decide the TBD rows added in [A8] and [A9]. The credit signal is
-      now cited from `sec:pf:game` ([A12]), so deciding it also fixes what
-      that sentence commits to.
+      commons for the system as a whole. [A32] dropped the commons
+      question, and the author reinstated it later on 2026-10-16 (proposed
+      RQ6 in `ROADMAP.md` at the workspace root, not yet in the thesis).
+      Align this paragraph with the RQ once its wording is approved.
+- [x] The two TBD rows of [A8] (the η_i encoding and global pooling) were
+      decided on 2026-10-13, see [A29].
+- [x] Decide the TBD row of [A9], the credit signal. Decided 2026-10-16 by
+      [A32]: the mean reward of the agents that choose together
+      (`eq:credit`). The row is gone and the code (#163) follows it.
+- [ ] Write the sentence in `sec:pf:controllers` that says how the zones of
+      the zone partition are drawn (blocks of consecutive aisles, [A29]), and
+      decide the number of zones `p`. Higher priority since [A32], because
+      the section-based arm only differs from the centralised arm when
+      `p > 1`.
 - [x] **Tie-break in `eq:assignmentrule`** ([A12] follow-up, done
       2026-09-30). Two ties were unbroken: tasks released in the same
       timestep, and free agents at equal `d_G` to `s_j`. Now tasks go in
@@ -658,8 +1363,14 @@ regenerates `loop.png`.
       cost. They should compute the keep-up check, the three parts of
       service time, crowding and relocations per update, and the paired
       per-seed gain of `eq:rqformal`.
-- [ ] **Values for [A20].** `f_up`, the evaluation horizon and the number
-      of evaluation seeds in `tab:evalparams`.
+- [ ] **Values for [A20].** `f_up` (0.8), the evaluation horizon (630) and
+      the load levels are set, see [A31]. The number of evaluation seeds in
+      `tab:evalparams` is still TBD.
+- [ ] **Code for [A30] and [A31].** The `c_wait` reward term (0.1) and
+      `keep_up_threshold` = 0.8 in `slap-mapd-coupling`, then retrain. Code
+      done on `main` (`reward_function.py`, `wait_cost: 0.1` and
+      `keep_up_threshold: 0.8` in every `configs/*.yaml`), checked
+      2026-10-16. The retrain is still to do.
 - [ ] Confirm the delivery date (about 12 January 2027) and that the new
       arms match the thesis contract wording.
 - [ ] **Code for [A22].** `slap-mapd-coupling` `communication_neighbours`
@@ -669,3 +1380,38 @@ regenerates `loop.png`.
       communication with the cost distance `graph.distance`. It should use
       a hop distance (breadth-first search) for those, as `eq:localsubgraph`,
       `eq:commgraph` and `eq:halo` now say.
+- [ ] **Stock as a placement template** (proposed 2026-10-17, wording waits
+      for the author, see `thesis-progress/desicion/stock_template_2026-10-17.md`).
+      Picks never lower `x_t` and nothing is replenished. The model already
+      says so (`2.Introduction.tex:444-447`, `x_t` stays fixed between
+      updates) and the code does it (`multi_agent_env.py:276, 394`). But
+      `2.Introduction.tex:601-604` and `:1634-1636` still read "if not
+      simulated" and "modelled only if stated". Proposal: state the template
+      reading where `x_t` is defined. The storage update stands in for
+      replenishment and re-slotting, as a warehouse decides where incoming
+      stock is put away. Say that the switch is instant and free, which favours
+      adaptive storage, and that relocations are therefore reported as a cost.
+      Replace both "if" sentences. Cite `WaubertdePuiseau2022DynamicSL`
+      (already in `references.bib`), which defines the dynamic SLAP as where to
+      store goods "upon entry or reentry into the system".
+- [ ] **Gap: pickup vertex in proportion to units.** The pickup vertex is
+      drawn uniformly among the vertices holding the SKU
+      (`4.Implementation.tex:732`, `multi_agent_env.py:520`), so a leftover
+      unit at an old vertex keeps half of the SKU's orders there. That matters
+      because ν binds at every update. Proposal: draw in proportion to
+      `x_t(k,v)`, mapping the same `u_pickup` through cumulative units so the
+      order stream stays paired. Also name the pickup choice next to
+      `eq:coupling` as where storage enters routing. Changes every
+      adaptive-storage result, so it is to be decided before the long run.
+      Issue drafted, not yet opened.
+- [ ] **Gap: a storage update keeps each SKU's units.** The set of storage
+      rules (`2.Introduction.tex:504-511`) allows a rule that drops a SKU, which
+      could then never be ordered again. The code keeps totals only when the
+      cap binds (`storage/relocation.py:28-30, 71`), and the greedy target can
+      leave units unplaced (`storage/demand.py:17`). This never happens on the
+      8-agent instance (928 of 2000 capacity). Proposal: say so in the thesis,
+      and check totals after every update in the code. Issue drafted, not yet
+      opened.
+- [ ] **Check: the instant switch.** Optional. Evaluate the adaptive rules
+      with every update applied one epoch late, with no retraining, to see
+      how much of the gain the instant switch carries.

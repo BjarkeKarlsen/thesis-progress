@@ -139,8 +139,8 @@ INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
-OUTPUT GAPS.toc
 INPUT /usr/share/texmf-dist/fonts/tfm/jknappen/ec/ectt1095.tfm
+OUTPUT GAPS.toc
 INPUT /usr/share/texmf-dist/fonts/tfm/jknappen/ec/ecrm2074.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/jknappen/ec/ecbx2074.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm

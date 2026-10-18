@@ -1,0 +1,267 @@
+diff --git a/examples/04_decentralised_training.py b/examples/04_decentralised_training.py
+index a6469eb..9a1c89b 100644
+--- a/examples/04_decentralised_training.py
++++ b/examples/04_decentralised_training.py
+@@ -23,11 +23,14 @@ arm. Pooling is "mean" for the centralised and section arms and "none" for the
+ decentralised arm.
+ 
+ Regimes (sec:method:training). "fixed_only" trains under F_fix. "matched" trains
+-under the storage rule used at evaluation, EVALUATION_STORAGE_MODE. That rule is
+-F_fix here, so the two regimes train identically until the online storage
+-estimates of the demand and congestion rules exist. Evaluation samples a legal
+-slot with the policy function's rule. Whether it should take the most likely
+-slot instead is still open.
++under the storage rule used at evaluation. That rule is chosen with --storage-mode
++(fixed, demand or congestion, default fixed) and its parameters --storage-epoch (Delta),
++--reassignment-cap (nu) and --congestion-weight (beta), which the thesis leaves TBD, so
++an adaptive rule needs the ones it reads and there is no default. With the default rule
++the two regimes train identically. The policy is always evaluated under --storage-mode,
++so a "fixed_only" policy can be evaluated under an adaptive rule. Evaluation samples a
++legal slot with the policy function's rule. Whether it should take the most likely slot
++instead is still open.
+ 
+ Arrival rate. --arrival-rate sets the task arrival rate lambda_task of training
+ and of evaluation, so a checkpoint is evaluated at the rate it was trained at by
+@@ -140,6 +143,74 @@ CREDIT_SIGNAL: CreditSignal = "per_agent"
+ NUM_ZONES = 3
+ # The storage rule a policy is evaluated under. "matched" training uses it too.
+ EVALUATION_STORAGE_MODE = "fixed"
++
++
++class StorageSettings(NamedTuple):
++    """The storage rule of a run and its parameters (tab:storageparams). The thesis leaves the
++    epoch length Delta, the relocation cap nu and the congestion weight beta TBD, so there is no
++    default for them. An adaptive rule needs the ones it reads, and F_fix takes none."""
++
++    mode: str = "fixed"
++    epoch: int | None = None  # Delta, steps between storage updates
++    cap: int | None = None  # nu, units relocated per update at most
++    weight: float | None = None  # beta, F_cng only
++
++
++FIXED_STORAGE = StorageSettings()
++
++
++def add_storage_arguments(parser: argparse.ArgumentParser) -> None:
++    """The storage flags shared by 04, 04b and 05. Without them every run uses F_fix."""
++    parser.add_argument(
++        "--storage-mode",
++        choices=["fixed", "demand", "congestion"],
++        default="fixed",
++        help="storage rule the policy is evaluated under, and trained under with "
++        "--regime matched (default fixed)",
++    )
++    parser.add_argument("--storage-epoch", type=int, help="Delta, steps between storage updates")
++    parser.add_argument("--reassignment-cap", type=int, help="nu, units relocated per update")
++    parser.add_argument("--congestion-weight", type=float, help="beta, congestion rule only")
++
++
++def storage_from_args(args: argparse.Namespace, parser: argparse.ArgumentParser) -> StorageSettings:
++    """The StorageSettings of the flags, or a parser error for a combination the model rules out."""
++    settings = StorageSettings(
++        args.storage_mode, args.storage_epoch, args.reassignment_cap, args.congestion_weight
++    )
++    problem = storage_problem(settings)
++    if problem:
++        parser.error(problem)
++    return settings
++
++
++def storage_problem(settings: StorageSettings) -> str | None:
++    """Why `settings` is not a storage rule of the thesis, or None."""
++    if settings.mode == "fixed":
++        if any(v is not None for v in (settings.epoch, settings.cap, settings.weight)):
++            return "--storage-mode fixed takes no --storage-epoch, --reassignment-cap or beta"
++        return None
++    missing = [
++        flag
++        for flag, value in (
++            ("--storage-epoch", settings.epoch),
++            ("--reassignment-cap", settings.cap),
++        )
++        if value is None
++    ]
++    if settings.mode == "congestion" and settings.weight is None:
++        missing.append("--congestion-weight")
++    if settings.mode == "demand" and settings.weight is not None:
++        return "--congestion-weight only applies to --storage-mode congestion"
++    if missing:
++        return f"--storage-mode {settings.mode} needs " + ", ".join(missing)
++    if settings.epoch is not None and settings.epoch < 1:
++        return "--storage-epoch must be positive"
++    if settings.cap is not None and settings.cap < 0:
++        return "--reassignment-cap must not be negative"
++    return None
++
++
+ # Illustrative. The cap on the messages an agent hears. With FLEET_SIZE agents an agent hears at
+ # most the FLEET_SIZE - 1 others, so this cap is exactly enough, and it follows the fleet size so a
+ # larger fleet does not silently drop senders. It only matters with --communication, and it was 2
+@@ -200,15 +271,18 @@ def build_config(
+     arrival_rate: float = DEFAULT_ARRIVAL_RATE,
+     horizon: int = DEFAULT_HORIZON,
+     communication: bool = False,
++    storage: StorageSettings = FIXED_STORAGE,
+ ) -> ExperimentConfig:
+     """The configuration a run trains under. "fixed_only" trains under F_fix and
+-    "matched" under the storage rule used at evaluation (sec:method:training).
+-    The two differ only once EVALUATION_STORAGE_MODE is not "fixed", which needs the
+-    online storage estimates of the demand and congestion rules. `communication` is the
++    "matched" under the storage rule used at evaluation, `storage` (sec:method:training).
++    The two differ only once `storage` is not F_fix. `communication` is the
+     thesis' conditional ablation (RQ5), decentralised arm only, off unless asked for."""
+-    storage_mode = "fixed" if regime == "fixed_only" else EVALUATION_STORAGE_MODE
++    settings = FIXED_STORAGE if regime == "fixed_only" else storage
+     return ExperimentConfig(
+-        storage_mode=storage_mode,
++        storage_mode=settings.mode,  # type: ignore[arg-type]
++        storage_epoch_length=settings.epoch,
++        reassignment_cap=settings.cap,
++        congestion_weight=settings.weight,
+         controller=controller,
+         congestion_sensitive=False,
+         communication=communication,
+@@ -235,10 +309,11 @@ def evaluation_config(
+     arrival_rate: float = DEFAULT_ARRIVAL_RATE,
+     horizon: int = DEFAULT_HORIZON,
+     communication: bool = False,
++    storage: StorageSettings = FIXED_STORAGE,
+ ) -> ExperimentConfig:
+-    """The configuration an episode is evaluated under, the "matched" one. It must carry
+-    the `communication` the checkpoint was trained with."""
+-    return build_config("matched", seed, controller, arrival_rate, horizon, communication)
++    """The configuration an episode is evaluated under, the "matched" one, with the storage
++    rule `storage`. It must carry the `communication` the checkpoint was trained with."""
++    return build_config("matched", seed, controller, arrival_rate, horizon, communication, storage)
+ 
+ 
+ def build_seed_split(base_seed: int, eval_seed_count: int = 3) -> SeedSplitConfig:
+@@ -431,6 +506,7 @@ def evaluate(
+     arrival_rate: float = DEFAULT_ARRIVAL_RATE,
+     horizon: int = DEFAULT_HORIZON,
+     communication: bool = False,
++    storage: StorageSettings = FIXED_STORAGE,
+ ) -> None:
+     """Runs `module` for one episode per evaluation seed through the evaluator, so
+     the observations are the ones it saw in training. The seeds are the evaluation half
+@@ -440,7 +516,9 @@ def evaluate(
+     policy = ModulePolicy(module)
+     summaries = []
+     for episode_idx, eval_seed in enumerate(eval_seeds):
+-        config = evaluation_config(eval_seed, arm.controller, arrival_rate, horizon, communication)
++        config = evaluation_config(
++            eval_seed, arm.controller, arrival_rate, horizon, communication, storage
++        )
+         trace_path = trace_dir / f"{arm.controller}_episode_{episode_idx + 1}.jsonl"
+         metrics = run_episode(
+             instance.graph,
+@@ -496,6 +574,7 @@ def parse_args(
+         "env-runners * horizon steps (horizon with none), so with 7 runners the default of "
+         "630 gives 4410 steps per iteration (default 630, illustrative)",
+     )
++    add_storage_arguments(parser)
+     parser.add_argument("--env-runners", type=int, default=0)
+     parser.add_argument("--eval-seeds", type=int, default=3, help="number of evaluation seeds")
+     parser.add_argument("--gpu", action="store_true")
+@@ -509,6 +588,7 @@ def parse_args(
+         "04b_evaluate_checkpoint.py",
+     )
+     args = parser.parse_args(argv)
++    args.storage = storage_from_args(args, parser)
+     if args.communication and controller != "decentralised":
+         parser.error("--communication only applies to the decentralised controller")
+     if args.eval_seeds < 1:
+@@ -535,13 +615,15 @@ def main(controller: ControllerArchitecture = "decentralised") -> None:
+         arrival_rate=args.arrival_rate,
+         horizon=args.horizon,
+         communication=args.communication,
++        storage=args.storage,
+     )
+     arm = build_arm(instance, controller, config.observation_depth)
+     print(
+         f"{controller} arm on {len(instance.graph.vertices)} vertices, "
+         f"max_local_nodes={arm.encoding.max_local_nodes}, pooling={arm.pooling}, "
+         f"credit_signal={CREDIT_SIGNAL}, arrival_rate={config.arrival_rate}, "
+-        f"horizon={config.horizon}, communication={config.communication}"
++        f"horizon={config.horizon}, communication={config.communication}, "
++        f"storage={args.storage.mode}"
+     )
+ 
+     seed_split = build_seed_split(config.seed, args.eval_seeds)
+@@ -580,6 +662,7 @@ def main(controller: ControllerArchitecture = "decentralised") -> None:
+         args.arrival_rate,
+         args.horizon,
+         args.communication,
++        args.storage,
+     )
+ 
+ 
+diff --git a/examples/04b_evaluate_checkpoint.py b/examples/04b_evaluate_checkpoint.py
+index 7bf8601..ce1b79e 100644
+--- a/examples/04b_evaluate_checkpoint.py
++++ b/examples/04b_evaluate_checkpoint.py
+@@ -55,9 +55,12 @@ def build_config(
+     arrival_rate: float = example_04.DEFAULT_ARRIVAL_RATE,
+     horizon: int = example_04.DEFAULT_HORIZON,
+     communication: bool = False,
++    storage=example_04.FIXED_STORAGE,
+ ):
+     """The configuration of an evaluation episode, 04's."""
+-    return example_04.evaluation_config(seed, controller, arrival_rate, horizon, communication)
++    return example_04.evaluation_config(
++        seed, controller, arrival_rate, horizon, communication, storage
++    )
+ 
+ 
+ def check_communication(module, communication: bool) -> None:
+@@ -86,6 +89,7 @@ def render_episode(
+     delay: float = 0.15,
+     horizon: int = example_04.DEFAULT_HORIZON,
+     communication: bool = False,
++    storage=example_04.FIXED_STORAGE,
+ ) -> None:
+     """Live pygame preview of one episode driven by the module's sampled slots. Close the
+     window (or Ctrl+C) to stop early."""
+@@ -99,6 +103,7 @@ def render_episode(
+         arrival_rate=arrival_rate,
+         horizon=horizon,
+         communication=communication,
++        storage=storage,
+     )
+     adapter = WarehouseMAPDMultiAgentEnv(
+         instance.graph,
+@@ -167,8 +172,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+         help="local communication, the thesis' conditional ablation (RQ5), decentralised arm "
+         "only. Pass it exactly as it was passed to 04_decentralised_training.py",
+     )
++    example_04.add_storage_arguments(parser)
+     parser.add_argument("--render", action="store_true")
+     args = parser.parse_args(argv)
++    args.storage = example_04.storage_from_args(args, parser)
+     if args.communication and args.arm != "decentralised":
+         parser.error("--communication only applies to the decentralised controller")
+     if args.eval_seeds < 1:
+@@ -196,6 +203,7 @@ def main() -> None:
+         arrival_rate=args.arrival_rate,
+         horizon=args.horizon,
+         communication=args.communication,
++        storage=args.storage,
+     )
+     arm = example_04.build_arm(instance, args.arm, config.observation_depth)
+ 
+@@ -214,6 +222,7 @@ def main() -> None:
+             args.arrival_rate,
+             horizon=args.horizon,
+             communication=args.communication,
++            storage=args.storage,
+         )
+     else:
+         seed_split = example_04.build_seed_split(config.seed, args.eval_seeds)
+@@ -230,6 +239,7 @@ def main() -> None:
+             args.arrival_rate,
+             args.horizon,
+             args.communication,
++            args.storage,
+         )
+ 
+ 

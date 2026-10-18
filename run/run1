@@ -1,0 +1,27 @@
+Rerun the communication condition (fish, from the main checkout). I kept the budget at 500000, which is what the other arms' logs show:
+
+fish
+cd ~/Documents/thesis/slap-mapd-coupling
+test -d examples/output; and echo "move examples/output away first"
+env PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+  ~/.venvs/rl/bin/python examples/04_decentralised_training.py \
+  --horizon=630 --arrival-rate=0.15 --env-runners=7 --gpu \
+  --budget-env-steps=500000 --eval-seeds=3 --communication \
+  2>&1 | tee ~/thesis_runs/run_04_h630_rate0.15_comm_retry.log
+mv examples/output ~/thesis_runs/h630_rate0.15_comm_retry
+
+Close the browser or any other GPU-heavy app first, since that frees the roughly 1 GB the crash was short of. If it still runs out of memory, the next step is lowering minibatch_size from 128 (examples/04_decentralised_training.py:242) or dropping --gpu for this one run. I haven't changed either, because minibatch_size is a training hyperparameter. Say if you want it changed.
+
+If you do want to re-evaluate the section checkpoint:
+
+fish
+~/.venvs/rl/bin/python examples/04b_evaluate_checkpoint.py \
+  --checkpoint=/home/bjarkek/ray_results/section_fixed_only/PPO_warehouse_mapd_multi_agent_env_6170e_00000_0_2026-10-14_11-33-57/checkpoint_000000 \
+  --arm=section --eval-seeds=3 --arrival-rate=0.15 --horizon=630
+
+For the communication checkpoint later, use --arm=decentralised --communication, with the same flags otherwise.
+
+Output folders. These look mislabelled, and I haven't touched anything:
+- ~/thesis_runs/h630_rate0.15_comm holds the three-arm run (04, 02 and 03 traces and progress files). It does not hold the communication run.
+- ~/thesis_runs/h630_rate0.15 holds the earlier sanity run from 10:43.
+- Its decentralised_training_progress.jsonl is 0 bytes, because the crashed communication run truncated it when it started. The non-communication decentralised progress is therefore only in run_04_decentralised_training_h630_rate0.15.log now. The decentralised traces from 11:05 are intact.
