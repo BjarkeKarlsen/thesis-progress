@@ -17,7 +17,8 @@ looks the way it does. Updated 2026-10-20.
 
 | File | What it holds |
 |---|---|
-| `GAPS.md` | Rationale for every `[Axx]` tag ("every controller arm as a GCN" and later changes). The REVISION 2 `[Gxx]`/`[Kxx]`/`[Mxx]` fixes are in `../archive/temp/GAPS.tex`. |
+| `GAPS.md` | Index of every `[Axx]` tag with its status, the rationale for each tag still in force, and the open items ("every controller arm as a GCN" and later changes). The REVISION 2 `[Gxx]`/`[Kxx]`/`[Mxx]` fixes are in `../archive/temp/GAPS.tex`. |
+| `done/GAPS_history.md` | Superseded tags ([A8], [A16], [A21], [A40]) and closed checklist items, moved out of `GAPS.md`. |
 | `decision_log.md` | Open thesis decisions from issue #103 and the training budget gap, with options for each. |
 
 ## Active
