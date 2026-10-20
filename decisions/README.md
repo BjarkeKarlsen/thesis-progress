@@ -64,6 +64,7 @@ looks the way it does. Updated 2026-10-20.
 
 ## Related folders
 
+- `../notes/how_the_system_works.md` is the plain description of the system.
 - `../notes/` has the research goals, status notes, the conflict signals note and `thoughts.md`, plus `updates_done/` (L4 plans, campaign findings, fix PR log).
 - `../guides/` has explanatory guides (halo protocol, learning problem, move score head).
 - `../archive/temp/` has the early formal drafts and reviews. These are history, not spec.
