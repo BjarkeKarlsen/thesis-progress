@@ -1538,6 +1538,18 @@ wrong under [A32] are marked.
 
 ## Still open
 
+- [ ] **Code for [A49] to [A51].** Four drift points posted to #103 on
+      2026-10-20 (group "measures"): the two-part keep-up check, the mean
+      service time over all tasks instead of picks, the put-away distance
+      still computed, and the relative gain over route time. One fix PR from
+      `main` (https://github.com/BjarkeKarlsen/slap-mapd-coupling/issues/103#issuecomment-6291490025).
+- [ ] **Open point of [A50].** A line split over two shelves gives two picks,
+      so the number of picks can differ between rules on one seed. Decide
+      whether that needs handling, or one sentence in the threats to validity.
+- [ ] **References for [A52].** Check the eight entries added from memory
+      (Li 2021, Silver 2005, Wen 2022, Fu 2022, Heskett 1963, de Koster 2007,
+      Axsater 2015, Stern 2019) against the sources.
+
 - [ ] **Values for [A38].** epsilon (probe value 1), x_min (8 in the
       configs), Delta (100), the receiving vertices, and beta under the
       arrival model (1 in `configs/medium_arrival`).
