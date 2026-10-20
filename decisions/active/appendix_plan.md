@@ -5,6 +5,15 @@ The limit is 60 pages for the main text. The bibliography and appendices do not
 count. The appendices are a separate document (`thesis/appendix.tex`), so labels
 are shared through generated files (`LATEX.md`, "Appendix document").
 
+Files. One per appendix in `thesis/Chapters/Appendix/` (`A.Notation.tex` to
+`H.Parameters.tex`). The order of the `\subfile` lines in `appendix.tex` sets
+the letters. A supporting experiment gets its own appendix, with its setup,
+result and conclusion. The main experiments (RQ1 to RQ4) stay in the
+Experiments chapter.
+
+Checked 2026-10-20. All 16 moved blocks are in their appendix files word for
+word, against the text as it stood just before the move.
+
 Rule for a move. The main text keeps the idea in words and the result. The
 appendix keeps the full derivation, details and extra figures. Labels stay the
 same, and the main text marks the spot with `% [APP]`.
