@@ -301,4 +301,4 @@ Do not rewrite mathematical notation automatically unless all dependent occurren
 
 - `thesis/Chapters/2.Notation.tex` (`tab:notation`, the notation appendix) is the authority on which letter means what. A symbol used in the chapters but missing from the table, or used with a different meaning, is a DEF007 finding. The table lists symbols a reader meets more than once, not helpers local to one equation, so a missing local helper is not a finding.
 - `notation_renames.md` at the workspace root lists the clashes already known and the renames agreed for them. Report a known clash as known, with its agreed rename, rather than as a new discovery.
-- Model changes are tagged `% [Axx]` in the chapters with their reasons in `thesis-progress/temp/GAPS.md`. Check there before reporting a renamed or redefined symbol as drift.
+- Model changes are tagged `% [Axx]` in the chapters with their reasons in `thesis-progress/decisions/GAPS.md`. Check there before reporting a renamed or redefined symbol as drift.
