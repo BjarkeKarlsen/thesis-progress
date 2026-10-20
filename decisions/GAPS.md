@@ -103,6 +103,7 @@ Status of every tag. *In force* entries are below. *History* entries are in
 | [A45] | Keep-up against released tasks, a backlog slope, and stalls | In force |
 | [A46] | Orders with several lines and amounts | In force |
 | [A47] | Robots carry the put-away | In force |
+| [A48] | The storage rule is a dynamic SLAP, solved with rules | In force |
 
 ## Problem Formulation (`2.Introduction.tex`)
 
@@ -1452,6 +1453,25 @@ wrong under [A32] are marked.
   model (Δ = 100, one queue). Not yet started.
 
 ---
+
+### [A48] The storage rule is a dynamic SLAP, solved with rules (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `3.Background.tex`, `sec:bg:storage` and the opening of
+  `sec:rw:storage`. `6.Conclusion.tex`, `sec:future`.
+- **What the edit says.** The Background defines DSLAP as deciding where
+  goods are stored as they arrive (Waubert de Puiseau et al. 2022) and says
+  the storage rule solves it for arriving stock, with fixed rules rather than
+  a learned policy. The description of the three storage papers is left to
+  Related Work only, so they are no longer introduced twice. The sentence
+  that the rule "updates storage dynamically as demand shifts" is gone,
+  since stock on a shelf never moves after [A38]. Future work gains a
+  paragraph on a learned storage policy trained in turns with one router,
+  and the Transformer subsection of Related Work becomes two sentences there.
+- **Why.** The old wording described relocation, which the arrival model
+  replaced. Saying the rules are fixed answers the obvious question of why
+  the storage side does not learn, and the idea itself is kept in
+  `decisions/ideas/learned_storage_policy.md`. Removing the doubled papers
+  and the Transformer subsection also saves about a page.
 
 ## Still open
 

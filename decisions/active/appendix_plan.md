@@ -42,6 +42,26 @@ The results are still to be written, so expect the main text to grow by 6 to 8 p
 | G | Storage rule details (`app:storage`) | `sec:pf:storage`, the storage matrix example, arrivals, tie-breaking | done |
 | H | Parameter tables (`app:params`) | the five `tab:*params` of Method and Implementation | done |
 
+## Second round, 2026-10-20
+
+The 60 pages count from the Introduction. Moved in this round, all checked
+word for word (29 blocks in total across both rounds).
+
+| | Appendix | Moved from |
+|---|---|---|
+| F | worked example, blocked time against the edge estimate | `sec:pf:measures` |
+| I | Logging and correctness checks (`app:repro`) | `sec:impl:logging`, `sec:impl:validation` |
+| J | Pilot runs (`app:pilots`) | `sec:method:storage`, `sec:impl:instances`, `sec:impl:logging` |
+| K | Controllers and observations in detail (`app:controllers`) | `sec:pf:controllers`, `tab:observationexample` |
+| L | Deadlines and re-tasking (`app:scope`) | `sec:pf:scope` |
+
+Also. Related Work's Transformer subsection became two sentences in Future
+work, the doubled SLAP papers were removed from Background (`[A48]`), and a
+forced page break before the Method was removed.
+
+Main text now pages 4 to 49 (46 pages). With results, discussion,
+conclusion and future work written, about 55 to 56.
+
 ## Still to check
 
 - Read the bridging sentences left in the main text (search `% [APP]`).
