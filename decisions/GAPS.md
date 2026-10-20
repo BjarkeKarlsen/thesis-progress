@@ -1528,7 +1528,8 @@ wrong under [A32] are marked.
   and its bound moves to Appendix K. The split is the queue split between
   waiting and being served. 25 definitions move to Appendix M, "Definitions
   in full", each kept in words in the main text, and 4 small displays become
-  inline. The main text goes from 51 displayed equations to 22.
+  inline. The move, vertex and swap rules follow, written in words with
+  `fig:conflicts`. The main text goes from 51 displayed equations to 20.
 - **Why.** The author found the maths heavier than in comparable papers, and
   a system with fewer new ideas is easier to validate. What stays new is the
   coupling of storage to live traffic and the comparison of controllers by how
