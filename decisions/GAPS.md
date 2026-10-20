@@ -1079,7 +1079,7 @@ wrong under [A32] are marked.
     warehouse with 8 agents and 94 vertices (9 aisles, 3 zones), at load
     0.3, which is an overload there (Token Passing finishes 0.26 to 0.27).
     `sec:impl:instances` and `tab:evalparams` still need the wording
-    (`ROADMAP.md`, Milestone 1).
+    (`thesis-progress/archive/workspace/ROADMAP.md`, Milestone 1).
   - Resolved. RLlib's turn-based multi-agent environment supports the
     sub-steps (step 0 spike of `real_controllers_plan.md`, 2026-10-16).
   - `[A1]`, `[A2]`, `[A3]`, `[A4]`, `[A5]`, `[A6]`, `[A8]`, `[A9]`, `[A12]`,
@@ -1240,7 +1240,7 @@ wrong under [A32] are marked.
   grows, and whether that loss is faster when one decision covers fewer
   agents.
 - **Why.** The author reinstated the commons question on 2026-10-16
-  (proposed as RQ6 in `ROADMAP.md`). It uses the same runs and the same
+  (proposed as RQ6 in `thesis-progress/archive/workspace/ROADMAP.md`). It uses the same runs and the same
   measure as RQ4, so a sixth question would only split the reader's
   attention. Agreed 2026-10-19 (`research_goals_2026-10-18.md`, change 7).
 - **Code.** None. `Lambda_T` and `m` are already logged.
@@ -1477,7 +1477,7 @@ wrong under [A32] are marked.
 - [ ] `3.Background.tex`, "Congestion and emergence", still frames the
       commons for the system as a whole. [A32] dropped the commons
       question, and the author reinstated it later on 2026-10-16 (proposed
-      RQ6 in `ROADMAP.md` at the workspace root, not yet in the thesis).
+      RQ6 in `thesis-progress/archive/workspace/ROADMAP.md` at the workspace root, not yet in the thesis).
       Align this paragraph with the RQ once its wording is approved.
       The question is now part of RQ4 ([A33], 2026-10-19), so this paragraph
       can be aligned.

@@ -12,7 +12,7 @@ Local note. The controller redesign (real centralised and section-based) is not 
 
 ## 1. Embed each window once (issue 160)
 
-Status, later on 2026-10-16: do now, Track B of `ROADMAP.md`.
+Status, later on 2026-10-16: do now, Track B of `thesis-progress/archive/workspace/ROADMAP.md`.
 
 Design in `embed_once_design.md`. It applies to the decentralised arm with communication, the only arm with senders.
 Under the real centralised and section-based design, robots in one decision unit already share the decision, so no other

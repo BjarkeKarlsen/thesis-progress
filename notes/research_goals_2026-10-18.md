@@ -2,7 +2,7 @@
 
 **Status: changes 1, 3, 4, 6, 7 and 9 applied 2026-10-19 as `[A41]` and `[A33]`, change 5 as `[A42]`. change 2 superseded by `[A44]` (reworded main result), change 10 open, change 11 made obsolete by the arrival model.** Original status: proposal. The author asked to note the changes to
 the research goals and not to edit the Introduction yet. Each change becomes an `[Axx]` tag and
-a `GAPS.md` entry when it is applied. `[A33]` (commons question, `ROADMAP.md`) is still
+a `GAPS.md` entry when it is applied. `[A33]` (commons question, `thesis-progress/archive/workspace/ROADMAP.md`) is still
 unapplied, and `stock_template_2026-10-17.md` has proposed `[A38]` to `[A40]`, so the changes
 here would start at `[A41]`.
 
@@ -103,7 +103,7 @@ Proposed:
 
 Reason: RQ4 then bounds the main result rather than standing beside it.
 
-### 7. The commons question (`[A33]`, proposed as RQ6 in `ROADMAP.md`)
+### 7. The commons question (`[A33]`, proposed as RQ6 in `thesis-progress/archive/workspace/ROADMAP.md`)
 
 Proposed: fold it into RQ4 instead of adding a sixth question. RQ4 already runs the fleet sweep.
 One sentence where RQ4 is formalised:
@@ -159,7 +159,7 @@ the reader should know what it does and does not buy in the experiments.
   routing half of congestion sensitivity (change 5).
 - `5.Experiments.tex`, "Mapping questions to comparisons": the same wording for RQ1 to RQ4.
 - `5.Experiments.tex`, results opening: lead with the main result and `tab:exp:rq1`.
-- `ROADMAP.md`: the commons question as part of RQ4, not RQ6.
+- `thesis-progress/archive/workspace/ROADMAP.md`: the commons question as part of RQ4, not RQ6.
 
 ## Decisions asked of the author
 

@@ -125,7 +125,7 @@ Update, later on 2026-10-16. The first result moves to an 8-agent warehouse with
 there (Token Passing finishes 0.26 to 0.27). Training is 500 000 timesteps, horizon 630, 2 training seeds (0 and 1000),
 run overnight (`~/thesis_runs/night_2026-10-16/`). The checkpoint is chosen by completed tasks on validation seeds 20 and
 21 and tested on seeds 5 to 10. Items 7 to 11 below are about the 3-agent instance and stay as history, except where
-marked. The order of work is in `ROADMAP.md` at the workspace root.
+marked. The order of work is in `thesis-progress/archive/workspace/ROADMAP.md` at the workspace root.
 7. Load 0.4. An overload point where nothing keeps up with 3 agents (Token Passing finishes at most about 0.3), reported as
    completion share, throughput and backlog, or a larger fleet so 0.4 keeps up. Thesis (`eq:throughput`, fleet size).
 8. Add a load around 0.2 to 0.22, where the learned arms keep up with a heavy queue.

@@ -26,7 +26,7 @@ looks the way it does. Updated 2026-10-20.
 | File | Topic | Status |
 |---|---|---|
 | `active/thesis_plan.md` | Main planning document, built from `../notes/thoughts.md` | Live, 2026-10-19 |
-| `active/embed_once_design.md` | Embed each agent's window once, to cut communication cost | Do now (Track B of `ROADMAP.md`) |
+| `active/embed_once_design.md` | Embed each agent's window once, to cut communication cost | Do now (Track B of `thesis-progress/archive/workspace/ROADMAP.md`) |
 | `active/memory_reduction_plan.md` | Where training memory goes and what to change | Not implemented |
 | `active/trace_extension_plan.md` | Extend the episode trace to find where a task goes wrong | Not implemented |
 | `active/simplification_plan.md`, `active/simplification_proposal.tex` | Simplification changes that stay (version 3) | Plan |

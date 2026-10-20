@@ -35,7 +35,7 @@ service time and congestion in a graph-based warehouse. It splits into five ques
 | RQ5 | Conditional. Does local communication help the decentralised controller? |
 
 A commons question is proposed as RQ6. As the fleet grows, does each agent finish fewer tasks,
-and does the loss grow faster when one decision covers fewer agents? It is in `ROADMAP.md`, not
+and does the loss grow faster when one decision covers fewer agents? It is in `thesis-progress/archive/workspace/ROADMAP.md`, not
 yet in the thesis.
 
 **The loop.** Two layers feed each other. Every Δ steps a storage rule decides which shelves
@@ -246,6 +246,6 @@ the other in timesteps.
 - Demand probe: `thesis-progress/decisions/done/demand_probe_2026-10-17.md`
 - Run folders: `~/thesis_runs/short_2026-10-17/`, `~/thesis_runs/night_2026-10-16/`,
   `~/thesis_runs/demand_probe/`
-- Order of work: `ROADMAP.md`, current state: `SESSION_CONTEXT.md`, model changes:
+- Order of work: `thesis-progress/archive/workspace/ROADMAP.md`, current state: `SESSION_CONTEXT.md`, model changes:
   `thesis-progress/decisions/GAPS.md`
 - Status deck: https://claude.ai/artifact/SRitW5eepWasuMeqUkyF7j

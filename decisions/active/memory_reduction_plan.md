@@ -1,121 +1,180 @@
-# Memory reduction plan, 2026-10-16
+# Memory reduction plan, rewritten 2026-10-20
 
-Local note at the workspace root. It says where the memory of a training run goes, what was measured, and
-what to change, in order. Nothing here is implemented yet. Code is in
-`slap-mapd-coupling/src/slap_mapd_coupling/models/` and `environment/action_masking.py`.
+Local note. It says where the memory of a training run goes on current code, what was measured, and what to change,
+in order. Nothing here is implemented. It replaces the plan of 2026-10-16, whose numbers came from the 3-agent
+campaign instance with 6 vertex features and are out of date. `embed_once_design.md` is now step R4 of this plan.
+
+Code is in `slap-mapd-coupling/src/slap_mapd_coupling/models/` (`local_subgraph_encoding.py`, `gnn_encoder.py`,
+`rl_module.py`), `environment/action_masking.py` and `training/arm.py`.
 
 ## Where it stands
 
-Memory is not limiting today. The pilot's decentralised run with communication ran out of GPU memory once, before
-the value pass was chunked (PR 145, on `main`). The campaign's communication run finished on its first attempt.
-The reason to act now is the plan for longer runs, 2000 step episodes and a budget near 2 000 000 steps. That makes
-one iteration 14 000 steps, so the stored batch grows about 3 times.
+Memory limits RQ4. From 16 agents on, the centralised and section arms do not fit on the GPU, and at 32 agents they
+do not fit in RAM either. Communication does not fit at any fleet size. The decentralised arm without communication
+fits everywhere measured.
 
-The GPU is an RTX 2070 Super with 8 GB. Other processes already use about 1.4 GB of it.
+The GPU is an RTX 2070 Super with 8 GB, about 6.7 GB free (other processes hold about 1.4 GB). The machine has 31 GB
+of RAM.
 
-## What was measured
+RLlib's learner connector is built with the learner's device (`learner.py:341`, Ray 2.57), so the whole train batch
+of an iteration is turned into tensors on the GPU before it is cut into minibatches. The stored batch therefore has
+to fit on the GPU, not only the minibatch.
 
-The model is small and already float32. It has 5 824 parameters at hidden width 32. So weights, their gradients
-and any clipping of them take no meaningful memory. No gradient clipping is configured at all. Changing the
-number format of the weights saves nothing. The memory is in the rows of observations and in the activations that
-grow with the number of rows.
+## What was measured, 2026-10-20
 
-Peak extra GPU memory of the encoder (campaign instance, 3 agents, 2 senders at most):
+Probe script `memprobe.py` in the session scratchpad, run on the code of `main` plus the fleet configs of
+`feat/fleet-load-sweeps`. Observation spaces are built from the configs `configs/fleet_{8,16,32}/*.yaml`. One iteration
+is 7 runners times horizon 2000 timesteps, one row per agent per timestep, so rows = 14 000 times the fleet size. The
+centralised arm has one row per agent turn, which is the same count.
 
-| rows | no communication | communication |
-|---|---|---|
-| 128, with gradients (one training minibatch) | 51 MiB | 97 MiB |
-| 512, no gradients (one chunk of the value pass) | 93 MiB | 283 MiB |
-| 2 048, no gradients | 366 MiB | 1 120 MiB |
-| 13 230, no gradients (one iteration, unchunked) | 2 367 MiB | out of memory |
+| fleet | arm | communication | movable vertices | window cap N | bytes per row | GB per iteration |
+|---|---|---|---|---|---|---|
+| 8 | decentralised | no | 98 | 59 | 6 908 | 0.77 |
+| 8 | decentralised | yes, 7 senders | 98 | 59 | 54 948 | 6.15 |
+| 8 | section | no | 98 | 98 | 11 824 | 1.32 |
+| 8 | centralised | no | 98 | 98 | 11 824 | 1.32 |
+| 16 | decentralised | no | 226 | 59 | 6 908 | 1.55 |
+| 16 | decentralised | yes, 15 senders | 226 | 59 | 109 796 | 24.6 |
+| 16 | section | no | 226 | 203 | 24 424 | 5.47 |
+| 16 | centralised | no | 226 | 226 | 27 184 | 6.09 |
+| 32 | decentralised | no | 472 | 61 | 7 140 | 3.20 |
+| 32 | decentralised | yes, 31 senders | 472 | 61 | 226 916 | 101.7 |
+| 32 | section | no | 472 | 360 | 43 264 | 19.4 |
+| 32 | centralised | no | 472 | 472 | 56 704 | 25.4 |
 
-It grows in a straight line with rows, about 0.18 MiB per row without communication and 0.55 MiB with it.
+The 64-agent configs did not build. `generate_instance` raised `InstanceGenerationError` at seed 42 ("none of 100
+sampled topologies admitted a well-formed role assignment").
 
-What one stored row holds, in bytes (computed from the observation space):
+Why the centralised and section rows are large. Their window is every movable vertex, or a zone with its halo, and
+the cap N is set to the largest window (`training/arm.py`). The whole window is stored in every row. The edge list is
+53 to 55% of a row in every arm, and for the centralised arm it is the same in every row of every episode.
 
-| key | shape | type | bytes |
+The GNN pass itself is not what limits. Peak extra GPU memory of the encoder, in MiB per row.
+
+| fleet | arm | value pass, 512 rows, no gradients | training minibatch, 128 rows, with gradients |
 |---|---|---|---|
-| edge_index | 132 by 2 | int64 | 2 112 |
-| node_features | 33 by 6 | float32 | 792 |
-| edge_mask | 132 | float32 | 528 |
-| node_mask | 33 | float32 | 132 |
-| move_target_index | 4 | int64 | 32 |
-| own_index, congestion | 1 each | int64, float32 | 12 |
-| **total, no communication** | | | **3 608** |
-| the same for each of 2 senders (communication) | | | adds 3 600 each |
-| **total, communication** | | | **10 808** |
+| 8 | decentralised | 0.34 | 0.55 |
+| 8 | centralised | 0.54 | 0.81 |
+| 16 | centralised | 1.23 | 1.87 |
+| 32 | decentralised | 0.33 | 0.52 |
+| 32 | section | 1.95 | 3.02 |
+| 32 | centralised | 2.56 | 3.94 |
+| 32 | decentralised, communication | out of memory | 16.1 |
 
-The edge list alone is 59% of a row.
+At 32 agents one chunk of the centralised value pass is about 1.3 GB, and one minibatch about 0.5 GB.
+
+## What a row holds, and what depends on the time step
+
+A row of every arm holds the window's vertex features, its masks, its edge list, the move targets, the agent's own
+index, the congestion feature and the action mask, and the pool mask for the arms that pool. Only part of this changes
+with time.
+
+| part | depends on |
+|---|---|
+| edge list, edge mask, vertex mask | the window only |
+| pool mask | the window only |
+| move targets, own index | the agent's vertex |
+| the role flags (storage, delivery, endpoint, transit, receiving), 5 of the 8 vertex features | the vertex only |
+| occupied, claimed, eta, 3 of the 8 vertex features | the time step (and the turn, for claimed) |
+| congestion, action mask | the time step |
+
+The window of a row is fixed by the agent's vertex in every arm. It is the field of view of that vertex for the
+decentralised arm, the zone of that vertex with its halo for the section arm, and every movable vertex for the
+centralised arm. The vertex order inside a window is fixed too, since `local_subgraph` and the arm windows depend on
+the graph and the vertex only. So one key per row, the agent's vertex, recovers everything in the first four lines.
 
 ## What to change, in order
 
-### Step a. Lower the chunk size
+### R1. Store what depends only on the vertex once, and look it up
 
-`VALUE_CHUNK_ROWS = 512` in `environment/action_masking.py` bounds the rows of one encoder pass in the value
-pass. It does not change any result, because the pass has no gradients and each row is independent.
+The row keeps the agent's vertex, the 3 time-dependent vertex features, the congestion feature and the action mask.
+Everything else moves into tables built once per run from the graph and the arm. The module looks the tables up on the
+GPU and rebuilds the tensors `encode_padded` takes today, so the encoder does not change.
 
-- 256 rows halves the peak of that pass, to about 47 MiB without communication and 140 MiB with it.
-- The cost is more, smaller passes, so a little slower. It is not on the training path (minibatches of 128 are).
-- Make it a parameter next to the PPO settings, so a run can lower it without editing the module. Keep 512 as the
-  default so nothing changes unless asked.
+- The tables. Per window, the edge list, the edge mask, the vertex mask, the pool mask and the role flags of its
+  vertices. Per vertex, its window number, its own index in that window and its move targets. The centralised arm has
+  one window, the section arm one per zone, the decentralised arm one per movable vertex. At 32 agents the
+  decentralised tables are about 2 MB.
+- Where the tables live. Registered buffers of the RL module, built from the graph and the arm when the module is
+  built, so a checkpoint carries them. How they reach the module (the model config or a rebuild from the graph) is
+  decided in the branch.
+- Where it changes. `encoded_observation_space` and `encode_view` in `local_subgraph_encoding.py` (what is stored),
+  the start of the forward in `rl_module.py:50` to `rl_module.py:70` (the lookup), and the table builder next to
+  `arm_windows`. `encode_padded` and `PolicyValueHead` keep their arguments.
+- It changes no number. The rebuilt tensors are the ones stored today, so results are bit for bit the same. The model
+  and the thesis do not change.
 
-### Step b. Store the observation in smaller types
+### R2. Smaller types for what is left
 
-This changes only how a row is stored, not what is in it.
+`occupied` and `claimed` are 0 or 1 and go to uint8. `eta` stays float32, so the results stay bit for bit the same.
+The module casts back at the lookup. The action mask stays as RLlib's masking expects it.
 
-b1. The index arrays hold vertex numbers below 33, so they fit in int8.
+Estimated batch per iteration after R1 and after R1 with R2, in GB.
 
-| | now | after b1 | saved |
-|---|---|---|---|
-| no communication | 3 608 | 1 732 | 52% |
-| communication | 10 808 | 5 194 | 52% |
+| fleet | arm | now | after R1 | after R1 and R2 |
+|---|---|---|---|---|
+| 8 | decentralised | 0.77 | 0.09 | 0.05 |
+| 8 | centralised | 1.32 | 0.14 | 0.07 |
+| 16 | section | 5.47 | 0.56 | 0.29 |
+| 16 | centralised | 6.09 | 0.62 | 0.32 |
+| 32 | decentralised | 3.20 | 0.34 | 0.18 |
+| 32 | section | 19.4 | 1.97 | 1.00 |
+| 32 | centralised | 25.4 | 2.55 | 1.30 |
 
-b2. The masks are 0 or 1 and are stored as float32. As uint8 they take a quarter.
+These are computed from the shapes, not measured. A row after R1 is about 12 N bytes plus 32, and about 6 N plus 32
+after R2. The probe is run again on the branch.
 
-| | after b1 | after b1 and b2 | saved against now |
-|---|---|---|---|
-| no communication | 1 732 | 1 237 | 66% |
-| communication | 5 194 | 3 691 | 66% |
+At 64 agents the warehouse has perhaps 1 000 movable vertices and the batch twice the rows, so the centralised arm
+would be about 5 to 6 GB after R1 and R2. That is near the free GPU memory, which is why R3 follows.
 
-Where it changes.
-- `encoded_observation_space` (the dtypes of the space) and `encode_view` and the sender copies (the arrays that
-  are built) in `local_subgraph_encoding.py`.
-- A cast at the top of `GNNEncoder.encode_padded` back to int64 for indexing and to float32 for the masks. Torch
-  indexing needs int64.
-- The batch builder `_batch` in `training/policy.py` stacks whatever type it gets, so it needs no change.
+### R3. Keep the batch in RAM, move one minibatch at a time to the GPU
 
-What has to be checked, because it is not certain.
-- That RLlib passes int8 and uint8 through to the module without turning them into float32. If it converts them,
-  there is no saving in the batch, and the saving is only in the stored samples.
-- The existing tests that compare the one-observation oracle with the batched path, and the replay test, must
-  pass unchanged. Results must be bit for bit the same, since only types change.
-- A memory probe before and after, with the same rows as the table above.
+Only if R1 and R2 are not enough, which is likely for the centralised arm at 64 agents. The learner connector then
+builds the batch on the CPU, and the iterator moves each minibatch and each value-pass chunk to the GPU. The hook is
+the same as embed-once's (`Learner._create_iterator_if_necessary`, through `config.learners(learner_class=...)`), so R3
+and R4 share one learner subclass. To be probed first. Whether the GAE connector's value pass can run on CPU tensors
+moved chunk by chunk.
 
-What it gives for a 2000 step iteration (7 runners, 3 agents, 42 000 rows).
+Lower the value-pass chunk size with it. `VALUE_CHUNK_ROWS = 512` in `environment/action_masking.py` becomes a setting
+next to the PPO settings, with 512 as the default. At 64 agents one centralised chunk of 512 rows would be several GB.
 
-| | now | after b1 | after b1 and b2 |
-|---|---|---|---|
-| no communication | 152 MB | 73 MB | 52 MB |
-| communication | 454 MB | 218 MB | 155 MB |
+### R4. Embed-once, for RQ5 only
 
-## Later options, not now
+`embed_once_design.md`. After R1 a sender needs only its own row's key, not a copy of its window, and its message is
+looked up from the embedding of its own row. That is what makes the communication column fit (about 1 KB per row at
+32 agents instead of 227 KB). It needs minibatches of whole timesteps, a training change, so it stays a separate branch
+and waits until RQ5 is confirmed.
 
-- **Look up what depends only on the vertex.** The window around a vertex, its edge list, its masks and the move
-  targets depend on the graph and on which vertex the agent stands on, not on the time step. They could be built
-  once per vertex and looked up on the GPU from the agent's vertex. A row would then hold only the vertex features
-  that change (about 800 bytes, roughly 78% less than now). It changes the observation and many tests, so it needs
-  its own plan. It is the best structural saving.
-- **Embed each agent's window once.** With communication each receiver carries its senders' windows, so the same
-  window is embedded again for every receiver that hears it. Sharing the embedding would cut the communication cost
-  from about the square of the fleet size to about linear. **Promoted to the main item, designed in
-  `embed_once_design.md`.** It needs minibatches of whole timesteps, so it is a training change as well as a memory
-  change. Steps a and b above stay as a second layer on top of it.
-- **Mixed precision (float16).** Not recommended. The GPU is Turing, which has no bfloat16, so it would be float16
-  with loss scaling. The masks hold very negative values and the benefit at width 32 is small. It would also have
-  to be applied to every arm to keep the comparison fair.
+## Not recommended
+
+- Mixed precision (float16). The GPU is Turing, without bfloat16, so it would be float16 with loss scaling. The masks
+  hold very negative values, it changes numbers, and it would have to apply to every arm.
+- Storing `eta` as float16. It halves what is left after R2 but is no longer bit for bit, and R1 with R2 is enough up
+  to 32 agents.
+
+## Another limit at 32 and 64 agents, not memory
+
+An iteration at 32 agents is 448 000 rows. With 5 epochs and minibatches of 128 that is about 17 500 gradient steps
+per iteration. Training time may limit RQ4 before memory does. `thesis_plan.md` already says to time one iteration of
+each arm at 32 and 64 before committing. Whether the minibatch size or the number of runners scales with the fleet is
+a training-table decision, not part of this plan.
+
+## Tests
+
+- The lookup rebuilds the same tensors. For every arm, the rebuilt dense observation equals the one `encode_view`
+  builds today, on a few episodes of the 8-agent warehouse.
+- The existing oracle tests (`test_gnn_encoder.py`, `test_base_model.py`, `test_rl_module.py`,
+  `test_local_subgraph_encoding.py`, `test_policy.py`, `test_training_env.py`) pass, with only the stored layout
+  changed in them.
+- A short training run gives the same losses before and after, at a fixed seed on CPU.
+- Replay and the four invariants are untouched, since the simulator does not change.
+- The probe before and after, with the numbers in the pull request text.
 
 ## Order of work
 
-Second of three pieces, written up before any code. The first is `trace_extension_plan.md`. The third is the leg
-tool. When this is implemented it should be one small branch from `main`, with the probe numbers in the pull
-request text.
+1. R1 and R2 as one branch from `main`. Needed before any training at 16 agents or more.
+2. Time one iteration of each arm at 16 and 32 with R1 and R2, which also gives the real GPU peak.
+3. R3 and the chunk-size setting, if step 2 or the 64-agent warehouse needs it.
+4. R4 when RQ5 is confirmed.
+5. Separately, the 64-agent configs do not generate an instance at seed 42. That belongs to the warehouse generation of
+   RQ4, not to this plan.

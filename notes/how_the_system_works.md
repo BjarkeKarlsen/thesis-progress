@@ -56,6 +56,47 @@ with PPO. They differ in how many robots one decision covers.
 Token Passing is a classic planner that is not learned. It runs next to the
 three routers as a reference.
 
+## Is the storage rule a SLAP?
+
+Yes. The storage rule solves a dynamic storage location assignment problem
+(DSLAP). Waubert de Puiseau et al. (2022) define DSLAP as choosing where
+arriving goods are stored, and the arrival model does exactly that. Fixed
+storage is classic static SLAP (dedicated storage). The demand rule is the
+ABC-style rule that Waubert de Puiseau use as their baseline. What the thesis
+adds is a live multi-agent router whose traffic feeds back into storage. Silva
+et al. (2020) couple storage with picker routes, but they solve both once per
+batch.
+
+Three wording points follow (open, not yet in the thesis).
+- `3.Background.tex` says the rule "updates storage as demand shifts". Since
+  `[A38]` nothing is moved, so it should say the rule places arriving stock.
+- The storage rules are hand-written formulas, not learned. The thesis should
+  say so in one clause, because Waubert de Puiseau learn theirs with deep RL.
+- "Assignment" means two things, storage assignment and task assignment. Say
+  "storage rule" for the first and never "storage controller".
+
+### Should storage be a PPO policy too?
+
+Open question, raised 2026-10-20. The recommendation is to keep the rules
+for the thesis and name a learned storage policy as future work.
+
+Coupling here means a feedback loop, not that both sides learn. The
+congestion-aware rule already reads traffic, so the loop is closed without a
+second learner. Making storage learned as well would cost more than it adds.
+- **The main result gets muddied.** With a fixed rule, any change in the gain
+  between controllers comes from the router. With two learners, a gain could
+  come from either side, or from the two adapting to each other.
+- **Two learners chase each other.** Each one changes the world the other
+  learns in, so training is less stable and needs more seeds.
+- **The reward arrives late.** A shelf choice pays off only when that stock is
+  picked, often hundreds of steps later. That is hard to credit to the
+  choice.
+- **The training budget doubles**, on top of the four router arms and the
+  fleet sizes for RQ4.
+
+If time is left after RQ1 to RQ4, a small learned storage policy against the
+congestion-aware rule, under one router, would be a fair extension of RQ3.
+
 ## The loop
 
 Storage shapes the work, because where stock sits sets how far robots travel.

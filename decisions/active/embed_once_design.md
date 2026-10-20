@@ -1,6 +1,14 @@
 # Embed each agent's window once, design, 2026-10-16
 
-**Status, later on 2026-10-16. Do now** (author's decision), as Track B of `ROADMAP.md`, in parallel with reading the
+**Status, 2026-10-20. Step R4 of `memory_reduction_plan.md`, waits until RQ5 is confirmed.** The probe of 2026-10-20
+showed that the centralised and section arms, not communication, limit memory at 16 agents and more, so R1 and R2 of
+that plan come first. After R1 a row is keyed by the agent's vertex and the window's structure is in a table, so the
+"what a row holds" part below simplifies. A sender's slot needs only its row key, since its window structure is
+already looked up by vertex. The R3 learner subclass is the same hook as the block iterator of section 4. The size
+estimates in "What it saves" are from the old 3-agent numbers. The current ones are in `memory_reduction_plan.md`.
+The status below is history.
+
+**Status, later on 2026-10-16. Do now** (author's decision), as Track B of `thesis-progress/archive/workspace/ROADMAP.md`, in parallel with reading the
 first result. With 8 agents a robot hears up to 7 senders, so a communication row is about 8 times a plain row. The
 row keys must live with the turn-based adapter of #164. Communication runs with one turn only, so the decentralised arm
 is the only one touched.

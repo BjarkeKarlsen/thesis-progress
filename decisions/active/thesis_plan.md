@@ -9,7 +9,7 @@ not agreed. **Open** means a decision is still needed. **Stale** means an idea i
 that a later decision replaced.
 
 Sources: `short_run_2026-10-18.md`, `arrival_short_2026-10-18.md`, `arrival_storage_plan.md`,
-`research_goals_2026-10-18.md`, `ROADMAP.md`, `SESSION_CONTEXT.md`, and the chapters
+`research_goals_2026-10-18.md`, `thesis-progress/archive/workspace/ROADMAP.md`, `SESSION_CONTEXT.md`, and the chapters
 `thesis/Chapters/2.Introduction.tex` and `4.Implementation.tex`.
 
 ## 1. The main result (decided 2026-10-18)
