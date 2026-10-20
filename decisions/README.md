@@ -61,6 +61,7 @@ looks the way it does. Updated 2026-10-20.
 | File | Topic |
 |---|---|
 | `ideas/transformer_extension/` | Adding attention (Transformer) components to the learned controllers |
+| `ideas/learned_storage_policy.md` | A PPO storage policy coupled with the router, case for and against. Look into after the long run |
 
 ## Related folders
 

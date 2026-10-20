@@ -77,25 +77,10 @@ Three wording points follow (open, not yet in the thesis).
 
 ### Should storage be a PPO policy too?
 
-Open question, raised 2026-10-20. The recommendation is to keep the rules
-for the thesis and name a learned storage policy as future work.
-
-Coupling here means a feedback loop, not that both sides learn. The
-congestion-aware rule already reads traffic, so the loop is closed without a
-second learner. Making storage learned as well would cost more than it adds.
-- **The main result gets muddied.** With a fixed rule, any change in the gain
-  between controllers comes from the router. With two learners, a gain could
-  come from either side, or from the two adapting to each other.
-- **Two learners chase each other.** Each one changes the world the other
-  learns in, so training is less stable and needs more seeds.
-- **The reward arrives late.** A shelf choice pays off only when that stock is
-  picked, often hundreds of steps later. That is hard to credit to the
-  choice.
-- **The training budget doubles**, on top of the four router arms and the
-  fleet sizes for RQ4.
-
-If time is left after RQ1 to RQ4, a small learned storage policy against the
-congestion-aware rule, under one router, would be a fair extension of RQ3.
+Open, raised 2026-10-20, and kept as an extra to look into after the long run.
+For now storage stays as rules. The case for and against, and a middle path
+that adds a learned policy to RQ3 only, are in
+`../decisions/ideas/learned_storage_policy.md`.
 
 ## The loop
 
