@@ -1,5 +1,11 @@
 # Memory reduction plan, rewritten 2026-10-20
 
+**Status, later on 2026-10-20. R1 to R4 are implemented**, uncommitted on `feat/row-lookup`
+(`~/worktrees/feat-row-lookup`), stacked on `feat/putaway` (#188). R4 was built without the
+timestep-block minibatches. The learner adds the senders' rows to each minibatch instead,
+so PPO's minibatches are unchanged. How it works and the measured numbers are in
+`../../notes/windows_and_embedding.md`. The sections below are the plan as written.
+
 Local note. It says where the memory of a training run goes on current code, what was measured, and what to change,
 in order. Nothing here is implemented. It replaces the plan of 2026-10-16, whose numbers came from the 3-agent
 campaign instance with 6 vertex features and are out of date. `embed_once_design.md` is now step R4 of this plan.
