@@ -99,11 +99,15 @@ Status of every tag. *In force* entries are below. *History* entries are in
 | [A41] | Research questions built around the main result | In force |
 | [A42] | RQ3 asks about congestion-aware storage only | In force |
 | [A43] | Edge cost and step costs from van Knippenberg et al. | In force |
-| [A44] | The main result is adaptive storage, and the loop is closed in RQ3 | In force |
-| [A45] | Keep-up against released tasks, a backlog slope, and stalls | In force |
+| [A44] | The main result is adaptive storage, and the loop is closed in RQ3 | In force, measure revised by [A50] and [A51] |
+| [A45] | Keep-up against released tasks, a backlog slope, and stalls | Revised by [A49], slope dropped |
 | [A46] | Orders with several lines and amounts | In force |
-| [A47] | Robots carry the put-away | In force |
+| [A47] | Robots carry the put-away | In force, result measure revised by [A50] |
 | [A48] | The storage rule is a dynamic SLAP, solved with rules | In force |
+| [A49] | Keep-up is throughput against the release rate | In force |
+| [A50] | The result is the mean service time of picks | In force |
+| [A51] | The gain between controllers is a percentage of fixed-storage service time | In force |
+| [A52] | Borrowed concepts and fewer equations | In force |
 
 ## Problem Formulation (`2.Introduction.tex`)
 
@@ -1472,6 +1476,65 @@ wrong under [A32] are marked.
   the storage side does not learn, and the idea itself is kept in
   `decisions/ideas/learned_storage_policy.md`. Removing the doubled papers
   and the Transformer subsection also saves about a page.
+
+### [A49] Keep-up is throughput against the release rate (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:pf:measures` (`eq:throughput`), `sec:pd-aim-and-scope`, `tab:measures`,
+  `tab:evalparams` (Appendix H), the notation table.
+- **What the edit says.** A run keeps up when its throughput is at least
+  `f_up` times the rate tasks were actually released, `Lambda_T >= f_up (|C_T| + B_T) / T`.
+  The backlog slope `chi_T` and its threshold `chi_max` are gone. The stall count stays.
+- **Why.** The author asked for fewer new concepts. Throughput against arrivals
+  is the lifelong MAPD measure (Li et al. 2021) and the stability condition of a
+  queue, so it needs a citation, not an argument, and drops a TBD threshold.
+- **Revises.** [A45] (the two-part check).
+
+### [A50] The result is the mean service time of picks (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:introduction`, `sec:pd-aim-and-scope`, `sec:pd-rq`, `sec:pf:measures`
+  (`eq:meanservice`, `eq:split`), Appendix F, `5.Experiments.tex`, `tab:measures`.
+- **What the edit says.** The result is Ma et al.'s mean service time, over the
+  completed picks. Put-aways count in the keep-up check and their mean service
+  time is reported next to the result. Total service time (`eq:totalservice`)
+  and the put-away distance (`eq:putaway`, `nu_T`) are removed.
+- **Why.** The measure of the literature, used unchanged, is easier to compare
+  and to validate. The risk [A47] named, that a rule could gain by leaving
+  work unfinished, is covered by the keep-up check, which a run must pass
+  before it is compared.
+- **Open.** A line split over two shelves gives two picks, so the number of
+  picks can differ between rules on one seed. Worth one sentence in the
+  threats to validity once the results are in.
+- **Revises.** [A47] (total service time as the result) and [A40] (put-away distance).
+
+### [A51] The gain between controllers is a percentage of fixed-storage service time (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:pd-rq` (RQ2 and the main result), `eq:relgain`, `5.Experiments.tex`.
+- **What the edit says.** RQ2 compares `100 * gain_n / zeta_bar(F_fix, pi)` between
+  controllers instead of the gain as a share of route time.
+- **Why.** Storage studies report gains as a percentage over the baseline
+  (Waubert de Puiseau et al. 2022), so the number reads the same way as theirs.
+- **Revises.** [A44] (share of route time).
+
+### [A52] Borrowed concepts and fewer equations (Clarity, thesis text edited 2026-10-20, uncommitted)
+
+- **What the edit says.** Concepts the thesis defined itself are named and
+  cited as the known versions. The move, vertex and swap rules are the MAPF
+  definitions of Stern et al. (2019). The arrivals are an order-up-to policy
+  (Axsater 2015). The demand rule and the starting stock are class-based
+  storage by the cube-per-order index (Heskett 1963, de Koster et al. 2007).
+  The claim mask is a one-step reservation table of prioritised planning
+  (Silver 2005). Choosing in turn is a sequential policy (Wen et al. 2022,
+  Fu et al. 2022). The distance label is van Knippenberg's distance feature,
+  and its bound moves to Appendix K. The split is the queue split between
+  waiting and being served. 25 definitions move to Appendix M, "Definitions
+  in full", each kept in words in the main text, and 4 small displays become
+  inline. The main text goes from 51 displayed equations to 22.
+- **Why.** The author found the maths heavier than in comparable papers, and
+  a system with fewer new ideas is easier to validate. What stays new is the
+  coupling of storage to live traffic and the comparison of controllers by how
+  many agents one decision covers.
+- **Check.** The seven new references in `references.bib` were added from
+  memory and must be checked against the sources before submission.
 
 ## Still open
 
