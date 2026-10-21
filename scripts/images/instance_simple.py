@@ -17,12 +17,15 @@ def instance_simple():
                label=r"storage $\mathcal{V}_{\mathrm{str}}$"),
         Line2D([], [], marker="s", ls="", mfc=C["del_f"], mec=C["del_e"], ms=12,
                label=r"delivery $\mathcal{V}_{\mathrm{del}}$"),
+        Line2D([], [], marker="s", ls="", mfc=C["rcv_f"], mec=C["rcv_e"], ms=12, # TODO: make sure it is shown correctly it should be at the top part of the graph the nodes in the base draw
+               label=r"receive $\mathcal{V}_{\mathrm{rcv}}$"),
         Line2D([], [], marker="D", ls="", mfc=C["ep_f"], mec=C["ep_e"], ms=11,
                label=r"endpoint $\mathcal{V}_{\mathrm{ep}}$"),
         Line2D([], [], marker="o", ls="", mfc="white", mec=C["node"], ms=12,
                label="transit vertex"),
-        Line2D([], [], color=C["accent"], lw=0, marker=">", markersize=9,
-               label=r"one-way segment: $(v,w)\in E$, $(w,v)\notin E$"),
+              
+        #Line2D([], [], color=C["accent"], lw=0, marker=">", markersize=9, # Since we removed one way edges, this is not needed anymore
+        #       label=r"one-way segment: $(v,w)\in E$, $(w,v)\notin E$"),
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.02),
               ncol=3, frameon=False, fontsize=11)

@@ -1,5 +1,8 @@
 # Appendix plan
 
+**2026-10-21. Third round agreed**, 13 appendices down to 10 and included at the end of
+`main.tex`. See `appendix_split_handoff.md`.
+
 **Status 2026-10-20. Structure built, first moves done, uncommitted in `thesis/`.**
 The limit is 60 pages for the main text. The bibliography and appendices do not
 count. The appendices are a separate document (`thesis/appendix.tex`), so labels

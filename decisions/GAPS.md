@@ -1537,6 +1537,117 @@ wrong under [A32] are marked.
 - **Check.** The seven new references in `references.bib` were added from
   memory and must be checked against the sources before submission.
 
+### [A53] Conflict resolution also protects the vertex of an agent still to be processed (Correctness, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:method:resolution`, step 2 and the feasibility argument.
+- **What the edit says.** A proposed move is also refused when it enters the
+  current vertex of an agent not yet processed, the claim mask rule applied
+  after the fact. The feasibility argument is replaced by the short
+  induction, with the two-agent counterexample. The rule is cautious, so
+  some safe follow moves become waits.
+- **Why.** An external review (2026-10-20) showed the old argument fails: a
+  higher-priority agent accepted onto the vertex of a lower one that then
+  waits gives a vertex conflict. The code already had the fix since issue #7
+  (`resolution/conflict_resolution.py`, `move_blocked`), and
+  `test_swap_conflict_forces_both_agents_to_wait` covers the case. Only the
+  text lagged.
+- **Code.** No change.
+
+### [A54] Pick units are reserved at release and leave the shelf at pickup (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:pf:tasks` (`eq:coupling`, the pickup rule paragraph), `eq:pickuprule`
+  (Appendix M), `eq:arrivals` (Appendix G), the arrivals paragraph, the notation table.
+- **What the edit says.** New quantity `r_t(k,v)`, the units promised to picks not yet
+  picked up. The stock condition is checked at release against `x_t - r_t`. The units
+  stay in `x_t` and take up room until pickup. The pickup rule and the arrivals read
+  `x_t - r_t`.
+- **Why.** The external review (2026-10-20) found the text inconsistent. Stock fell at
+  release but the stock condition was stated at the step the units are taken. The code
+  also freed shelf room at release, so a put-away could be sent into room still holding
+  units. Option (b) of the review chosen by the author, since capacity is one of the
+  four correctness checks.
+- **Code.** `feat/stock-reservation` (worktree `~/worktrees/feat-stock-reservation`),
+  stacked on #190, commits `13e858e` and `98d70a1`. Changes `_release_orders`,
+  `_arrive` and `_advance_task_lifecycle`. The age of a picked unit is now measured at
+  pickup. Results can change only through room on shelves, because the pickup rule and
+  the arrival amounts read the same numbers as before.
+- **Open.** `r_t` belongs in the state tuple (review point on the state, step 3).
+
+### [A55] Claims narrowed after the external review (Clarity, thesis text edited 2026-10-20, uncommitted)
+
+- **What the edit says.**
+  - Paired seeds give the same customer orders, not the same tasks. Where a line
+    is picked and how it splits depend on storage, and that is part of the gain.
+  - The first part of the service-time split is "the wait before assignment",
+    since it also holds the wait for stock (`eq:split`, `5.Experiments.tex`).
+  - `W_T` (`eq:waiting`) averages over completed picks, like `eq:meanservice`.
+  - Edge cost is distance, not travel time. Every edge takes one step, and
+    every instance has unit costs (all 28 configs, `default_edge_cost: 1.0`).
+  - The controllers are compared as configurations. They differ in what a
+    decision sees, knowledge of earlier moves and reward credit, not only in
+    how many agents one decision covers.
+  - Pham et al. (2024) does not isolate communication. The sentence now says
+    what their experiment shows.
+  - Appendix K. The distance-label bound limits how much one step shortens
+    `eta_i`, not how much it lengthens it. The "worst case is bounded" claim
+    is removed.
+  - The keep-up check is a finite-horizon check, so the backlog over the run is
+    shown for the main-result conditions.
+  - The trip distance's delivery leg (`eq:tripdistance`) is named a stand-in,
+    since delivery vertices are drawn at random.
+  - `fig:loop` redrawn (`thesis-progress/scripts/images/loop.tex`). Arrivals,
+    put-aways, reservations and the five-part task. Fixed storage sends
+    arrivals home rather than holding `x_t` fixed.
+- **Why.** External review, 2026-10-20.
+- **Code.** None. The backlog per step is already logged (`log.backlog_by_t`).
+
+### [A56] The two training regimes answer different questions, and order throughput is reported (Design change, thesis text edited 2026-10-20, uncommitted)
+
+- **Where.** `sec:method:training`, the training paragraph of `5.Experiments.tex`,
+  the order completion paragraph of `sec:pf:measures`.
+- **What the edit says.** Training on `F_fix` only is the main result, because one
+  frozen policy meets every storage rule, so the gain is the storage rule's.
+  Matched training compares whole systems, and part of its gain can come from
+  training. Training and evaluation seeds are counted apart. Orders completed
+  per timestep are reported next to task throughput.
+- **Why.** External review, 2026-10-20. Split lines and put-aways change the task
+  count without changing the customers served.
+- **Open.** The author should confirm `F_fix`-only training as the main result.
+  The seed counts are still the open mockup.
+- **Code.** None. `num_completed_orders` is already in `RunMetrics`.
+
+### [A57] Warehouse size and role counts follow the fleet, and the generator checks only well-formedness (Design change, thesis text edited 2026-10-21, uncommitted)
+
+- **Where.** `sec:impl:instances`, `app:wellformed` (the endpoint set),
+  `app:instances` (the four warehouses and the generator check).
+- **What the edit says.** |V| = 16 m, so 128, 256, 512 and 1024 vertices for
+  8, 16, 32 and 64 agents. |V_ep| = m, |V_str| = m/2, |V_del| = |V_rcv| =
+  m/2, two agents per dock at every size. Every edge is two-way in the experiments, and one-way edges stay
+  a feature of the model. The receiving vertices are endpoints of the
+  well-formedness check, as the code already had it. The sentence crediting
+  random role placement to Ma et al. is dropped, because they draw tasks at
+  random from fixed endpoints.
+- **Why.** The graph size was drawn at random per seed (86 to 131 vertices at
+  m = 8) and the role counts had been tuned until generation passed (64 agents
+  had fewer shelves than 32). The 16 m sizes match van Knippenberg et al.
+  (2021), Tables 4 and 5. m/2 shelves make agents share shelves (author,
+  2026-10-21). The generator's extra condition, that the plain vertices stay
+  strongly connected, rejected well-formed placements. The fleet warehouses drop it
+  (`role_backbone: false`), and older configs keep it, so they give the same instances.
+  The fleet size alone sets the warehouse (`fleet_defaults`). A config with an `instance`
+  section builds that warehouse as written.
+- **Open.** The reason given for two-way edges is a proposal, for the author to
+  confirm. vertex_capacity of the 8-agent configs is raised from 200 to 300,
+  since 4 shelves hold up to 240 units at the start.
+- **Code.** Worktree `~/worktrees/fix-warehouse-scaling` (branch
+  `fix/warehouse-scaling`, uncommitted). `generator.py` (`fleet_defaults`,
+  `role_backbone`), `spec.py` (`instance_params`), the `validation.py` docstrings,
+  `configs/fleet_*` (no instance section), and
+  `scripts/instance_report.py`. Earlier fleet runs do not reproduce. Every other
+  config is unchanged.
+- **Appendix.** Handoff for writing `app:instances`:
+  `decisions/active/graph_appendix_handoff.md`.
+
 ## Still open
 
 - [ ] **Code for [A49] to [A51].** Four drift points posted to #103 on

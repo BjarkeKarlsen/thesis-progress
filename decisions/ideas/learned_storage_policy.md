@@ -72,3 +72,9 @@ with the supervisor is still to be checked.
 
 - `../../notes/how_the_system_works.md`, section "Is the storage rule a SLAP?"
 - `../active/thesis_plan.md`, section 4.2 (RQ3) and section 10 (order of work)
+
+# My thoughts
+
+If we keep the already existing as the baseline where we have F(\dot), so it does not learn anything and everything is fixed is good. The overall problem is what we are measuring righ now does not really belong in the SLAP or the DSLAP world. Here we either need to know it can apply for counting as a SLAP or DSLAP what we have built first and foremost. When we know that we know which direction to go. 
+
+If this does not account for a SLAP or DSLAP then we would need to create a learned policy, which is what i think no matter what since the study is all about this. If we site the DSLAP and used their update rules and their contruction then we will have the DSLAP in place and can start to train it. 

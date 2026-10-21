@@ -171,10 +171,17 @@ out of memory before and takes 168 MiB now.
 
 - Old checkpoints do not load, since the rows changed. Every run is retrained
   anyway.
-- Each step still builds the full padded window in the adapter and then keeps
-  only the changing part. On small instances an episode is 5 to 20% slower than
-  before. Building only the changing part would make steps faster than before.
-- The 64-agent configs do not generate a warehouse yet.
-- Two adapter tests fail on `feat/putaway` itself, not because of this work.
-  They read the claimed flag at column -1, which #188 made the receiving
-  column.
+- Fixed on the same branch. The adapter now builds only what the compact row
+  needs (`encode_all_observations(..., padded=False)`), and skips the window
+  arrays, the pool mask and the senders' views. An episode on the small test
+  instances is now faster than before this work, not slower. The full build
+  stays as the reference the tests compare against.
+- Fixed on the same branch. Two adapter tests read the claimed flag at column
+  -1, which #188 made the receiving column. They now read column 6.
+- Fixed on `fix/fleet64-instance` (`~/worktrees/fix-fleet64-instance`, from
+  `feat/fleet-load-sweeps`). The 64-agent configs generate a warehouse with
+  `max_num_cross_aisles` 28 instead of 20 (883 vertices, 34 topology attempts).
+  Random role placement had to keep the aisles strongly connected with 160 role
+  vertices, which almost never held with fewer cross-aisles. With 28
+  cross-aisles on aisles of length 28 the warehouse is closer to an open grid
+  than the 8 to 32-agent ones.

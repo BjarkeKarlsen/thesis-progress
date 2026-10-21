@@ -23,8 +23,9 @@ plt.rcParams.update({
     "savefig.dpi": 300,
 })
 
+#TODO fix the colors to match the thesis color palette, here rcv_f and rcv_e are not the same as in the thesis, they are too light and not visible enough
 C = dict(edge="#9aa5b1", node="#5a6673", store_f="#cfe3f7", store_e="#2f6fae",
-         del_f="#ffd9b3", del_e="#c9761a", ep_f="#d7f0d8", ep_e="#3f8f45",
+         del_f="#ffd9b3", del_e="#c9761a", rcv_f="#f8c8a0", rcv_e="#d48c4a", ep_f="#d7f0d8", ep_e="#3f8f45",
          agent="#c0392b", accent="#2f6fae", comm="#7d3c98", text="#43505c")
 
 
@@ -66,22 +67,26 @@ DELIVERY = ["0_0", "4_8"]
 ENDPOINTS = ["0_4", "4_2", "0_8"]
 
 
+RECEIVE = ["0_2", "4_6"]
+
+
 def draw_base(ax, dim=False):
     """Draw the warehouse graph; dim=True greys it out as a background."""
     a = 0.35 if dim else 1.0
     two_way = [(u, v) for u, v in G.edges() if (v, u) in G.edges()]
-    one_way = [(u, v) for u, v in G.edges() if (v, u) not in G.edges()]
+    #one_way = [(u, v) for u, v in G.edges() if (v, u) not in G.edges()]
     nx.draw_networkx_edges(G, POS, edgelist=two_way, ax=ax, edge_color=C["edge"],
                            width=1.6, alpha=a, arrows=False)
-    nx.draw_networkx_edges(G, POS, edgelist=one_way, ax=ax, edge_color=C["accent"],
-                           width=2.0, alpha=a, arrows=True, arrowsize=18,
-                           node_size=460, connectionstyle="arc3,rad=0.0")
-    other = [n for n in G if n not in STORAGE + DELIVERY + ENDPOINTS]
+    #nx.draw_networkx_edges(G, POS, edgelist=one_way, ax=ax, edge_color=C["accent"],
+    #                       width=2.0, alpha=a, arrows=True, arrowsize=18,
+    #                       node_size=460, connectionstyle="arc3,rad=0.0")
+    other = [n for n in G if n not in STORAGE + DELIVERY + RECEIVE + ENDPOINTS]
     for nl, fc, ec, shape, size in (
         (other, "white", C["node"], "o", 460),
         (STORAGE, C["store_f"], C["store_e"], "o", 460),
         (DELIVERY, C["del_f"], C["del_e"], "s", 560),
         (ENDPOINTS, C["ep_f"], C["ep_e"], "D", 470),
+        (RECEIVE, C["rcv_f"], C["rcv_e"], "v", 560),
     ):
         nx.draw_networkx_nodes(G, POS, nodelist=nl, node_color=fc, edgecolors=ec,
                                node_shape=shape, node_size=size, ax=ax, alpha=a)
@@ -90,18 +95,19 @@ def draw_base_mini(ax, dim=False):
     """Draw the warehouse graph; dim=True greys it out as a background."""
     a = 0.35 if dim else 1.0
     two_way = [(u, v) for u, v in G.edges() if (v, u) in G.edges()]
-    one_way = [(u, v) for u, v in G.edges() if (v, u) not in G.edges()]
+    #one_way = [(u, v) for u, v in G.edges() if (v, u) not in G.edges()]
     nx.draw_networkx_edges(G, POS, edgelist=two_way, ax=ax, edge_color=C["edge"],
                            width=1.6, alpha=a, arrows=False)
-    nx.draw_networkx_edges(G, POS, edgelist=one_way, ax=ax, edge_color=C["accent"],
-                           width=2.0, alpha=a, arrows=True, arrowsize=18,
-                           node_size=460, connectionstyle="arc3,rad=0.0")
-    other = [n for n in G if n not in STORAGE + DELIVERY + ENDPOINTS]
+    #nx.draw_networkx_edges(G, POS, edgelist=one_way, ax=ax, edge_color=C["accent"],
+    #                       width=2.0, alpha=a, arrows=True, arrowsize=18,
+    #                       node_size=460, connectionstyle="arc3,rad=0.0")
+    other = [n for n in G if n not in STORAGE + DELIVERY + RECEIVE + ENDPOINTS]
     for nl, fc, ec, shape, size in (
         (other, "white", C["node"], "o", 460),
         (STORAGE, C["store_f"], C["store_e"], "o", 460),
         (DELIVERY, C["del_f"], C["del_e"], "s", 560),
         (ENDPOINTS, C["ep_f"], C["ep_e"], "D", 470),
+        (RECEIVE, C["rcv_f"], C["rcv_e"], "v", 560),
     ):
         nx.draw_networkx_nodes(G, POS, nodelist=nl, node_color=fc, edgecolors=ec,
                                node_shape=shape, node_size=size, ax=ax, alpha=a)
