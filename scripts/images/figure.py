@@ -52,6 +52,7 @@ from decision_problem_grid import decision_problem_grid
 from timeline import timeline
 from arrival_storage import arrival_storage
 from warehouses import warehouses
+from stock_moments import stock_moments
 
 if __name__ == "__main__":
     instance(); instance_simple(); observation(); loop()
@@ -65,4 +66,5 @@ if __name__ == "__main__":
     storage_update_example(); controllers_example(); posg_schematic()
     two_layer_feedback(); scoring_run(); decision_problem_grid()
     timeline(); arrival_storage(); warehouses()
+    stock_moments()
     print("wrote figures to", os.path.abspath(OUT))
