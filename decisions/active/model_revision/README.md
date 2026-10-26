@@ -79,6 +79,11 @@ of work.
 7. As time allows: **03 rename** (its own PR, before or after 02, not mixed into another step), **08 Ma et al.**,
    **09 figures**, **10 step 2**.
 8. **07 text reasons** go in with the step each belongs to.
+   *Written 2026-10-26*, uncommitted in `thesis/`, each sentence tagged `% model revision 07, Dxx`, for the
+   author to approve. See `07_text_reasons.md`, "Written".
+9. **08 Ma et al.** *Done 2026-10-26* (tests B and C skipped by the author that day). Code uncommitted on
+   branch `feat/ma-reproduction` in `~/worktrees/refill` (on `feat/welch-window`). Rows and answer in
+   `../../../results/K_checks/ma2017/`, text in `app:repro:ma`. Within about 10 %, always on the fast side.
 
 ## Risks
 

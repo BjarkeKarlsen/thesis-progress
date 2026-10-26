@@ -38,3 +38,18 @@ load, paired by seed, to answer whether demand storage's gain comes from knowing
 stock over more slots. On graph v1 random matched demand on picks (24.8 against 24.7 at 8 agents), so the check
 is needed. Random storage exists in the pilot code (`~/worktrees/pilot-learned-storage`). Check whether it is in
 `slap-mapd-coupling` `main` (`src/slap_mapd_coupling/storage/registry.py`) before the reruns.
+
+## Written (2026-10-26)
+
+All uncommitted in `thesis/`, each tagged `% model revision 07, Dxx` so the author can find and approve
+them. No `[Axx]` tag, since no model changes.
+
+- D11. `4.Implementation.tex`, after the assignment rule: picks and put-aways share one queue, oldest
+  first, and a put-away gets no priority because that is the simplest rule and adds no parameter.
+- D13. `2.Introduction.tex`, scope list, new item "Nothing after the delivery vertex". It says
+  "delivery vertex", not "workstation", because the rename (step 03) is not applied yet.
+- D12. `G.StorageValues.tex`, `app:cal:period` and `app:cal:beta`, a paragraph each, plus the
+  Conclusion. `B.Parameters.tex`: Δ = 100 and β = 1 with their reason in the Source column. The review
+  period of the refill rule is left as a TODO comment, since step 05's text is not written.
+- D17. `G.StorageValues.tex`, new `app:cal:random` after the margin. One sentence in the main-result
+  paragraph of `2.Introduction.tex` that points to it. `tools/sync_xrefs.py --build` was run.

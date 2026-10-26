@@ -1,0 +1,21 @@
+{
+  "num_agents": 8,
+  "f_up": 0.8,
+  "by_mode": {
+    "fixed": {
+      "capacity": 0.12,
+      "first_failing_rate": null,
+      "main_load": 0.072
+    },
+    "demand": {
+      "capacity": null,
+      "first_failing_rate": 0.12,
+      "main_load": null
+    },
+    "random": {
+      "capacity": 0.12,
+      "first_failing_rate": null,
+      "main_load": 0.072
+    }
+  }
+}

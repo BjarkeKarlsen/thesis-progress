@@ -1,0 +1,75 @@
+{
+  "num_agents": 16,
+  "f_up": 0.8,
+  "varied": "storage.vertex_capacity",
+  "by_value": {
+    "170": {
+      "fixed": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "demand": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "congestion": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      }
+    },
+    "200": {
+      "fixed": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "demand": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "congestion": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      }
+    },
+    "300": {
+      "fixed": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "demand": {
+        "capacity": null,
+        "first_failing_rate": 0.12,
+        "main_load": null
+      },
+      "congestion": {
+        "capacity": null,
+        "first_failing_rate": 0.12,
+        "main_load": null
+      }
+    },
+    "400": {
+      "fixed": {
+        "capacity": 0.12,
+        "first_failing_rate": null,
+        "main_load": 0.072
+      },
+      "demand": {
+        "capacity": null,
+        "first_failing_rate": 0.12,
+        "main_load": null
+      },
+      "congestion": {
+        "capacity": null,
+        "first_failing_rate": 0.12,
+        "main_load": null
+      }
+    }
+  }
+}

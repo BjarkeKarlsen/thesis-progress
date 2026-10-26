@@ -1,5 +1,9 @@
 # Handoff: restructure the appendices
 
+**Done 2026-10-21, in a changed form.** The appendices became separate documents, one per
+topic, instead of chapters at the end of `main.tex`. What was built is in
+`appendix_plan.md`, "Third round". This file is kept as history.
+
 Written 2026-10-21 for the agent that does the restructure. The structure is agreed with
 the author. What is left is moving the files, changing how the main text includes them,
 adding the Source column and leaving skeletons for the calibration tests.

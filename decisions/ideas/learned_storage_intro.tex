@@ -1,0 +1,118 @@
+% Draft text for thesis/Chapters/2.Introduction.tex, if the learned storage policy is adopted.
+% Not in the thesis. Written 2026-10-22, see learned_storage_policy.md, "Definition 2026-10-22".
+% [Axx] is a placeholder. The tag is numbered when the change is adopted and logged in GAPS.md.
+%
+% Part A applies either way. Parts B to D apply only if the learned policy is adopted.
+
+% =================================================================
+% Part A. Where the rules come from.
+% sec:pf:storage, before "The two functional forms, the weights ..." (about line 442).
+% =================================================================
+
+% A1, the rules as they are now.
+The rules follow the storage literature. Fixed storage is dedicated storage.
+The demand rule is class-based storage by the cube-per-order index
+\citep{heskett1963coi,dekoster2007picking}, the same kind of rule as the ABC
+classes that \citet{WaubertdePuiseau2022DynamicSL} use as their baseline. The
+congestion-aware rule adds the traffic estimates to the demand rule.
+
+% A2, the same with the learned rule in place of the congestion-aware rule.
+% The rules follow the storage literature. Fixed storage is dedicated storage.
+% The demand rule is class-based storage by the cube-per-order index
+% \citep{heskett1963coi,dekoster2007picking}, the same kind of rule as the ABC
+% classes that \citet{WaubertdePuiseau2022DynamicSL} use as their baseline. The
+% learned rule follows their method, a policy trained with deep reinforcement
+% learning, and adds the traffic of the fleet to what it sees and to what it is
+% judged by.
+
+% =================================================================
+% Part B. The learned rule.
+% sec:pf:storage, after the paragraph that defines \mathcal{F} (about line 405).
+% =================================================================
+
+% [Axx]
+A storage rule can also be learned. The learned rule places the arriving stock
+one shelf at a time. It takes the SKUs in order of demand, as the demand rule
+does. For each SKU it looks at the warehouse and chooses a shelf that still has
+room, and as many units as fit go there. That shelf gives one put-away task. If
+units are left, the rule chooses again among the shelves that still have room.
+Units that fit on no shelf are not placed, as under every rule. If 30 units of
+tea arrive and the rule chooses shelf $B$, which has room for 20, then 20 go to
+$B$ and the rule chooses a shelf for the last 10.
+
+The rule sees what the other rules read, the stock, the units on their way and
+the three estimates, and the SKU it is placing. It chooses among the shelves
+themselves, not among groups of shelves, so no division of the warehouse is
+needed and the same rule runs on a warehouse of any size.
+
+Formally, let $x^{\mathrm{in},(n)}$ be the units on their way after the first
+$n$ choices of the epoch at $t$, with $x^{\mathrm{in},(0)} = x^{\mathrm{in},-}_t$,
+and let $k_n$ be the SKU of choice $n$. The shelves with room for one more unit
+of $k_n$ are
+\[
+  V^{\mathrm{room}}_n = \Bigl\{ v \in V_{\mathrm{str}} :
+    b_{k_n} + \sum_{k \in \mathcal{K}} b_k
+      \bigl( x_t^{-}(k,v) + x^{\mathrm{in},(n-1)}(k,v) \bigr) \le \mathrm{cap}(v) \Bigr\},
+\]
+and choice $n$ draws a shelf from the \emph{learned storage policy},
+\begin{equation}
+  v_n \sim \pi^{\mathrm{str}}_\theta\bigl(\,\cdot \mid x_t^{-},\, x^{\mathrm{in},(n-1)},\,
+    k_n,\, \hat\rho_t,\, \hat\mu_t,\, \hat w_t \bigr),
+  \qquad v_n \in V^{\mathrm{room}}_n .
+  \label{eq:storagepolicy}
+\end{equation}
+As many units of $k_n$ as fit on $v_n$ are added to $x^{\mathrm{in},(n)}$. Every
+choice stays within capacity, moves nothing and adds only arriving units, so the
+result meets the three conditions of \nref{eq:storageupdate}. The draws come
+from the run's seed, so for each seed the learned rule $F_{\mathrm{lrn}}$ is one
+element of $\mathcal{F}$.
+
+% =================================================================
+% Part C. What the learned rule is trained for.
+% sec:pf:game, after "The reward R_i itself is left open here ..." (about line 1050).
+% =================================================================
+
+% [Axx]
+A learned storage rule has a learning problem of its own. It decides on the
+slow clock, once per put-away, and the routing controller is part of the world
+it learns in. While the storage rule learns, the controller is held fixed, so
+the controller's choices belong to the transition kernel of the storage rule,
+just as the storage update belongs to the kernel $P$ of the routers.
+
+The storage rule is judged by the loaded journeys its choices settle. A shelf
+choice decides two journeys, the put-away from the receiving side to the shelf
+and each pick from the shelf to its delivery vertex. The time a robot spends on
+them while carrying the units, moving or blocked, is the part of the service
+time a shelf choice controls. The wait before assignment and the empty run to
+the shelf depend on where the fleet happens to be, so they are left out. The
+trip distance $d^{\mathrm{trip}}$~\eqref{eq:tripdistance} is the same journey in
+an empty warehouse. The loaded time adds what traffic costs on that journey,
+which the trip distance leaves out.
+
+Formally, the \emph{loaded time} of task $\tau_j$ is
+$\zeta^{\mathrm{load}}_j = t_j^{\mathrm{finish}} - t_j^{\mathrm{pickup}}$. With
+$\mathcal{C}^{\mathrm{put}}_T$ the put-aways completed by $T$, the storage
+policy is trained for
+\begin{equation}
+  \min_{\theta}\; \mathbb{E}_{\pi^{\mathrm{str}}_\theta} \Bigl[
+    \sum_{\tau_j \in \mathcal{C}^{\mathrm{put}}_T} \zeta^{\mathrm{load}}_j
+    + \sum_{\tau_j \in \mathcal{C}^{\mathrm{pick}}_T} \zeta^{\mathrm{load}}_j \Bigr].
+  \label{eq:storagelearning}
+\end{equation}
+Both sums are needed. Orders are the same under every rule, so every pick
+happens whatever the rule does, and only its loaded time depends on the shelf.
+The number of put-aways does depend on the rule, because a SKU spread over more
+shelves takes more trips, and the first sum charges for each. How each term is
+credited to the choice that caused it is given in Section~\ref{sec:method:storage}.
+
+% =================================================================
+% Part D. Rows for the notation table (Appendices/A.Notation.tex).
+% =================================================================
+% F_fix, F_dem, F_cng row becomes F_fix, F_dem, F_lrn if the learned rule replaces F_cng.
+%
+% \( \pi^{\mathrm{str}}_\theta \) & \nameeq{eq:storagepolicy} & Learned storage policy, which draws a shelf with room for each put-away \\
+% \( F_{\mathrm{lrn}} \) & learned storage rule & The storage rule that places arriving stock by \( \pi^{\mathrm{str}}_\theta \) \\
+% \( \zeta^{\mathrm{load}}_j \) & loaded time & \( t_j^{\mathrm{finish}} - t_j^{\mathrm{pickup}} \), the time task \( \tau_j \)'s units are carried \\
+% \( \mathcal{C}^{\mathrm{put}}_T \) & completed put-aways & Put-away tasks completed by \( T \) \\
+%
+% Helpers local to eq:storagepolicy, not in the table: n, k_n, v_n, x^{in,(n)}, V^room_n.

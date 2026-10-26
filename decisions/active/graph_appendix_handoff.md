@@ -104,7 +104,7 @@ Run from the workspace root (`~/Documents/thesis`) unless noted. Use the shared 
 
 ## What to write
 
-In `thesis/Chapters/Appendix/C.Instances.tex`, replace the TODO at its end. Keep the
+In `thesis/Appendices/C.Warehouses.tex` (written 2026-10-21 except the results table), replace the TODO in Results. Keep the
 starting-stock part that is already there. Suggested order, one idea per paragraph:
 
 1. **How a warehouse is generated.** In words:

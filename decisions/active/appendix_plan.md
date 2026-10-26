@@ -1,7 +1,7 @@
 # Appendix plan
 
-**2026-10-21. Third round agreed**, 13 appendices down to 10 and included at the end of
-`main.tex`. See `appendix_split_handoff.md`.
+**2026-10-21. Third round done**, see the section at the end. The sections before it are
+history.
 
 **Status 2026-10-20. Structure built, first moves done, uncommitted in `thesis/`.**
 The limit is 60 pages for the main text. The bibliography and appendices do not
@@ -73,3 +73,61 @@ conclusion and future work written, about 55 to 56.
 - Further candidates if the results push past 60 pages. "What a decentralised
   agent sees" (the communication graph), "Who decides", and the pilot numbers in
   `sec:method:storage` and `sec:impl:instances`.
+
+## Third round, 2026-10-21
+
+Agreed with the author and built, uncommitted in `thesis/`. Each appendix is its own
+document with its own PDF and front page, in `thesis/Appendices/`, and `main.tex` ends with
+an overview table after the bibliography (`Appendices/overview.tex`). Topic appendices are
+short papers that can be read without the thesis, in five parts, Summary, Setting, Method,
+Results and Conclusion. C is the template. Notation, Parameters and Definitions are
+reference material. How to build: `LATEX.md`, "Appendices".
+
+| | Appendix | File | From |
+|---|---|---|---|
+| A | Notation | `A.Notation.tex` | A |
+| B | Parameters and where each value comes from | `B.Parameters.tex` | H, plus a Source column (*cited*, *derived*, *tested*, *open*, *design*) |
+| C | Warehouse instances | `C.Warehouses.tex` | B (well-formed), C, written as a paper |
+| D | Load and demand | `D.LoadDemand.tex` | D (load sweep), J (load levels, drift), skeleton |
+| E | Storage and inventory | `E.Storage.tex` | G, C (starting stock), J (arrival against relocation) |
+| F | Controllers, observations and reward | `F.Controllers.tex` | E, K |
+| G | Model and training | `G.Training.tex` | new, skeleton |
+| H | Measures and evaluation | `H.Measures.tex` | F |
+| I | Logging and correctness checks | `I.Checks.tex` | I |
+| J | What the model leaves out | `J.Scope.tex` | L |
+| K | Definitions in full | `K.Definitions.tex` | M |
+
+Still to do (handoff for the next agent: `appendix_papers_handoff.md`):
+- Write D to I as papers in the shape of C. Most need their tests run first
+  (`decisions/ideas/Appendixes.md`).
+- The results table of C, from the 50-seed instance report.
+- Mid-sentence `\Nref` prints a capital "The" in about ten places of `2.Introduction.tex`.
+
+## Fourth round, 2026-10-23
+
+Agreed with the author and built, uncommitted in `thesis/`. The thesis keeps the argument
+and the design, and the appendices hold the experiments behind it, one short paper per
+experiment. The design text moved out of the chapters to save pages is reference material
+in C, ordered like the thesis. Every label moved with its text. The table of the split and
+the state of each appendix is in `appendix_papers_handoff.md`, "Status on 2026-10-23, after
+the split".
+
+| | Appendix | File | From |
+|---|---|---|---|
+| A | Notation | `A.Notation.tex` | A |
+| B | Parameters | `B.Parameters.tex` | B |
+| C | Model details | `C.ModelDetails.tex` | design parts of E, F, H, and J, K |
+| D | Warehouse generation | `D.Warehouses.tex` | C |
+| E | Load and capacity | `E.Load.tex` | D (load) |
+| F | Demand drift | `F.Demand.tex` | D (drift) |
+| G | Storage rule values | `G.StorageValues.tex` | E (tests) |
+| H | Evaluation horizon and stall length | `H.Horizon.tex` | H (tests) |
+| I | Observation depth and reward weights | `I.Reward.tex` | F (tests) |
+| J | Model and training | `J.Training.tex` | G |
+| K | Simulator checks | `K.Checks.tex` | I |
+| L | Full results | `L.Results.tex` | new, the test-run tables |
+
+The model's formal definitions stay in the thesis, and background and related work too,
+with only an extension of either going to an appendix paper. The formal statements now in
+C go back into the chapters when the thesis is reworked. See `appendix_papers_handoff.md`,
+"The thesis holds the design, the appendices hold the experiments".

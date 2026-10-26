@@ -1744,3 +1744,106 @@ wrong under [A32] are marked.
 - [ ] **Check: the instant switch.** Optional. Evaluate the adaptive rules
       with every update applied one epoch late, with no retraining, to see
       how much of the gain the instant switch carries.
+
+### [A58] The main load comes from fixed storage, and capacity is the highest rate that keeps up (Design change, thesis text edited 2026-10-21, uncommitted)
+
+- **Where.** `app:load:method` (Appendix D).
+- **What the edit says.** The Token Passing load sweep runs fixed storage only. The
+  capacity of a warehouse is the highest arrival rate at which fixed storage, and every
+  lower rate, keeps up on every seed (`eq:throughput`). The main load is 0.6 of it, and
+  every storage rule and controller of that fleet runs at this one rate. Each fleet size is
+  swept on its own warehouse, on a grid of 0.0125 m to 0.1 m in eight steps, refined
+  between the last passing and the first failing rate.
+- **Why.** The gain test pairs fixed and adaptive storage on one order stream, so they need
+  one rate. Fixed storage is the baseline, and the other systems' results are read from
+  their own runs. The earlier reading, the highest mean throughput over the rates, kept
+  rising past the point the fleet fell behind, because throughput counts put-aways, which
+  grow with the rate. It also drops `chi_max`, which `[A49]` removed.
+- **Revises.** The capacity reading of `thesis_plan.md` section 4.3 ("the most tasks per
+  timestep Token Passing sustains").
+- **Code.** Worktree `~/worktrees/fix-measures` (branch `fix/measures-a49-a51`,
+  uncommitted), `scripts/load_sweep.py`, `scripts/run_fleet_sweeps.sh`,
+  `scripts/extract_sweep_parameters.py`. The sweeps in `slap-mapd-coupling/DIR/` predate
+  the graph fix of `[A57]` and are run again.
+
+### [A59] The keep-up check is applied to picks and put-aways separately (Design change, thesis text edited 2026-10-23, uncommitted)
+
+- **Where.** `sec:pf:measures` (`eq:throughput`), the notation table (`f_up`, and a new row for
+  `C^put_T`, `B^pick_T`, `B^put_T`).
+- **What the edit says.** A run keeps up only if its picks and its put-aways each pass the check,
+  each against its own release rate, with the same `f_up`. The orders still waiting for stock
+  count in the pick backlog. Throughput as the result of a run that does not keep up stays the
+  total over both kinds.
+- **Why.** The Token Passing parameter sweep of 2026-10-22 showed that the combined check misses
+  put-aways falling behind. At 32 agents demand storage passed on 20 of 20 seeds while it
+  finished 301 of 450 put-aways (67 %), because the picks carried the combined share above 0.8.
+  A rule that leaves put-aways waiting can shorten the picks and still pass. See
+  `notes/parameter_sweep_2026-10-23.md` and `notes/measures_catalogue.md`.
+- **Revises.** [A50], whose "Why" said the keep-up check covers a rule that gains by leaving work
+  unfinished. With one combined check it did not. [A47] (put-aways count as tasks in the check).
+- **Code.** `evaluation/metrics.py` (`keeps_up`, and the per-kind backlog), the load sweep's
+  capacity reading. Planned in `active/measures_plan.md`. The capacities and main loads of
+  `[A58]` are read again with the new check.
+
+### [A60] A checkpoint is chosen on validation seeds by pick service time among those that keep up (Design change, thesis text edited 2026-10-23, uncommitted)
+
+- **Where.** `app:cal:checkpoint` (Appendix G), which was a TODO.
+- **What the edit says.** Every saved checkpoint plays the validation seeds. Among those that pass
+  the keep-up check on every validation seed, the one with the shortest mean pick service time is
+  evaluated on the test seeds. If none passes, the one with the highest throughput is taken and
+  the arm is reported by its throughput. The training return is not used.
+- **Why.** It is the rule of `eq:decisionproblem` applied to checkpoints, so checkpoint choice and
+  the result use one measure. The training return is dominated by the shaping term and does not
+  track service time (`thesis_plan.md` section 5).
+- **Open.** The number of validation seeds and the checkpoint frequency. The configs have 2 seeds
+  and every 3 iterations.
+- **Code.** The configs select by `episode_return_mean`. Planned in `active/measures_plan.md`.
+
+### [A61] The horizon is 2000 or more, and the load sweep states its seeds and covers the largest fleet (Design change, thesis text edited 2026-10-23, uncommitted)
+
+- **Where.** `tab:evalparams` (Appendix B, `T`), the TODO of `app:cal:horizon` (Appendix H),
+  `app:load:method` (Appendix D).
+- **What the edit says.** `T` is 2000 or more, still open for the calibration of
+  `app:cal:horizon`, which may raise it but not lower it. The load sweep runs 20 seeds per
+  rate, as many as the compute allowed, to show how much the numbers vary between order
+  streams on each generated warehouse, and it gives an overview of the settings that work per
+  fleet, not a tuned optimum. Where the lowest grid rate already fails, rates below it are
+  added the same way as between the last passing and the first failing rate.
+- **Why.** The author set the floor of the horizon: long enough for the demand estimate to
+  settle, for several demand drifts (period 200) and storage periods (Δ = 100), and for a
+  learned storage rule to make enough choices (about 200 per episode at 8 agents). 630 was a
+  value from the three-agent pilot of `[A31]`, and every config already uses 2000. The author
+  does not argue for the number of seeds, only states it and what it is for. At 64 agents the
+  lowest grid rate (0.8) failed on the rerun of 2026-10-23, so "one grid covers every fleet"
+  no longer held.
+- **Revises.** `[A31]` (`T` = 630), `[A58]` (the grid).
+
+### [A62] Graph v2, every endpoint a leaf off the aisles, a one-way loop and a U-shaped flow (Design change, thesis text edited 2026-10-26, uncommitted)
+
+- **Where.** `sec:impl:instances` (Chapter 4), `app:instances` (Appendix D: summary, setting,
+  `app:instances:method`, results, `tab:instances`, conclusion and `app:cal:roles`).
+- **What the edit says.** Every storage, delivery, receiving and parking vertex is a leaf with
+  one edge to the aisle beside it, so every warehouse is well-formed by construction and none
+  is discarded. Aisles run from a front lane to a back lane, and two one-way rows in opposite
+  directions cross the rack area and form a loop with no leaf on it. Every other edge is
+  two-way. Some aisles stop short of the back lane, and one link per pair of neighbouring
+  aisles in each block joins them at a row drawn from the seed. Delivery vertices on the
+  front wall, receiving vertices from one front corner, parking from the opposite back corner,
+  a U-shaped flow. 16 m walkable vertices with the leaves on top. The shelf count follows from
+  the rack faces (58, 230, 575 and 1356), and a shelf may hold several SKUs.
+- **Why.** The queue of 2026-10-23 showed that storage could hardly change trip length, and
+  that a robot serving a shelf blocked the aisle (`notes/queue_findings_2026-10-26.md`,
+  sections 2 and 3). Model revision decisions D1 to D6
+  (`active/model_revision/README.md`, `02_graph.md`). Van Knippenberg et al. (2021),
+  Section 4 and Figure 4, checked in the paper: start and goal nodes have one or two
+  neighbours, and the two uni-directional central lanes carry none except at their ends.
+- **Result.** Test A (`results/tests/A_graph_v2/`): 50 of 50 seeds well-formed at every fleet,
+  each from the first layout. Trip distance 6 to 37 at 8 agents, 5 to 131 at 64. At 8 agents
+  and load 0.12, demand storage beats fixed by 14 % on pick service time, random beats fixed
+  by 18 %, and demand is 4.5 % behind random. Travel per pick drops by under one step.
+- **Open.** A source for the U-shaped flow (Bartholdi and Hackman, to check, TODO in both
+  places). `warehouses.png` still shows the old layout (step 09). The text mentions no earlier
+  layout (author, 2026-10-26). The thesis is not committed.
+- **Code.** PR #193 (`feat/graph-v2`), with the random put-away rule of test A in PR #194.
+- **Revises.** `[A57]` (roles drawn at random on the aisles, m/2 storage vertices, every edge
+  two-way, layouts discarded until well-formed).

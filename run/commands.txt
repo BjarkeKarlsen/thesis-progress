@@ -1,5 +1,5 @@
-python -m slap_mapd_coupling.main train --config configs/medium_putaway/decentralised.yaml --output ~/thesis_run/putaway_pilot --gpu --env-runners 7
+python -m slap_mapd_coupling.main train --config configs/fleet_8/decentralised.yaml --output ~/thesis_run/pilot --gpu --env-runners 7
 
-python -m slap_mapd_coupling.main evaluate /home/bjarkek/thesis_run/putaway_pilot --storage-modes fixed --output /home/bjarkek/thesis_run/putaway_pilot
+python -m slap_mapd_coupling.main evaluate /home/bjarkek/thesis_run/pilot --storage-modes fixed --output /home/bjarkek/thesis_run/pilot
 
 tail -f sweep_run.log

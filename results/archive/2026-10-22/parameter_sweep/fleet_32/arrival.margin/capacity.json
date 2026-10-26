@@ -1,0 +1,67 @@
+{
+  "num_agents": 32,
+  "f_up": 0.8,
+  "varied": "arrival.margin",
+  "by_value": {
+    "0.25": {
+      "fixed": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      },
+      "demand": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      }
+    },
+    "0.5": {
+      "fixed": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      },
+      "demand": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      }
+    },
+    "1": {
+      "fixed": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      },
+      "demand": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      }
+    },
+    "1.5": {
+      "fixed": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      },
+      "demand": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      }
+    },
+    "2": {
+      "fixed": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      },
+      "demand": {
+        "capacity": 0.36,
+        "first_failing_rate": null,
+        "main_load": 0.216
+      }
+    }
+  }
+}

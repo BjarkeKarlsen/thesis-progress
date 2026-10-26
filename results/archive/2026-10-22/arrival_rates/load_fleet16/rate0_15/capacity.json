@@ -1,0 +1,11 @@
+{
+  "num_agents": 16,
+  "f_up": 0.8,
+  "by_mode": {
+    "fixed": {
+      "capacity": 0.15,
+      "first_failing_rate": null,
+      "main_load": 0.09
+    }
+  }
+}

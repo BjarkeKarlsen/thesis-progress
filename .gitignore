@@ -226,3 +226,23 @@ __marimo__/
 *.out
 *.bbl
 *.blg
+
+# Large raw traces, kept on NordLocker, not in git (2026-10-26)
+results/H_horizon/fleet_16/trace_seed0.jsonl
+results/H_horizon/fleet_16/trace_seed1.jsonl
+results/H_horizon/fleet_16/trace_seed2.jsonl
+results/H_horizon/fleet_16/traces/traces/fixed_rate0.12_seed0.jsonl
+results/H_horizon/fleet_16/traces/traces/fixed_rate0.12_seed1.jsonl
+results/H_horizon/fleet_16/traces/traces/fixed_rate0.12_seed2.jsonl
+results/H_horizon/fleet_32/trace_seed0.jsonl
+results/H_horizon/fleet_32/trace_seed1.jsonl
+results/H_horizon/fleet_32/trace_seed2.jsonl
+results/H_horizon/fleet_32/traces/traces/fixed_rate0.36_seed0.jsonl
+results/H_horizon/fleet_32/traces/traces/fixed_rate0.36_seed1.jsonl
+results/H_horizon/fleet_32/traces/traces/fixed_rate0.36_seed2.jsonl
+results/H_horizon/fleet_64/trace_seed0.jsonl
+results/H_horizon/fleet_64/trace_seed1.jsonl
+results/H_horizon/fleet_64/trace_seed2.jsonl
+results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed0.jsonl
+results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed1.jsonl
+results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed2.jsonl
