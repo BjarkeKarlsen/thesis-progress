@@ -1,0 +1,1 @@
+For Token Passing and maybe other models is the endpoint even used? There is no relu for Token Passing that agent with no task should go to a endpoint? Since this model do we even need this node or should we fix the code and modeling for this part?
