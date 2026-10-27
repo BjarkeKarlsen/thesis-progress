@@ -1942,3 +1942,21 @@ wrong under [A32] are marked.
   parking vertices at 8 agents, 640 and 742 at 64, with 20 and 320 SKUs. Final counts after the sizing.
 - **Code.** `num_storage_vertices` for graph v2 (`e0090d0`).
 - **Revises.** `[A62]` (the shelves follow from the rack faces, 58 to 1356, $|V_{\mathrm{ep}}| = m$).
+
+### [A72] An idle robot moves to an endpoint only when it is in the way (Design change, thesis text edited 2026-10-27)
+
+- **Where.** The roles paragraph of `sec:pf:env`, `sec:pf:observations` (a paragraph after the
+  distance label), `eq:currenttarget` (Appendix C, two more cases), `sec:method:rl` (the reward of an
+  idle agent), the notation table ($q_i(t)$, new $y_i(t)$).
+- **What the edit says.** A robot without a task keeps its own vertex as its target. When it stands on
+  the pickup or delivery vertex of an unfinished task, or another robot was stopped from moving onto its
+  vertex, its target becomes the nearest free endpoint $y_i(t)$ until it arrives or gets a task. The
+  shaping term rewards it for getting closer, with no wait cost.
+- **Why.** A learned robot with no task targeted its own vertex, so it stayed where its last task ended,
+  often on a delivery or receiving vertex, and "an idle robot waits at an endpoint, where it blocks no
+  one" held for Token Passing only (README "Still open", 2026-10-26). Token Passing's own rule covers
+  only the delivery vertex of an unassigned task, because its task rule never hands out a task whose
+  ends are taken. Model revision D26, refined by the author 2026-10-27.
+- **Rejected.** Sending every idle robot to an endpoint at once, which adds trips and differs from Token
+  Passing. Copying Token Passing's trigger word for word, which leaves a pickup blocked.
+- **Code.** `idle_parking` in the experiment section (`e0090d0`), on in `configs/step12/`.
