@@ -1924,3 +1924,21 @@ wrong under [A32] are marked.
   before `2817ca7`, so its rules weighed the nearest dock.
 - **Revises.** `[A62]` (delivery vertices on the front wall, receiving vertices at one front corner, a
   U-shaped flow) and `[A47]` (the first leg from the nearest receiving vertex).
+
+### [A71] Two shelves per SKU, the other rack faces parking (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:impl:instances` (the shelves, and the counts of parking vertices and SKUs).
+- **What the edit says.** After the delivery vertices are drawn, $2|\mathcal{K}|$ shelves are spread
+  evenly over the rack faces left, and the remaining faces become parking vertices, so
+  $|V_{\mathrm{ep}}| \ge m$. The number of SKUs per fleet is TBD, set so that a SKU of middle popularity
+  is refilled about four times per demand cycle.
+- **Why.** With a shelf on every rack face there were 58 shelves for 60 SKUs at 8 agents and about 30
+  shelves near each delivery vertex, so every rule placed stock next to one and the rules hardly
+  differed. Van Knippenberg et al. have no storage, so the count had no value of its own (Appendix D).
+  Two per SKU is the fewest that leaves a second place while a refill is under way. Spread evenly rather
+  than at random, so a seed does not cluster its shelves. Model revision D25.
+- **Rejected.** A shelf on every rack face.
+- **Provisional counts** (instance report, 50 seeds, `results/D_warehouses/step12/`): 40 shelves and 21
+  parking vertices at 8 agents, 640 and 742 at 64, with 20 and 320 SKUs. Final counts after the sizing.
+- **Code.** `num_storage_vertices` for graph v2 (`e0090d0`).
+- **Revises.** `[A62]` (the shelves follow from the rack faces, 58 to 1356, $|V_{\mathrm{ep}}| = m$).
