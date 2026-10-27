@@ -265,3 +265,38 @@ and evaluation seeds relies on." (637 to 638).**
 GAPS entry: the code fixed one warehouse per fleet (seed 42) while Appendix D's seed split read as one per
 seed. The generator exists to give a family of irregular warehouses, so the claim is about that family, and
 a test on unseen layouts shows whether the router has learned to route rather than one map.
+
+## [A74] D28, stacked blocks of four rack rows, irregular aisles in every block
+
+**`sec:impl:instances`, replaces "The aisles run from a front lane to a back lane, and some stop short of the
+back lane. Two one-way rows cross the middle ... and a few links join neighbouring aisles."**
+
+> The rack area is split into blocks of four rack rows. A two-way cross lane runs between neighbouring
+> blocks, and at the centre two one-way rows take its place, one in each direction, like the two one-way
+> central lanes of \citet{vanKnippenberg2021}. Joined at both ends they form a loop. No leaf hangs off a
+> lane, so traffic across the warehouse never waits behind a robot at a shelf. A larger warehouse gets more
+> blocks and more aisles rather than deeper ones, so a shelf is within four steps of a lane at every fleet
+> size. With deeper blocks around one central loop, the aisles at 64 agents would be six times as deep as
+> at 8 and all traffic across the warehouse would share one loop, so a difference between fleets would
+> partly come from the building rather than the fleet. In each block the two outer aisles run from lane to
+> lane. Every inner aisle hangs from the lane on the side of the central loop, at a length drawn from the
+> seed, so some stop short in a dead end, in every block. Every other edge is two-way, and a few links join
+> neighbouring aisles.
+
+**Same section, the growth paragraph, after "...get 128, 256, 512 and 1024 vertices a robot can drive
+through."**
+
+> The shape is the most nearly square that holds them, 6 aisles and 2 blocks at 8 agents, 7 aisles and 4
+> blocks at 16, 10 and 6 at 32, and 15 and 8 at 64.
+
+**Appendix D.** The setting and method describe one pair of blocks with full lower aisles, and
+`tab:instances` holds the counts of the first graph v2. Both follow the instance report on the stacked
+layout (`results/D_warehouses/step12/`), drafted once its numbers are in.
+
+GAPS entry: today's growth deepened the two blocks around one loop (4 rack rows at 8 agents, 24 at 64), so
+congestion grew with the fleet partly because of the layout, which muddies any comparison across fleet
+sizes. Blocks of a fixed depth keep the building around each robot the same. The lower block was full in
+every seed, so the bottom half looked the same everywhere (the author, watching the layout, 2026-10-27).
+Rejected: deeper blocks around one loop, more one-way pairs (several loops complicate routing for little
+gain), and shelves along the central pair (it would block the loop, D3). Code `e1f6c2c` (irregular lower
+block) and `9bc3bc4` (`num_blocks`, `v2_stacked_shape`). Revises `[A62]`.

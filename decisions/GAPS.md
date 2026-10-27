@@ -1960,3 +1960,39 @@ wrong under [A32] are marked.
 - **Rejected.** Sending every idle robot to an endpoint at once, which adds trips and differs from Token
   Passing. Copying Token Passing's trigger word for word, which leaves a pickup blocked.
 - **Code.** `idle_parking` in the experiment section (`e0090d0`), on in `configs/step12/`.
+
+### [A73] A new warehouse every episode (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:impl:instances` (the seed sentence), Appendix J (the seed split).
+- **What the edit says.** Every episode plays the warehouse of its own seed. Training sees one warehouse
+  per episode of the budget, 250 at 500 000 steps of 2000-step episodes, and the validation and test seeds
+  play warehouses no run trained on. Every controller and storage rule plays the same warehouse on the same
+  seed, so the comparison stays paired. Each training seed is its own warehouse, and the window tables of
+  every warehouse are built before training.
+- **Why.** The code fixed one warehouse per fleet (seed 42), while Appendix D's seed split read as one per
+  seed. The generator exists to give a family of irregular warehouses, so the claim is about that family,
+  and a test on unseen layouts shows whether the router learned to route rather than one map. One per
+  episode is the most layouts a fixed budget shows. Model revision D27, agreed 2026-10-27.
+- **Rejected.** One warehouse per fleet. A smaller pool seen several times, kept as the fallback if
+  training does not settle.
+- **Code.** `warehouse_per_seed`, `training/warehouses.py`, `StoredWindowLookup` (`e0090d0`),
+  `prepare-warehouses` (later on the same branch).
+- **Revises.** The fixed instance seed of `[A57]`/`[A62]`.
+
+### [A74] Stacked rack blocks of four rows, irregular aisles in every block (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:impl:instances` (the layout paragraph, the shapes per fleet). Appendix D still to follow.
+- **What the edit says.** The rack area is blocks of four rack rows, a two-way cross lane between
+  neighbouring blocks and the one-way loop at the centre. A larger warehouse gets more blocks and aisles,
+  not deeper ones, so a shelf is within four steps of a lane at every fleet size. In each block the outer
+  aisles run lane to lane and every inner aisle hangs from the lane on the side of the loop at a length
+  drawn from the seed. 6 aisles and 2 blocks at 8 agents, 7 and 4 at 16, 10 and 6 at 32, 15 and 8 at 64.
+- **Why.** The old growth deepened two blocks around one loop (4 rack rows at 8 agents, 24 at 64), so
+  congestion grew with the fleet partly because of the layout, which muddies any comparison across fleet
+  sizes. The lower block was full in every seed, so the bottom half looked the same everywhere (the author,
+  watching the layout, 2026-10-27). Model revision D28.
+- **Rejected.** Deeper blocks around one loop. More one-way pairs, which complicate routing for little
+  gain. Shelves along the central pair, which would block the loop (D3).
+- **Code.** `e1f6c2c` (irregular lower block), `9bc3bc4` (`num_blocks`, `v2_stacked_shape`). The old layouts
+  build bit for bit as before (27 instances compared).
+- **Revises.** `[A62]` (two blocks around one pair, the lower block full).
