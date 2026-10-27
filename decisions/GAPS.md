@@ -1876,3 +1876,26 @@ wrong under [A32] are marked.
   time, it must lead with the order service time.
 - **Revises.** D13 and `[A50]` (the mean service time of picks as the result), and `[A46]` (order
   completion as the longest service time among an order's tasks, reported only).
+
+### [A69] One random start for every rule, class-based homes for fixed storage (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:impl:instances` (the start paragraph), `sec:pf:storage` (the home shelf of
+  $F_{\mathrm{fix}}$), `app:horizon:setting` (Appendix H, the warm-up).
+- **What the edit says.** Every rule starts from the same $x_0$, each SKU alone on a shelf drawn at
+  random for the seed with one refill plus its safety stock. Half the shelves start empty. The home
+  shelves of $F_{\mathrm{fix}}$ are chosen once from the popularity at $t = 0$, the most popular SKUs
+  nearest the delivery vertices, and are not the shelves of $x_0$. Training and evaluation start the
+  same way, and evaluation measures after a warm-up (length TBD) in which the storage rule's refills
+  replace the start.
+- **Why.** The old start put the popular SKUs nearest the delivery vertices for every rule, so the
+  start decided most of where stock was and the rules made few decisions of their own (watching a
+  run, 2026-10-26). Model revision D22, and choice 2 of `12_thesis_drafts.md`, agreed 2026-10-27.
+  Homes that followed a random start would make fixed storage random dedicated storage, a weak
+  baseline for the main result.
+- **Rejected.** An empty start (every slot placed by the rule, but the first thousands of steps are
+  filling), and homes that follow the random start.
+- **Code.** `initial_placement: random_slots` on `feat/flow-and-start`. Fixed storage's homes from the
+  class-based placement: commit `b44db09` (`fixed_homes`). The step 12 sweep started 2026-10-27
+  12:12 ran before that change, so its fixed storage had random homes.
+- **Revises.** D19 (start fill 0.4, the SKU count derived from it) and `[A35]`/`[A38]` (the start
+  as the class-based placement applied once, homes as the shelves of $x_0$).
