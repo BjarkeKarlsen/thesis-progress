@@ -20,9 +20,9 @@ assignment and multi-agent pickup and delivery. Read these first, in order:
 is missing, the sweep has not finished or its push failed, so stop and tell the author.
 
 **What ran.** `scripts/sweep/overnight.bash` of `slap-mapd-coupling`, branch `feat/flow-and-start` at
-`9bc3bc4` or later, on `configs/step12/fleet_{8,16,32,64}.yaml`, from `bedtime.bash step12` (restarted
+`1056911` or later, on `configs/step12/fleet_{8,16,32,64}.yaml`, from `bedtime.bash step12` (restarted
 2026-10-27 after the layout changes, the first start's partial rows are in
-`~/thesis_runs/archive/step12_sweep_old_layout/` and are not to be used):
+`~/thesis_runs/archive/step12_sweep_old_layout*/` and are not to be used):
 - step 1 and 2, Token Passing load sweeps under fixed storage, 20 seeds per rate, then finer rates around
   each fleet's capacity, in `arrival_rates/load_fleet<m>/` (`load_sweep.jsonl`, `capacity.json`,
   `summary.md`),
@@ -36,12 +36,13 @@ Every episode ran 10000 steps with a 5000-step warm-up left out of the measures,
 its own warehouse (D27). The warehouses are the agreed step 12 model: stacked rack blocks of 4 rows with
 cross lanes and the one-way pair in the middle (6 aisles and 2 blocks at 8 agents, 7 and 4 at 16, 10 and
 6 at 32, 15 and 8 at 64), every inner aisle segment irregular, delivery vertices on random rack faces,
-receiving vertices along the left wall, shipping to a random dock, fixed storage with class-based homes
+receiving vertices along the left wall, exactly $m$ parking vertices spread over the rack faces left,
+shipping to a random dock, fixed storage with class-based homes
 (`[A69]`) and the put-away leg as the mean over the docks (`[A70]`). The SKU counts are provisional,
 20, 30, 50 and 100 SKUs at 8, 16, 32 and 64 agents, with two shelves per SKU and Q = 30.
 
 **Check first** that the run is this one: `~/thesis_runs/queue_<date>/code_step12/base_commit.txt` on the
-PC that ran it should be `9bc3bc4` or later. If it is earlier, the run is the first start, so stop and
+PC that ran it should be `1056911` or later. If it is earlier, the run is the first start, so stop and
 tell the author.
 
 **Your task, part D of `12_flow_and_start.md` (D25).**
