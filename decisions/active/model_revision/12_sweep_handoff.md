@@ -41,6 +41,10 @@ baseline. The agreed model (`[A69]`) gives it class-based homes instead. So:
 - every gain of demand over fixed storage in the sensitivity sweeps is likely too large,
 - units per step, put-aways per run, lines that waited for stock and the shape of the Q sweep are still
   usable for sizing.
+
+A second, smaller caveat. The sweep also ran before `2817ca7`, so the storage rules weighed the put-away
+leg from the nearest dock, not the mean over the docks (`[A70]`). Refills still came from random docks.
+This shifts which shelves demand and congestion storage chose, not the load the fleet carried.
 Say this wherever you report a number it affects.
 
 **Your task, part D of `12_flow_and_start.md` (D25).**

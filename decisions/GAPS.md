@@ -1842,7 +1842,7 @@ wrong under [A32] are marked.
   and load 0.12, demand storage beats fixed by 14 % on pick service time, random beats fixed
   by 18 %, and demand is 4.5 % behind random. Travel per pick drops by under one step.
 - **Open.** A source for the U-shaped flow (Bartholdi and Hackman, to check, TODO in both
-  places). `warehouses.png` still shows the old layout (step 09). The text mentions no earlier
+  places). Closed for the chapter by `[A70]`, which ends the U-shaped flow (Appendix D still says U). `warehouses.png` still shows the old layout (step 09). The text mentions no earlier
   layout (author, 2026-10-26). The thesis is not committed.
 - **Code.** PR #193 (`feat/graph-v2`), with the random put-away rule of test A in PR #194.
 - **Revises.** `[A57]` (roles drawn at random on the aisles, m/2 storage vertices, every edge
@@ -1899,3 +1899,28 @@ wrong under [A32] are marked.
   12:12 ran before that change, so its fixed storage had random homes.
 - **Revises.** D19 (start fill 0.4, the SKU count derived from it) and `[A35]`/`[A38]` (the start
   as the class-based placement applied once, homes as the shelves of $x_0$).
+
+### [A70] Delivery vertices on random rack faces, receiving vertices along the left wall, the put-away leg over every dock (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:impl:instances` (the paragraph that was the U-shaped flow, its TODO removed),
+  `sec:method:storage` (the trip distance in words, twice), `eq:tripdistance` (Appendix C).
+- **What the edit says.** The delivery vertices take rack faces drawn at random for each seed. The
+  receiving vertices are spread evenly along the whole left wall. Stock comes in and orders leave
+  there, so work runs from the left wall to a shelf, to a delivery vertex and back. The first leg of
+  $d^{\mathrm{trip}}(v)$ is the mean distance over the receiving vertices, since a refill's dock is
+  drawn at random. At 8 agents $d^{\mathrm{trip}}$ runs from about 11 to 34 steps, the means over 50
+  seeds of the smallest and largest (`results/D_warehouses/step12/summary.md`).
+- **Why.** Fixed delivery vertices on the front wall made every run's traffic meet at the same
+  vertices, and the docks in one corner sent every refill to the same dock (dock 132, watching a run on
+  2026-10-26). With random docks, the nearest dock is not where a refill comes from, so the mean is the
+  trip the rules should weigh. Model revision D24, the author's note on the docks (2026-10-27).
+- **Rejected.** Random places along the front wall only, which keeps "near the front is good" true in
+  every layout. The nearest dock in `eq:tripdistance`, which favours shelves near one dock that only
+  some refills use.
+- **Check.** Every seed at 8, 16, 32 and 64 agents is well-formed at the first layout drawn (instance
+  report, 50 seeds per fleet).
+- **Code.** `station_placement: rack_faces` and `dock_placement: left_wall` in graph v2 (`e0090d0`),
+  `DrawnDocks` for the mean over the docks (`2817ca7`). The step 12 sweep started 2026-10-27 12:12 ran
+  before `2817ca7`, so its rules weighed the nearest dock.
+- **Revises.** `[A62]` (delivery vertices on the front wall, receiving vertices at one front corner, a
+  U-shaped flow) and `[A47]` (the first leg from the nearest receiving vertex).
