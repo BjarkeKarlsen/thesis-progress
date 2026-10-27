@@ -5,14 +5,14 @@ that no role placement made well-formed. `used` is the instance of the config's 
 
 | m | seeds | pass | discard | V | walkable | V per agent | segments | aisles | cross-aisles | str | del | rcv | ep | role share | degree | roles on leaves | d^trip min | d^trip mean | d^trip max | d^trip ratio | seconds |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 8 | 50 | 50/50 | 0.00 | 200 | 128 | 25.0 | 221 | 6.0 | 4.2 | 40 | 4 | 4 | 24 | 0.360 | 2.21 | 71.9 | 10.4 | 21.3 | 33.4 | 3.46 | 0.2 |
-| 16 | 50 | 50/50 | 0.00 | 403 | 256 | 25.2 | 444 | 7.0 | 7.9 | 60 | 8 | 8 | 71 | 0.365 | 2.20 | 147.2 | 12.4 | 26.2 | 42.9 | 3.56 | 0.5 |
-| 32 | 50 | 50/50 | 0.00 | 786 | 512 | 24.6 | 865 | 10.0 | 10.9 | 100 | 16 | 16 | 142 | 0.349 | 2.20 | 274.1 | 15.2 | 33.9 | 55.0 | 3.66 | 2.1 |
-| 64 | 50 | 50/50 | 0.00 | 1591 | 1024 | 24.9 | 1757 | 15.0 | 17.3 | 200 | 32 | 32 | 303 | 0.357 | 2.21 | 567.4 | 19.1 | 45.2 | 74.2 | 3.92 | 8.5 |
+| 8 | 50 | 50/50 | 0.00 | 184 | 128 | 23.0 | 205 | 6.0 | 4.2 | 40 | 4 | 4 | 8 | 0.304 | 2.23 | 56.0 | 10.9 | 21.7 | 31.9 | 3.11 | 0.2 |
+| 16 | 50 | 50/50 | 0.00 | 348 | 256 | 21.8 | 389 | 7.0 | 7.9 | 60 | 8 | 8 | 16 | 0.264 | 2.24 | 92.0 | 13.0 | 26.9 | 40.8 | 3.27 | 0.4 |
+| 32 | 50 | 50/50 | 0.00 | 676 | 512 | 21.1 | 755 | 10.0 | 10.9 | 100 | 16 | 16 | 32 | 0.243 | 2.23 | 164.0 | 15.5 | 35.1 | 55.0 | 3.59 | 1.5 |
+| 64 | 50 | 50/50 | 0.00 | 1352 | 1024 | 21.1 | 1518 | 15.0 | 17.3 | 200 | 32 | 32 | 64 | 0.243 | 2.24 | 328.0 | 18.7 | 46.4 | 75.1 | 4.03 | 5.9 |
 
 ## The instance each config uses
 
-- m=8, seed 42: |V|=203 (128 walkable), 223 segments, 6 aisles of length 6 to 8, 4 cross-aisles, d^trip 12 to 32 (mean 22.0, ratio 2.83), 1 layout(s) sampled, well-formed True.
-- m=16, seed 42: |V|=403 (256 walkable), 444 segments, 7 aisles of length 11 to 16, 9 cross-aisles, d^trip 11 to 38 (mean 27.8, ratio 3.38), 1 layout(s) sampled, well-formed True.
-- m=32, seed 42: |V|=786 (512 walkable), 868 segments, 10 aisles of length 12 to 24, 9 cross-aisles, d^trip 16 to 60 (mean 34.1, ratio 3.84), 1 layout(s) sampled, well-formed True.
-- m=64, seed 42: |V|=1594 (1024 walkable), 1761 segments, 15 aisles of length 22 to 32, 17 cross-aisles, d^trip 21 to 70 (mean 44.7, ratio 3.29), 1 layout(s) sampled, well-formed True.
+- m=8, seed 42: |V|=184 (128 walkable), 204 segments, 6 aisles of length 6 to 8, 4 cross-aisles, d^trip 11 to 36 (mean 22.9, ratio 3.23), 1 layout(s) sampled, well-formed True.
+- m=16, seed 42: |V|=348 (256 walkable), 389 segments, 7 aisles of length 11 to 16, 9 cross-aisles, d^trip 10 to 38 (mean 26.9, ratio 3.80), 1 layout(s) sampled, well-formed True.
+- m=32, seed 42: |V|=676 (512 walkable), 758 segments, 10 aisles of length 12 to 24, 9 cross-aisles, d^trip 16 to 57 (mean 34.5, ratio 3.64), 1 layout(s) sampled, well-formed True.
+- m=64, seed 42: |V|=1352 (1024 walkable), 1519 segments, 15 aisles of length 22 to 32, 17 cross-aisles, d^trip 19 to 72 (mean 45.5, ratio 3.78), 1 layout(s) sampled, well-formed True.
