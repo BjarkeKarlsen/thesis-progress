@@ -45,6 +45,11 @@ baseline. The agreed model (`[A69]`) gives it class-based homes instead. So:
 A second, smaller caveat. The sweep also ran before `2817ca7`, so the storage rules weighed the put-away
 leg from the nearest dock, not the mean over the docks (`[A70]`). Refills still came from random docks.
 This shifts which shelves demand and congestion storage chose, not the load the fleet carried.
+
+A third. The sweep also ran before `e1f6c2c`, which made the lower rack block irregular
+(`lower_block: irregular` in `configs/step12/`). Its warehouses have every lower aisle down to the front
+lane, so the capacities belong to that layout. The rerun on the final configs will use the irregular
+block.
 Say this wherever you report a number it affects.
 
 **Your task, part D of `12_flow_and_start.md` (D25).**
