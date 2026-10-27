@@ -1847,3 +1847,32 @@ wrong under [A32] are marked.
 - **Code.** PR #193 (`feat/graph-v2`), with the random put-away rule of test A in PR #194.
 - **Revises.** `[A57]` (roles drawn at random on the aisles, m/2 storage vertices, every edge
   two-way, layouts discarded until well-formed).
+
+### [A68] Shipping to a dock, and the order service time as the result (Design change, thesis text edited 2026-10-27)
+
+- **Where.** `sec:pf:tasks` (order lines, the three task kinds, the task definition, the stock
+  condition), the roles paragraph of `sec:pf:env`, the scope list (D13's item "Nothing after the
+  delivery vertex" replaced by "No packing"), `sec:pf:measures` (the result, the service time
+  paragraph with `eq:ordercompletion` and `eq:meanservice`, the split, the keep-up check,
+  `tab:measures`), `app:measures` (Appendix C, the old order completion paragraph removed) and the
+  notation table.
+- **What the edit says.** The delivery vertex holds an order's units until its last line is
+  there, then a shipment carries the whole order to a receiving vertex, where it leaves. A
+  shipment is a third kind of task, released when the order's last pick is delivered, served
+  like a pick or a put-away. The receiving vertex of every shipment and put-away is drawn at
+  random. The result $\bar\zeta_T$ keeps its symbol and its place in `eq:rqformal`, and is now the
+  mean order service time, from an order's release until it leaves at a dock. The per-task
+  service time stays, to explain the result and for the reproduction of Ma et al. Shipments count
+  with the picks in the keep-up check.
+- **Why.** The order is what the customer waits for, and the trip out loads the docks that inbound
+  stock also uses, so leaving it out (D13) hid crowding the storage rule causes. Model revision
+  D21 (`active/model_revision/12_flow_and_start.md`), and choice 1 of `12_thesis_drafts.md`,
+  agreed by the author 2026-10-27. A random dock because which dock a truck uses does not depend on
+  where the stock goes.
+- **Rejected.** Keep the mean service time of picks as the result, which leaves the docks out of it.
+- **Code.** Branch `feat/flow-and-start` (`e0090d0`): `shipping` and `dock_choice` in the arrival
+  settings, ship tasks in `environment/multi_agent_env.py`, `order_metrics` ending at the dock.
+  Still to change: the summary of `training/evaluate_run.py` leads with the gain in pick service
+  time, it must lead with the order service time.
+- **Revises.** D13 and `[A50]` (the mean service time of picks as the result), and `[A46]` (order
+  completion as the longest service time among an order's tasks, reported only).
