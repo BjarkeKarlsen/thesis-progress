@@ -246,3 +246,6 @@ results/H_horizon/fleet_64/trace_seed2.jsonl
 results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed0.jsonl
 results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed1.jsonl
 results/H_horizon/fleet_64/traces/traces/fixed_rate0.3_seed2.jsonl
+
+# Step 12 watch trace over 5 MB (project rule: large traces off git)
+results/tests/step12_watch16/traces/
