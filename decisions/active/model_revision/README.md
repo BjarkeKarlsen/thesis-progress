@@ -37,17 +37,36 @@ given out in the order the steps are applied.
 | D10 | Horizon by Welch's method: cut the warm-up, measure over whole demand cycles | 06 |
 | D11 | Assignment stays oldest first for picks and put-aways alike, with the reason in one clause | 07 |
 | D12 | Δ = 100, half the rotation period. β = 1, a step of waiting weighs the same as a step of travel | 07 |
-| D13 | Packing, holding an order until its last line, and the trip to outbound are outside the model | 07 |
+| D13 | ~~Packing, holding an order until its last line, and the trip to outbound are outside the model~~ Replaced by D21 (2026-10-27). Packing stays outside | 07 |
 | D14 | Reproduce Ma et al.'s (2017) Token Passing results on their grid warehouse, loaded as a graph | 08 |
 | D15 | Figures: the instance in van Knippenberg's style next to the grid drawing, and the stock per slot at a few moments | 09 |
 | D16 | Train on the GPU first, and keep leaves out of the router's window only if that is not enough | 10 |
 | D17 | Fixed storage stays the reference of the main result. Random storage is only a check, under Token Passing in appendix G: is demand's gain due to demand information or only to spreading stock | 07, 11 |
 | D18 | The stall is defined at fleet level: no task finished by anyone for X steps, one X for every fleet size | 06 |
-| D19 | Every fleet starts with its shelves 0.4 full (`start_fill`), the number of SKUs derived from it, so storage has the same problem at every fleet size. Tested in appendix G | 05 |
+| D19 | ~~Every fleet starts with its shelves 0.4 full (`start_fill`), the number of SKUs derived from it, so storage has the same problem at every fleet size. Tested in appendix G~~ Replaced by D22 (2026-10-27) | 05 |
 | D20 | The demand ranking rotates by a share of the SKUs (5 % every 200 steps), so it turns once in about 4000 steps at every fleet | 06 |
+| D21 | Shipping. When the last line of an order reaches its workstation, one shipping task carries the order from the workstation to a dock drawn at random. The order is done when it leaves at the dock, so its service time includes the trip out. Refills also come in at a dock drawn at random. The workstation holds whatever arrives, with no capacity and no processing time. Shipping is an ordinary task, assigned like picks and put-aways. Orders keep several lines (author, 2026-10-26 and 2026-10-27) | 12 |
+| D22 | One start for training and evaluation. Every SKU starts on one slot drawn at random, holding its S_k units (step 05's service level), so half the slots start empty and the start carries no demand information. Evaluation adds a warm-up of about 5000 steps before scoring, so the refills placed by the storage rule replace the random start. The stall (D18) is checked only after the warm-up. Replaces D19 and the empty start of 2026-10-26 (author, 2026-10-27) | 12 |
+| D23 | ~~Training starts with random stock, evaluation empty~~ Merged into D22 (2026-10-27) | 12 |
+| D24 | The workstations are rack faces drawn at random anywhere in the warehouse, per seed, instead of spread along the front wall. The docks are spread evenly along the whole left wall, front to back, instead of grouped at the front left corner, so inbound and outbound traffic also enters through the middle (author, 2026-10-27) | 12 |
+| D25 | Slots = 2 x SKUs, spread evenly over the rack faces left after the workstations, the rest become parking leaves or are removed. The SKU count and Q follow from measured throughput: a middle-ranked SKU is refilled about 4 times per demand cycle. Slot capacity holds S_k of the most popular SKU. One SKU per slot only at the start, later a slot holds several (D5). Orders stay drawn over every SKU, the service level keeps them in stock, test B reports the share of lines that waited | 12 |
+| D26 | Idle robots of every controller follow Token Passing's parking rule. When a waiting task needs the vertex an idle robot stands on, the nearest free parking leaf becomes its target, reserved for it. Replaces the own-vertex target of issue #102 for idle robots. The thesis line "waits at an endpoint, where it blocks no one" then holds for every controller (author, 2026-10-27) | 12 |
+| D26, refined | An idle robot (no task) goes to the nearest free parking leaf only when it is in the way: its vertex is the pickup or delivery of an unfinished task, or another robot tried to move onto it this step and was stopped. A robot in nobody's way stays (author, 2026-10-27) | 12 |
+| D27 | A new warehouse every episode. The episode seed draws the layout (aisle lengths, links, workstations) and the start stock. 250 training warehouses, one per episode of today's budget (500 000 steps of 2000-step episodes), built ahead of time. Validation and test seeds have their own warehouses, never trained on. Fixed and demand storage play the same warehouse per test seed. Closes the gap with Appendix D ("one seed always gives the same warehouse, which the split into training and evaluation seeds relies on"), where the code fixed one warehouse per fleet (author, 2026-10-27) | 12 |
 
 ## Still open
 
+- **Found 2026-10-26, idle robots of the learned routers.** Token Passing parks an idle agent on the
+  nearest free parking leaf when a waiting task needs the vertex it stands on as its delivery vertex, and
+  otherwise leaves it where its last path ended (`planners/token_passing.py`, rules 2 and 3). Its no-deadlock
+  guarantee rests on this, so the parking leaves stay while it is the baseline. The learned routers have no
+  such rule. A free robot's target is its own vertex (`environment/reward_function.py`, issue #102), so it
+  stays where it stopped, often on the workstation or dock leaf of its last task, and gets no signal to
+  leave. The thesis says every idle robot "waits at an endpoint in V_ep, where it blocks no one"
+  (`2.Introduction.tex`, line 141), true for Token Passing only. Not yet checked how often a learned robot
+  blocks a leaf another robot needs, or what conflict resolution does then. Proposed, not agreed: Token
+  Passing's rule for every controller, the nearest free parking leaf becoming the idle robot's target only
+  when a waiting task needs its vertex. A model change, so an `[Axx]` tag and its own step file once agreed.
 - The crowding weight of the reward, n_cng = 0.1 now. Proposed n_cng = c_wait = 0.2, a fully crowded window
   costs one step stood still. Only training can show whether it changes behaviour, so it waits for the reruns.
 - The learned storage policy stays a maybe (author, 2026-10-26). The policy exists (`~/worktrees/pilot-learned-storage`).
@@ -84,6 +103,9 @@ of work.
 9. **08 Ma et al.** *Done 2026-10-26* (tests B and C skipped by the author that day). Code uncommitted on
    branch `feat/ma-reproduction` in `~/worktrees/refill` (on `feat/welch-window`). Rows and answer in
    `../../../results/K_checks/ma2017/`, text in `app:repro:ma`. Within about 10 %, always on the fast side.
+10. **12 flow and start** (D21 to D26), agreed with the author on 2026-10-26, evening, and its questions
+   settled on 2026-10-27. Brief: `12_flow_and_start.md`. Implementation started 2026-10-27. It changes the model, so tests A to D
+   and figures 1 and 2 of step 09 follow it, not the other way round.
 
 ## Risks
 

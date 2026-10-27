@@ -6,7 +6,7 @@
 
 The learner update was 87 to 93 % of every training iteration (170 s at 8 agents, 540 s at 32). The fleet 32
 log says "0/1 GPUs": the learner ran on the CPU while the RTX 2070 SUPER (8 GB) was idle, because
-`bedtime.bash` never passed `--gpu`. Graph v2 adds two rack faces per aisle vertex, so a depth-5 window holds
+`bedtime.bash` never passed `--gpu` and maybe also maybe never use more CPU than one core. Graph v2 adds two rack faces per aisle vertex, so a depth-5 window holds
 about three times as many vertices in the aisles.
 
 ## Step 1. Use the GPU (no model change)
@@ -28,7 +28,8 @@ The router needs the walkable floor. A slot matters only when it is the robot's 
 - Changes `eq:localsubgraph`, `eq:features` and the action set in the chapters, so it gets an `[Axx]` tag.
   Code: `environment/observation.py`, `models/local_subgraph_encoding.py`, `models/window_tables.py`,
   `environment/action_masking.py`.
-
+- A waay to reduce memory needed to run as less RAM model the GNN better
 ## Related plans
 
 `../memory_reduction_plan.md`, `../../done/embed_once_design.md`, `../scaling_to_1024_agents.md`.
+continue with the next plan, 09 visualisation
