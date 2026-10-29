@@ -1,0 +1,58 @@
+{
+  "num_agents": 64,
+  "f_up": 0.8,
+  "varied": "arrival.refill_units",
+  "by_value": {
+    "15": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "random": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    },
+    "30": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "random": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    },
+    "60": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "random": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "num_agents": 64,
+  "f_up": 0.8,
+  "varied": "demand.rotation_share",
+  "by_value": {
+    "0.025": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    },
+    "0.05": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    },
+    "0.1": {
+      "fixed": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      },
+      "demand": {
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
+      }
+    }
+  }
+}

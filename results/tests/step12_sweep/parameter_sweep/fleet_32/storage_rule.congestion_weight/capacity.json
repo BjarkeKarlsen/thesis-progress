@@ -1,0 +1,49 @@
+{
+  "num_agents": 32,
+  "f_up": 0.8,
+  "varied": "storage_rule.congestion_weight",
+  "by_value": {
+    "0": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    },
+    "0.5": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    },
+    "1": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    },
+    "2": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    },
+    "3": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    },
+    "4": {
+      "congestion": {
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
+      }
+    }
+  }
+}
