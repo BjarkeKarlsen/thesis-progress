@@ -1667,6 +1667,13 @@ wrong under [A32] are marked.
       `model_revision/README.md`, "Still open". It changes the demand model
       and the second leg of the trip, so it gets its own `[Axx]` entry once
       agreed, and it comes before the SKU count and Q (D25).
+- [ ] **Text and code for the step 12 sizing.** Decided 2026-10-29 ("D25,
+      sized" and "D25, safety stock" in `model_revision/README.md`): Q = 12
+      at every fleet, n = 250 x main load rounded to a multiple of 20, 5
+      lines per order, and every SKU's safety stock sized at rank 0. The
+      starting stock text (`4.Implementation.tex`, the refill rule and
+      `tab:evalparams`) and `refill_starting_stock` still say the SKU's
+      rank at t = 0. One `[Axx]` entry when the text is written.
 - [ ] **Code for [A49] to [A51].** Four drift points posted to #103 on
       2026-10-20 (group "measures"): the two-part keep-up check, the mean
       service time over all tasks instead of picks, the put-away distance

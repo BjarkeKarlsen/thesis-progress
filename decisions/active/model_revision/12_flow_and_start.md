@@ -135,6 +135,31 @@ decentralised, centralised and section arms. A 2-iteration training run with 2 e
 evaluation with traces ran. Preparing a pool builds the tables of every seed of the split before training,
 which is minutes at 8 agents and likely hours at 64.
 
+## Sizing proposal (part D, 2026-10-29)
+
+From the step 12 sweep (`results/tests/step12_sweep/README.md`, which has the arithmetic and the check).
+Decided by the author on 2026-10-29, logged as "D25, sized" in the README.
+
+- **Q = 12 at every fleet.** Put-aways are then the same share of trips at every fleet and SKU count, 17 %
+  with 5 lines per order and 11 % with one.
+- **n = 250 x main load, rounded to a multiple of 20.** Every SKU then gets about 4 refills per 4000-step
+  demand cycle (12000 x load / (n Q)), and the 5 % rotation share is a whole number of SKUs, so the
+  ranking turns in exactly 4000 steps. At today's main loads n = 20, 40, 40 and 60 (refills 5.3, 3.8, 4.5
+  and 4.0), slots 40, 80, 80 and 120. The rerun's main loads will move with the extra put-aways, and the
+  rule is applied once more to them.
+- **Found on the way.** The sweep's 30 and 50 SKUs made the ranking turn in 3000 and 5000 steps, not
+  4000. There is room for more slots than the configs used (45, 95, 174 and 368 at most). The orders
+  of `configs/step12/` have one line each, since no `lines_per_order` is set, while D21 keeps several
+  lines per order. The rerun switches them on, 5 lines on average as in `[A46]`
+  (`lines_per_order: {distribution: shifted_poisson, mean: 5}`), decided by the author on 2026-10-29.
+- **Open.** The waits for stock are far above the 1 % aim at small Q (5.7 % to 14 % of orders at
+  Q = 15). The likely cause is that S_k is sized at each SKU's rank at t = 0, while the rotation takes
+  every SKU to the top. Checked on fleet 8 at Q = 15 with every SKU's safety stock sized at rank 0: the orders that waited
+  fell from 5.7 % to 0.0 % and picks got 14 % faster, for 24 % mean shelf fill against 17 %. Decided by
+  the author on 2026-10-29: S_k = Q + the rank 0 quantile for every SKU ("D25, safety stock"). Still to
+  do: `refill_starting_stock` in the code, and the starting stock in the thesis with an `[Axx]` tag.
+- Configs not changed yet. They change when the step 12 settings move into `configs/fleet_<m>/`.
+
 ## Also left from 2026-10-26
 
 - The round of `#103` for the merges since `689a80b` (#188 to #197) was started and stopped by the author.
