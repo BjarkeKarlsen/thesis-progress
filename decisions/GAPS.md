@@ -1650,6 +1650,23 @@ wrong under [A32] are marked.
 
 ## Still open
 
+- [ ] **Gap: an order's workstation is random, so the storage rules have no
+      target.** Found 2026-10-29 in the step 12 sweep, raised by the author.
+      Since `[A70]` the delivery vertices are random rack faces, and every
+      order still draws one at random, while the second leg of
+      `eq:tripdistance` (Appendix C, line 637) is the distance to the
+      nearest delivery vertex. `4.Implementation.tex`, line 65 (`[A55]`),
+      justifies that leg as ranking a shelf by how close it sits to "the
+      delivery side", which no longer exists. On 5 step 12 warehouses per
+      fleet the rule's best fifth of shelves is about 3 steps from its
+      nearest delivery vertex but 11, 16, 24 and 34 steps from the one an
+      order uses (an average shelf 12.5, 17, 25 and 35). `[A70]` took the
+      mean over the docks for the same reason. Proposed, not agreed: each
+      delivery vertex keeps needing the same SKUs, fixed or changing
+      slowly. The options and the open points are in
+      `model_revision/README.md`, "Still open". It changes the demand model
+      and the second leg of the trip, so it gets its own `[Axx]` entry once
+      agreed, and it comes before the SKU count and Q (D25).
 - [ ] **Code for [A49] to [A51].** Four drift points posted to #103 on
       2026-10-20 (group "measures"): the two-part keep-up check, the mean
       service time over all tasks instead of picks, the put-away distance

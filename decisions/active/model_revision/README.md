@@ -57,6 +57,33 @@ given out in the order the steps are applied.
 
 ## Still open
 
+- **Found 2026-10-29, an order's workstation is random, so storage has no place to aim for.** Raised by the
+  author after the step 12 sweep. Every order draws its workstation at random
+  (`multi_agent_env.py`, the order release), and since D24 the workstations sit on random rack faces all over
+  the warehouse. The rules still score a shelf by its distance to the nearest workstation (`eq:tripdistance`,
+  second leg, and `access_distance` in `storage/demand.py`). The thesis calls that leg "a stand-in for the
+  delivery trip" that ranks a shelf by "how close it sits to the delivery side" (`4.Implementation.tex`,
+  line 65, `[A55]`). With workstations spread at random there is no delivery side any more. Measured on 5
+  step 12 warehouses per fleet: the best fifth of shelves by the rule lie about 3 steps from their nearest
+  workstation, but 11, 16, 24 and 34 steps on average from the workstation an order uses, against 12.5, 17,
+  25 and 35 for an average shelf, at 8, 16, 32 and 64 agents. So the rule's best shelves are only 3 % to
+  10 % closer in practice, and even the best shelves for a random workstation are only 10 % to 21 % closer.
+  The same reasoning made `[A70]` take the mean over the docks for the first leg. The proposal is that each
+  workstation keeps needing the same items, fixed or changing slowly, so an item has a real place to be
+  close to. Ways to define it, not agreed:
+  - (a) Each SKU belongs to one workstation. An order goes to one workstation and draws its lines from that
+    workstation's SKUs, and at each rotation a few SKUs move to another workstation. The simplest.
+  - (b) Each workstation has its own popularity ranking, overlapping the others by a set amount, rotating
+    slowly.
+  - (c) Keep random workstations and score the second leg by the mean over the workstations, as `[A70]`
+    does for the docks. No model change, but storage then matters little for the trip to the workstation.
+
+  To decide with the author: whether fixed storage knows each SKU's workstation at the start (its
+  class-based homes of `[A69]` placed near it), so that the gain measures what following later changes is
+  worth, and how a multi-line order picks its workstation under (b). It changes how demand is spread, so it
+  comes before the SKU count and Q of D25, and the step 12 sweep is rerun after it. A model change, so a
+  decision number here and an `[Axx]` tag once agreed. Overview of the sweep:
+  https://claude.ai/artifact/8tht3tBrq9Agtp7Vi4Y9sw (question 2).
 - **Found 2026-10-26, idle robots of the learned routers.** Token Passing parks an idle agent on the
   nearest free parking leaf when a waiting task needs the vertex it stands on as its delivery vertex, and
   otherwise leaves it where its last path ended (`planners/token_passing.py`, rules 2 and 3). Its no-deadlock
