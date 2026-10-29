@@ -1651,7 +1651,8 @@ wrong under [A32] are marked.
 ## Still open
 
 - [ ] **Gap: an order's workstation is random, so the storage rules have no
-      target.** Found 2026-10-29 in the step 12 sweep, raised by the author.
+      target.** Decided 2026-10-29, option (a), D29 in `model_revision/README.md`.
+      Code and thesis text still to do. Found 2026-10-29 in the step 12 sweep, raised by the author.
       Since `[A70]` the delivery vertices are random rack faces, and every
       order still draws one at random, while the second leg of
       `eq:tripdistance` (Appendix C, line 637) is the distance to the

@@ -158,6 +158,8 @@ Decided by the author on 2026-10-29, logged as "D25, sized" in the README.
   fell from 5.7 % to 0.0 % and picks got 14 % faster, for 24 % mean shelf fill against 17 %. Decided by
   the author on 2026-10-29: S_k = Q + the rank 0 quantile for every SKU ("D25, safety stock"). Still to
   do: `refill_starting_stock` in the code, and the starting stock in the thesis with an `[Axx]` tag.
+- **Workstations (D29, 2026-10-29).** Each SKU belongs to one workstation, so `num_delivery_vertices`
+  becomes n / 10, 2, 4, 4 and 6 at today's SKU counts, and follows n when the rule is re-applied.
 - Configs not changed yet. They change when the step 12 settings move into `configs/fleet_<m>/`.
 
 ## Also left from 2026-10-26

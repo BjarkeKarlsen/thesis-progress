@@ -56,6 +56,7 @@ given out in the order the steps are applied.
 | D26, refined | An idle robot (no task) goes to the nearest free parking leaf only when it is in the way: its vertex is the pickup or delivery of an unfinished task, or another robot tried to move onto it this step and was stopped. A robot in nobody's way stays (author, 2026-10-27) | 12 |
 | D27 | A new warehouse every episode. The episode seed draws the layout (aisle lengths, links, workstations) and the start stock. 250 training warehouses, one per episode of today's budget (500 000 steps of 2000-step episodes), built ahead of time. Validation and test seeds have their own warehouses, never trained on. Fixed and demand storage play the same warehouse per test seed. Closes the gap with Appendix D ("one seed always gives the same warehouse, which the split into training and evaluation seeds relies on"), where the code fixed one warehouse per fleet (author, 2026-10-27) | 12 |
 | D28 | The warehouse grows by stacking rack blocks of a fixed depth, 4 rack rows, with a two-way cross lane between neighbouring blocks and the one-way pair in the middle, instead of deeper blocks around one pair. Every inner aisle segment, in every block, hangs from the lane on the side of the pair at a length drawn from the seed. 6 aisles and 2 blocks at 8 agents, 7 and 4 at 16, 10 and 6 at 32, 15 and 8 at 64 (author, 2026-10-27, after the irregular lower block of the same day) | 12 |
+| D29 | Each SKU belongs to one workstation, option (a) of the random-workstation gap ("Still open", 2026-10-29). An order goes to one workstation and draws all its lines from that workstation's SKUs, so a SKU has one place it is needed. There are W = n / 10 workstations, each owning 10 SKUs, so an order of 5 lines takes about half of them: 2, 4, 4 and 6 at today's SKU counts, against 4, 8, 16 and 32 before. Every 1000 steps two SKUs of different workstations swap, about 4 swaps per 4000-step demand cycle, a new setting the sensitivity sweep can vary. Fixed storage knows the starting link only, its class-based homes (`[A69]`) sit near each SKU's starting workstation and never move, so the gain measures what following the swaps and the rotation is worth. Defaults, confirmed by the author: SKUs dealt to the workstations in turn by starting rank, so each owns the same mix of popular and slow SKUs; an order picks its workstation in proportion to the current demand of its SKUs, so each SKU's demand stays Zipf; the second leg of `eq:tripdistance` becomes the distance to the SKU's workstation, which demand storage reads from the lines of its window like its demand estimate. Replaces random workstations per order (D24 keeps the random rack faces) (author, 2026-10-29) | 12 |
 
 ## Still open
 
@@ -80,11 +81,9 @@ given out in the order the steps are applied.
   - (c) Keep random workstations and score the second leg by the mean over the workstations, as `[A70]`
     does for the docks. No model change, but storage then matters little for the trip to the workstation.
 
-  To decide with the author: whether fixed storage knows each SKU's workstation at the start (its
-  class-based homes of `[A69]` placed near it), so that the gain measures what following later changes is
-  worth, and how a multi-line order picks its workstation under (b). It changes how demand is spread, so it
-  comes before the SKU count and Q of D25, and the step 12 sweep is rerun after it. A model change, so a
-  decision number here and an `[Axx]` tag once agreed. Overview of the sweep:
+  **Decided 2026-10-29, option (a), see D29.** Fewer workstations (W = n / 10), fixed storage knows the
+  starting link only, and two SKUs swap workstations every 1000 steps. Code and thesis text still to do,
+  with an `[Axx]` tag, before the step 12 sweep is rerun. Overview of the sweep:
   https://claude.ai/artifact/8tht3tBrq9Agtp7Vi4Y9sw (question 2).
 - **Found 2026-10-26, idle robots of the learned routers.** Token Passing parks an idle agent on the
   nearest free parking leaf when a waiting task needs the vertex it stands on as its delivery vertex, and
