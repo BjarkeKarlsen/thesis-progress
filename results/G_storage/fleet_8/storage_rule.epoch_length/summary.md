@@ -2,17 +2,17 @@
 
 ## Trip distance of the storage vertices
 
-Smallest 11.0, largest 15.0, ratio 1.36, over 4 storage vertices. The ratio bounds what storage can save on a trip.
+Smallest 7.5, largest 36.0, ratio 4.80, over 40 storage vertices. The ratio bounds what storage can save on a trip.
 
 ## storage_rule.epoch_length = 50
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 14 | 1.83 | 0.00 | 0.00 |
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 14 | 1.83 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 16 | 1.55 | 0.00 | 0.00 |
+| congestion | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 44 | -0.00 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 53 | -0.02 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 51 | -0.00 | 210.00 | 0.00 |
 
 ### Capacity
 
@@ -21,19 +21,19 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.12 | n/a | 0.072 |
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| congestion | 0.105 | n/a | 0.063 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 
 ## storage_rule.epoch_length = 100
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 | 1.54 | 0.00 | 0.00 |
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 | 1.54 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 15 | 0.59 | 0.00 | 0.00 |
+| congestion | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 48 | -0.03 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 35 | -0.01 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 66 | -0.03 | 99.00 | 0.00 |
 
 ### Capacity
 
@@ -42,19 +42,19 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.12 | n/a | 0.072 |
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| congestion | 0.105 | n/a | 0.063 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 
 ## storage_rule.epoch_length = 200
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 13 | 0.46 | 0.00 | 0.00 |
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 13 | 0.46 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 14 | -0.14 | 0.00 | 0.00 |
+| congestion | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 64 | -0.00 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 51 | -0.03 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 55 | -0.03 | 57.00 | 0.00 |
 
 ### Capacity
 
@@ -63,19 +63,19 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.12 | n/a | 0.072 |
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| congestion | 0.105 | n/a | 0.063 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 
 ## storage_rule.epoch_length = 400
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 15 | 0.19 | 0.00 | 0.00 |
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 15 | 0.19 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 14 | 0.11 | 0.00 | 0.00 |
+| congestion | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 60 | -0.02 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 66 | -0.03 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 72 | 0.00 | 27.00 | 0.00 |
 
 ### Capacity
 
@@ -84,7 +84,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.12 | n/a | 0.072 |
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| congestion | 0.105 | n/a | 0.063 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 

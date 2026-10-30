@@ -2,17 +2,16 @@
 
 ## Trip distance of the storage vertices
 
-Smallest 4.0, largest 56.0, ratio 14.00, over 32 storage vertices. The ratio bounds what storage can save on a trip.
+Smallest 20.9, largest 81.8, ratio 3.91, over 200 storage vertices. The ratio bounds what storage can save on a trip.
 
 ## The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| fixed | 0.42 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 87 | 2.18 | 0.00 | 0.00 |
-| fixed | 0.5 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 91 | 3.85 | 0.00 | 0.00 |
-| fixed | 0.6 | 20 | 15 / 20 | 15 / 20 | 20 / 20 | 91 | 7.41 | 0.45 | 0.00 |
-| fixed | 0.7 | 20 | 0 / 20 | 0 / 20 | 20 / 20 | 109 | 12.15 | 5.90 | 0.00 |
-| fixed | 0.8 | 20 | 0 / 20 | 0 / 20 | 20 / 20 | 94 | 16.32 | 38.55 | 0.00 |
+| fixed | 0.2 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 22 | -0.06 | 175.50 | 0.00 |
+| fixed | 0.4 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 12 | 1.14 | 675.00 | 0.00 |
+| fixed | 0.6 | 20 | 8 / 20 | 0 / 20 | 20 / 20 | 12 | 12.04 | 3187.50 | 0.00 |
+| fixed | 0.8 | 20 | 0 / 20 | 0 / 20 | 20 / 20 | 11 | 30.36 | 9031.50 | 0.00 |
 
 ## Capacity
 
@@ -21,5 +20,5 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| fixed | 0.5 | 0.6 | 0.3 |
+| fixed | 0.4 | 0.6 | 0.24 |
 

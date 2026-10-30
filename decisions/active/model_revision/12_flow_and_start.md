@@ -137,7 +137,7 @@ which is minutes at 8 agents and likely hours at 64.
 
 ## Sizing proposal (part D, 2026-10-29)
 
-From the step 12 sweep (`results/tests/step12_sweep/README.md`, which has the arithmetic and the check).
+From the step 12 sweep (`results/G_storage/README.md`, which has the arithmetic and the check).
 Decided by the author on 2026-10-29, logged as "D25, sized" in the README.
 
 - **Q = 12 at every fleet.** Put-aways are then the same share of trips at every fleet and SKU count, 17 %

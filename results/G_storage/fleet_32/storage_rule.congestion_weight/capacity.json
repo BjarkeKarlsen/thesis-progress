@@ -5,44 +5,44 @@
   "by_value": {
     "0": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     },
     "0.5": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     },
     "1": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     },
     "2": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     },
     "3": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     },
     "4": {
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.36,
-        "main_load": null
+        "capacity": 0.18,
+        "first_failing_rate": null,
+        "main_load": 0.108
       }
     }
   }

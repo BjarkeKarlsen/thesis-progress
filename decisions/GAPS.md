@@ -1646,7 +1646,7 @@ wrong under [A32] are marked.
   `scripts/instance_report.py`. Earlier fleet runs do not reproduce. Every other
   config is unchanged.
 - **Appendix.** Handoff for writing `app:instances`:
-  `decisions/active/graph_appendix_handoff.md`.
+  `decisions/done/graph_appendix_handoff.md`.
 
 ## Still open
 
@@ -1668,7 +1668,9 @@ wrong under [A32] are marked.
       `model_revision/README.md`, "Still open". It changes the demand model
       and the second leg of the trip, so it gets its own `[Axx]` entry once
       agreed, and it comes before the SKU count and Q (D25).
-- [ ] **Text and code for the step 12 sizing.** Decided 2026-10-29 ("D25,
+- [ ] **Code for [A75] and [A76].** Thesis text written 2026-10-30, code and
+      configs still to do.
+- [ ] **Text and code for the step 12 sizing.** Text done as [A75] (2026-10-30). Decided 2026-10-29 ("D25,
       sized" and "D25, safety stock" in `model_revision/README.md`): Q = 12
       at every fleet, n = 250 x main load rounded to a multiple of 20, 5
       lines per order, and every SKU's safety stock sized at rank 0. The
@@ -2021,3 +2023,40 @@ wrong under [A32] are marked.
 - **Code.** `e1f6c2c` (irregular lower block), `9bc3bc4` (`num_blocks`, `v2_stacked_shape`). The old layouts
   build bit for bit as before (27 instances compared).
 - **Revises.** `[A62]` (two blocks around one pair, the lower block full).
+
+### [A75] The SKU count, the refill size and the safety stock (Design change, thesis text edited 2026-10-30)
+
+- **Where.** `sec:impl:instances` (the SKU count, the drift as a share, the start stock),
+  `tab:evalparams` (Appendix B), `tab:notation` (Q), Appendices E, F and G (the step 12 sweep).
+- **What the edit says.** Q = 12 units at every fleet. The SKU count is 250 x the main load, rounded to a
+  multiple of 20, so every SKU is refilled about four times per demand cycle and the 5 % drift is a whole
+  number of SKUs (the ranking goes round in exactly 4000 steps). Every SKU starts with one refill plus the
+  safety stock of the most popular rank.
+- **Why.** The step 12 sweep (`results/G_storage/README.md`). The refills follow from the orders,
+  12000 x load / (n Q) per cycle, matched by the sweep within 0.2. One Q keeps put-aways the same share of
+  trips at every fleet. With 30 and 50 SKUs the ranking went round in 3000 and 5000 steps. The safety stock
+  sized at each SKU's starting rank left 6 to 14 % of orders waiting at Q = 15, and sizing it at the top rank
+  brought fleet 8 to 0.0 % with picks 14 % faster. Model revision "D25, sized" and "D25, safety stock".
+- **Rejected.** A Q per fleet (put-away share 9 to 17 % by fleet). Large Q to hide the waits, which leaves
+  under one refill per cycle.
+- **Code.** Not yet: `refill_starting_stock` (top rank), the configs.
+
+### [A76] Each SKU belongs to one delivery vertex (Design change, thesis text edited 2026-10-30)
+
+- **Where.** `sec:method:storage` (the trip distance and its reason, replacing the stand-in of `[A55]`),
+  `sec:impl:instances` (the delivery vertex count, how an order picks its delivery vertex, the
+  fixed homes), the scope item "SKUs ordered independently" in `2.Introduction.tex`, `eq:tripdistance`
+  (Appendix C, now $d^{\mathrm{trip}}_t(k,v)$ with $\hat h_t(k)$), Appendix D (the shelf-only trip relabelled
+  `eq:shelftrip`), `tab:notation` ($h(k)$), `tab:evalparams`, Appendix F.
+- **What the edit says.** Each seed splits the SKUs at random over the delivery vertices, 10 each, so there
+  are |K| / 10 delivery vertices, each with its own section, fixed for the run. An order picks its delivery
+  vertex at random and draws its lines from that vertex's SKUs by popularity. The demand rules read the
+  SKU's delivery vertex from the last storage period's lines. Fixed storage places its homes near h(k)
+  and never moves them. Kept simple by the author (2026-10-30), no swaps, model revision "D29, simplified".
+- **Why.** With a random delivery vertex per order the rule's best shelves were only 3 to 10 % closer in
+  practice than an average shelf, so storage had no place to aim for (step 12 sweep). Model revision D29.
+- **Rejected.** The mean over the delivery vertices, as `[A70]` does for the docks, which leaves storage
+  little to gain. A soft link, or fewer lines per order, which with m/2 delivery vertices leave 2 to 5 SKUs
+  per vertex.
+- **Code.** Not yet.
+- **Revises.** `[A55]` (the second leg as a stand-in), `[A70]` (m/2 delivery vertices, the nearest one).

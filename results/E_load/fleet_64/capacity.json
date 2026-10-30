@@ -3,9 +3,9 @@
   "f_up": 0.8,
   "by_mode": {
     "fixed": {
-      "capacity": 0.5,
+      "capacity": 0.4,
       "first_failing_rate": 0.6,
-      "main_load": 0.3
+      "main_load": 0.24
     }
   }
 }

@@ -2,16 +2,16 @@
 
 ## Trip distance of the storage vertices
 
-Smallest 11.0, largest 15.0, ratio 1.36, over 4 storage vertices. The ratio bounds what storage can save on a trip.
+Smallest 7.5, largest 36.0, ratio 4.80, over 40 storage vertices. The ratio bounds what storage can save on a trip.
 
 ## demand.skew = 0.5
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.12 | 20 | 19 / 20 | 20 / 20 | 19 / 20 | 10 | 2.02 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 16 | 0.18 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 61 | -0.01 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 47 | -0.03 | 99.00 | 0.00 |
 
 ### Capacity
 
@@ -20,17 +20,17 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | n/a | 0.12 | n/a |
-| fixed | 0.12 | n/a | 0.072 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 
 ## demand.skew = 1
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 | 1.54 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 15 | 0.59 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 35 | -0.01 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 66 | -0.03 | 99.00 | 0.00 |
 
 ### Capacity
 
@@ -39,17 +39,17 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 
 ## demand.skew = 1.5
 
 ### The check per rate
 
-| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest stand-still, highest | backlog slope per 100 steps | overflow units | unplaced units |
+| rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 11 | -0.17 | 0.00 | 0.00 |
-| fixed | 0.12 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 13 | 0.77 | 0.00 | 0.00 |
+| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 45 | -0.02 | 0.00 | 0.00 |
+| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 50 | -0.01 | 160.50 | 0.00 |
 
 ### Capacity
 
@@ -58,6 +58,6 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | 0.12 | n/a | 0.072 |
-| fixed | 0.12 | n/a | 0.072 |
+| demand | 0.105 | n/a | 0.063 |
+| fixed | 0.105 | n/a | 0.063 |
 

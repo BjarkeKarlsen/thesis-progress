@@ -1,8 +1,0 @@
-Sweep outcome
-
-- 8 and 32 agents: demand cuts pick service time by about 44% at the default values. The gain barely moves with arrival margin or congestion weight. It shrinks with longer storage epochs (down to 12% at 32 agents with epoch 400), with weaker skew, and when the demand pattern rotates faster or slower than the default.
-- 16 agents: no gain at the defaults. Demand is 50 to 60% worse with a rotation period of 400 or a shift of 2. This is the only fleet where the congestion weight helps: from 0.5 upwards it gives +12% and cuts the backlog from 40 to 14.
-- 64 agents: demand is about 11% worse than fixed and fails to keep up on all 20 seeds at the defaults. It keeps up only with epoch 200 or more, skew 1.5, or rotation period 100. A congestion weight of 4 rescues only 9 of 20 seeds.
-- Congestion weight at 8 and 32 agents: it changes nothing, and the results match demand exactly.
-- Caveat on the main result: pick service time alone overstates the gain. Demand pushes the waiting into put-aways. Put-away service time goes from 69 to 134 at 8 agents and from 84 to 209 at 32, and the end backlog is about 2.5 times fixed's. It's worth deciding whether the main result should count put-aways.
-- Check this: fleet 16's main load (0.15) came from configs/fleet_16/decentralised.yaml. The other fleets took theirs from the load sweep's capacity.json, so fleet 16 may not sit at the same point on its load curve as the others. That could explain why it looks out of line.

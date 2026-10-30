@@ -5,70 +5,70 @@
   "by_value": {
     "50": {
       "fixed": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       },
       "demand": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       },
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       }
     },
     "100": {
       "fixed": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       },
       "demand": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       },
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       }
     },
     "200": {
       "fixed": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       },
       "demand": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       },
       "congestion": {
-        "capacity": null,
-        "first_failing_rate": 0.3,
-        "main_load": null
+        "capacity": 0.24,
+        "first_failing_rate": null,
+        "main_load": 0.144
       }
     },
     "400": {
       "fixed": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       },
       "demand": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       },
       "congestion": {
-        "capacity": 0.3,
+        "capacity": 0.24,
         "first_failing_rate": null,
-        "main_load": 0.18
+        "main_load": 0.144
       }
     }
   }
