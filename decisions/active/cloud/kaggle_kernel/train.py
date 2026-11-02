@@ -18,17 +18,17 @@ BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
 CONTROLLER = "decentralised"          # or "centralised", "section"
 FLEET = 8                             # 8, 16, 32 or 64
 REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
-HOURS = 11                            # stop cleanly before Kaggle's 12 h limit
-BUDGET = None                         # env steps, None keeps the config's budget
+HOURS = 0.4                           # stop cleanly before Kaggle's 12 h limit (11 for a real run)
+BUDGET = 60000                        # env steps, None keeps the config's budget (smoke test: 60000)
 GPU = False                           # True only with "enable_gpu": true in kernel-metadata.json
 # To continue a run that hit HOURS: add this kernel's output as an input in
 # kernel-metadata.json ("kernel_sources") and set the path of its run folder here, for example
 # "/kaggle/input/slap-mapd-train/run". The script prints the inputs it finds.
 RESUME_FROM = None
 
+# The config holds everything else, the fleet's main load included (arrival_rate, from the
+# updated Token Passing run, results/E_load/fleet_<m>/capacity.json).
 CONFIG = f"configs/fleet_{FLEET}/{CONTROLLER}.yaml"
-# The main load of each fleet, from the updated Token Passing run (results/E_load/fleet_<m>/).
-LOAD = {8: 0.09, 16: 0.18, 32: 0.3, 64: 0.6}[FLEET]
 
 
 def run(cmd, **kwargs):
@@ -73,7 +73,7 @@ if RESUME_FROM:
     cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]
 else:
     cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "train", "--config", config,
-           "--controller", CONTROLLER, "--regime", REGIME, "--arrival-rate", str(LOAD),
+           "--controller", CONTROLLER, "--regime", REGIME,
            "--env-runners", str(max(1, (os.cpu_count() or 2) - 1)), "--checkpoint-every", "3",
            "--output", RUN]
     cmd += ["--budget-env-steps", str(BUDGET)] if BUDGET else []

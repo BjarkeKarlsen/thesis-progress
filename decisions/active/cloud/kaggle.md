@@ -27,7 +27,8 @@ everything in `/kaggle/working` as the kernel's output. A run that does not fini
   home (2.57.0), trains one arm with `slap-mapd train`, and stops it cleanly with Ctrl-C after
   `HOURS`, so the run folder is always in a state `slap-mapd resume` can continue. The settings at
   the top are the only part to edit: `CONTROLLER`, `FLEET`, `REGIME`, `HOURS`, `BUDGET`, `GPU` and
-  `RESUME_FROM`. The main load follows from `FLEET`.
+  `RESUME_FROM`. Everything else, the fleet's main load included, comes from the config
+  `configs/fleet_<FLEET>/<CONTROLLER>.yaml`.
 - `kaggle_kernel/kernel-metadata.json`. A private script kernel, CPU only, internet on.
 
 ## Running it
