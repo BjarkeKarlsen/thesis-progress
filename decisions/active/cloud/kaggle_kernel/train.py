@@ -68,7 +68,8 @@ if REGIME == "matched" and not RESUME_FROM:
 # The warehouse tables are built on first use, in /tmp so they stay out of the output. timeout
 # sends Ctrl-C after HOURS, Ray stops cleanly, and the run can be continued with RESUME_FROM.
 os.makedirs("/tmp/ray_k", exist_ok=True)
-env = dict(os.environ, RAY_TMPDIR="/tmp/ray_k", SLAP_WAREHOUSE_STORE="/tmp/warehouses")
+env = dict(os.environ, RAY_TMPDIR="/tmp/ray_k", SLAP_WAREHOUSE_STORE="/tmp/warehouses",
+           PYTHONUNBUFFERED="1")
 if RESUME_FROM:
     cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]
 else:
@@ -79,9 +80,17 @@ else:
     cmd += ["--budget-env-steps", str(BUDGET)] if BUDGET else []
     cmd += ["--gpu"] if GPU else []
 print("+", " ".join(cmd), flush=True)
+# Every line of the training goes to train.log and to Kaggle's log, so the run can be followed
+# live on its page. The Output tab only fills once the run has ended.
 with open(f"{RUN}/train.log", "a") as log:
-    code = subprocess.run(["timeout", "--signal=INT", f"{HOURS}h", *cmd],
-                          cwd="code", env=env, stdout=log, stderr=subprocess.STDOUT).returncode
+    process = subprocess.Popen(["timeout", "--signal=INT", f"{HOURS}h", *cmd], cwd="code",
+                               env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               text=True, bufsize=1)
+    for line in process.stdout:
+        log.write(line)
+        log.flush()
+        print(line, end="", flush=True)
+    code = process.wait()
 
 # ------------------------------------------------------------------ finish
 print("exit code", code)
@@ -90,6 +99,5 @@ if code == 0:
     print("Finished. Download the run folder.")
 else:
     print("Not finished. Continue it with RESUME_FROM, see kaggle.md.")
-print(open(f"{RUN}/train.log").read()[-3000:])
 # The cloned code is not part of the result, so it stays out of the output.
 shutil.rmtree("/kaggle/working/code", ignore_errors=True)
