@@ -18,8 +18,8 @@ BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
 CONTROLLER = "decentralised"          # or "centralised", "section"
 FLEET = 8                             # 8, 16, 32 or 64
 REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
-HOURS = 1                             # stop cleanly before Kaggle's 12 h limit (11 for a real run)
-BUDGET = 60000                        # env steps, None keeps the config's budget (smoke test: 60000)
+HOURS = 11                            # stop cleanly before Kaggle's 12 h limit (11 for a real run)
+BUDGET = None                         # env steps, None keeps the config's budget (smoke test: 60000)
 GPU = False                           # True only with "enable_gpu": true in kernel-metadata.json
 # To continue a run that hit HOURS: add this kernel's output as an input in
 # kernel-metadata.json ("kernel_sources") and set the path of its run folder here, for example
@@ -64,11 +64,29 @@ if REGIME == "matched" and not RESUME_FROM:
     config = f"{RUN}/config.yaml"
     yaml.safe_dump(data, open(config, "w"), sort_keys=False)
 
+# ------------------------------------------------------------------ the warehouse tables
+# A dataset in "dataset_sources" of kernel-metadata.json that holds a pool_key.txt is a set of
+# warehouse tables built at home (slap-mapd prepare-warehouses). Each is copied to
+# /tmp/warehouses/<its key>, where the run looks first. A set whose key the run does not ask for
+# is ignored, and a missing one is built on first use, which takes about 20 minutes at fleet 8.
+STORE = "/tmp/warehouses"
+for source in sorted(os.listdir("/kaggle/input")) if os.path.isdir("/kaggle/input") else []:
+    found = [os.path.join(root, "pool_key.txt")
+             for root, _, files in os.walk(os.path.join("/kaggle/input", source))
+             if "pool_key.txt" in files]
+    for marker in found:
+        key = open(marker).read().strip()
+        target = os.path.join(STORE, key)
+        if not os.path.isdir(target):
+            shutil.copytree(os.path.dirname(marker), target,
+                            ignore=shutil.ignore_patterns("pool_key.txt", "dataset-metadata.json"))
+        print("warehouse tables", key, len(os.listdir(target)), "files", flush=True)
+
 # ------------------------------------------------------------------ train
-# The warehouse tables are built on first use, in /tmp so they stay out of the output. timeout
-# sends Ctrl-C after HOURS, Ray stops cleanly, and the run can be continued with RESUME_FROM.
+# timeout sends Ctrl-C after HOURS, Ray stops cleanly, and the run can be continued with
+# RESUME_FROM.
 os.makedirs("/tmp/ray_k", exist_ok=True)
-env = dict(os.environ, RAY_TMPDIR="/tmp/ray_k", SLAP_WAREHOUSE_STORE="/tmp/warehouses",
+env = dict(os.environ, RAY_TMPDIR="/tmp/ray_k", SLAP_WAREHOUSE_STORE=STORE,
            PYTHONUNBUFFERED="1")
 if RESUME_FROM:
     cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]

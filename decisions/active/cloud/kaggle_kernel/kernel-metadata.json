@@ -8,7 +8,9 @@
   "enable_gpu": false,
   "enable_tpu": false,
   "enable_internet": true,
-  "dataset_sources": [],
+  "dataset_sources": [
+    "bjarkekarlsen/slap-wh-fleet8-decentralised-f681777fff13"
+  ],
   "competition_sources": [],
   "kernel_sources": []
 }

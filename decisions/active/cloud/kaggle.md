@@ -31,6 +31,27 @@ everything in `/kaggle/working` as the kernel's output. A run that does not fini
   `configs/fleet_<FLEET>/<CONTROLLER>.yaml`.
 - `kaggle_kernel/kernel-metadata.json`. A private script kernel, CPU only, internet on.
 
+## Warehouse tables, built at home
+
+Before training, a run needs the window tables of every seed's warehouse. Built on Kaggle they
+take about 20 minutes at fleet 8 and about 1.5 hours at fleet 64, in every session. So they are
+built at home once per arm and fleet and uploaded as a private Kaggle dataset:
+
+```bash
+PYTHONPATH=slap-mapd-coupling/src ~/.venvs/rl/bin/python \
+    thesis-progress/decisions/active/cloud/upload_warehouses.py \
+    slap-mapd-coupling/configs/fleet_8/decentralised.yaml
+```
+
+It prints the dataset's name, for example `bjarkekarlsen/slap-wh-fleet8-decentralised-f681777fff13`.
+Put that name in `"dataset_sources"` of `kaggle_kernel/kernel-metadata.json`, and `train.py`
+copies the tables into place before training ("warehouse tables ... files" in the log). The name
+holds a fingerprint of everything the tables depend on, the code and the config, but not the
+budget or the regime. A set that no longer matches is ignored and the run builds its own, so run
+the script again after a change to the model or the configs. Each arm has its own set.
+
+Uploaded so far: fleet 8 decentralised (`f681777fff13`, 200 MB, 2026-11-02).
+
 ## Running it
 
 From the workspace root:
