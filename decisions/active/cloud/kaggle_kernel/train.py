@@ -1,0 +1,95 @@
+"""Train one arm of slap-mapd-coupling on Kaggle, as a script kernel.
+
+Pushed and started from home with the Kaggle command line (see ../kaggle.md):
+
+    kaggle kernels push -p thesis-progress/decisions/active/cloud/kaggle_kernel
+
+Edit the settings below, push, and download the run folder when it is done. Everything the run
+writes is in /kaggle/working/run, which Kaggle keeps as the kernel's output.
+"""
+
+import os
+import shutil
+import subprocess
+import sys
+
+# ------------------------------------------------------------------ settings, the only part to edit
+BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
+CONTROLLER = "decentralised"          # or "centralised", "section"
+FLEET = 8                             # 8, 16, 32 or 64
+REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
+HOURS = 11                            # stop cleanly before Kaggle's 12 h limit
+BUDGET = None                         # env steps, None keeps the config's budget
+GPU = False                           # True only with "enable_gpu": true in kernel-metadata.json
+# To continue a run that hit HOURS: add this kernel's output as an input in
+# kernel-metadata.json ("kernel_sources") and set the path of its run folder here, for example
+# "/kaggle/input/slap-mapd-train/run". The script prints the inputs it finds.
+RESUME_FROM = None
+
+CONFIG = f"configs/fleet_{FLEET}/{CONTROLLER}.yaml"
+# The main load of each fleet, from the updated Token Passing run (results/E_load/fleet_<m>/).
+LOAD = {8: 0.09, 16: 0.18, 32: 0.3, 64: 0.6}[FLEET]
+
+
+def run(cmd, **kwargs):
+    print("+", " ".join(cmd), flush=True)
+    return subprocess.run(cmd, check=True, **kwargs)
+
+
+# ------------------------------------------------------------------ the code, the same Ray as at home
+os.chdir("/kaggle/working")
+if os.path.isdir("/kaggle/input"):
+    print("inputs:", [os.path.join("/kaggle/input", d) for d in os.listdir("/kaggle/input")])
+run(["git", "clone", "--depth", "1", "--branch", BRANCH,
+     "https://github.com/BjarkeKarlsen/slap-mapd-coupling.git", "code"])
+run([sys.executable, "-m", "pip", "install", "-q", "-e", "code", "ray[rllib]==2.57.0"])
+COMMIT = subprocess.run(["git", "-C", "code", "rev-parse", "HEAD"],
+                        capture_output=True, text=True).stdout.strip()
+print(COMMIT, "on", os.cpu_count(), "cores", flush=True)
+
+# ------------------------------------------------------------------ the run folder
+RUN = "/kaggle/working/run"
+if RESUME_FROM:
+    shutil.copytree(RESUME_FROM, RUN)
+os.makedirs(RUN, exist_ok=True)
+with open(f"{RUN}/commit.txt", "a") as f:
+    f.write(f"{COMMIT} {BRANCH} {CONTROLLER} fleet {FLEET} {REGIME}\n")
+
+config = os.path.abspath(f"code/{CONFIG}")
+if REGIME == "matched" and not RESUME_FROM:
+    # As bedtime.bash does: trained under the rule it is evaluated in, demand storage.
+    import yaml
+    data = yaml.safe_load(open(config))
+    data.update(regime="matched", evaluation_storage_mode="demand")
+    config = f"{RUN}/config.yaml"
+    yaml.safe_dump(data, open(config, "w"), sort_keys=False)
+
+# ------------------------------------------------------------------ train
+# The warehouse tables are built on first use, in /tmp so they stay out of the output. timeout
+# sends Ctrl-C after HOURS, Ray stops cleanly, and the run can be continued with RESUME_FROM.
+os.makedirs("/tmp/ray_k", exist_ok=True)
+env = dict(os.environ, RAY_TMPDIR="/tmp/ray_k", SLAP_WAREHOUSE_STORE="/tmp/warehouses")
+if RESUME_FROM:
+    cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]
+else:
+    cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "train", "--config", config,
+           "--controller", CONTROLLER, "--regime", REGIME, "--arrival-rate", str(LOAD),
+           "--env-runners", str(max(1, (os.cpu_count() or 2) - 1)), "--checkpoint-every", "3",
+           "--output", RUN]
+    cmd += ["--budget-env-steps", str(BUDGET)] if BUDGET else []
+    cmd += ["--gpu"] if GPU else []
+print("+", " ".join(cmd), flush=True)
+with open(f"{RUN}/train.log", "a") as log:
+    code = subprocess.run(["timeout", "--signal=INT", f"{HOURS}h", *cmd],
+                          cwd="code", env=env, stdout=log, stderr=subprocess.STDOUT).returncode
+
+# ------------------------------------------------------------------ finish
+print("exit code", code)
+if code == 0:
+    open(f"{RUN}/done", "w").write(f"kaggle, commit {COMMIT}\n")
+    print("Finished. Download the run folder.")
+else:
+    print("Not finished. Continue it with RESUME_FROM, see kaggle.md.")
+print(open(f"{RUN}/train.log").read()[-3000:])
+# The cloned code is not part of the result, so it stays out of the output.
+shutil.rmtree("/kaggle/working/code", ignore_errors=True)

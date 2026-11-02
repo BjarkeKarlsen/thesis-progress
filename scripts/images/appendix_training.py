@@ -5,14 +5,16 @@ Run:  python thesis-progress/scripts/images/appendix_training.py   (from the wor
 Out:  thesis-progress/scripts/Images/app_training_curves.png   fig:app:trainingcurves
       thesis-progress/scripts/Images/app_training_health.png   fig:app:traininghealth
 
-Reads
-- results/J_training/fleet_<m>/<arm>/validation.jsonl, one row per saved checkpoint and
-  validation seed, the evaluation row of the catalogue plus env_steps. The training curves
-  come from validation, not from the training return (measures_catalogue.md, "What each
-  phase records"). Written by M5 of decisions/active/measures_plan.md, not built yet.
-- results/J_training/fleet_<m>/<arm>/progress.jsonl, one line per training iteration with
-  env_steps, policy_loss, value_loss, entropy and kl (assumed names, also M5).
-A missing run is drawn as a placeholder.
+Reads, for each learned arm trained under fixed storage (fixed_only),
+- results/J_training/fleet_<m>/<arm>/fixed_only/validation.jsonl, one row per saved checkpoint
+  and validation seed, the rows of `slap-mapd evaluate` with the checkpoint's iteration and
+  env_steps added. The training curves come from validation, not from the training return
+  (measures_catalogue.md, "What each phase records").
+- results/J_training/fleet_<m>/<arm>/fixed_only/training.jsonl, one line per training
+  iteration with env_steps, policy_loss, value_loss, entropy and kl, cut from RLlib's
+  result.json.
+Both are written by thesis-progress/scripts/collect_run.py from an evaluated run. A missing run
+is drawn as a placeholder.
 """
 import os
 import statistics
@@ -21,6 +23,7 @@ from appendix_data import (RESULTS, ARMS, ARM_COLOUR, C, plt, read_jsonl, share,
                            panel_title, placeholder, save)
 
 TRAINING = os.path.join(RESULTS, "J_training")
+REGIME = "fixed_only"
 LEARNED = ("centralised", "section", "decentralised")
 
 
@@ -52,7 +55,7 @@ def training_curves(fleet=8):
                                       gridspec_kw=dict(height_ratios=(2, 3), hspace=0.3))
     found = False
     for arm in LEARNED:
-        groups = by_checkpoint(read_jsonl(os.path.join(TRAINING, f"fleet_{fleet}", arm,
+        groups = by_checkpoint(read_jsonl(os.path.join(TRAINING, f"fleet_{fleet}", arm, REGIME,
                                                        "validation.jsonl")))
         if not groups:
             continue
@@ -77,7 +80,7 @@ def training_curves(fleet=8):
     if found:
         top.legend(frameon=False, fontsize=9)
     else:
-        placeholder(bottom, f"results/J_training/fleet_{fleet}/<arm>/validation.jsonl")
+        placeholder(bottom, f"results/J_training/fleet_{fleet}/<arm>/{REGIME}/validation.jsonl")
     return save(fig, "app_training_curves.png")
 
 
@@ -92,7 +95,8 @@ def training_health(fleet=8):
     axes = axes.ravel()
     found = False
     for arm in LEARNED:
-        rows = read_jsonl(os.path.join(TRAINING, f"fleet_{fleet}", arm, "progress.jsonl"))
+        rows = read_jsonl(os.path.join(TRAINING, f"fleet_{fleet}", arm, REGIME,
+                                       "training.jsonl"))
         if not rows:
             continue
         found = True
@@ -109,7 +113,7 @@ def training_health(fleet=8):
     if found:
         axes[0].legend(frameon=False, fontsize=8)
     else:
-        placeholder(axes[0], f"results/J_training/fleet_{fleet}/<arm>/progress.jsonl")
+        placeholder(axes[0], f"results/J_training/fleet_{fleet}/<arm>/{REGIME}/training.jsonl")
     return save(fig, "app_training_health.png")
 
 

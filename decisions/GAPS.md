@@ -1840,7 +1840,10 @@ wrong under [A32] are marked.
   track service time (`thesis_plan.md` section 5).
 - **Open.** The number of validation seeds and the checkpoint frequency. The configs have 2 seeds
   and every 3 iterations.
-- **Code.** The configs select by `episode_return_mean`. Planned in `active/measures_plan.md`.
+- **Code.** `choose_checkpoint` in `training/evaluate_run.py`, branch `feat/evaluate-horizon`
+  (2026-11-02). It replaced the most completed tasks, which follows how many orders arrived. The
+  configs' `score_attribute: episode_return_mean` only names Tune's best checkpoint, which
+  `evaluate` does not use.
 
 ### [A61] The horizon is 2000 or more, and the load sweep states its seeds and covers the largest fleet (Design change, thesis text edited 2026-10-23, uncommitted)
 
@@ -2109,3 +2112,27 @@ wrong under [A32] are marked.
 - **Revises.** `[A75]` (the SKU count from the load, Q = 12), `[A76]` (10 SKUs per workstation, one
   workstation per section, the second leg to one vertex), `[A71]` (two shelves per SKU, now 5 per
   agent over 2.5 SKUs per agent).
+
+### [A78] The network reads distance as a difference from the robot's own vertex (Design change, thesis text edited 2026-11-02)
+
+- **Where.** `sec:method:model` ("What the network reads" and a new paragraph "Distance as a
+  difference", new `eq:relativeeta`), `eq:features` in Appendix C, `tab:notation`. Same day, from the
+  same review of the network: a "No memory" paragraph at the end of `sec:method:model`, one line on
+  the pooled mean in `sec:method:controllers`, "close to the target" in `sec:method:rl` with the
+  1 - gamma note, and L = 0 to 5 in Appendix J (`app:training:method`, `tab:app:rounds`).
+- **What the edit says.** Each vertex gets its distance to the target minus the robot's own
+  distance, capped at plus or minus d_obs. The reward's potential still uses the distance itself.
+- **Why.** The distance is to the target, not to the robot, so it is large on every vertex in view
+  (about 30 in fleet 8, over 50 in fleet 64), next to features that are 0 or 1. The move only
+  depends on the difference, which was hidden in two large numbers. Small numbers centred on zero
+  train better with PPO. The cap gives the feature the same range under every controller, as the
+  crowding number has, since the centralised window is the whole warehouse.
+- **Rejected.** Dividing the distance by d_obs, which shrinks the numbers but still hides the
+  difference. No cap, which leaves values as large as the warehouse in the centralised window.
+- **Cost.** The robot sees which way is closer but no longer how far it is from its target in
+  total, so the value head cannot tell 2 steps left from 40. The author keeps it so (2026-11-02):
+  the move only needs the direction. Rejected with it: the robot's own distance as one extra scaled
+  number next to the crowding number. Memory and speed are unchanged. The policy can still take a
+  step back for a bigger gain later.
+- **Code.** Not written yet. `environment/observation.py` (the feature) and the tests that check its
+  values. Do it before the step 5 training runs.
