@@ -18,7 +18,7 @@ BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
 CONTROLLER = "decentralised"          # or "centralised", "section"
 FLEET = 8                             # 8, 16, 32 or 64
 REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
-HOURS = 0.4                           # stop cleanly before Kaggle's 12 h limit (11 for a real run)
+HOURS = 1                             # stop cleanly before Kaggle's 12 h limit (11 for a real run)
 BUDGET = 60000                        # env steps, None keeps the config's budget (smoke test: 60000)
 GPU = False                           # True only with "enable_gpu": true in kernel-metadata.json
 # To continue a run that hit HOURS: add this kernel's output as an input in

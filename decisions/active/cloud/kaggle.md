@@ -82,8 +82,10 @@ needs the evaluation set to match first. Still open (2026-11-02).
 
 Do this once before any real run. It takes about an hour.
 
-1. Settings: `CONTROLLER = "decentralised"`, `FLEET = 8`, `BUDGET = 60000`, `HOURS = 0.4`
-   (24 minutes). Push.
+1. Settings: `CONTROLLER = "decentralised"`, `FLEET = 8`, `BUDGET = 60000`, `HOURS = 1`.
+   Push. Before training, a run builds the warehouse tables of every seed in `/tmp`. At fleet 8
+   (258 warehouses) that took 20 minutes on Kaggle's 4 cores, so 0.4 hours left no time for an
+   iteration (2026-11-02, version 1). In an 11-hour run it is about 3 percent.
 2. The output should hold `run/` with a `*_spec.json`, at least one `checkpoint_*` folder, and a
    log that ends with "Stopped at ... Continue it with: slap-mapd resume". That proves the clean
    stop. If no checkpoint appears, raise `HOURS` and run it again.
