@@ -2,18 +2,20 @@
 
 **Answers.** The capacity of each fleet under fixed storage, the highest rate at which every seed keeps up
 with order work and put-aways, every lower rate too, and the main load, 0.6 of it.
-**Fills.** `app:load:first` and `tab:app:firstsweep` of Appendix E. The main loads are used by every run in
-F and G. `tab:app:capacity` waits for the next run.
+**Fills.** `tab:app:capacity` and `app:load:next` of Appendix E. The main loads are used by every run in
+F and G. `tab:app:firstsweep` keeps the first sweep (rows in git history at `524ef5a`).
 **Settings file.** `configs/step12/fleet_<m>.yaml`. Setup in `../README.md`.
 
-| fleet | capacity | first failing | main load |
-|---|---|---|---|
-| 8 | 0.175 | 0.2 | 0.105 |
-| 16 | 0.25 | 0.3 | 0.15 |
-| 32 | 0.3 | 0.4 | 0.18 |
-| 64 | 0.4 | 0.6 | 0.24 |
+| fleet | capacity | first failing | main load | main load per agent |
+|---|---|---|---|---|
+| 8 | 0.15 | 0.175 | 0.09 | 0.011 |
+| 16 | 0.3 | 0.35 | 0.18 | 0.011 |
+| 32 | 0.5 | 0.6 | 0.3 | 0.009 |
+| 64 | 1.0 | 1.2 | 0.6 | 0.009 |
 
 ## Commands, per fleet m
+
+What `scripts/sweep/overnight.bash` ran:
 
 1. The grid, rates per agent 0.0125 to 0.1, stopping at the first rate no seed keeps up at:
 
@@ -23,49 +25,37 @@ F and G. `tab:app:capacity` waits for the next run.
            --rates-per-agent 0.0125 0.025 0.0375 0.05 0.0625 0.075 0.0875 0.1
 
 2. Finer rates between the last passing and the first failing rate, the same command with `--rates` in
-   place of `--rates-per-agent`:
+   place of `--rates-per-agent`. Pass 1 ran the rates below. Pass 2 found nothing left to refine.
 
    | fleet | `--rates` |
    |---|---|
    | 8 | `0.125 0.15 0.175` |
    | 16 | `0.25 0.3 0.35` |
-   | 32 | `0.1 0.2 0.3` |
-   | 64 | `0.2 0.4 0.6` (run twice, the first stopped when a worker ran out of memory) |
+   | 32 | `0.5 0.6 0.7` |
+   | 64 | `1 1.2 1.4` (6 workers) |
 
 3. The main load is `by_mode.fixed.main_load` in `fleet_<m>/capacity.json`.
 
+The main loads lie below the lowest grid rate, so the rows at the main load are in F and G (the thesis
+values of each sensitivity sweep, for example `../F_demand/fleet_<m>/demand.skew` at skew 1).
+
 ## Findings
 
-- **The main loads are safe.** At every main load all 20 seeds keep up with order work and put-aways,
-  and the backlog stays flat (growth per 100 steps -0.03, 0.03, 0.06 and -0.07).
-- **Capacity per agent falls as the fleet grows**, from 0.022 at 8 agents to 0.006 at 64. The warehouse
-  grows with the fleet, so trips get longer (longest trip 36 to 82 steps).
-- **The keep-up check passes overloaded rates.** At each capacity the backlog still grows by 1 to 2 tasks
-  per 100 steps and a pick takes 2 to 5 times as long as at the lowest rate. That is why the main load sits
-  at 0.6 of the capacity.
-- **Fleets 32 and 64 are coarse.** Their capacities are known to within 0.1 and 0.2 only. The error can
-  only make the main load lower than it could be.
-- **Orders wait for stock more as the load rises**, at 8 agents from 2.8 % of orders at 0.1 to 5.1 % at
-  capacity, at 64 agents from 5.4 % to 15 %.
-- **Two counting errors in the code** (fixed in PR #199). The stored keep-up flag left finished shipments
-  out, so it was too strict (fleet 8 at 0.175 said 7 of 20 seeds, the right count is 20). The capacities
-  here were read with the right count. Four measures counted the warm-up (order completion, orders that
-  waited, total service time, robots busy). None changes the capacities or the gains.
-- **Against the old model** (graph v1) the capacities moved from 0.2, 0.2, 0.6 and 0.5 to 0.175, 0.25, 0.3
-  and 0.4. Not like for like: the old runs had 2000 steps and no warm-up, and step 12 adds shipping.
-
-## Completeness
-
-Every fleet has a `capacity.json` with a main load, and every sensitivity sweep has all its rows (3600).
-One worker was killed by the kernel's out-of-memory killer at 27/10 16:07, which stopped pass 1 of the
-finer rates for fleet 64 (`BrokenProcessPool` in the sweep log of fleet 64, not kept). Pass 2 ran the
-same rates and filled every seed.
-
-## What reruns once the open points are settled
-
-The full sweep (`bedtime.bash step12`) on the final configs, after the step 12 settings move into
-`configs/fleet_<m>/` as part D says, with Q = 12, the SKU counts above, 5 lines per order
-(`lines_per_order: {distribution: shifted_poisson, mean: 5}`), the class-based homes of
-`b44db09`, the evaluator fixes if agreed, and fewer workers for fleet 64. About 27 hours at this run's
-speed. Before it, the open question of the random workstation (`model_revision/README.md`, "Still open")
-changes how demand is spread, and so possibly the sizing.
+- **The main loads are safe.** At every main load all 20 seeds keep up with order work and put-aways
+  under fixed and demand storage. The backlog falls slightly (growth per 100 steps under fixed storage
+  -0.03, -0.05, -0.25 and -1.0 at 8, 16, 32 and 64 agents).
+- **Capacity now grows with the fleet.** The warehouse grows by the same amount per agent, so capacity
+  per agent stays near 0.019 (0.016 at 32 agents). In the first sweep it fell from 0.022 to 0.006.
+- **Picks wait for the workstation, not for travel.** This is the issue the run found. At the main load
+  a pick drives 17 to 25 steps but waits 67 to 156 steps before a robot takes it. Over 80 % of its
+  service time a robot's path already ends at its workstation (`mean_pick_wait_delivery_taken`, 74, 79,
+  83 and 84 % of the pick service time at 8, 16, 32 and 64 agents). Meanwhile the robots hold a task only
+  30 to 56 % of the time. Token Passing gives a task only to a robot whose path does not end where
+  another path ends, and all 5 lines of an order go to the same workstation, so they go one at a time.
+- **Against the first sweep.** There each order went to any workstation and had one line, and the wait
+  for the workstation was 36 to 45 % of a pick. With sections of 4 workstations, 5 lines per order and
+  fewer workstations per SKU, the same rule now dominates the pick. So the main loads are low, and the
+  pick service time is mostly this wait. The idling is Token Passing's rule as published, kept as a
+  limitation (author, 2026-11-02, step 4). No extra entry points per workstation.
+- **Fixed storage overflows more.** It puts 146, 338, 705 and 1740 units per run off their home shelf at
+  the main loads (99 to 238 in the first sweep). No unit is left unplaced.

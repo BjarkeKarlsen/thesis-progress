@@ -117,7 +117,7 @@ def demand_sweep():
     columns = [
         ("demand.skew", "demand", r"Zipf exponent", 1.0, None),
         ("demand.rotation_period", "demand", "drift period (steps)", 200, None),
-        ("demand.rotation_shift", "demand", "drift step (ranks)", 5, None),
+        ("demand.rotation_share", "demand", "drift step (share of SKUs)", 0.05, None),
     ]
     return sweep_figure("app_demand_sweep.png", columns, SWEEP)
 

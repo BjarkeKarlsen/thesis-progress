@@ -9,7 +9,7 @@ and why the safety stock is sized at the most popular rank.
 
 ## Commands, per fleet m
 
-Each runs at the fleet's main load from `../E_load/fleet_<m>/capacity.json` (0.105, 0.15, 0.18 and 0.24),
+Each runs at the fleet's main load from `../E_load/fleet_<m>/capacity.json` (0.09, 0.18, 0.3 and 0.6),
 one setting varied at a time:
 
     $PY scripts/sweep/load_sweep.py --config configs/step12/fleet_$m.yaml --rates $LOAD --seeds 20 \
@@ -37,25 +37,39 @@ the rows back (about 15 minutes).
 
 ## Findings
 
-- **Storage period.** Stock arrives only at a storage update, so a long period also makes refills late.
-  The wait for stock grows from 0.6 to 5.3 steps at 8 agents and from 3.6 to 15.8 at 64, and every rule
-  slows down. The gain holds at every period (4 to 15 %). The period stays 100.
-- **Congestion weight.** Weights 0 to 4 give the same pick time within 1.5 steps. A weight of 0 gives
-  exactly demand storage. A pick is blocked for only 1 to 3 steps, 2 to 3 % of its time, and at most about
-  7 even far above capacity, so the weight has nothing to work on under Token Passing. It stays 1.
-- **Random check.** Random storage is 22, 22, 12 and 13 % slower than fixed at 8, 16, 32 and 64 agents,
-  and faster on at most 3 of 20 seeds. So the gain of demand storage comes from knowing demand.
-- **Refill size.** Refills per SKU per 4000 steps follow 12000 x load / (n Q), matched within 0.2.
-  Doubling Q halves the put-aways. Every Q keeps up and the gain hardly moves with Q. The orders that waited
-  for stock at Q = 15, 30, 60: 5.7, 2.8, 0.9 % at 8 agents and 14.1, 7.0, 2.9 % at 64. Decided: Q = 12 at
-  every fleet and n = 250 x main load rounded to a multiple of 20 (`[A75]`).
-- **Fixed storage overflows.** It puts 90 to 270 units per run off their home shelf, up to 620 at skew 1.5.
-- **Safety stock.** Sized at each SKU's starting rank it was too small once the drift took the SKU to the
-  top. Sized at the most popular rank (fleet 8, Q = 15), the orders that waited fell from 5.7 % to 0.0 %
-  and a pick got 14 % faster, for a mean shelf fill of 24 % against 17 %. Decided: every SKU gets the
-  top-rank safety stock (`[A75]`).
+- **Storage period.** The gain grows with the period at 8 and 16 agents (7 % at 50 to 18 % at 400), is
+  flat at 32 (12 to 16 %) and falls at 64 (8 to 10 % up to 200, 3 % at 400, faster than fixed on 11 of
+  20 seeds). Stock waits are near zero at every period (at most 0.9 % of lines, at 64 agents and
+  period 50), unlike the first sweep, where a long period made refills late. The period stays 100.
+- **Congestion weight.** Weights 0 to 4 give the same pick time within 2 % at every fleet, and a weight
+  of 0 gives exactly demand storage. A pick is blocked for only 1 to 2.5 steps. The weight still has
+  nothing to work on under Token Passing, whose waiting happens before a robot takes the task. It
+  stays 1. This leaves the storage half of RQ3 for the learned controllers.
+- **Random check.** Random storage is now far slower than fixed, 48 to 76 % at 8 agents and 63 to
+  210 % at the other fleets, and slower on every seed. At 64 agents it fails the keep-up check on every
+  seed, at 32 agents on 2 to 9 of 20. It ignores the sections, so a unit often lands far from the
+  workstations that need it. The gain of demand storage comes from knowing demand.
+- **Refill size.** The gain is larger at Q = 15 and 30 than at the thesis value 10 (18 to 28 % against
+  10 to 14 %). At Q = 60 it falls again at 32 and 64 agents (18 and 8.5 %), where fixed storage itself
+  gets much slower (201 and 282 steps). Put-aways are 13 to 14 % of trips at Q = 15, 7 to 8 % at 30 and
+  4 % at 60, and about 20 % at Q = 10. Stock waits are near zero at every Q.
+- **Stock waits are below the aim.** At the thesis values 0.1 to 0.3 % of lines wait for stock, against
+  an aim of about 1 %. The top-rank safety stock does more than it needs to. Mean shelf fill is 25 to
+  27 %, so there is room.
+- **Fixed storage overflows.** It puts 146, 338, 705 and 1740 units per run off their home shelf at the
+  thesis values (90 to 270 in the first sweep).
+
+## The first sweep, for comparison (rows at `524ef5a`)
+
+Q = 30, one line per order, any workstation. The gain held at every period (4 to 15 %) but a long period
+made refills late. Weights 0 to 4 gave the same pick time within 1.5 steps. Random storage was 12 to
+22 % slower than fixed. At Q = 15 6 to 14 % of orders waited for stock, which the top-rank safety stock
+fixed (`safety_check/`, below).
 
 ## Sizing the SKU count, Q and the safety stock (part D, D25)
+
+History. This section is from the first sweep. `[A77]` replaced its sizing (2026-10-31): the SKU count
+is 2.5 per agent and Q = 10. The arithmetic still holds.
 
 ### The arithmetic
 

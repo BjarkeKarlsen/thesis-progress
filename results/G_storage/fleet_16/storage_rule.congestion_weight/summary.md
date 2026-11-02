@@ -2,7 +2,7 @@
 
 ## Trip distance of the storage vertices
 
-Smallest 14.2, largest 35.0, ratio 2.46, over 60 storage vertices. The ratio bounds what storage can save on a trip.
+Smallest 21.0, largest 49.0, ratio 2.33, over 80 storage vertices. The ratio bounds what storage can save on a trip.
 
 ## storage_rule.congestion_weight = 0
 
@@ -10,7 +10,7 @@ Smallest 14.2, largest 35.0, ratio 2.46, over 60 storage vertices. The ratio bou
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 28 | 0.03 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 114 | 0.01 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -19,7 +19,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 
 ## storage_rule.congestion_weight = 0.5
 
@@ -27,7 +27,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 25 | 0.07 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 111 | -0.03 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -36,7 +36,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 
 ## storage_rule.congestion_weight = 1
 
@@ -44,7 +44,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 27 | 0.05 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 114 | -0.02 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -53,7 +53,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 
 ## storage_rule.congestion_weight = 2
 
@@ -61,7 +61,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 27 | 0.03 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 101 | -0.02 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -70,7 +70,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 
 ## storage_rule.congestion_weight = 3
 
@@ -78,7 +78,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 27 | 0.06 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 113 | -0.02 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -87,7 +87,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 
 ## storage_rule.congestion_weight = 4
 
@@ -95,7 +95,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.15 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 23 | 0.04 | 0.00 | 0.00 |
+| congestion | 0.18 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 99 | -0.01 | 0.00 | 0.00 |
 
 ### Capacity
 
@@ -104,5 +104,5 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| congestion | 0.15 | n/a | 0.09 |
+| congestion | 0.18 | n/a | 0.108 |
 

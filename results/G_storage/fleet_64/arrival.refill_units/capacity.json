@@ -5,53 +5,53 @@
   "by_value": {
     "15": {
       "fixed": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "demand": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "random": {
-        "capacity": 0.24,
-        "first_failing_rate": null,
-        "main_load": 0.144
+        "capacity": null,
+        "first_failing_rate": 0.6,
+        "main_load": null
       }
     },
     "30": {
       "fixed": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "demand": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "random": {
-        "capacity": 0.24,
-        "first_failing_rate": null,
-        "main_load": 0.144
+        "capacity": null,
+        "first_failing_rate": 0.6,
+        "main_load": null
       }
     },
     "60": {
       "fixed": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "demand": {
-        "capacity": 0.24,
+        "capacity": 0.6,
         "first_failing_rate": null,
-        "main_load": 0.144
+        "main_load": 0.36
       },
       "random": {
-        "capacity": 0.24,
-        "first_failing_rate": null,
-        "main_load": 0.144
+        "capacity": null,
+        "first_failing_rate": 0.6,
+        "main_load": null
       }
     }
   }

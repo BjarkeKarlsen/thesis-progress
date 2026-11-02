@@ -5,38 +5,38 @@
   "by_value": {
     "0.025": {
       "fixed": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       },
       "demand": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       }
     },
     "0.05": {
       "fixed": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       },
       "demand": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       }
     },
     "0.1": {
       "fixed": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       },
       "demand": {
-        "capacity": 0.18,
+        "capacity": 0.3,
         "first_failing_rate": null,
-        "main_load": 0.108
+        "main_load": 0.18
       }
     }
   }

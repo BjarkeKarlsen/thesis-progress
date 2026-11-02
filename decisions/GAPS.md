@@ -1668,9 +1668,25 @@ wrong under [A32] are marked.
       `model_revision/README.md`, "Still open". It changes the demand model
       and the second leg of the trip, so it gets its own `[Axx]` entry once
       agreed, and it comes before the SKU count and Q (D25).
-- [ ] **Code for [A75] and [A76].** Thesis text written 2026-10-30, code and
-      configs still to do.
-- [ ] **Text and code for the step 12 sizing.** Text done as [A75] (2026-10-30). Decided 2026-10-29 ("D25,
+- [x] **Code for [A75] and [A76].** Done 2026-10-31 with `[A77]`, slap-mapd-coupling `18fefda`.
+- [ ] **Token Passing checks the values, it does not settle them for the other systems** (author,
+      2026-11-02). The updated Token Passing run (2026-10-31, `results/E_load`, `F_demand`,
+      `G_storage`, `app:load:runs` in Appendix E) found two things that hold for Token Passing only.
+      Look at both again under the learned arms (centralised, section-based, decentralised) once
+      they are trained.
+      - *Congestion weight.* Weights 0 to 4 change the pick service time by at most 2 %, because
+        Token Passing's waiting happens before a robot takes the task, on no edge the weight sees.
+        The learned arms may block each other more, so the storage half of RQ3 is read there.
+      - *Stock waits.* 0.1 to 0.3 % of lines wait for stock, against an aim of about 1 %. A slower
+        arm finishes put-aways later, so stock reaches the shelf later and more lines may wait.
+        Report the share per arm. The safety stock stays as it is until then.
+      - *Main load.* The main load is 0.6 of Token Passing's capacity, and every arm and both
+        storage rules run at it, so the comparison stays paired. Kept as it is (author,
+        2026-11-02). An arm that beats Token Passing runs further below its own limit, so its waits
+        are shorter and its gain may look a little smaller. Say this in one sentence in the threats
+        to validity when the results are written. RQ4, which varies the load, shows the rest.
+- [x] **Text and code for the step 12 sizing.** Replaced by `[A77]` (2026-10-31): the SKU count is
+      2.5 per agent, not 250 x main load, and Q = 10. Text done as [A75] (2026-10-30). Decided 2026-10-29 ("D25,
       sized" and "D25, safety stock" in `model_revision/README.md`): Q = 12
       at every fleet, n = 250 x main load rounded to a multiple of 20, 5
       lines per order, and every SKU's safety stock sized at rank 0. The
@@ -2060,3 +2076,36 @@ wrong under [A32] are marked.
   per vertex.
 - **Code.** Not yet.
 - **Revises.** `[A55]` (the second leg as a stand-in), `[A70]` (m/2 delivery vertices, the nearest one).
+
+### [A77] The warehouse scales with the fleet, and each section has four workstations (Design change, thesis text edited 2026-10-31)
+
+- **Where.** `sec:impl:instances` (shelves and workstations, the SKU count, the sections, Q in the
+  starting stock, the homes of F_fix), `sec:method:storage` and `eq:tripdistance` in Appendix C (the
+  second leg), the Token Passing paragraph of `sec:method:controllers`, the orders text and a new
+  scope item in `2.Introduction.tex`, `tab:notation` (h(k)), `tab:evalparams` (Appendix B).
+- **What the edit says.** Everything grows with the fleet. Per agent 16 walkable vertices, 5 shelves,
+  2.5 SKUs, half a workstation, half a dock and one parking vertex, so 20, 40, 80, 160 SKUs and 40,
+  80, 160, 320 shelves at 8, 16, 32, 64 agents, two shelves per SKU. Each SKU belongs to a section of
+  20 SKUs, a random split per seed, and each section is served by 4 workstations on neighbouring
+  rack faces. An order picks one workstation at random, draws its lines from that workstation's
+  section, and every line goes there. h(k) is now the section's workstations, and the second leg
+  of the trip is the mean distance to them. Q = 10, so put-aways are a fifth of the trips. Token
+  Passing's rule lets one agent head for a workstation at a time, so an order's lines queue there.
+  This is kept and stated as a limitation, since the router is not what the thesis tests.
+- **Why.** With 10 SKUs per section and 5 lines per order, demand was nearly flat: the top fifth of
+  SKUs took 33 % of the lines, against 46 % with sections of 20 and 64 % for one-line orders over
+  every SKU (a simulation of the order drawing, 2026-10-30). One rule, everything per agent, keeps
+  every warehouse equally full and is easy to state. On the queue: a scratch run at fleet 8 (6
+  seeds, load 0.1, Token Passing) gave picks of 212 steps, 187 of them waiting for the workstation,
+  with one vertex per workstation, against 36 steps with four entry points per workstation.
+- **Rejected.** The SKU count from the load (250 x load in `[A75]`), which keeps the refills per SKU
+  equal across fleets but not how full the warehouse is. A shelf on every rack face, which makes a
+  large warehouse nearly empty (about 5 shelves per SKU at 64 agents). Several entry points per
+  workstation, which removes the queue but changes the warehouse for one router.
+- **Cost.** A SKU is refilled less often in a large warehouse, since the load grows more slowly than
+  the fleet. The step 12 sweep of 2026-10-31 measures by how much.
+- **Code.** slap-mapd-coupling `18fefda` on main (`workstations_per_section`, `Vertex.section`,
+  configs/step12).
+- **Revises.** `[A75]` (the SKU count from the load, Q = 12), `[A76]` (10 SKUs per workstation, one
+  workstation per section, the second leg to one vertex), `[A71]` (two shelves per SKU, now 5 per
+  agent over 2.5 SKUs per agent).

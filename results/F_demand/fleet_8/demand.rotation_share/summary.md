@@ -2,7 +2,7 @@
 
 ## Trip distance of the storage vertices
 
-Smallest 7.5, largest 36.0, ratio 4.80, over 40 storage vertices. The ratio bounds what storage can save on a trip.
+Smallest 14.5, largest 39.0, ratio 2.69, over 40 storage vertices. The ratio bounds what storage can save on a trip.
 
 ## demand.rotation_share = 0.025
 
@@ -10,8 +10,8 @@ Smallest 7.5, largest 36.0, ratio 4.80, over 40 storage vertices. The ratio boun
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 35 | -0.01 | 0.00 | 0.00 |
-| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 66 | -0.03 | 99.00 | 0.00 |
+| demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 301 | -0.01 | 0.00 | 0.00 |
+| fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 316 | -0.03 | 146.00 | 0.00 |
 
 ### Capacity
 
@@ -20,8 +20,8 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | 0.105 | n/a | 0.063 |
-| fixed | 0.105 | n/a | 0.063 |
+| demand | 0.09 | n/a | 0.054 |
+| fixed | 0.09 | n/a | 0.054 |
 
 ## demand.rotation_share = 0.05
 
@@ -29,8 +29,8 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 35 | -0.01 | 0.00 | 0.00 |
-| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 66 | -0.03 | 99.00 | 0.00 |
+| demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 301 | -0.01 | 0.00 | 0.00 |
+| fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 316 | -0.03 | 146.00 | 0.00 |
 
 ### Capacity
 
@@ -39,8 +39,8 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | 0.105 | n/a | 0.063 |
-| fixed | 0.105 | n/a | 0.063 |
+| demand | 0.09 | n/a | 0.054 |
+| fixed | 0.09 | n/a | 0.054 |
 
 ## demand.rotation_share = 0.1
 
@@ -48,8 +48,8 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| demand | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 55 | -0.04 | 0.00 | 0.00 |
-| fixed | 0.105 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 54 | -0.03 | 79.50 | 0.00 |
+| demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 294 | 0.00 | 0.00 | 0.00 |
+| fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 281 | -0.02 | 140.00 | 0.00 |
 
 ### Capacity
 
@@ -58,6 +58,6 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | capacity | first failing rate | main load |
 |---|---|---|---|
-| demand | 0.105 | n/a | 0.063 |
-| fixed | 0.105 | n/a | 0.063 |
+| demand | 0.09 | n/a | 0.054 |
+| fixed | 0.09 | n/a | 0.054 |
 
