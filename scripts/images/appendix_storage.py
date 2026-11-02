@@ -4,10 +4,10 @@ The figures of the Storage rule values appendix (G.StorageValues.tex, app:storag
 Run:  python thesis-progress/scripts/images/appendix_storage.py   (from the workspace root)
 Out:  thesis-progress/scripts/Images/app_storage_period.png   fig:app:storageperiod
       thesis-progress/scripts/Images/app_storage_beta.png     fig:app:storagebeta
-      thesis-progress/scripts/Images/app_storage_margin.png   fig:app:storagemargin
+      thesis-progress/scripts/Images/app_storage_refill.png   fig:app:storagerefill
 
 Reads the storage columns of the Token Passing parameter sweep
-(results/G_storage/fleet_<m>/storage_rule.*/, from slap-mapd-coupling's
+(results/G_storage/fleet_<m>/storage_rule.*/ and arrival.refill_units/, from slap-mapd-coupling's
 scripts/sweep/parameter_sweep.bash). A missing run is drawn as a placeholder.
 """
 import os
@@ -35,16 +35,17 @@ def storage_beta():
                         extra=("mean_crowding", "mean\ncrowding"))
 
 
-def storage_margin():
-    """The stock margin epsilon under demand storage, paired with fixed storage at the same
-    margin (app:cal:margin). The margin sets how much stock arrives above the last period's
-    orders, so it changes fixed storage too."""
-    columns = [("arrival.margin", "demand", r"stock margin $\varepsilon$", 1.0, None)]
-    return sweep_figure("app_storage_margin.png", columns, SWEEP)
+def storage_refill():
+    """The refill size Q under demand storage, paired with fixed storage at the same Q
+    (app:cal:refill). Q changes fixed storage too, since it sets how much arrives. The sweep ran
+    Q = 15, 30 and 60, and the point at Q = 10 is the storage period sweep at Delta = 100."""
+    columns = [("arrival.refill_units", "demand", r"refill size $Q$ (units)", 10.0, None)]
+    return sweep_figure("app_storage_refill.png", columns, SWEEP,
+                        add_default=("storage_rule.epoch_length", 100.0))
 
 
 def appendix_storage():
-    return [storage_period(), storage_beta(), storage_margin()]
+    return [storage_period(), storage_beta(), storage_refill()]
 
 
 if __name__ == "__main__":

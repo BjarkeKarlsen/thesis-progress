@@ -5,7 +5,12 @@ Run from the workspace root:
     python thesis-progress/scripts/images/stock_moments_data.py RUN_DIR
 
 RUN_DIR is a load_sweep.py output with one trace per storage rule in
-traces/ (made with --trace-seeds 1). The traces are several megabytes and
+traces/ (made with --trace-seeds 1), for example, from slap-mapd-coupling:
+
+    python scripts/sweep/load_sweep.py --config configs/fleet_8/decentralised.yaml \
+        --rates 0.09 --seeds 1 --storage-modes fixed demand random --trace-seeds 1 \
+        --horizon 7000 --warmup 5000 --workers 3 --out RUN_DIR
+ The traces are several megabytes and
 stay off git. This script keeps only the warehouse and, at each moment, the
 units per slot by popularity rank, the picks waiting per slot and the
 put-aways delivered to each slot so far, in data/stock_moments.json.
@@ -17,10 +22,9 @@ import sys
 
 DATA = os.path.join(os.path.dirname(__file__), "data", "stock_moments.json")
 RULES = ("fixed", "demand", "random")
-# After a warm-up stand-in of 1000 steps, then a quarter and a half demand
-# cycle (4000 steps) later. The warm-up is set by test C (Welch's method), so
-# the moments are provisional until it has run.
-MOMENTS = (1000, 2000, 3000)
+# The end of the 5000-step warm-up of the Token Passing runs (app:load:method), then a
+# quarter and a half demand cycle (4000 steps) later.
+MOMENTS = (5000, 6000, 7000)
 
 
 def _lines(path):

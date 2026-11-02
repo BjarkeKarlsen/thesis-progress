@@ -161,13 +161,16 @@ def save(fig, name):
     return path
 
 
-def sweep_figure(name, columns, results_dir, extra=None):
+def sweep_figure(name, columns, results_dir, extra=None, add_default=None):
     """Storage or demand parameters swept with Token Passing, one column each, read top to
     bottom as the catalogue reads a run: (a) result, the pick service gain over fixed,
     (b) cost, the put-away service time over fixed, (c) check, the share of seeds that keep
     up, picks solid and put-aways dashed. A column is (parameter, rule, x label, default,
     fixed_default). extra = (row field, y label) adds a panel of that field's mean, for
-    example the crowding under the congestion weight."""
+    example the crowding under the congestion weight. add_default = (folder, value) takes the
+    rows of another sweep at `value` as the point at the column's default, when the sweep of the
+    parameter left its default out (the refill size, whose Q = 10 rows are those of the storage
+    period sweep at Delta = 100)."""
     n = 4 if extra else 3
     k = len(columns)
     fig, axes = plt.subplots(n, k, figsize=(4.2 * k + 1.0, 1.7 * n + 1.2), sharex="col",
@@ -181,6 +184,10 @@ def sweep_figure(name, columns, results_dir, extra=None):
             folders = [parameter] + ([fixed_default[0]] if fixed_default else [])
             rows = [r for folder in folders for r in read_jsonl(
                 os.path.join(results_dir, f"fleet_{fleet}", folder, "load_sweep.jsonl"))]
+            if add_default:
+                rows += [dict(r, varied=parameter, value=default) for r in read_jsonl(
+                    os.path.join(results_dir, f"fleet_{fleet}", add_default[0],
+                                 "load_sweep.jsonl")) if r.get("value") == add_default[1]]
             points = sweep_points(rows, parameter, rule, fixed_default)
             if not points:
                 continue

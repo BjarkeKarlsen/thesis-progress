@@ -25,7 +25,13 @@ SWEEP = os.path.join(RESULTS, "F_demand")
 
 
 def _fixed_by_rate(fleet):
+    """Fixed storage rows of the load sweep by rate, with the main load added. The main loads
+    lie below the lowest rate of the grid, so their rows come from the demand sweep at its thesis
+    values (results/F_demand/fleet_<m>/demand.skew at skew 1), the same 20 seeds and settings."""
     rows = read_jsonl(os.path.join(LOAD, f"fleet_{fleet}", "load_sweep.jsonl"))
+    rows += [r for r in read_jsonl(os.path.join(SWEEP, f"fleet_{fleet}", "demand.skew",
+                                                 "load_sweep.jsonl"))
+             if r.get("value") == 1.0]
     by_rate = {}
     for r in rows:
         if r["storage_mode"] == "fixed":
@@ -77,8 +83,8 @@ def load_sweep_fleets():
 
 def load_validity():
     """Units put off their home shelf (overflow_units, a) and units that fitted on no shelf
-    (unplaced_units, b) against the rate per agent, fixed storage, mean over seeds. Both are
-    0 at the main loads (measures_catalogue.md, Validity)."""
+    (unplaced_units, b) against the rate per agent, fixed storage, mean over seeds, counted
+    over the whole run. No unit is unplaced at the main loads (app:load:validity)."""
     fig, axes = plt.subplots(1, 2, figsize=(7.6, 2.8), sharex=True,
                              gridspec_kw=dict(wspace=0.35))
     found = False
