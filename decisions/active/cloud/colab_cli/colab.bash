@@ -21,6 +21,9 @@
 #   COMMIT    the slap-mapd-coupling commit to train (origin/main; a continued run keeps its own)
 #   PATCH     a diff applied on top of COMMIT, to try a change before it is on GitHub (none)
 #   LEARNER_CPUS  CPUs of the learner (the cores the runners leave; 1 as at home)
+#   GPU       a GPU for the learner, such as T4 or L4 (none, a CPU machine). A run keeps the
+#             machine type it started on, so continue a GPU run with the same GPU set
+#   BATCH_ON_CPU  1 keeps the train batch in host memory, for a batch too big for the GPU
 #   BUDGET    env steps, empty keeps the config's budget
 #   HOURS     stop cleanly after this many hours (20)
 #   RUNNERS   env runners, the same on every machine (3, as bedtime.bash)
@@ -40,6 +43,13 @@ HOURS=${HOURS:-20}
 RUNNERS=${RUNNERS:-3}
 BUDGET=${BUDGET:-}
 PATCH=${PATCH:-}
+GPU=${GPU:-}
+BATCH_ON_CPU=${BATCH_ON_CPU:-}
+# The Colab CLI turns a GPU name it does not know into an A100, the dearest one, so only these.
+case ${GPU,,} in
+"" | t4 | l4 | g4 | h100 | a100) ;;
+*) echo "GPU=$GPU is not one of T4, L4, G4, H100, A100" >&2; exit 2 ;;
+esac
 LEARNER_CPUS=${LEARNER_CPUS:-}
 INTERVAL=${INTERVAL:-1800}
 STOP=${STOP:-1}
@@ -80,8 +90,8 @@ start() {
     trap 'rm -rf "$tmp"' RETURN
     # `colab status` exits 0 for a session that does not exist, so look in the list.
     if ! colab sessions 2>/dev/null | grep -q "^\[$session\] "; then
-        log "opening session $session"
-        colab new -s "$session" --high-mem || return 1
+        log "opening session $session${GPU:+ with a $GPU GPU}"
+        colab new -s "$session" --high-mem ${GPU:+--gpu "$GPU"} || return 1
     fi
     if [ -f "$dest/commit.txt" ]; then
         commit=$(head -n 1 "$dest/commit.txt" | cut -d' ' -f1)
@@ -105,12 +115,13 @@ start() {
         colab upload -s "$session" "$tmp/run.tgz" /content/run.tgz || return 1
     fi
     "$PYTHON" -c 'import json, sys
-fleet, arm, regime, commit, hours, runners, budget, learner, out = sys.argv[1:]
+fleet, arm, regime, commit, hours, runners, budget, learner, gpu, on_cpu, out = sys.argv[1:]
 json.dump(dict(fleet=int(fleet), controller=arm, regime=regime, commit=commit,
                hours=float(hours), runners=int(runners), budget=int(budget) if budget else None,
-               learner_cpus=int(learner) if learner else None),
+               learner_cpus=int(learner) if learner else None, gpu=bool(gpu),
+               batch_on_cpu=on_cpu == "1"),
           open(out, "w"))' "$fleet" "$arm" "$regime" "$commit" "$HOURS" "$RUNNERS" "$BUDGET" \
-        "$LEARNER_CPUS" "$tmp/job.json"
+        "$LEARNER_CPUS" "$GPU" "$BATCH_ON_CPU" "$tmp/job.json"
     colab upload -s "$session" "$tmp/job.json" /content/job.json || return 1
     if [ -n "$PATCH" ]; then
         log "sending the patch $PATCH"
@@ -294,11 +305,14 @@ watch() {
     done
 }
 
+# Bash reads a script as it runs it. Every branch ends in exit, so a watch that runs for days
+# never reads on into this file after it was edited.
 command=${1:-}
 shift || true
 case $command in
-start | fetch | watch) [ $# -eq 4 ] || { sed -n 2,14p "$0"; exit 2; }; "$command" "$@" ;;
+start | fetch | watch) [ $# -eq 4 ] || { sed -n 2,14p "$0"; exit 2; }; "$command" "$@"; exit ;;
 status | stop) [ $# -eq 1 ] || { sed -n 2,14p "$0"; exit 2; }
-    if [ "$command" = stop ]; then colab stop -s "$1"; else status "$1"; fi ;;
+    if [ "$command" = stop ]; then colab stop -s "$1"; else status "$1"; fi; exit ;;
 *) sed -n 2,28p "$0"; exit 2 ;;
 esac
+exit

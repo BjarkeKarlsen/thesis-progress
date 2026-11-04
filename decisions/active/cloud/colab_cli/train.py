@@ -46,6 +46,12 @@ try:
         if os.path.exists("/content/code.patch"):
             run(["git", "-C", CODE, "apply", "/content/code.patch"])
     run([sys.executable, "-m", "pip", "install", "-q", "-e", CODE, "ray[rllib]==2.57.0"])
+    if JOB.get("gpu"):
+        # A run asked to train on a GPU must not quietly train on the CPU instead.
+        import torch
+        if not torch.cuda.is_available():
+            raise RuntimeError("the job asks for a GPU, but torch sees none on this machine")
+        print("GPU:", torch.cuda.get_device_name(0), flush=True)
     print(JOB["commit"], "on", os.cpu_count(), "cores", flush=True)
     if JOB.get("learner_cpus") is None:
         JOB["learner_cpus"] = max(1, os.cpu_count() - JOB["runners"])
@@ -89,6 +95,9 @@ try:
         # changes no result. A resumed run keeps what it started with.
         if JOB.get("learner_cpus", 1) > 1:
             cmd += ["--learner-cpus", str(JOB["learner_cpus"])]
+        # The learner on the GPU, as at home. A resumed run keeps what it started with.
+        cmd += ["--gpu"] if JOB.get("gpu") else []
+        cmd += ["--batch-on-cpu"] if JOB.get("batch_on_cpu") else []
         cmd += ["--budget-env-steps", str(JOB["budget"])] if JOB.get("budget") else []
     print("+", " ".join(cmd), flush=True)
     with open(f"{RUN}/train.log", "a") as log:
