@@ -6,8 +6,10 @@
 #   colab.bash start  SESSION FLEET ARM REGIME   open the session if needed and start training
 #   colab.bash status SESSION                    the state, the last log lines, the units left
 #   colab.bash fetch  SESSION FLEET ARM REGIME   copy what is new of the run (and warehouses) home
-#   colab.bash watch  SESSION FLEET ARM REGIME   fetch every INTERVAL until it ends, then finish
-#                                                the run as bedtime.bash does and stop the session
+#   colab.bash watch  SESSION FLEET ARM REGIME   fetch every INTERVAL until it is done, then finish
+#                                                the run as bedtime.bash does and stop the session.
+#                                                A run stopped at HOURS, or whose machine is gone,
+#                                                is continued on a fresh machine (RESTARTS)
 #   colab.bash stop   SESSION                    stop the session
 #
 # ARM is decentralised or section, REGIME fixed_only or matched. The run goes to
@@ -24,6 +26,7 @@
 #   RUNNERS   env runners, the same on every machine (3, as bedtime.bash)
 #   INTERVAL  seconds between fetches of `watch` (1800)
 #   STOP      1 stops the session when `watch` ends (1)
+#   RESTARTS  times `watch` continues a stopped run on a fresh machine (6)
 set -uo pipefail
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -40,6 +43,7 @@ PATCH=${PATCH:-}
 LEARNER_CPUS=${LEARNER_CPUS:-}
 INTERVAL=${INTERVAL:-1800}
 STOP=${STOP:-1}
+RESTARTS=${RESTARTS:-6}
 
 log() { echo "$(date '+%Y-%m-%d %H:%M') $*"; }
 
@@ -223,25 +227,69 @@ finish() {
     fi
 }
 
+iterations_at_home() {  # iterations_at_home FLEET ARM REGIME: lines of the progress log at home
+    cat "$TRAINING/fleet_$1/$2/$3"/*_training_progress.jsonl 2>/dev/null | wc -l
+}
+
+# Continues a run on a fresh machine: stops what is left of the old one and starts again, which
+# sends the run from home and resumes it from its latest checkpoint.
+restart() {
+    local session=$1
+    colab stop -s "$session" > /dev/null 2>&1 || true
+    unset COMMIT  # a continued run keeps the commit in its commit.txt
+    start "$@"
+}
+
+# Fetches every INTERVAL until the run is done. A run stopped at HOURS (timeout's exit code
+# 124), or whose machine stopped answering, is continued on a fresh machine, up to RESTARTS
+# times. A restart that brought no new iteration home ends the watch, so a run that fails at
+# once is not restarted again and again.
 watch() {
-    local session=$1 fleet=$2 arm=$3 regime=$4 line misses=0
+    local session=$1 fleet=$2 arm=$3 regime=$4 line misses=0 restarts=0 before
+    before=$(iterations_at_home "$fleet" "$arm" "$regime")
     while true; do
         line=$(fetch "$@" | tee /dev/stderr | grep '^STATE' | tail -n 1)
-        if [ -z "$line" ]; then
+        case $line in
+        "")
             misses=$((misses + 1))
             log "no state from $session ($misses of 3)"
-            [ "$misses" -ge 3 ] && { log "the session seems gone, continue with start"; return 1; }
-        else
+            [ "$misses" -lt 3 ] && { sleep "$INTERVAL"; continue; }
+            log "$session seems gone"
+            ;;
+        "STATE finished 0")
+            log "$line, the run is done"
+            finish "$fleet" "$arm" "$regime"
+            [ "$STOP" = 1 ] && colab stop -s "$session"
+            return 0
+            ;;
+        "STATE finished 124")
+            log "$line, stopped at $HOURS h before its budget"
+            ;;
+        "STATE finished"* | "STATE failed"*)
+            log "$line, stopped with an error, see train.log. Not continued."
+            [ "$STOP" = 1 ] && colab stop -s "$session"
+            return 1
+            ;;
+        *)
             misses=0
-            case $line in
-            "STATE finished"* | "STATE failed"*)
-                log "$line"
-                finish "$fleet" "$arm" "$regime"
-                [ "$STOP" = 1 ] && colab stop -s "$session"
-                return 0
-                ;;
-            esac
+            sleep "$INTERVAL"
+            continue
+            ;;
+        esac
+        # Here the run stopped before its budget, or its machine is gone.
+        local now
+        now=$(iterations_at_home "$fleet" "$arm" "$regime")
+        if [ "$restarts" -gt 0 ] && [ "$now" -le "$before" ]; then
+            log "no new iteration since the last restart ($now), not continued"
+            return 1
         fi
+        if [ "$restarts" -ge "$RESTARTS" ]; then
+            log "restarted $restarts times already, not continued"
+            return 1
+        fi
+        restarts=$((restarts + 1)) before=$now misses=0
+        log "continuing on a fresh machine, restart $restarts of $RESTARTS, $now iterations at home"
+        restart "$@" || { log "the restart failed"; return 1; }
         sleep "$INTERVAL"
     done
 }
