@@ -25,7 +25,13 @@ GPU = False                           # True only with "enable_gpu": true in ker
 # To continue a run that hit HOURS: add this kernel's output as an input in
 # kernel-metadata.json ("kernel_sources") and set the path of its run folder here, for example
 # "/kaggle/input/slap-mapd-train/run". The script prints the inputs it finds.
-RESUME_FROM = "/kaggle/input/slap-mapd-train-section/run"
+# Kaggle mounts a kernel's output under /kaggle/input/notebooks/<user>/<kernel>/, so find
+# the run folder there rather than naming the path.
+import glob
+RESUME_FROM = next(iter(sorted(
+    os.path.dirname(p) for p in glob.glob("/kaggle/input/**/run/*_spec.json", recursive=True)
+)), None) or "/kaggle/input/slap-mapd-train-section/run"
+print("resume from", RESUME_FROM, flush=True)
 
 # The config holds everything else, the fleet's main load included (arrival_rate, from the
 # updated Token Passing run, results/E_load/fleet_<m>/capacity.json).

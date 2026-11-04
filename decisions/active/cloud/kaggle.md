@@ -79,8 +79,10 @@ A run that hit `HOURS` before its budget ends with "Not finished" in its log.
 
 1. Copy the folder to a new kernel (its own `id`), and in its `kernel-metadata.json` set
    `"kernel_sources": ["bjarkekarlsen/slap-mapd-train"]`, so the first run's output is mounted.
-2. Set `RESUME_FROM = "/kaggle/input/slap-mapd-train/run"`. The script prints the inputs it
-   finds, so check the path in the log if it fails.
+2. Set `RESUME_FROM` to the first run's folder. Kaggle mounts a kernel's output under
+   `/kaggle/input/notebooks/<user>/<kernel>/`, not `/kaggle/input/<kernel>/` (2026-11-04), so
+   `kaggle_kernel_section_resume/train.py` finds the folder by its `*_spec.json` instead of
+   naming the path. Copy that block. The script prints the inputs it finds.
 3. Push the new kernel.
 
 Then evaluate it at home. The tables are rebuilt or found in `~/thesis_runs/warehouses`.
