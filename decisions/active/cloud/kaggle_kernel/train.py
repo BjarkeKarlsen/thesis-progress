@@ -17,7 +17,8 @@ import sys
 BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
 CONTROLLER = "decentralised"          # or "centralised", "section"
 FLEET = 8                             # 8, 16, 32 or 64
-REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
+REGIME = "matched"                    # or "matched" (trained under demand storage)
+COMMUNICATION = False                 # True: decentralised with local communication (RQ5)
 HOURS = 11                            # stop cleanly before Kaggle's 12 h limit (11 for a real run)
 BUDGET = None                         # env steps, None keeps the config's budget (smoke test: 60000)
 GPU = False                           # True only with "enable_gpu": true in kernel-metadata.json
@@ -53,7 +54,8 @@ if RESUME_FROM:
     shutil.copytree(RESUME_FROM, RUN)
 os.makedirs(RUN, exist_ok=True)
 with open(f"{RUN}/commit.txt", "a") as f:
-    f.write(f"{COMMIT} {BRANCH} {CONTROLLER} fleet {FLEET} {REGIME}\n")
+    f.write(f"{COMMIT} {BRANCH} {CONTROLLER} fleet {FLEET} {REGIME}"
+            f"{' communication' if COMMUNICATION else ''}\n")
 
 config = os.path.abspath(f"code/{CONFIG}")
 if REGIME == "matched" and not RESUME_FROM:
@@ -93,10 +95,11 @@ if RESUME_FROM:
 else:
     cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "train", "--config", config,
            "--controller", CONTROLLER, "--regime", REGIME,
-           "--env-runners", str(max(1, (os.cpu_count() or 2) - 1)), "--checkpoint-every", "3",
+           "--env-runners", "3", "--checkpoint-every", "3",  # 3 runners, 3 episodes per update
            "--output", RUN]
     cmd += ["--budget-env-steps", str(BUDGET)] if BUDGET else []
     cmd += ["--gpu"] if GPU else []
+    cmd += ["--communication"] if COMMUNICATION else []
 print("+", " ".join(cmd), flush=True)
 # Every line of the training goes to train.log and to Kaggle's log, so the run can be followed
 # live on its page. The Output tab only fills once the run has ended.

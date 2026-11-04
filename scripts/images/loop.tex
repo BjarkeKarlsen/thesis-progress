@@ -33,7 +33,7 @@
 \newcommand{\looppanel}[2]{%
 \begin{tikzpicture}
   \ifnum#1=1
-    \node[box, fill=storeF] (S) {\textbf{Storage layer} $F$\\
+    \node[box, fill=storeF] (S) {\textbf{Storage layer} $F_{\mathrm{cng}}$\\
       slow, every $\Delta$ steps\\
       shelves for arriving $y_t$ from\\ demand and traffic};
   \else
@@ -80,6 +80,6 @@
 \begin{document}
 \begin{tabular}{@{}c@{\hspace{0.6cm}}c@{}}
   \looppanel{0}{(a) $F_{\mathrm{fix}}$ baseline, no feedback} &
-  \looppanel{1}{(b) Adaptive storage, feedback closes the loop}
+  \looppanel{1}{(b) Congestion-aware storage, traffic closes the loop}
 \end{tabular}
 \end{document}

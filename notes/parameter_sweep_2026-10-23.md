@@ -4,7 +4,7 @@ The Token Passing sensitivity sweep of 2026-10-22 is complete. It covers 4 fleet
 
 ## What the sweep is for
 
-This was not written down in one place (`decisions/active/sweep.md` is empty). The plans give three uses.
+This was not written down in one place (`decisions/done/sweep.md` is empty). The plans give three uses.
 
 1. **Choosing the storage values that the literature does not give.** These are the period Δ (`storage_rule.epoch_length`), the stock margin ε (`arrival.margin`) and the congestion weight β (`storage_rule.congestion_weight`). The rule is to look in the SLAP and dynamic SLAP literature first, and to choose by this sweep and say so where nothing fits (`thesis_plan.md` section 7).
 2. **The cost graph.** It plots put-away distance against the service time gain over a sweep of the stock margin (`thesis_plan.md` section 5).

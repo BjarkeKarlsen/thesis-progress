@@ -12,7 +12,8 @@ from base import OUT, C
 # Figures 1 and 4): aisle vertices small and white, the role vertices coloured,
 # two-way edges as plain lines and one-way edges as arrows. The layouts are
 # exported from the generator (slap-mapd-coupling's scripts/instance_report.py,
-# copied from results/tests/A_graph_v2/warehouses/instances/fleet_*/seed_42.json)
+# copied from results/D_warehouses/step12/instances/fleet_*/seed_42.json, the step 12
+# layout, 2026-10-27)
 # to data/, so this script needs only the JSON, not the codebase.
 # data/instances_used_v1.json holds the graph v1 warehouses, drawn the same way
 # so the thesis can show why the design changed (model revision step 09).
@@ -33,7 +34,16 @@ SIZES = {"8": 34, "16": 14, "32": 6, "64": 2.5}
 def _panel(ax, inst, title, size):
     pos = {int(v): p for v, p in inst["positions"].items()}
     roles = {int(v): r for v, r in inst["roles"].items()}
-    edges = {(int(u), int(v)) for u, v in inst["edges"]}
+    # Two edge formats: a list of directed pairs (instances_used.json), or one entry
+    # per edge with its one-way flag (warehouses_step12.json).
+    if inst["edges"] and len(inst["edges"][0]) == 3:
+        edges = set()
+        for u, v, one_way in inst["edges"]:
+            edges.add((int(u), int(v)))
+            if not one_way:
+                edges.add((int(v), int(u)))
+    else:
+        edges = {(int(u), int(v)) for u, v in inst["edges"]}
     for u, v in edges:
         if (v, u) in edges:
             if u < v:
@@ -78,9 +88,26 @@ def _four(name, out):
     plt.close(fig)
 
 
+def _step12(key, out, title, height=10):
+    """Four panels of data/warehouses_step12.json (warehouses_data.py), the
+    graph of [A73] and [A74]."""
+    with open(os.path.join(DATA, "warehouses_step12.json")) as handle:
+        items = json.load(handle)[key]
+    fig, axes = plt.subplots(2, 2, figsize=(11, height),
+                             gridspec_kw=dict(hspace=0.15, wspace=0.05))
+    for ax, inst, letter in zip(axes.flat, items, "abcd"):
+        _panel(ax, inst, f"({letter}) " + title(inst), SIZES[str(inst["fleet"])])
+    _legend(fig, 0.03)
+    fig.savefig(os.path.join(OUT, out))
+    plt.close(fig)
+
+
 def warehouses():
-    """Graph v2, the four fleets (app:instances), and the 8-agent one alone for the chapter."""
-    _four("instances_used.json", "warehouses.png")
+    """app:instances: the four fleet sizes at seed 42, and four seeds of the
+    8-agent warehouse. Graph v1 and the 8-agent one alone are kept from before."""
+    _step12("sizes", "warehouses.png",
+            lambda inst: f"$m={inst['fleet']}$, $|V|={len(inst['roles'])}$")
+    _step12("seeds", "warehouses_seeds.png", lambda inst: f"seed {inst['seed']}", height=7)
     _four("instances_used_v1.json", "warehouses_v1.png")
     with open(os.path.join(DATA, "instances_used.json")) as handle:
         m8 = json.load(handle)["8"]

@@ -1,4 +1,4 @@
-Agreed 2026-10-21, combined with `Appendixes.md` (one test per number no paper gives us). The structure is in `decisions/active/appendix_split_handoff.md`.
+Agreed 2026-10-21, combined with `Appendixes.md` (one test per number no paper gives us). The structure is in `decisions/done/appendix_split_handoff.md`.
 
 ## Recommended structure
 

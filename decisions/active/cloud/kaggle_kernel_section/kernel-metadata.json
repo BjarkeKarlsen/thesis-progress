@@ -1,0 +1,16 @@
+{
+  "id": "bjarkekarlsen/slap-mapd-train-section",
+  "title": "slap-mapd-train-section",
+  "code_file": "train.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "bjarkekarlsen/slap-wh-fleet8-section-2b1cb9a671c0"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}

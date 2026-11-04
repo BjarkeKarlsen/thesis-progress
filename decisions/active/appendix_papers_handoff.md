@@ -12,10 +12,10 @@ table. What is left is finishing C and then writing D to J in the same shape.
   starts, the label scheme and the build.
 - `thesis/Appendices/C.Warehouses.tex`, the template. Read the PDF too
   (`thesis/Appendices/C.Warehouses.pdf`).
-- `thesis-progress/decisions/ideas/Appendixes.md`. It lists every number with its source
+- `thesis-progress/decisions/done/Appendixes.md`. It lists every number with its source
   (*cited*, *derived*, *tested*, *open*) and the test proposed for each open one. That file
   is the work list for D to H.
-- `thesis-progress/decisions/active/appendix_plan.md`, section "Third round". It has the
+- `thesis-progress/decisions/done/appendix_plan.md`, section "Third round". It has the
   table of all eleven appendices and where their text came from.
 
 ## What the author wants an appendix to be
@@ -138,7 +138,7 @@ Then, in "Results" of C:
 - Check the sentence in "Summary" that says every generated warehouse passes. It carries a
   `% TODO: confirm` comment. If not every seed passes, say so honestly in Summary, Results
   and Conclusion, and tell the author.
-- `thesis-progress/decisions/active/graph_appendix_handoff.md` has more detail on this
+- `thesis-progress/decisions/done/graph_appendix_handoff.md` has more detail on this
   step. Its section "What to write" is done apart from the table.
 
 ### 2. Write what needs no new runs

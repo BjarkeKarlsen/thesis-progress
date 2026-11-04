@@ -59,8 +59,8 @@ def _highlight_readings(ax, G, pos, active, deltas):
     for a in active:
         x, y = pos[a]
         ax.annotate(rf"$\delta={deltas[a]:.2f}$", (x, y),
-                    textcoords="offset points", xytext=(0, -22),
-                    ha="center", fontsize=10, color=C["accent"])
+                    textcoords="offset points", xytext=(16, -16), ha="left",
+                    fontsize=10, color=C["accent"])
 
 
 def congestion_mini():
@@ -122,8 +122,7 @@ def congestion_mini():
     faded = set(AGENTS) - set(active)
     _scatter(ax, pos, faded=faded)
     _highlight_readings(ax, G, pos, active, deltas)
-    ax.set_title("section-based: every agent in $Y_1$\n(reach past the "
-                 "boundary is the boundary protocol)", fontsize=10.5)
+    ax.set_title("section-based: every agent in its zone", fontsize=11)
 
     # (c) decentralised: only ego's own reading
     ax = axes[2]

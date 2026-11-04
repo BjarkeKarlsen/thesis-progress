@@ -255,7 +255,7 @@ each one is a Method sentence (or code) that does not match it.
 ## 17. Actions during evaluation
 
 - **Decided 2026-10-16: (b), sampled.** Greedy evaluation is a diagnostic
-  only (`thesis-progress/notes/signals_and_decisions_2026-10-16.md`,
+  only (`thesis-progress/archive/notes/signals_and_decisions_2026-10-16.md`,
   6A). `controllers/decentralised.py` no longer exists, and evaluation goes
   through `training/policy.py`. The thesis sentence saying that the
   reported results are sampled is still to write (6B.5 there).

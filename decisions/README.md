@@ -2,7 +2,7 @@
 
 Where every design decision and plan for the thesis lives. The thesis
 chapters are the source of truth for the model. These files record why it
-looks the way it does. Updated 2026-10-20.
+looks the way it does. Updated 2026-10-30.
 
 ## How the folder works
 
@@ -25,14 +25,13 @@ looks the way it does. Updated 2026-10-20.
 
 | File | Topic | Status |
 |---|---|---|
-| `active/appendix_plan.md` | Which sections moved to the separate appendix document | Structure built, D and the warehouse figures to add |
-| `active/thesis_plan.md` | Main planning document, built from `../notes/thoughts.md` | Live, 2026-10-19 |
-| `active/embed_once_design.md` | Embed each agent's window once, to cut communication cost | Do now (Track B of `thesis-progress/archive/workspace/ROADMAP.md`) |
-| `active/memory_reduction_plan.md` | Where training memory goes and what to change | Not implemented |
-| `active/trace_extension_plan.md` | Extend the episode trace to find where a task goes wrong | Not implemented |
-| `active/simplification_plan.md`, `active/simplification_proposal.tex` | Simplification changes that stay (version 3) | Plan |
-| `active/recurrent_policy_plan.md` | Recurrent policy (option 3) | On hold, decentralised arm only |
-| `active/storage_mode_prompt.md`, `active/storage_mode_wip.patch` | Make the storage rule a switch in training, evaluation and the campaign | Prompt plus unapplied work in progress |
+| `active/thesis_plan.md` | Main planning document, built from `../archive/notes/thoughts.md` | Live |
+| `active/model_revision/` | Model revision of 2026-10-26, steps 01 to 12 (`README.md` has the decisions) | Step 12 on `feat/flow-and-start`, not merged |
+| `active/appendix_papers_handoff.md` | Write the appendices as short papers | C and D done, E, G, H and J have placeholders |
+| `active/appendix_values_overview.md` | Which run fills each appendix placeholder | In use |
+| `active/measures_plan.md` | The measures of a run, grouped | M1 to M4 done, M5 (`[A60]` checkpoint choice) and M6 open |
+| `active/scaling_to_1024_agents.md` | Fleet sweep up to 1024 agents | Not started, fleet 128 does not generate |
+| `active/cloud/` | Training arms on Kaggle and Colab, with the order of work in `README.md` | Guides written, Kaggle smoke test not run |
 
 ## Done
 
@@ -47,6 +46,17 @@ looks the way it does. Updated 2026-10-20.
 | `done/order_lines_proposal.md` | Orders with several lines and amounts | `[A46]` |
 | `done/code_changes_plan_2026-10-19.md` | Code for `[A43]` to `[A46]` | Merged #178 to #186, step G2 left |
 | `done/A47_putaway_draft.md`, `done/putaway_code_plan_2026-10-19.md` | Robots carry the put-away | `[A47]` |
+| `done/embed_once_design.md` | Embed each agent's window once | Done |
+| `done/memory_reduction_plan.md` | Where training memory goes | R1 to R4 done |
+| `done/simplification_plan.md`, `done/simplification_proposal.tex` | Simplification changes that stay | Embed once done, block iterator question moved to `thesis_plan.md` |
+| `done/storage_mode_prompt.md`, `done/storage_mode_wip.patch` | Storage rule as a switch | Done, storage mode is a config switch |
+| `done/fix_metric_values.md`, `done/fix_values_from_measures.md` | Keep-up and throughput metrics after `[A49]` to `[A51]` | Done, keep-up split into picks and put-aways (`[A59]`) |
+| `done/Appendixes.md`, `done/Appendixes_safe.md`, `done/split_up_appendix_for_better_structure.md` | A test for every number no paper gives, grouped by topic | Agreed and built, `[A57]` |
+| `done/appendix_plan.md`, `done/appendix_split_handoff.md` | Appendices as separate documents | Built, appendices A to L |
+| `done/graph_appendix_handoff.md`, `done/graph_appenndix.md` | Warehouse graph appendix | Written (D) |
+| `done/sweep.md` | Finish the load sweep | Done, main loads in `../notes/queue_findings_2026-10-26.md` |
+| `done/handover_queue_analysis.md` | Analyse the queue of 2026-10-23 | Done, in `../notes/queue_findings_2026-10-26.md` |
+| `done/run_in_cloud.md` | Cloud training run by an n8n server | Dropped, replaced by `active/cloud/` |
 
 ### Measurements behind the decisions
 
@@ -62,11 +72,14 @@ looks the way it does. Updated 2026-10-20.
 | File | Topic |
 |---|---|
 | `ideas/transformer_extension/` | Adding attention (Transformer) components to the learned controllers |
-| `ideas/learned_storage_policy.md` | A PPO storage policy coupled with the router, case for and against. Look into after the long run |
+| `ideas/learned_storage_policy.md`, `ideas/learned_storage_pilot_plan.md`, `ideas/learned_storage_intro.tex`, `ideas/learned_storage_gcn_size.py` | A PPO storage policy. Pilot stage 1 built, uncommitted in `~/worktrees/pilot-learned-storage` |
+| `ideas/recurrent_policy_plan.md` | Recurrent policy (option 3). On hold, decentralised arm only |
+| `ideas/trace_extension_plan.md` | Per-task trace (release, assign, finish). Partly built, the trace has `pickup_at` |
 
 ## Related folders
 
 - `../notes/how_the_system_works.md` is the plain description of the system.
-- `../notes/` has the research goals, status notes, the conflict signals note and `thoughts.md`, plus `updates_done/` (L4 plans, campaign findings, fix PR log).
+- `../notes/` has the current notes (measures catalogue, queue findings, parameter sweep, thesis review, how to show a run, windows and embedding), plus `updates_done/` (L4 plans, campaign findings, fix PR log).
+- `../archive/notes/` has the out-of-date notes: research goals, status of 2026-10-17, conflict signals and `thoughts.md`.
 - `../guides/` has explanatory guides (halo protocol, learning problem, move score head).
 - `../archive/temp/` has the early formal drafts and reviews. These are history, not spec.

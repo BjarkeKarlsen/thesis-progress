@@ -1,6 +1,6 @@
 # Appendix: a test for every number no paper gives us
 
-Agreed 2026-10-21. The structure that combines this idea with `split_up_appendix_for_better_structure.md` is in `decisions/active/appendix_split_handoff.md`.
+Agreed 2026-10-21. The structure that combines this idea with `split_up_appendix_for_better_structure.md` is in `decisions/done/appendix_split_handoff.md`.
 
 The rule: every number that does not come from another article gets an appendix that shows
 how it was found. Your questions are grouped by topic below, each with the answer indented
@@ -24,7 +24,7 @@ It is the current number, not a reason for it.
 simple terms, and cite van Knippenberg as inspiration.**
 
 > **Status.** Decided and built (`[A57]`). The writing is handed off in
-> `decisions/active/graph_appendix_handoff.md`.
+> `decisions/done/graph_appendix_handoff.md`.
 >
 > - **Size.** |V| = 16m gives 128, 256, 512 and 1024 vertices. *Cited*: van Knippenberg et
 >   al. (2021) use 128 to 2048 nodes for 32 and 64 agents, and 1024 nodes for 64 agents.

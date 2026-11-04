@@ -24,7 +24,7 @@ def instance_mini():
         Line2D([], [], marker="o", ls="", mfc=C["store_f"], mec=C["store_e"], ms=11,
                label=r"storage $V_{\mathrm{str}}$"),
         Line2D([], [], marker="s", ls="", mfc=C["del_f"], mec=C["del_e"], ms=11,
-               label=r"delivery $V_{\mathrm{del}}$"),
+               label=r"workstation $V_{\mathrm{work}}$"),
         Line2D([], [], marker="D", ls="", mfc=C["ep_f"], mec=C["ep_e"], ms=10,
                label=r"endpoint $V_{\mathrm{ep}}$"),
         Line2D([], [], marker="o", ls="", mfc="white", mec=C["node"], ms=11,

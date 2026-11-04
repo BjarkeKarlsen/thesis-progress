@@ -9,12 +9,12 @@ the author. What is left is moving the files, changing how the main text include
 adding the Source column and leaving skeletons for the calibration tests.
 
 Background, read these first:
-- `decisions/ideas/Appendixes.md`. The rule this structure serves: every number that
+- `decisions/done/Appendixes.md`. The rule this structure serves: every number that
   does not come from a paper gets an appendix that shows how it was found. It also has
   the source of every value (*cited*, *derived*, *tested*, *open*).
-- `decisions/ideas/split_up_appendix_for_better_structure.md`. Group the appendices by
+- `decisions/done/split_up_appendix_for_better_structure.md`. Group the appendices by
   the question a reader brings, not by topic of the code. Label pilots as pilots.
-- `decisions/active/appendix_plan.md`. How the current 13 appendices came about, and
+- `decisions/done/appendix_plan.md`. How the current 13 appendices came about, and
   the rule for moving text.
 - `LATEX.md` at the workspace root, "Appendix document", and `thesis/tools/sync_xrefs.py`.
 - `CLAUDE.md` at the workspace root, "Thesis writing style".
@@ -26,7 +26,7 @@ Background, read these first:
   one reviewable change on its own.
 - Do not commit or push. Leave the work uncommitted and report what changed. The author
   commits it and syncs Overleaf.
-- `decisions/active/graph_appendix_handoff.md` writes into `app:instances` at the same
+- `decisions/done/graph_appendix_handoff.md` writes into `app:instances` at the same
   time. Keep that label on the warehouse appendix (C below), so the two handoffs do not
   clash. If its text has already landed in `C.Instances.tex`, move it along with the rest.
 
@@ -215,7 +215,7 @@ List them in the report and leave both as they are.
 - `LATEX.md`, "Appendix document". Describe the new mechanism, including the one-way
   sync and the list file, and the subsection label scheme.
 - `AGENTS.md` at the workspace root, the `thesis/` bullet on `appendix.tex`.
-- `decisions/active/appendix_plan.md`. Add a "Third round" section with the new table,
+- `decisions/done/appendix_plan.md`. Add a "Third round" section with the new table,
   and point to this file.
 - `SESSION_CONTEXT.md` only if it names an appendix letter. It did not on 2026-10-21.
 

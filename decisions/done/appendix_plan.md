@@ -99,7 +99,7 @@ reference material. How to build: `LATEX.md`, "Appendices".
 
 Still to do (handoff for the next agent: `appendix_papers_handoff.md`):
 - Write D to I as papers in the shape of C. Most need their tests run first
-  (`decisions/ideas/Appendixes.md`).
+  (`decisions/done/Appendixes.md`).
 - The results table of C, from the 50-seed instance report.
 - Mid-sentence `\Nref` prints a capital "The" in about ten places of `2.Introduction.tex`.
 

@@ -63,7 +63,7 @@ def _panel(ax, new_tea):
             if p not in (HOME, new_tea):
                 ax.scatter(*p, s=280, c="white", edgecolors=C["node"], zorder=3)
     ax.scatter(*DELIVERY, s=380, marker="s", c=C["del_f"], edgecolors=C["del_e"], zorder=3)
-    ax.annotate("delivery and\nreceiving", DELIVERY, textcoords="offset points", xytext=(0, -30),
+    ax.annotate("workstation and\nreceiving", DELIVERY, textcoords="offset points", xytext=(0, -30),
                 ha="center", fontsize=10.5, color=C["del_e"])
     ax.text(-1.0, 2.75, "Left aisle", ha="center", fontsize=11, color=C["text"])
     ax.text(1.0, 2.75, "Right aisle", ha="center", fontsize=11, color=C["text"])
@@ -93,7 +93,7 @@ def arrival_storage():
         Line2D([], [], color=PUTAWAY, lw=2.2, ls=(0, (3, 2)), label="put-away of new stock"),
         Line2D([], [], color=C["agent"], lw=3.0, alpha=0.85, label="order's walk to the nearest tea"),
         Line2D([], [], marker="D", ls="", mfc=C["store_f"], mec=C["store_e"], ms=10, label="tea"),
-        Line2D([], [], marker="s", ls="", mfc=C["del_f"], mec=C["del_e"], ms=10, label="delivery"),
+        Line2D([], [], marker="s", ls="", mfc=C["del_f"], mec=C["del_e"], ms=10, label="workstation"),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False,
                fontsize=10, bbox_to_anchor=(0.5, 0.0))

@@ -27,7 +27,7 @@ cp thesis-progress/scripts/Images/warehouses.png thesis/Images/
 
 Your notes
 
-thesis-progress/decisions/ideas/Appendixes.md is restructured into eight topics: graph, storage, episode length, agents, congestion reward, model, PPO and config values. Each question is quoted with the answer indented below it. Each number is marked cited, derived, tested or open. Where nobody knows the answer yet, a To figure out line proposes a test. Your original is saved at /tmp/claude-1000/-home-bjarkek-Documents-thesis/ad4b4d17-9572-42a8-8bd7-58397df02877/scratchpad/Appendixes_original.md.
+thesis-progress/decisions/done/Appendixes.md is restructured into eight topics: graph, storage, episode length, agents, congestion reward, model, PPO and config values. Each question is quoted with the answer indented below it. Each number is marked cited, derived, tested or open. Where nobody knows the answer yet, a To figure out line proposes a test. Your original is saved at /tmp/claude-1000/-home-bjarkek-Documents-thesis/ad4b4d17-9572-42a8-8bd7-58397df02877/scratchpad/Appendixes_original.md.
 
 Three mismatches came up while answering:
 - Episode length. The thesis gives the evaluation horizon as T = 630 (Appendix H), but the configs use 2000.

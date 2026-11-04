@@ -9,7 +9,7 @@ The appendix shows how the warehouse graph is generated for every fleet size
 (m = 8, 16, 32, 64). It explains in plain words why each instance is well-formed and
 reports the structure of many generated instances. It ties the sizes to van Knippenberg
 et al. (2021). This is the first of the "one test per number no paper gives us" appendices
-listed in `thesis-progress/decisions/ideas/Appendixes.md`.
+listed in `thesis-progress/decisions/done/Appendixes.md`.
 
 ## Decisions already taken (`[A57]` in `GAPS.md`)
 
