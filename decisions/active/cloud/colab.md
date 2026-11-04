@@ -13,6 +13,10 @@ What the smoke tests of 2026-11-04 showed (fleet 8, decentralised, fixed storage
 - A High-RAM CPU machine has 8 cores and 50 GB, costs 0.26 units an hour, and Pro gives 100 units.
 - Sampling took 29 s an iteration and the learner's update 181 s on one core. With
   `--learner-cpus 5` (PR #204) the update took 126 s, the whole iteration about 140 s.
+- Fleet 32 on CPU (2026-11-04): decentralised about 420 to 450 s an iteration (about 10 h a
+  run). Section over an hour an iteration, nearly all of it the learner's update, so stopped.
+- A T4 High-RAM machine costs 1.57 units an hour (CPU 0.26), with 50 GB and a 15 GB T4. Set
+  `GPU=T4` on `start` and `watch`.
 - Fetching works (run folder, spec, progress log, checkpoints, `done`). `resume` after a dropped
   session is not tested yet.
 
