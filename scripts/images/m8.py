@@ -24,9 +24,9 @@ STYLE = {  # face, edge, marker, size
 LEGEND = {
     "storage": (r"$V_{\mathrm{str}}$", "o", 10),
     "delivery": (r"$V_{\mathrm{work}}$", "s", 10),
-    "receiving": (r"$V_{\mathrm{rcv}}$", "^", 10),
+    "receiving": (r"$V_{\mathrm{dock}}$", "^", 10),  # [A86]
     "endpoint": (r"$V_{\mathrm{ep}}$", "D", 9),
-    "": (r"$V_{\mathrm{mov}}$", "o", 10),
+    "": ("aisle", "o", 10),  # [A86] V_mov dropped
 }
 
 

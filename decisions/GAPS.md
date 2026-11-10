@@ -2136,3 +2136,126 @@ wrong under [A32] are marked.
   step back for a bigger gain later.
 - **Code.** Not written yet. `environment/observation.py` (the feature) and the tests that check its
   values. Do it before the step 5 training runs.
+
+### [A83] Readability pass on the introduction, and the research questions on hold (Design change, thesis text edited 2026-11-10, uncommitted)
+
+- **Where.** `2.Introduction.tex`, the whole introduction and project description. Tagged `% [A83]`.
+- **What the edit says.** One name per idea: "demand storage" (not adaptive or demand-only),
+  "congestion-aware storage" closes the loop. The link between the layers is told with a concrete
+  example. Orders are told first, then the pick task they create. Each measure is tied to the
+  question it answers. Decision time, put-away service time and orders finished leave the
+  introduction. The contribution paragraph is cut, and its one sentence opens the expected outcome,
+  which now lists the three deliverables (model, simulator, measured gain). The main-result
+  paragraph keeps the percentage gain and drops the 95% interval (already in the Experiments
+  chapter and `eq:rqformal`), the reference sentence and random storage. Nothing is added to the
+  Experiments chapter (author, 2026-11-10).
+- **Load.** Appendix E builds the warehouse. It uses Token Passing to choose the main load and does
+  not answer a research question. The load question is answered by evaluating each trained
+  controller at several arrival rates, with no new training. Fleet size stays in the load, for the
+  fleet sizes that are trained. The load is given as a share of what the fleet can serve.
+- **Research questions, on hold.** New list in the chapter, old list commented out next to it:
+  old RQ1 and RQ2 merged into RQ1, old RQ3 and RQ4 become RQ2 and RQ3, old RQ5 becomes RQ4 and is
+  no longer conditional. To be revisited once the results are in. Until then the other chapters
+  and Appendix E keep the old numbering.
+- **Why.** The author's review (`Thesis _comments.pdf`, 2026-11-09). The section used several names
+  for the same thing and did not say clearly what the main result is. RQ2 read as a repeat of RQ1.
+- **Open, settled in `[A84]`.** The author asks whether a main result on demand storage, which does not close the loop,
+  carries the thesis idea of coupling MAPD and SLAP. See `[A44]`.
+- **Code.** None.
+
+### [A84] Coupling is tested two ways, and the loop also at a higher load (Design change, thesis text edited 2026-11-10, uncommitted)
+
+- **Where.** `2.Introduction.tex`, the two coupling paragraphs and the new RQ2. `3.ProblemFormulation.tex`,
+  `sec:pf:coupling`. `5.Experiments.tex`, the mapping paragraph and `tab:expfactors` (new row).
+  Tagged `% [A84]`.
+- **What the edit says.** Coupling is tested two ways. One way: demand storage changes where the
+  robots drive, and the main result asks whether its gain depends on the controller. Both ways:
+  congestion-aware storage reads the traffic and closes the loop. The loop is tested at the main
+  load and at a higher load where every controller still keeps up but the aisles are crowded.
+  `sec:pf:coupling` no longer says adaptive storage adds the backward path. Only congestion-aware
+  storage does.
+- **Why.** The thesis idea is the coupling of MAPD and SLAP, but demand storage only works one way,
+  and in the step 12 sweep the congestion weight changed nothing (within 2 %) at the main load.
+  Avoiding crowded aisles can only help where the aisles are crowded, which the main load may not
+  give. A little-effect answer is still a result, and fits the expected outcome.
+- **Rejected.** Making the closed loop the main result, given the 2 % finding.
+- **Gap.** The higher load is TBD. Choose it from the load test (old RQ4, new RQ3) as the highest
+  load where every trained controller still keeps up, not from the Token Passing sweep.
+- **Cost.** Evaluation only. The main setup runs one frozen policy, trained under fixed storage,
+  under every storage rule, so no new training.
+- **Revises.** `[A44]` (adds the one-way reading and the higher load). Settles the open point of `[A83]`.
+- **Code.** The evaluation scripts need the higher load as one more condition for demand and
+  congestion-aware storage. Small.
+
+### [A85] Random storage is dropped (Design change, thesis text edited 2026-11-10, uncommitted)
+
+- **Where.** `G.StorageValues.tex`: the subsection `app:cal:random` with its figure
+  `fig:app:stockmoments` removed, the refill-size sweep sentence and the conclusion no longer mention
+  random storage. `2.Introduction.tex` already dropped it (`[A83]`). Tagged `% [A85]`.
+- **What the edit says.** Random storage is not part of the thesis. Fixed storage is the only
+  reference the gain is measured against.
+- **Why.** The author does not want it, and the thesis should stay as short as it can. Its one job
+  was to check that the gain of demand storage comes from knowing demand, not from spreading stock.
+  The step 12 sweep answered that clearly (random 48 to 210 % slower than fixed, on every seed), so
+  it adds length without supporting a research question.
+- **Rejected.** Keeping the stock moments figure with only fixed and demand storage. Its text was
+  built around random storage.
+- **Code.** `scripts/sweep/parameter_sweep.bash` no longer runs the refill-size sweep under
+  `random` (the only run that used it, uncommitted on `main`). The evaluation in `bedtime.bash`
+  never ran it. The mode itself and `scripts/images/stock_moments.py` stay, unused by the thesis.
+- **Revises.** `[A83]` (random storage was to move to the Experiments chapter).
+
+### [A86] Readability pass on the environment, docks, no V_mov, agent from the Problem Formulation on (Design change, thesis text edited 2026-11-10, uncommitted)
+
+- **Where.** `3.ProblemFormulation.tex`: the chapter opening and `sec:pf:env`, the uses of V_mov and
+  "receiving vertex" further on. `4.Implementation.tex`, `5.Experiments.tex`: "robot" becomes "agent"
+  in the text (comments untouched), V_mov and "receiving vertex" removed. `A.Notation.tex`: the V_mov
+  row removed, V_rcv renamed V_dock ("docks"), the role sets, N+(v), d_G, the zones, the location
+  and the end vertex now over V. `C.ModelDetails.tex`: V_dock in the trip distance, `eq:onestepcost`
+  moved from the `sec:pf:env` group to a new `sec:method:rl` group. `G.StorageValues.tex`: docks.
+  Figures `instance_simple`, `instance`, `observation` (legend V_dock, plain vertices "aisle") and
+  `conflicts` (agents a_1 and a_2, no formulas, "a_2 waits"), redrawn from
+  `scripts/images/m8.py` and `conflicts.py`. Tagged `% [A86]`.
+- **What the edit says.** The chapter opens with one sentence and says once that a robot is called an
+  agent. The environment is told in words first, then as a graph. Every edge costs 1, so the two
+  directions never cost differently and that sentence is gone. The wait-or-move action model is
+  only in `sec:pf:agents`. The wait cost is left to the reward. The receiving vertices are called
+  docks everywhere, V_dock. V_mov is dropped, because every vertex is a place an agent can stand,
+  so the role sets are subsets of V. The Figure 1 caption names the two middle aisles as one-way,
+  as the picture shows.
+- **Why.** The author's review, 2026-11-10. The opening repeated the introduction, the environment
+  had the action model twice, introduced the wait cost before its use and used two names for the
+  docks. Figure 2 repeated equations 3 and 4 just above it. "Robot" and "agent" were the same word.
+- **Rejected.** Keeping V_mov for a later warehouse with positions agents cannot enter. It can come
+  back when such a warehouse exists.
+- **Not changed.** The introduction and project description keep "robot". `2.Notation.tex`,
+  `tmp1.tex` and `C.ModelDetailsV1.tex` (old versions) keep the old symbols.
+- **Code.** None. The code may keep its own names for these sets.
+
+### [A87] Readability pass on where the items are, and the storage update places at most what arrived (Correction and design change, thesis text edited 2026-11-10, uncommitted)
+
+- **Where.** `3.ProblemFormulation.tex`: the chapter opening and `sec:pf:storage`. Figure
+  `arrival_storage` (`fig:storageexample`) redrawn from `scripts/images/arrival_storage.py`.
+  Tagged `% [A87]`.
+- **What the edit says.** The opening is the short picture of the warehouse again, and says once that
+  a robot is called an agent. The subsection is told in words first. The storage state stays a
+  counting function. Room on a shelf is explained before eq:feasiblestorage. How stock changes is
+  three steps (arrives at a dock, the rule picks the shelf, an agent carries it). x^in is explained
+  as units on their way ("in" for inbound). The three estimates come before the storage update and
+  say who uses them: demand storage the orders, congestion-aware storage also the crossings and
+  waits, which come from how the agents moved. The storage update states its three conditions in
+  words, then as equations, without "subject to". Each condition has a short name beside it
+  (labels `eq:upd:room`, `eq:upd:keep`, `eq:upd:arrived`), and an example on the stock of
+  Table I shows all three, including units left unplaced. The objective no longer names a separate x*, it
+  is written on x^in. The "simpler map" paragraph, the bullet list and the separate timing paragraph
+  are gone. The example follows Figure 3 and is told with demand storage. Figure 3 draws the tea on
+  shelves, labels the square as the workstation only and calls panel (b) demand storage.
+- **Correction.** The third condition of the storage update was "=", so every arriving unit had to
+  get a shelf. The Implementation chapter leaves what fits nowhere unplaced, so it is now "<=", as
+  an older draft had it.
+- **Kept.** w_hat, explained in one line (the author chose to keep it over using waits or crossings
+  alone, 2026-11-10). Equations 7 to 10 stay in the main text, because the storage update is the
+  core of the storage side of the model.
+- **Why.** The author's review (`Thesis _comments.pdf`). The subsection was abstract, gave
+  symbols before their meaning and did not say who uses the estimates.
+- **Code.** None for the text. Check that the code also leaves unplaced what fits nowhere.

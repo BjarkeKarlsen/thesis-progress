@@ -1,0 +1,362 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,graphicx,float,booktabs,xcolor,xparse,enumitem,soul}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\NewDocumentCommand{\myfig}{O{htbp} m m m O{\linewidth}}{\begin{figure}[#1]\centering\includegraphics[width=#5]{#2}\caption{#3}\label{fig:#4}\end{figure}}
+\newcommand{\citep}[1]{\textup{[#1]}}
+\newcommand{\nref}[1]{\eqref{#1}}\newcommand{\Nref}[1]{\eqref{#1}}
+\renewcommand{\thesubsection}{V-\Alph{subsection}}
+\setcounter{subsection}{2}
+\setcounter{equation}{4}
+\title{Proposed changes to ``Where the items are'', version 3}
+\date{10 November 2026}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 lists the changes in plain words. Part~2 shows the Problem
+Formulation section as it would read. Part~3 shows what changes in the
+Implementation chapter and Appendix~C. Text in \new{green} is proposed and not
+in the thesis yet, and \st{struck} text would go. Everything in black is
+already in the thesis file. Part~4 lists what the check of the code found
+and the questions for you.
+
+\section*{Part 1. The changes}
+\subsection*{The idea}
+The problem is stated the way Waubert de Puiseau et al.\ (2022) state theirs.
+It has a decision, what may be seen, what may not be done, and a cost. How
+the problem is solved is separate. Here it is solved by three rules, and a
+rule does not break the storage location assignment problem. It is one way
+to solve it, as are the rule benchmarks in their paper and the classic
+slotting rule. The only thing a rule may not claim is to be the best
+possible placement.
+
+The real cost is the mean order service time, the main measure of the
+thesis. Until now the section gave $D + \beta K$ as the objective, but that
+is only the stand-in the rules rank shelves by. So $D$, $K$ and $\beta$ move
+to the Implementation chapter, where the rules are.
+
+\subsection*{Changes in the Problem Formulation (Part 2)}
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{How much arrives.} New sentences say that stock comes in
+refills of $Q$ units, that a refill goes whole onto one shelf, and that a SKU
+gets one refill for every $Q$ units ordered. This was missing, and it is
+what keeps the arrivals the same under every rule.
+\item \textbf{A new example and Figure~\ref{fig:storageupdate}}, with three
+refills of 3 units of tea. Two are placed and one fits nowhere, which also
+shows why condition \eqref{eq:upd:arrived} uses $\le$.
+\item \textbf{``What the rule decides'' becomes ``The storage problem''}. One
+sentence names the problem and its four parts (decision, what is seen, the
+conditions, the cost) without repeating them. A second paragraph names the
+three rules in one sentence each and says plainly that congestion-aware
+storage is the thesis's own, because the DSLAP studies have no traffic.
+\item \textbf{$D$, $K$, $\beta$ and the objective leave this section.} They
+were put here earlier today and would now move (Part~3). $\alpha$ stays
+dropped.
+\end{itemize}
+\subsection*{Changes in the Implementation chapter (Part 3)}
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The stand-in cost} $D + \beta K$ moves here as a new paragraph,
+with the label \texttt{eq:storageobjective}. $D$ now follows the code. Each
+leg of the trip counts as often as it is made, the pick leg once per order
+line and the put-away leg once per refill. The sentence that gave both legs
+the same weight goes.
+\item \textbf{Ties} go by the trip distance, then by index, as in the code.
+\item \textbf{Appendix~C's arrivals} are rewritten to the refill rule the code
+uses, with a new symbol $\nu_t(k)$ for the units ordered since the last
+refill.
+\item \textbf{Other places} name the crowding cost in words, not as an
+equation of a later chapter.
+\item \textbf{Whole refills.} The sentence ``as many on each shelf as fit''
+becomes ``each refill whole on the first shelf with room for it'', as the
+code does.
+\end{itemize}
+
+\clearpage
+\section*{Part 2. The Problem Formulation section as it would read}
+\subsection{Where the items are}
+\label{sec:pf:storage}
+
+Stock is kept on shelves, and an item can only be picked from a shelf that
+holds it. So where the stock sits decides where the agents must move to.
+The shelves never move. What changes over time is what each shelf holds.
+
+The storage state is a counting function. It says how many units of each
+SKU sit on each shelf, for example 12 units of tea on shelf $A$. A shelf
+can hold several SKUs, and one SKU can sit on several shelves.
+
+Formally, $x_t(k,v)$ is the number of units of SKU $k$ on shelf $v$ at
+time $t$. Here $k$ is one of the SKUs in $\mathcal{K}$, and $v$ one of the
+shelves in $V_{\mathrm{str}}$:
+\begin{equation}
+x_t:\mathcal{K}\times V_{\mathrm{str}}\to\mathbb{N}_0 .
+\label{eq:storagestate}
+\end{equation}
+
+Each shelf has limited room, and units of different SKUs take different
+amounts of it. The units on a shelf, each counted with the room it takes,
+may not need more room than the shelf has. Formally, let $b_k$ be the room
+one unit of SKU $k$ takes and $\mathrm{cap}(v)$ the room on shelf $v$. The
+storage states that fit are
+\begin{equation}
+\mathcal{X}=
+\left\{
+x\in\mathbb{N}_0^{\mathcal{K}\times V_{\mathrm{str}}}:
+\sum_{k\in \mathcal{K}}b_kx(k,v)\le\mathrm{cap}(v)
+\quad\forall v\in V_{\mathrm{str}}
+\right\}.
+\label{eq:feasiblestorage}
+\end{equation}
+
+\paragraph{Example.}
+Table~\ref{tab:storagematrix} shows a small storage state. Tea and mugs
+take one unit of room each, and coffee takes two. Shelves $A$, $B$ and $C$
+have room for 20, 15 and 10. Shelf $A$ is then exactly full, and $B$ and
+$C$ have room left:
+\[
+\begin{pmatrix}
+1&2&1
+\end{pmatrix}
+\begin{pmatrix}
+12&0&5\\
+4&3&0\\
+0&6&2
+\end{pmatrix}
+=
+\begin{pmatrix}
+20&12&7
+\end{pmatrix}
+\le
+\begin{pmatrix}
+20&15&10
+\end{pmatrix}.
+\]
+Room also ties SKUs together. Tea and coffee share the room on shelf $A$,
+so more tea there leaves less room for coffee.
+
+\begin{table}[H]
+\centering
+\caption{A small storage state.}
+\label{tab:storagematrix}
+\begin{tabular}{lccc}
+\toprule
+ & \(A\) & \(B\) & \(C\)\\
+\midrule
+tea & 12 & 0 & 5\\
+coffee & 4 & 3 & 0\\
+mugs & 0 & 6 & 2\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{How stock changes.}
+Stock leaves the shelves when agents pick it for orders, and new stock
+comes in to refill them.
+
+New stock arrives at a dock every $\Delta$ timesteps. Each of these moments
+is a storage update. \new{Stock arrives in refills of $Q$ units, and a refill
+always goes whole onto one shelf. How much arrives depends on the orders
+alone. A SKU gets one refill for every $Q$ units ordered since its last
+refill, so the arrivals are the same under every rule.} At a storage update, the storage rule $F$ chooses a
+shelf for each arriving unit. An agent then carries the units from the dock
+to that shelf. This trip is called a put-away.
+
+While the units are on their way, they already take up room on the shelf,
+but no order can pick them yet. So they are counted on their own. Write
+$x^{\mathrm{in}}_t(k,v)$ for the units of SKU $k$ on their way to shelf
+$v$, with ``in'' for inbound. When the agent delivers them, they count as
+on the shelf.
+
+\paragraph{What the rule knows.}
+The rule only knows the last storage period. It reads three averages per
+step over that period:
+\begin{itemize}
+\item \(\hat\rho_t(k)\), how often SKU \(k\) was ordered
+\item \(\hat\mu_t(e)\), how often agents crossed edge \(e\)
+\item \(\hat w_t(e)\), how many steps agents waited to get onto edge \(e\)
+\end{itemize}
+Demand storage uses only the first, the orders. Congestion-aware storage
+uses all three. The last two come from how the agents moved, and show which
+aisles were crowded. An edge counts as crowded when many agents cross it
+and they often wait to get onto it.
+
+\paragraph{The storage update.}
+At a storage update the rule only decides where the new units go, and
+three conditions must hold. No shelf may hold more than it has room for,
+counting the units on their way. Units already on their way keep the shelf
+they were given. And the rule cannot place more units than arrived, so
+units that fit on no shelf are left unplaced.
+
+Formally, the rule takes the stock just before the update, $x_t^{-}$ on the
+shelves and $x^{\mathrm{in},-}_t$ on its way. It also takes $y_t(k)$, the
+units of each SKU $k$ that arrived, and the three averages above. It
+returns where the units go:
+\begin{equation}
+x_t^{\mathrm{in}}
+=
+F\left(
+x_t^{-},\,
+x_t^{\mathrm{in},-},\,
+y_t,\,
+\hat\rho_t,\,
+\hat\mu_t,\,
+\hat w_t
+\right).
+\label{eq:storageupdate}
+\end{equation}
+The three conditions, in the same order, are
+\begin{align}
+x_t^{-}+x_t^{\mathrm{in}}&\in \mathcal{X}
+&&\text{no shelf over its room,}
+\label{eq:upd:room}\\
+x_t^{\mathrm{in}}&\ge x_t^{\mathrm{in},-}
+&&\text{units on their way keep their shelf,}
+\label{eq:upd:keep}\\
+\sum_{v\in V_{\mathrm{str}}}
+\left(
+x_t^{\mathrm{in}}(k,v)-x_t^{\mathrm{in},-}(k,v)
+\right)
+&\le y_t(k)\quad\forall k\in \mathcal{K}
+&&\text{no more placed than arrived.}
+\label{eq:upd:arrived}
+\end{align}
+
+\paragraph{Example.}
+\new{Take the stock of Table~\ref{tab:storagematrix} just before an update,
+with nothing on its way, and say three refills of 3 units of tea arrive.
+Shelf $A$ is full, and $B$ and $C$ each have room for one refill, so the
+rule puts one refill on $B$ and one on $C$ (Figure~\ref{fig:storageupdate}).
+Every shelf stays within its room, so \eqref{eq:upd:room} holds. Nothing was
+on its way before, so \eqref{eq:upd:keep} holds. The third refill fits
+nowhere and is left unplaced. The rule places 6 of the 9 units, so
+\eqref{eq:upd:arrived} holds with $6 \le 9$.}
+
+\myfig[H]{storage_update.png}{\new{One storage update on the stock of Table~\ref{tab:storagematrix}. Two refills of tea go whole to shelves with room, and the third fits nowhere.}}{storageupdate}[0.85\linewidth]
+
+\paragraph{\new{The storage problem.}}
+\new{Choosing a shelf when stock arrives is the dynamic storage location
+assignment problem (Waubert de Puiseau et al., 2022). The rule makes the
+storage update \eqref{eq:storageupdate}, sees only the past, must keep
+conditions \eqref{eq:upd:room} to \eqref{eq:upd:arrived}, and is judged by
+the mean order service time of Section V-J.}
+
+\new{That cost depends on how the agents move after the update, so no rule
+can work it out when it decides. Each rule therefore ranks the shelves by a
+simple stand-in for it, given in Section VI-A. Fixed storage sends every
+refill to its SKU's home shelf. Demand storage puts popular SKUs where their
+trip is short, the classic slotting rule (Heskett, 1963; de Koster et al.,
+2007). Congestion-aware storage also avoids shelves whose trip runs through
+crowded aisles. The dynamic storage studies have no traffic, so this last
+rule is this thesis's own, and it is the one that closes the loop.}
+
+\paragraph{Example.}
+Figure~\ref{fig:storageexample} shows tea that has become popular. Under
+fixed storage, new tea goes back to its home shelf, three edges from the
+workstation. Under demand storage, it goes to the nearest shelf with room,
+one edge away. The old tea stays where it is and runs down as it is picked.
+
+\myfig[t]{arrival_storage.png}{Arriving tea under fixed and demand storage. Old tea stays where it is, so only the new tea's shelf differs.}{storageexample}[0.8\linewidth]
+
+
+
+\clearpage
+\section*{Part 3. The Implementation chapter, the part that changes}
+\subsection*{VI-A Storage rules (excerpt)}
+All three rules place arriving stock the same way, and only their order
+differs. They take one SKU at a time and put its arriving
+\st{units on the shelves in the rule's order, as many on each shelf as fit}
+\new{refills on the shelves in the rule's order, each refill whole on the first shelf with room for it}.
+What fits nowhere is not placed. Stock already on a shelf stays where it is.
+
+\textit{(The trip distance paragraph, fixed storage and the start of demand storage stay as they are.)}
+
+\textit{In the congestion-aware paragraph:}
+\st{Both legs carry the same $\hat\rho_t(k)$, because arrivals refill what
+was ordered, so a SKU is put away about as often as it is picked.}
+
+\paragraph{\new{The stand-in cost.}}
+\new{The rules cannot see the service time they are judged by, so they rank
+shelves by a stand-in. The classic slotting cost is each trip's length times
+how often the trip is made (Heskett, 1963; de Koster et al., 2007). A shelf
+has two trips. The pick leg runs from the shelf to a workstation of the
+SKU's section and is made about $\hat\rho_t(k)$ times per step, once per
+order line. The put-away leg runs from a dock to the shelf and is made about
+$\hat\rho^{\mathrm{unit}}_t(k)/Q$ times per step, because one refill brings
+$Q$ units.}
+
+\new{Formally, let $d^{\mathrm{pick}}_t(k,v)$ be the mean distance from shelf
+$v$ to the workstations of section $\hat h_t(k)$, $d^{\mathrm{put}}(v)$ the
+mean distance from the docks to $v$, and $x^{\mathrm{new}}_t = x^{\mathrm{in}}_t - x^{\mathrm{in},-}_t$
+the units placed at an update. The slotting cost is}
+\begin{equation*}
+\new{D = \sum_{k\in\mathcal{K}} \sum_{v\in V_{\mathrm{str}}}
+\Bigl(\hat\rho_t(k)\, d^{\mathrm{pick}}_t(k,v) + \frac{\hat\rho^{\mathrm{unit}}_t(k)}{Q}\, d^{\mathrm{put}}(v)\Bigr)\, x^{\mathrm{new}}_t(k,v) .}
+\end{equation*}
+\new{The crowding cost is this thesis's own. It adds up the crowding
+$\hat\mu_t(e)\,\hat w_t(e)$ on every edge $e$ of the trip through $v$, from
+the docks to $v$ and on to the nearest workstation,}
+\begin{equation*}
+\new{K = \sum_{k\in\mathcal{K}} \sum_{v\in V_{\mathrm{str}}}
+\Bigl(\sum_{e \in \mathrm{path}(v)} \hat\mu_t(e)\,\hat w_t(e)\Bigr)\, x^{\mathrm{new}}_t(k,v) .}
+\end{equation*}
+\new{Demand and congestion-aware storage aim for a small value of}
+\begin{equation*}
+\new{D + \beta K ,}
+\end{equation*}
+\new{where $\beta$ sets how much crowding counts against distance, and
+demand storage has $\beta = 0$. They are greedy. They place one SKU at a
+time on its best shelves with room, and they do not search for the smallest
+value. Shelves that score the same go by the trip distance
+$d^{\mathrm{trip}}_t(k,v)$, then by index.}
+
+\subsection*{Appendix C, the arrivals (rewritten)}
+\new{How much arrives is set by the orders alone, so it is the same under
+every rule. Stock comes in refills of $Q$ units. A SKU gets one refill for
+every $Q$ units ordered since its last refill, and units that do not make a
+whole refill count towards the next one. So if 23 units of tea were ordered
+since its last refill and $Q = 10$, two refills of tea arrive and 3 units
+carry over. Formally, with $\nu_t(k)$ the units of SKU $k$ ordered since its
+last refill, counted when their lines are released, the arrivals are}
+\begin{equation*}
+\new{y_t(k) = Q \left\lfloor \frac{\nu_t(k)}{Q} \right\rfloor ,}
+\end{equation*}
+\new{and $\nu_t(k) - y_t(k)$ carries over to the next update.}
+
+\textit{The old text, which fills each SKU up to a level with a margin and a
+floor, and its equation are removed. The notation table gains $\nu_t(k)$.}
+
+\subsection*{Other places that name the crowding cost}
+\new{The loop section, the scoring section and the Background refer to ``the
+congestion term $K$'' of the storage objective. They would say ``the crowding
+cost of congestion-aware storage (Section VI-A)'' instead, so the reader is
+not sent to an equation in a later chapter.}
+
+\clearpage
+\section*{Part 4. The code}
+For the thesis settings (\texttt{configs/step12}), checked in
+\texttt{storage/arrival.py} and \texttt{environment/multi\_agent\_env.py}.
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{$b_k$ is real.} The SKUs take 0.5, 1 or 2 units of room, in turn.
+\item \textbf{Whole refills, unplaced refills, the leg weights, the ties and
+the refill arrivals} already work as Parts~2 and~3 describe. With these
+choices the thesis follows the code, so no rule changes and nothing has to
+be run again.
+\item \textbf{Only comments in the code are out of date.} The top comment of
+\texttt{storage/arrival.py} still describes the trip from the nearest dock
+and the old put-away score, and uses the old names (receiving vertex,
+delivery vertex). These would be brought in line with the thesis, with no
+change to what the code does. This goes in a small pull request on
+\texttt{slap-mapd-coupling}, which you open.
+\end{enumerate}
+
+\subsection*{Questions for you}
+\begin{enumerate}[leftmargin=1.5em]
+\item Do Parts~2 and~3 go into the thesis as shown?
+\item Should the code comments be updated as in Part~4, point~3?
+\item Should the differences found be noted in the tracking issue \#103,
+marked as fixed by the thesis side?
+\end{enumerate}
+\end{document}

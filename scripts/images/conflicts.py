@@ -5,6 +5,7 @@ from base import OUT, C
 
 
 def conflicts():
+    # [A86] Agents named a_1 and a_2, no formulas (eqs 3 and 4 sit above the figure).
     P = {"u": (0, 0), "v": (1, 0), "w": (2, 0)}
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2))
 
@@ -27,23 +28,20 @@ def conflicts():
                     arrowprops=dict(arrowstyle="-|>", lw=2.4, color=col))
 
     ax = axes[0]; panel(ax, "(a) vertex conflict", ("u", "v", "w"))
-    ag(ax, "u", "$a_i$", C["agent"]); ag(ax, "w", "$a_j$", C["accent"])
+    ag(ax, "u", "$a_1$", C["agent"]); ag(ax, "w", "$a_2$", C["accent"])
     arr(ax, 0.05, 0.85, -0.7, C["agent"]); arr(ax, 1.95, 1.15, -0.7, C["accent"])
-    ax.text(1.0, -1.25, r"$\ell_i(t{+}1)=\ell_j(t{+}1)$", ha="center", fontsize=12.5)
 
     ax = axes[1]; panel(ax, "(b) swap conflict", ("u", "v"))
-    ag(ax, "u", "$a_i$", C["agent"]); ag(ax, "v", "$a_j$", C["accent"])
+    ag(ax, "u", "$a_1$", C["agent"]); ag(ax, "v", "$a_2$", C["accent"])
     arr(ax, 0.05, 0.95, -0.62, C["agent"]); arr(ax, 0.95, 0.05, -0.92, C["accent"])
-    ax.text(1.0, -1.32, r"$\ell_i(t)=\ell_j(t{+}1)\ \wedge\ \ell_j(t)=\ell_i(t{+}1)$",
-            ha="center", fontsize=11.5)
 
     ax = axes[2]; panel(ax, "(c) feasible joint transition", ("u", "v", "w"))
-    ag(ax, "u", "$a_i$", C["agent"]); ag(ax, "w", "$a_j$", C["accent"])
+    ag(ax, "u", "$a_1$", C["agent"]); ag(ax, "w", "$a_2$", C["accent"])
     arr(ax, 0.05, 0.85, -0.7, C["agent"])
     ax.add_patch(mp.Arc((2.0, -0.7), 0.42, 0.42, theta1=200, theta2=520,
                         lw=2.2, color=C["accent"]))
     ax.annotate("", xy=(1.72, -0.60), xytext=(1.78, -0.64),
                 arrowprops=dict(arrowstyle="-|>", lw=2.2, color=C["accent"]))
-    ax.text(2.0, -1.25, r"$a_j$ waits, cost $c_{\mathrm{wait}}$",
+    ax.text(2.0, -1.25, r"$a_2$ waits",
             ha="center", fontsize=12.5, color=C["accent"])
     fig.savefig(f"{OUT}/conflicts.png"); plt.close(fig)

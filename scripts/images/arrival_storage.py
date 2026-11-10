@@ -4,7 +4,8 @@ two_layer_feedback.py: new stock arrives at the delivery vertex, and the
 storage rule only decides which shelf it goes to. Fixed storage sends new
 tea to its home shelf at the far end of the Right aisle. Adaptive storage
 (drawn as the demand rule) sends it to the nearest shelf with room, while
-the old tea stays where it is until it runs out. An order takes the nearest
+the old tea stays where it is until it runs out. [A87] Tea shelves are drawn
+as shelves (circles), the square is the workstation only, and (b) says demand storage. An order takes the nearest
 tea, so its walk is 3 edges under fixed storage and 1 under adaptive storage.
 Used as fig:storageexample in 2.Introduction.tex, replacing
 two_layer_feedback.png there.
@@ -63,22 +64,22 @@ def _panel(ax, new_tea):
             if p not in (HOME, new_tea):
                 ax.scatter(*p, s=280, c="white", edgecolors=C["node"], zorder=3)
     ax.scatter(*DELIVERY, s=380, marker="s", c=C["del_f"], edgecolors=C["del_e"], zorder=3)
-    ax.annotate("workstation and\nreceiving", DELIVERY, textcoords="offset points", xytext=(0, -30),
+    ax.annotate("workstation", DELIVERY, textcoords="offset points", xytext=(0, -30),
                 ha="center", fontsize=10.5, color=C["del_e"])
     ax.text(-1.0, 2.75, "Left aisle", ha="center", fontsize=11, color=C["text"])
     ax.text(1.0, 2.75, "Right aisle", ha="center", fontsize=11, color=C["text"])
 
     if new_tea == HOME:
-        ax.scatter(*HOME, s=420, marker="D", c=C["store_f"], edgecolors=C["store_e"], zorder=4)
+        ax.scatter(*HOME, s=420, marker="o", c=C["store_f"], edgecolors=C["store_e"], zorder=4)
         ax.annotate("old + new tea", HOME, textcoords="offset points", xytext=(-16, 0),
                     ha="right", va="center", fontsize=10.5, color=C["store_e"])
     else:
-        ax.scatter(*HOME, s=420, marker="D", c="white", edgecolors="white", zorder=4)
-        ax.scatter(*HOME, s=420, marker="D", c=C["store_f"], edgecolors=C["store_e"],
+        ax.scatter(*HOME, s=420, marker="o", c="white", edgecolors="white", zorder=4)
+        ax.scatter(*HOME, s=420, marker="o", c=C["store_f"], edgecolors=C["store_e"],
                    alpha=0.4, zorder=5)
         ax.annotate("old tea,\nruns out", HOME, textcoords="offset points", xytext=(16, 0),
                     ha="left", va="center", fontsize=10.5, color=C["store_e"], alpha=0.6)
-        ax.scatter(*new_tea, s=420, marker="D", c=C["store_f"], edgecolors=C["store_e"], zorder=4)
+        ax.scatter(*new_tea, s=420, marker="o", c=C["store_f"], edgecolors=C["store_e"], zorder=4)
         ax.annotate("new tea", new_tea, textcoords="offset points", xytext=(-16, 0),
                     ha="right", va="center", fontsize=10.5, color=C["store_e"])
 
@@ -88,11 +89,11 @@ def arrival_storage():
     _panel(axes[0], new_tea=HOME)
     axes[0].set_title("(a) fixed storage: new tea goes\nto its home shelf", fontsize=11, pad=12)
     _panel(axes[1], new_tea=NEAR)
-    axes[1].set_title("(b) adaptive storage: new tea goes\nto the nearest shelf with room", fontsize=11, pad=12)
+    axes[1].set_title("(b) demand storage: new tea goes\nto the nearest shelf with room", fontsize=11, pad=12)
     handles = [
         Line2D([], [], color=PUTAWAY, lw=2.2, ls=(0, (3, 2)), label="put-away of new stock"),
         Line2D([], [], color=C["agent"], lw=3.0, alpha=0.85, label="order's walk to the nearest tea"),
-        Line2D([], [], marker="D", ls="", mfc=C["store_f"], mec=C["store_e"], ms=10, label="tea"),
+        Line2D([], [], marker="o", ls="", mfc=C["store_f"], mec=C["store_e"], ms=10, label="shelf with tea"),
         Line2D([], [], marker="s", ls="", mfc=C["del_f"], mec=C["del_e"], ms=10, label="workstation"),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False,
