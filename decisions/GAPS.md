@@ -2306,4 +2306,13 @@ wrong under [A32] are marked.
   `scripts/images/workstation_lock.py`) and the paragraph that walks through it.
   `5.Experiments.tex`: the keeping-up and communication mockups and a threat to validity. All
   tagged `% [A91]`.
+- **Why the decentralised controller does not back out (added 2026-11-12, author).** It is
+  credited with its own reward only, so backing out for another agent gains it nothing, while
+  the section-based and centralised controllers share the reward of the agents that choose
+  together. The congestion term charges crowding, the same whether an agent waits or backs out,
+  and the override penalty falls on the agent that wants to leave, not on the one that blocks it.
+  So messages (RQ4) are its only way to learn it. Rejected for now: a larger congestion weight
+  (does not point to the move that helps) and a penalty on the blocking agent (a new reward of the
+  thesis's own, and every run would restart). A shared reward for the decentralised controller
+  is named as future work in the threats to validity.
 - **Code.** None. The cap branch `feat/workstation-cap` is not merged.
