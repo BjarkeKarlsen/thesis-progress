@@ -1,0 +1,8 @@
+checkpoint_000008_congestion_seed200000.jsonl: LOCKED from t = 1157, agents ['4', '5'], 43 tasks in 2000 steps
+checkpoint_000008_congestion_seed200001.jsonl: LOCKED from t = 1691, agents ['5', '6'], 107 tasks in 2000 steps
+checkpoint_000008_congestion_seed200002.jsonl: not locked, 143 tasks in 2000 steps
+checkpoint_000008_congestion_seed200000.jsonl: not locked, 91 tasks in 2000 steps
+checkpoint_000008_congestion_seed200001.jsonl: not locked, 155 tasks in 2000 steps
+checkpoint_000008_congestion_seed200002.jsonl: not locked, 201 tasks in 2000 steps
+checkpoint_000008_fixed_seed200000.jsonl: not locked, 97 tasks in 2000 steps
+2 of 7 locked (two agents holding a task for 500 steps or more at once)

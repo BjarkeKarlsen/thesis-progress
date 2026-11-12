@@ -1,0 +1,92 @@
+[
+ {
+  "trace": "fleet8_congestion/decentralised_congestion/traces/checkpoint_000008_congestion_seed200000.jsonl",
+  "seed": 200000,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": false,
+  "locked": true,
+  "from_t": 1157,
+  "agents_at_lock": [
+   "4",
+   "5"
+  ],
+  "completed": 43,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_congestion/decentralised_congestion/traces/checkpoint_000008_congestion_seed200001.jsonl",
+  "seed": 200001,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": false,
+  "locked": true,
+  "from_t": 1691,
+  "agents_at_lock": [
+   "5",
+   "6"
+  ],
+  "completed": 107,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_congestion/decentralised_congestion/traces/checkpoint_000008_congestion_seed200002.jsonl",
+  "seed": 200002,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": false,
+  "locked": false,
+  "from_t": null,
+  "agents_at_lock": null,
+  "completed": 143,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_congestion_comm/run/traces/checkpoint_000008_congestion_seed200000.jsonl",
+  "seed": 200000,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": true,
+  "locked": false,
+  "from_t": null,
+  "agents_at_lock": null,
+  "completed": 91,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_congestion_comm/run/traces/checkpoint_000008_congestion_seed200001.jsonl",
+  "seed": 200001,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": true,
+  "locked": false,
+  "from_t": null,
+  "agents_at_lock": null,
+  "completed": 155,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_congestion_comm/run/traces/checkpoint_000008_congestion_seed200002.jsonl",
+  "seed": 200002,
+  "agents": 8,
+  "storage": "congestion",
+  "communication": true,
+  "locked": false,
+  "from_t": null,
+  "agents_at_lock": null,
+  "completed": 201,
+  "steps": 2000
+ },
+ {
+  "trace": "fleet8_per_task/decentralised_fixed_only/traces/checkpoint_000008_fixed_seed200000.jsonl",
+  "seed": 200000,
+  "agents": 8,
+  "storage": "fixed",
+  "communication": false,
+  "locked": false,
+  "from_t": null,
+  "agents_at_lock": null,
+  "completed": 97,
+  "steps": 2000
+ }
+]

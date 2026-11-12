@@ -2259,3 +2259,51 @@ wrong under [A32] are marked.
 - **Why.** The author's review (`Thesis _comments.pdf`). The subsection was abstract, gave
   symbols before their meaning and did not say who uses the estimates.
 - **Code.** None for the text. Check that the code also leaves unplaced what fits nowhere.
+
+### [A91] Agents can lock at a workstation on a one-lane aisle, kept as a limitation (Design decision 2026-11-11 and 2026-11-12, thesis text edited 2026-11-12)
+
+- **What happens.** A workstation hangs off an aisle by a single edge ([A62]). When that aisle is one
+  lane wide, agents bringing lines to the workstation queue on the aisle. The agent at the
+  workstation then wants the aisle vertex the first agent in the queue stands on, and that agent
+  wants the workstation. That is a swap, the shortest circle of `sec:method:resolution`, so both
+  wait. The queue behind blocks the only way out, so nothing breaks the circle unless an agent
+  chooses to back out. The section around that workstation stops, and the rest of the fleet keeps
+  working. Seen in the traces of 2026-11-11 (`~/thesis_runs/training_fixes_test/`, fleet 8 and
+  fleet 32, [A90] reward), for example test seed 200000.
+- **How often the layout occurs.** Over the 258 warehouse seeds of each fleet, a section with all
+  four of its workstations off a one-lane aisle vertex (degree 3 or less) occurs in 35 seeds at
+  fleet 8 (14 %) and 70 at fleet 32 (27 %). Of the six test seeds, 200000 and 200005 have it at
+  both fleet sizes.
+- **Token Passing is not affected.** Its paths keep a vertex from one step before arrival to one
+  step after leaving, and every warehouse is well-formed ([A28], `app:wellformed`), so it does not
+  lock. The limitation is one of the learned controllers on this family of layouts.
+- **Rejected: a cap on tasks per workstation.** A rule that gives a workstation at most k open
+  tasks at a time (k = 1 and k = 4 were discussed) was coded in `~/worktrees/workstation-cap`
+  and stopped before it ran in full. It changes the assignment rule that every controller shares,
+  and it fights the order model, where all lines of an order go to the same workstation. van
+  Knippenberg et al. (2021) have no such rule either. Not used.
+- **Rejected: rebuilding the layout.** Making the aisles two lanes, or the workstations not hang
+  off one-lane aisles, would remove the lock but means a new warehouse sweep with Token Passing.
+- **Decision (author, 2026-11-11).** Keep the layout and the rules. Train the controllers as they
+  are, so that whether they learn to back out is part of what is measured. State it as a
+  limitation, and report it in the results.
+- **What is reported.** The number of locked test seeds per controller and storage rule, next to
+  the keep-up check. Under RQ4, whether messages make it rarer. A two-seed test at fleet 8 with
+  congestion-aware storage (`fleet8_congestion` and `fleet8_congestion_comm`) is all there is so
+  far, three seeds. By the rule below, two of three seeds lock without messages and none with them,
+  and with messages the fleet finished more tasks (91 against 43, 155 against 107, 201 against
+  143). An earlier version said messages did not prevent the lock. It used a looser test (one agent
+  standing still for 50 steps) and is corrected. Numbers and commands in
+  `results/limitations/workstation_lock/README.md`.
+- **Decided (author, 2026-11-12).** A seed is locked when at least two agents each hold the same
+  task for 500 steps or more at the same time. A locked seed counts as not keeping up. The
+  evaluation uses 20 test seeds (5 of them have the layout at fleet 8), which needs an option in
+  the code, since the trained runs store 6. The mechanism and the figure `workstation_lock` go in
+  the Implementation chapter beside conflict resolution. Review PDF
+  `active/readability_review/review_workstation_lock.pdf`, approved 2026-11-12.
+- **Where.** `4.Implementation.tex`, `sec:method:resolution`: the paragraph on a lasting circle,
+  figure `fig:workstationlock` (`Images/workstation_lock.png`, from
+  `scripts/images/workstation_lock.py`) and the paragraph that walks through it.
+  `5.Experiments.tex`: the keeping-up and communication mockups and a threat to validity. All
+  tagged `% [A91]`.
+- **Code.** None. The cap branch `feat/workstation-cap` is not merged.
