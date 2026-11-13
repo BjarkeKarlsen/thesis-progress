@@ -166,3 +166,16 @@ this is what the service level of D25 needs to hold over the whole cycle. A mode
 `refill_starting_stock` in `training/spec.py` and the starting stock in the thesis, logged as
 "D25, safety stock" in `model_revision/README.md`, with an `[Axx]` tag when the text is written. With it, Q = 12 should leave about as few waits as Q = 15 did here,
 since the cover at the bottom of a lot is the rank 0 quantile either way.
+
+## [A93] rerun, 2026-11-13 (main d204dbd, unit tp-a93, ~/thesis_runs/tp_a93_2026-11-13)
+
+- `storage_rule.congestion_weight`, fleets 8 and 16: replaced by demand against congestion-aware
+  storage at beta 1, 20 seeds, 10000 steps with 5000 left out. The demand rows match the old
+  period-100 demand rows of `storage_rule.epoch_length` on all 20 seeds.
+- `storage_rule.epoch_length`, fleets 8 and 16: only the congestion rows are replaced. The new ones at
+  period 100 match the congestion rows of `storage_rule.congestion_weight` on all 20 seeds. Fixed and
+  demand rows are kept. `merge_a93_period_rows.py` did the merge and wrote `summary.md` and
+  `capacity.json` with `load_sweep.py`'s own functions, without playing an episode. Run it from the
+  `slap-mapd-coupling` worktree with `PYTHONPATH=src:scripts/sweep`, arguments
+  `<m> <this folder> <run folder> <staging folder> configs/step12/fleet_<m>.yaml`.
+- Fleets 32 and 64: the same two steps once tp-a93 finishes them.

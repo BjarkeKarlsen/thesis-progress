@@ -10,7 +10,7 @@ Smallest 14.5, largest 39.0, ratio 2.69, over 40 storage vertices. The ratio bou
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 314 | -0.02 | 0.00 | 0.00 |
+| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 332 | -0.00 | 0.00 | 0.00 |
 | demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 302 | -0.01 | 0.00 | 0.00 |
 | fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 324 | -0.03 | 221.00 | 0.00 |
 
@@ -31,7 +31,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 310 | -0.01 | 0.00 | 0.00 |
+| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 298 | -0.00 | 0.00 | 0.00 |
 | demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 301 | -0.01 | 0.00 | 0.00 |
 | fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 316 | -0.03 | 146.00 | 0.00 |
 
@@ -52,7 +52,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 261 | -0.03 | 0.00 | 0.00 |
+| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 254 | -0.04 | 0.00 | 0.00 |
 | demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 248 | -0.02 | 0.00 | 0.00 |
 | fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 243 | -0.04 | 91.50 | 0.00 |
 
@@ -73,7 +73,7 @@ too, the first rate that fails, and the main load at 0.6 of the capacity.
 
 | rule | rate | seeds | keep up | picks keep up | put-aways keep up | longest gap between finishes, highest | backlog slope per 100 steps | overflow units | unplaced units |
 |---|---|---|---|---|---|---|---|---|---|
-| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 314 | -0.02 | 0.00 | 0.00 |
+| congestion | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 314 | -0.03 | 0.00 | 0.00 |
 | demand | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 301 | -0.02 | 0.00 | 0.00 |
 | fixed | 0.09 | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 307 | -0.05 | 63.00 | 0.00 |
 
