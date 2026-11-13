@@ -8,7 +8,7 @@
 \newcommand{\old}[1]{\textcolor{gray}{\st{#1}}}
 \newcommand{\mockup}[1]{\textit{#1}}
 \title{Proposed changes for [A92], how a trained policy is chosen and tested, and the lock rule of [A91]}
-\date{13 November 2026}
+\date{13 November 2026, version 2 (validation on 5 seeds decided)}
 \begin{document}
 \maketitle
 
@@ -30,9 +30,10 @@ chosen checkpoint then plays the test warehouses, and only those numbers are
 reported.
 
 New runs validate every checkpoint while they train, on 5 validation warehouses.
-The runs already trained validate afterwards, every checkpoint on the 2
-validation warehouses their settings hold, at their training length of 2000
-steps. The numbers are the same either way, only the timing differs.
+The runs already trained validate afterwards, every checkpoint on the same 5
+validation warehouses (their settings held 2, and you chose to validate them
+again on 5), at their training length of 2000 steps. The numbers are the same
+either way, only the timing differs.
 
 \subsection*{The test}
 20 test warehouses, up from 6, because 2 of the first 6 (and 8 of 20 at 32
@@ -104,10 +105,6 @@ on the CPU, so their runtime $\kappa_T$ is measured that way.}
 
 \section*{Part 3. Questions}
 \begin{enumerate}[leftmargin=1.4em]
-\item \textbf{Validation seeds.} The runs already trained are chosen on 2
-validation warehouses, new runs on 5. Is that acceptable if the thesis says
-so, or should the trained runs be validated again on 5? That costs about one
-more day of evaluation at fleet 16.
 \item \textbf{Runtime.} Token Passing runs on the CPU and the learned
 policies now on the GPU, so $\kappa_T$ is not measured alike. Should the
 runtime be measured once more on the CPU, for a few seeds, so the
