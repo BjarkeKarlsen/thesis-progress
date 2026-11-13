@@ -137,7 +137,9 @@ def collect_run(run, fleet, eval_name, queue, eval_commit, device):
         "run": {
             "fleet": fleet, "controller": spec["controller"], "arm_folder": arm,
             "communication": spec.get("communication", False),
-            "trained_under": spec["regime"], "run_dir": str(run),
+            # The folder name, fixed, demand or congestion. Runs trained before the rename (PR #206)
+            # store fixed_only or matched in their settings, kept beside it.
+            "trained_under": regime, "regime_in_settings": spec["regime"], "run_dir": str(run),
             "trained": where_trained(run),
             "budget_env_steps": spec["ppo"]["training_budget_env_steps"],
             "iterations": len(progress),
