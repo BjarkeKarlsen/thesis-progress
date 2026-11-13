@@ -1,0 +1,122 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,xcolor,enumitem,soul}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\st{#1}}}
+\newcommand{\mockup}[1]{\textit{#1}}
+\title{Proposed changes for [A92], how a trained policy is chosen and tested, and the lock rule of [A91]}
+\date{13 November 2026}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what was decided on 13 November and what was built, in plain words.
+Part~2 shows the text in the Experiments chapter that would change. Text in
+\new{green} is proposed, \old{struck} text would go, black text is already
+there, and italic text is a mockup instruction. Part~3 lists the questions.
+
+\section*{Part 1. What was decided}
+
+\subsection*{Validation goes with training, the test is kept apart}
+This is the usual practice in deep learning. Training saves a checkpoint every
+three iterations. Each checkpoint plays the validation warehouses, which no run
+trains on, and the checkpoint to use is chosen there by the rule of [A60]: of the
+checkpoints that keep up on every validation warehouse, the one with the shortest
+mean pick service time, or the highest throughput if none keeps up. Only the
+chosen checkpoint then plays the test warehouses, and only those numbers are
+reported.
+
+New runs validate every checkpoint while they train, on 5 validation warehouses.
+The runs already trained validate afterwards, every checkpoint on the 2
+validation warehouses their settings hold, at their training length of 2000
+steps. The numbers are the same either way, only the timing differs.
+
+\subsection*{The test}
+20 test warehouses, up from 6, because 2 of the first 6 (and 8 of 20 at 32
+agents) have the layout that can lock. Each test episode is 10000 steps, and the
+first 5000 are left out as warm-up, as in the Token Passing runs. The policy runs
+on the GPU and the warehouse simulation on the CPU.
+
+\subsection*{The two setups ([A84])}
+The main setup plays one policy, trained under fixed storage, under fixed and
+under demand storage, on the same test warehouses. The gain is then storage
+alone. The second setup plays each rule with the policy trained under it, so its
+gain mixes storage and training. Congestion-aware storage waits, because you
+found an issue in it.
+
+\subsection*{The lock rule}
+Each test episode now stores the longest time two agents both held their task at
+the same step. An agent with no task never counts, because an idle agent parks on
+an endpoint, which hangs off the aisle and blocks no one. The threshold for a lock
+is set from how these numbers spread once the results are in, so nothing has to
+be played again. In the traces so far a normal task took 60 to 100 steps, while
+healthy seeds of barely trained policies reached 400 to 460 steps, so the earlier
+500 steps was close to normal waits.
+
+\subsection*{Where it is recorded}
+Every evaluation writes its rows and an \texttt{evaluation.json} beside the runs,
+and \texttt{collect\_evaluation.py} adds a \texttt{README.md} with the commands,
+which policy was tested and why, and the fleet's comparison table for both
+setups. The small files go to \texttt{results/L\_results/}.
+
+\section*{Part 2. The text}
+
+\subsection*{2.1 Experiments, ``Training''}
+\begin{quote}
+A controller is used for evaluation only once its training return has
+levelled off, judged by \mockup{criterion}. \textit{\old{Which checkpoint is evaluated, chosen on validation seeds kept apart from the evaluation seeds.}}
+\new{Training saves a checkpoint every three iterations, and every checkpoint
+plays the validation seeds, warehouses no run trained on. The checkpoint that
+is tested is chosen there. Of the checkpoints that keep up on every
+validation seed, it is the one with the shortest mean pick service time. If
+none keeps up, it is the one with the highest throughput. Only the chosen
+checkpoint plays the test seeds, so a result is never measured on the
+warehouses that chose the policy.}
+\end{quote}
+
+\subsection*{2.2 Experiments, ``Scoring a condition''}
+\begin{quote}
+\textit{\old{Warm-up. A run starts with no tasks, and the storage rule needs data before its first useful update, so the first timesteps are not typical. State how many are discarded before scoring, and that T covers many storage epochs.}}
+\new{A test run starts with no tasks, and the storage rule needs orders before
+its first useful update, so the first steps are not typical. Every test run is
+10000 steps long and the first 5000 are left out, as in the Token Passing runs.
+Each condition plays 20 test seeds.}
+\end{quote}
+
+\subsection*{2.3 Experiments, Results, ``Keeping up''}
+\begin{quote}
+\mockup{Give the number of test seeds that lock, per controller and storage
+rule. A seed locks when at least two agents each hold the same task for
+\old{500 steps or more at the same time, a quarter of the episode}
+\new{longer than a threshold at the same time. Each run stores the longest
+such time. Give the threshold, chosen from how these times spread, and why}.
+A locked seed counts as not keeping up.}
+\end{quote}
+
+\subsection*{2.4 Experiments, ``Compute environment''}
+\begin{quote}
+\new{The learned policies run on the GPU during evaluation and the simulation
+on the CPU, so their runtime $\kappa_T$ is measured that way.}
+\end{quote}
+
+\section*{Part 3. Questions}
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{Validation seeds.} The runs already trained are chosen on 2
+validation warehouses, new runs on 5. Is that acceptable if the thesis says
+so, or should the trained runs be validated again on 5? That costs about one
+more day of evaluation at fleet 16.
+\item \textbf{Runtime.} Token Passing runs on the CPU and the learned
+policies now on the GPU, so $\kappa_T$ is not measured alike. Should the
+runtime be measured once more on the CPU, for a few seeds, so the
+controllers compare fairly?
+\item \textbf{The lock threshold} is chosen once the fleet 16 results are in.
+Is that the order you want?
+\item \textbf{Congestion-aware storage} is paused, both its evaluation and
+its training. What is the issue you found, so it can be fixed before it runs
+again?
+\end{enumerate}
+
+\end{document}
