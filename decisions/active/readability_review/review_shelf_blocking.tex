@@ -1,0 +1,347 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,xcolor,enumitem}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\oldmath}[1]{\textcolor{gray}{#1}}
+\newcommand{\mockup}[1]{\textit{#1}}
+\title{Proposed change [A93], congestion is measured as the time picks stand still at each shelf}
+\date{13 November 2026, version 3 (plainer words, the reason for keeping demand on the nearest shelf)}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what we found and what is proposed. Part~2 shows the thesis text that
+would change. \new{Green} is new text, \old{struck} text goes, black text stays,
+and italic text is a note on what to draw or add. A removed equation is grey and
+marked ``removed''. Part~3 has the questions. Nothing is changed in the thesis or
+the code yet.
+
+\section*{Part 1. What we found}
+
+\subsection*{The old signal did not work}
+Congestion-aware storage counts, for each edge, how often agents passed it times
+how often they waited to get onto it.
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The number is far too small.} It is about $10^{-4}$ per edge, while a
+  trip is about 29 steps. So it never changed which shelf was chosen. This is why
+  $\beta$ from 0 to 4 made almost no difference.
+\item \textbf{It jumps around.} Only 18 to 34 of 782 edges have any wait in a
+  storage period. The order of the shelves it gives changes almost completely from
+  one period to the next.
+\item \textbf{It looks in the wrong place.} With Token Passing a pick stands still
+  only 1 to 2.5 steps. Most of the time is spent waiting for a free agent, and that
+  wait is not on any edge.
+\end{itemize}
+
+We tried several other edge signals with Token Passing on 10 seeds. None of them
+was better than demand storage.
+
+\subsection*{The learned controllers do get stuck}
+The learned agents stand still much longer than with Token Passing, and more the
+bigger the fleet.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ & steps standing still per pick & Token Passing \\
+\midrule
+8 agents, decentralised & about 21 & 1 to 2.5 \\
+16 agents, section & about 32 & 1 to 2.5 \\
+16 agents, decentralised & about 38 & 1 to 2.5 \\
+32 agents, decentralised & 74 to 85 & 1 to 2.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The agents stand still in queues, when two agents face each other, and at the
+workstation lock of [A91]. Counting waits on edges misses most of this.
+
+\subsection*{The new signal}
+When a pick is done, we count the steps its agent stood still and note them on the
+shelf it came from. The signal of a shelf is the average over its recent picks.
+
+\begin{itemize}[leftmargin=1.2em]
+\item It is counted in steps, like the trip. So $\beta = 1$ means one step standing
+  still counts the same as one step of travel.
+\item It catches every reason for standing still.
+\item It belongs to a shelf, which is exactly what storage chooses.
+\end{itemize}
+
+At 8 agents, shelves differ a lot, from about 3 to 68 steps per pick, and the order
+of the shelves stays almost the same from one period to the next.
+
+The signal is used in two places. When stock arrives, it goes where picks rarely
+stand still. And when a product is on several shelves, a pick takes it from the
+shelf with the lowest distance plus standing still, not just the nearest one. The
+second happens for every order, so the loop now also reacts quickly.
+
+\subsection*{The test}
+We used policies that are already trained under demand storage, the best saved
+policy of each run. Nothing was retrained. We compared demand storage as it is with
+the signal used when stock arrives, when picking, and in both. 5 seeds, 4000 steps,
+of which the first 1000 are not counted. The test also averaged the demand numbers
+over periods (question~2).
+
+\begin{center}
+\begin{tabular}{llccccc}
+\toprule
+ & & steps still & less still & tasks & as many & keeps \\
+ & & per pick & than today & done & tasks or more & up \\
+\midrule
+8 agents & today & 21.0 & & 339 & & 4/5 \\
+decentralised & when stock arrives & 18.6 & 3/5 & 339 & 3/5 & 4/5 \\
+ & when picking & 20.8 & 3/5 & 334 & 3/5 & 4/5 \\
+ & \textbf{both} & \textbf{17.3} & \textbf{5/5} & 340 & 3/5 & 4/5 \\
+\midrule
+16 agents & today & 32.5 & & 361 & & 0/5 \\
+section & when stock arrives & 29.4 & 4/5 & 385 & 4/5 & 0/5 \\
+ & when picking & 31.6 & 4/5 & 374 & 3/5 & 0/5 \\
+ & \textbf{both} & \textbf{29.1} & \textbf{5/5} & \textbf{384} & 4/5 & 0/5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Used in both places, the signal cut the time standing still on every seed. It was
+18 percent less at 8 agents and 10 percent less at 16. At 16 agents the agents also
+did 6 percent more tasks. At 8 agents a pick took 244 steps instead of 294. This is
+the first congestion signal that helps.
+
+Two runs tell us nothing. The 16-agent decentralised controller does only 115 to
+150 tasks, where the section controller does 360 to 385. The 32-agent controller
+does 4 to 9 tasks in 3000 steps. Both get stuck over a long run. You said the
+16-agent decentralised controller needs messages to work, so we test it with
+messages (question~5).
+
+\subsection*{What this test is not}
+It is a short test on 5 seeds, with policies that never trained with the signal. It
+shows the signal is worth keeping. The full test in question~5 gives the result.
+Sending orders to the least busy workstation and moving old stock were tried the
+same day. They are not part of this change (question~7).
+
+\section*{Part 2. The text}
+
+\subsection*{2.1 Problem Formulation, ``What the rule knows''}
+\begin{quote}
+\old{The rule only knows the last storage period. It reads three averages per
+step over that period:}
+\new{The rule only knows the recent past. It reads two numbers:}
+\begin{itemize}
+\item \(\hat\rho_t(k)\), how often SKU \(k\) was ordered \new{per step in the last storage period}
+\item \old{\(\hat\mu_t(e)\), how often agents crossed edge \(e\)}
+\item \old{\(\hat w_t(e)\), how many steps agents waited to get onto edge \(e\)}
+\item \new{\(\hat\omega_t(v)\), how many steps recent picks from shelf \(v\) stood still, on average}
+\end{itemize}
+Demand storage uses only the first, the orders. Congestion-aware storage uses
+\old{all three. The last two come from how the agents moved, and show which
+aisles were crowded. An edge counts as crowded when many agents cross it and
+they often wait to get onto it.}
+\new{both. The second shows where agents lose time because of each other. It may
+be a queue in an aisle, two agents facing each other, or a queue at a
+workstation.}
+\end{quote}
+
+In \texttt{eq:storageupdate} the inputs change from
+\oldmath{$\hat\rho_t,\hat\mu_t,\hat w_t$ (removed)} to \new{$\hat\rho_t,\hat\omega_t$}.
+
+\subsection*{2.2 Problem Formulation, ``What the rule decides''}
+\begin{quote}
+Putting every popular SKU on the best shelves would send all traffic down
+the same few aisles. Congestion-aware storage therefore also avoids shelves
+\old{whose trip runs through crowded aisles.}
+\new{where picks often stand still.}
+
+\ldots
+
+The crowding cost is this thesis's own, because the classic problem has no
+traffic. It adds up, over the same units, \old{the crowding $\hat\mu_t(e)\,\hat w_t(e)$
+on every edge $e$ of the trip through $v$,}
+\new{how often their SKU is ordered times how long picks stand still at their
+shelf. Every pick from that shelf meets the wait, so a popular SKU pays it more
+often.}
+\begin{equation*}
+\oldmath{K = \sum_{k}\sum_{v}\Bigl(\sum_{e \in \mathrm{path}(v)} \hat\mu_t(e)\,\hat w_t(e)\Bigr)\, x^{\mathrm{new}}_t(k,v) \qquad \text{removed}}
+\end{equation*}
+\begin{equation*}
+\color{newc} K = \sum_{k\in\mathcal{K}} \sum_{v\in V_{\mathrm{str}}}
+\hat\rho_t(k)\,\hat\omega_t(v)\, x^{\mathrm{new}}_t(k,v) .
+\end{equation*}
+The rule aims for a placement with a small value of $D + \beta K$,
+where $\beta$ sets how much \old{crowding} \new{standing still} counts against distance.
+\new{Both count steps, so with $\beta = 1$ a step standing still counts as a step of
+travel.}
+\end{quote}
+
+\subsection*{2.3 Problem Formulation, the pickup rule}
+\begin{quote}
+A line takes its units from the shelf nearest its workstation first. If that shelf
+holds enough, the line is one task. \ldots\ This is the \emph{pickup rule}.
+
+\new{Under congestion-aware storage a line chooses differently. For each shelf it
+adds the distance to the workstation and the time picks there stand still,
+$\hat\omega_t(v)$. It takes from the shelf with the smallest sum first. Say tea is
+on $A$ and $C$. Picks from $A$ have stood still 5 steps on average and picks from
+$C$ 1 step. Then the line goes to $C$ if $C$ is at most 3 steps farther away.}
+
+\new{Fixed and demand storage keep taking the nearest shelf. Demand storage knows
+only the orders, so letting it pick by standing still would make it read the
+congestion too. The gap between demand and congestion-aware storage would then no
+longer show what reading congestion adds. The nearest shelf first is also the plain
+rule a warehouse uses when it knows nothing about traffic. So only the rule that
+closes the loop changes how lines pick.}
+
+\new{This choice is made for every order line, while stock only arrives every
+$\Delta$ steps. So congestion-aware storage reacts both slowly and quickly.}
+\end{quote}
+
+\mockup{Appendix~C, one line after eq:pickuprule: the shelves $v_1, v_2, \dots$
+that hold free units of $k$ are sorted by $d_G(v_i, g)$, or by
+$d_G(v_i, g) + \hat\omega_t(v_i)$ under congestion-aware storage, and by vertex
+number when equal.}
+
+\subsection*{2.4 Problem Formulation, the loop}
+\begin{quote}
+Backward, routing shapes storage. \old{The traffic the agents create is measured
+in the estimates $\hat\mu_t$ and $\hat w_t$, and at the next epoch the storage
+update uses them to decide where items go.}
+\new{How long agents stand still is measured at each shelf in $\hat\omega_t$. At the
+next storage update it decides where new stock goes. Every new order line also
+uses it to choose the shelf it picks from.}
+With fixed storage only the forward path exists. The backward path is
+what congestion-aware storage adds, because only that rule reads the
+\old{traffic.} \new{time agents stand still.}
+\end{quote}
+
+\mockup{Figure loop.pdf, panel (b): the backward arrow says $\hat\omega_t$ instead
+of $\hat\mu_t, \hat w_t$, and a short second arrow goes from $\hat\omega_t$ to the
+pickup of each task. Caption: ``The two-timescale loop under fixed (a) and
+congestion-aware storage (b). Demand storage reads only $\hat\rho_t$, so standing
+still never reaches it.''}
+
+\subsection*{2.5 Implementation, ``Where arriving stock goes''}
+\begin{quote}
+\textbf{Congestion-aware storage} ($F_{\mathrm{cng}}$) adds \old{crowding}
+\new{standing still} to the trip. Take two shelves with the same trip distance,
+\old{one reached through a quiet aisle and one through an aisle where agents often
+queue.} \new{one where picks rarely stand still and one where they often do.}
+Demand storage treats them as equal, and congestion-aware storage prefers the
+quiet one. Formally, the \emph{congestion-aware score} of SKU $k$ at shelf $v$ is
+\begin{equation*}
+\oldmath{\mathrm{score}(k,v) = \hat\rho_t(k)\cdot d^{\mathrm{trip}}_t(k,v) + \beta \sum_{e \in \mathrm{path}(v)} \hat\mu_t(e)\,\hat w_t(e) \qquad \text{removed}}
+\end{equation*}
+\begin{equation*}
+\color{newc} \mathrm{score}(k,v) = \hat\rho_t(k)\,\bigl(d^{\mathrm{trip}}_t(k,v) + \beta\,\hat\omega_t(v)\bigr) ,
+\end{equation*}
+\old{where $\mathrm{path}(v)$ is the trip through $v$.} The weight $\beta \ge 0$
+sets how much \old{crowding} \new{standing still} counts against distance.
+
+\old{The estimates are the per step rates of eq:estimates, taken over the last
+storage period only.}
+\new{The demand number is the rate per step of eq:estimates over the last storage
+period.} Counting per step keeps $\beta$ comparable across the sweep of the
+storage period $\Delta$. If no order was released in a period, nothing was picked
+and nothing arrives.
+
+\new{The time standing still comes from the picks done in the period. For each, we
+count the steps its agent stood still while serving it. This is the blocked part
+of its service time in eq:split. The average over a shelf's picks is the new
+reading for that shelf. A shelf gets only a few picks in one period, about eight at
+8 agents, so one reading alone jumps around. So the number keeps four fifths of its
+old value and adds one fifth of the new reading. A shelf with no pick in the period
+keeps its old value. A shelf's first reading is used as it is. With this, the order
+of the shelves hardly changes from one period to the next.}
+
+\old{A wait is counted on the edge the agent is waiting to enter, the next edge of
+its shortest route to its goal. It counts whenever an agent with a task stands
+still, whether it chose to wait or conflict resolution stopped it. Counting only
+the stops would show no waiting for Token Passing, which never collides but waits
+on purpose to let others pass. An agent without a task, or already at its goal,
+adds no wait.}
+\end{quote}
+
+\subsection*{2.6 Appendix C, eq:estimates}
+\begin{equation*}
+\hat\rho_t(k) = \tfrac{1}{\Delta}\,\#\{\text{order lines for } k \text{ released in the window}\},
+\end{equation*}
+\begin{equation*}
+\oldmath{\hat\mu_t(e) = \ldots,\quad \hat w_t(e) = \ldots \qquad \text{removed}}
+\end{equation*}
+\begin{equation*}
+\color{newc} \hat\omega_t(v) = \tfrac{4}{5}\,\hat\omega_{t-\Delta}(v) + \tfrac{1}{5}\,
+\frac{1}{|P_t(v)|}\sum_{j \in P_t(v)}\;\sum_{t'=t_j^{\mathrm{assigned}}}^{t_j^{\mathrm{finish}}-1}\omega_j(t') ,
+\end{equation*}
+\new{where $P_t(v)$ are the picks from shelf $v$ done in the window. If there are
+none, $\hat\omega_t(v) = \hat\omega_{t-\Delta}(v)$. A shelf's first reading is used
+as it is.}
+
+\subsection*{2.7 Appendix G, ``Calibration: the congestion weight''}
+\begin{quote}
+The congestion weight is $\beta = 1$. Both terms of the score
+count steps, \old{the expected travel and the expected waiting, so a step of
+waiting weighs the same as a step of travel.}
+\new{travel and standing still, so a step standing still counts the same as a step
+of travel.}
+
+\new{The rule first counted, for each edge, passes times waits. With Token Passing
+a weight from 0 to 4 changed the pick service time by at most 2 percent. The number
+was only about $10^{-4}$ per edge, and a pick stood still only 1 to 2.5 steps.
+Other edge signals did no better on 10 seeds. The time picks stand still at each
+shelf took its place [A93].}
+
+\new{The learned controllers stand still much longer. With them the new signal cut
+the time standing still on every seed at 8 agents, and at 16 agents with the
+section controller, by 18 and 10 percent.} \mockup{Table from Part~1, with the
+final numbers from the full test of question~5.}
+
+\old{The first sweep, on the first version of the warehouse graph, \ldots\ that
+wait lies on no edge the weight can see.} \mockup{The three old paragraphs go, and
+their figure app\_storage\_beta.png too.}
+\end{quote}
+
+\subsection*{2.8 Notation table and parameters}
+\begin{itemize}[leftmargin=1.2em]
+\item \old{\(\hat\mu_t(e)\), traffic estimate} and \old{\(\hat w_t(e)\), waiting estimate} go.
+\item \new{\(\hat\omega_t(v)\), time standing still at a shelf. The average steps
+  recent picks from shelf \(v\) stood still, kept over storage periods. Used by
+  \(F\) and, under congestion-aware storage, by the pickup rule.}
+\item \(\beta\), congestion weight. How much the \old{crowding} \new{standing still}
+  cost \(K\) counts against the slotting cost \(D\).
+\item Parameters table, the reason for \(\beta = 1\): \old{a step of waiting weighs
+  as a step of travel} \new{a step standing still counts as a step of travel}.
+  \new{New row: the newest period counts one fifth in $\hat\omega_t$.}
+\end{itemize}
+
+\section*{Part 3. Questions}
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{The new pick choice only for congestion-aware storage?} Decided yes
+  (13 November). The reason is in 2.3. Demand storage knows only the orders, so the
+  gap to congestion-aware storage must come from reading congestion alone. The main
+  result, demand against fixed, stays the same and needs no new runs.
+\item \textbf{Average the demand numbers too?} The test also averaged
+  $\hat\rho_t$ over periods. To match the test, congestion-aware storage should do
+  the same. But then the difference to demand storage comes from two changes. With
+  Token Passing the averaging alone was 1.5 percent faster (8 of 10 seeds,
+  $p = 0.08$). The other choice is to test again without it.
+\item \textbf{One fifth for the newest period.} It was picked, not tuned. Keep it,
+  or try a few values in the full test?
+\item \textbf{Remove $\hat\mu_t$ and $\hat w_t$ completely?} I suggest yes, and also
+  the paragraph on which edge a wait is counted on ([A36]). Nothing else uses them.
+\item \textbf{The full test.} 20 test seeds, 10000 steps with the first 5000 not
+  counted, the best saved policy of each run, demand against congestion-aware
+  storage. Runs: 8 agents decentralised, 16 agents section, and 16 agents
+  decentralised with messages. The 32-agent runs wait for a policy that does not
+  get stuck. Retrain under the new rule later, or not at all?
+\item \textbf{The name.} The rule now also chooses where to pick. Keep
+  ``congestion-aware storage'', or say once that it also picks?
+\item \textbf{Least busy workstation and moving old stock.} The least busy
+  workstation made Token Passing about 28 percent faster on two seeds but did
+  nothing for the learned controller. Moving old stock made Token Passing slower.
+  Leave both out of [A93]?
+\end{enumerate}
+
+\end{document}

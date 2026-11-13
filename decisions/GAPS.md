@@ -91,7 +91,7 @@ Status of every tag. *In force* entries are below. *History* entries are in
 | [A33] | The commons question folded into RQ4 | In force |
 | [A34] | Skewed demand that drifts | In force |
 | [A35] | Starting stock from expected demand, in blocks | In force |
-| [A36] | How a wait is attributed to an edge | In force |
+| [A36] | How a wait is attributed to an edge | Replaced by [A93] (the edge estimates are gone) |
 | [A37] | Storage rule wording fixes | In force |
 | [A38] | Storage decided when stock arrives | In force |
 | [A39] | Orders take a unit from the nearest shelf, or wait for stock | In force |
@@ -2316,3 +2316,51 @@ wrong under [A32] are marked.
   thesis's own, and every run would restart). A shared reward for the decentralised controller
   is named as future work in the threats to validity.
 - **Code.** None. The cap branch `feat/workstation-cap` is not merged.
+
+### [A93] Congestion is measured as the time picks stand still at each shelf (Design change 2026-11-13, thesis text edited 2026-11-13)
+
+- **Why the old signal went.** Congestion-aware storage read, for each edge, crossings times waits
+  per step (`\hat\mu_t(e)\,\hat w_t(e)`). That number is about 1e-4 per edge against a trip of about
+  29 steps, so it never moved a shelf. Only 18 to 34 of 782 edges see a wait in a storage period, so
+  the shelf order it gives changes almost completely each period. Under Token Passing a pick stands
+  still 1 to 2.5 steps, and most of its time is the wait for an agent, on no edge. Waits per
+  crossing, crossings alone, workstation pressure and their mix did no better than demand storage
+  with Token Passing (fleet 8, 10 seeds).
+- **What replaces it.** `\hat\omega_t(v)`: each finished pick counts the steps its agent stood still
+  (the blocked part of `eq:split`) and notes them on the shelf it came from. A period's reading is
+  the mean over the shelf's picks, and `\hat\omega_t(v)` is the plain average of the shelf's last
+  five readings (author chose this over keeping one fifth of each new reading, which works about
+  the same but is harder to explain). One period alone has about eight picks per shelf at 8 agents.
+- **Where it acts.** The score becomes `\hat\rho_t(k) (d^trip + \beta \hat\omega_t(v))`, `\beta = 1`,
+  and `K = \sum \hat\rho_t(k) \hat\omega_t(v) x^new`. Both terms count steps. Under
+  congestion-aware storage a line also picks from the shelf with the least distance plus
+  `\hat\omega_t(v)`, so the loop closes on every order line and not only every `\Delta` steps.
+- **Demand stays on the nearest shelf (author, 2026-11-13).** Demand storage knows only the orders.
+  Picking by standing still would make it read congestion too, and the gap to congestion-aware
+  storage would no longer show what reading congestion adds. The nearest shelf is the plain rule
+  without traffic knowledge. This also keeps every fixed and demand run valid.
+- **Not averaged: the demand estimate.** With Token Passing, averaging `\hat\rho_t` over periods
+  made no difference (+0.2 against -0.2 percent, fleet 8, 20 seeds), so congestion-aware storage
+  reads the same `\hat\rho_t` as demand storage.
+- **Evidence.** Policies trained under demand storage, best checkpoint by training tasks, 5 seeds,
+  4000 steps with 1000 left out. With the signal in storage and picking, standing still per pick
+  fell on every seed: fleet 8 decentralised (ck24) 21.0 to 17.3, tasks equal, service 294 to 244;
+  fleet 16 section (ck25) 32.5 to 29.1, tasks 361 to 384. Fleet 16 decentralised (ck23) and fleet 32
+  decentralised (ck2) jam over long runs and cannot be read (author: fleet 16 decentralised needs
+  messages). Rows and scripts in `results/G_storage/a93_first_look/`.
+- **Thesis text.** `3.ProblemFormulation.tex` (what the rule knows, `eq:storageupdate`, K, the
+  pickup rule under congestion-aware storage and why demand keeps the nearest shelf, the loop),
+  `3.Background.tex`, `4.Implementation.tex` (`eq:storagegreedy`, the estimate paragraph, the [A36]
+  paragraph removed), `C.ModelDetails.tex` (`eq:estimates`, the pick order, the measures note),
+  `G.StorageValues.tex` (`app:cal:beta`), notation and parameters. Tagged `% [A93]`. Review:
+  `active/readability_review/review_shelf_blocking.pdf`. Open in the text: the loop figure, and
+  the Token Passing and learned numbers of `app:cal:beta` (TODO comments).
+- **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
+  per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
+  pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`
+  (`putaway_congestion`). The instant put-away path still reads the edge estimates and is not part
+  of the thesis model. The edge counting itself is still recorded but no longer read on the robot
+  put-away paths.
+- **To rerun.** Listed in SESSION_CONTEXT.md: the Token Passing `app:cal:beta` and the congestion
+  rows of `app:cal:period`, the congestion-regime training at fleets 8, 16 and 32, and decentralised
+  with messages at 16. Fixed and demand runs stay valid.
