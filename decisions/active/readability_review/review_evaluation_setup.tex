@@ -8,7 +8,7 @@
 \newcommand{\old}[1]{\textcolor{gray}{\st{#1}}}
 \newcommand{\mockup}[1]{\textit{#1}}
 \title{Proposed changes for [A92], how a trained policy is chosen and tested, and the lock rule of [A91]}
-\date{13 November 2026, version 2 (validation on 5 seeds decided)}
+\date{13 November 2026, version 3 (validation on 5 seeds, runtime on the CPU decided)}
 \begin{document}
 \maketitle
 
@@ -39,7 +39,9 @@ either way, only the timing differs.
 20 test warehouses, up from 6, because 2 of the first 6 (and 8 of 20 at 32
 agents) have the layout that can lock. Each test episode is 10000 steps, and the
 first 5000 are left out as warm-up, as in the Token Passing runs. The policy runs
-on the GPU and the warehouse simulation on the CPU.
+on the GPU and the warehouse simulation on the CPU. The runtime is measured
+apart on the CPU, three test warehouses per run, one run at a time, so the
+controllers and Token Passing are timed alike.
 
 \subsection*{The two setups ([A84])}
 The main setup plays one policy, trained under fixed storage, under fixed and
@@ -99,16 +101,14 @@ A locked seed counts as not keeping up.}
 
 \subsection*{2.4 Experiments, ``Compute environment''}
 \begin{quote}
-\new{The learned policies run on the GPU during evaluation and the simulation
-on the CPU, so their runtime $\kappa_T$ is measured that way.}
+\new{The test results are played with the learned policies on the GPU, which
+only makes them faster. The runtime $\kappa_T$ is measured apart, on the CPU as
+for Token Passing, with each controller alone on the machine on three test
+seeds of full length.}
 \end{quote}
 
 \section*{Part 3. Questions}
 \begin{enumerate}[leftmargin=1.4em]
-\item \textbf{Runtime.} Token Passing runs on the CPU and the learned
-policies now on the GPU, so $\kappa_T$ is not measured alike. Should the
-runtime be measured once more on the CPU, for a few seeds, so the
-controllers compare fairly?
 \item \textbf{The lock threshold} is chosen once the fleet 16 results are in.
 Is that the order you want?
 \item \textbf{Congestion-aware storage} is paused, both its evaluation and
