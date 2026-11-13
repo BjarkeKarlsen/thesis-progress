@@ -2444,6 +2444,14 @@ wrong under [A32] are marked.
   those shelves. RQ2 measures both parts together (option a). This is said in the RQ2 results and
   listed as a threat to validity. Splitting them (Token Passing with only the placement or only the
   pick part, Appendix G) was option b, left for when the `app:cal:beta` reruns happen.
+- **Implementation check (author, 2026-11-13).** The same kinds of error fixed in
+  `4.Implementation.tex`: arriving units go in whole refills of Q onto the first shelf with room
+  (the code's `rule: refill`, `_put_away` with `whole`), not "as many as fit"; the loop's step 1 and
+  one sentence in "Where arriving stock goes" now name the pickup rule under congestion-aware
+  storage; "crowding number", "adaptive storage" and Token Passing's "delivery" renamed; Token
+  Passing also runs under demand storage (was "fixed storage" only); the storage score is used at
+  each storage update, the pickup rule every timestep. Open: the workstation lock figure uses runs
+  trained under the old signal.
 - **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
   per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
   pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`
