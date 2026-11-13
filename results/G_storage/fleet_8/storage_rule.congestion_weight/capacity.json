@@ -3,42 +3,12 @@
   "f_up": 0.8,
   "varied": "storage_rule.congestion_weight",
   "by_value": {
-    "0": {
-      "congestion": {
-        "capacity": 0.09,
-        "first_failing_rate": null,
-        "main_load": 0.054
-      }
-    },
-    "0.5": {
-      "congestion": {
-        "capacity": 0.09,
-        "first_failing_rate": null,
-        "main_load": 0.054
-      }
-    },
     "1": {
-      "congestion": {
+      "demand": {
         "capacity": 0.09,
         "first_failing_rate": null,
         "main_load": 0.054
-      }
-    },
-    "2": {
-      "congestion": {
-        "capacity": 0.09,
-        "first_failing_rate": null,
-        "main_load": 0.054
-      }
-    },
-    "3": {
-      "congestion": {
-        "capacity": 0.09,
-        "first_failing_rate": null,
-        "main_load": 0.054
-      }
-    },
-    "4": {
+      },
       "congestion": {
         "capacity": 0.09,
         "first_failing_rate": null,
