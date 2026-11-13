@@ -2457,6 +2457,17 @@ wrong under [A32] are marked.
   example uses three refills of 3 tea (6 of 9 placed) with `storage_update.png` beside it
   (`fig:storageupdate`). Stage 1 of `methodloop.pdf` names the pickup rule. An Overleaf tab opened
   before a push reverted `app:cal:beta` (`76033fe`); the merge kept the new text.
+- **Figures and names (author, 2026-11-13).** "Adaptive storage" replaced in the main chapters by
+  demand storage, both rules by name, or the rule F in the formal research question. Figures (review
+  `active/readability_review/review_figures.pdf`): `controllers_window.png` merges
+  `controllers_example.png` and `congestion_mini.png` (`fig:controllers-example`, `fig:congestion`
+  gone); `architecture_compact.pdf` moved to Appendix C (`app:controllers:sources`); the tea example
+  `arrival_storage.png` redrawn with a dock and slot-box shelves by `shelf_loop.py` (`arrival_storage.py`
+  removed), and `shelf_loop.png` with the dock on the left, because with the dock on the right the
+  empty shelf of the right aisle was the shortest trip and demand storage would not have chosen A.
+  `observation.png`: the aisle vertices are v and w (were B and C, which name shelves).
+  `instance.png`: shelves B and C carry Table I's stock, the legend says "route of a_2 while tau_1 is
+  active" (was "Active set B_t", with the task missing its units).
 - **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
   per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
   pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`

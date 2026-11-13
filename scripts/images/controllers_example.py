@@ -31,7 +31,7 @@ def _region(ax, nodes, pos, fc, ec):
     return xs, ys
 
 
-def _panel(ax, G, pos, mode):
+def _panel(ax, G, pos, mode, agent=True):
     # One visual rule across all panels: the shaded region is what decides
     # a_i's next move; only what lies outside it is dimmed.
     if mode == "centralised":
@@ -66,7 +66,8 @@ def _panel(ax, G, pos, mode):
             _region(ax, bar, pos, DEC_F, "none")
         draw_mini(ax, G, pos, dim=True)
         draw_mini(ax, G.subgraph(window), pos)
-    put_agent(ax, pos, EGO, r"$a_i$")
+    if agent:
+        put_agent(ax, pos, EGO, r"$a_i$")
 
 
 def controllers_example():

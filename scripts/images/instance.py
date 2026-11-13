@@ -14,14 +14,15 @@ CROP = dict(x_max=6.0, x_faded=7.5, y_min=9.0)
 # Vertex ids of the crop that the story uses.
 A_START, SHELF_A, WORKSTATION = 87, 168, 159
 ROUTE = [87, 86, 168, 86, 80, 159]
-# Stock under each shelf, the 01c_storage_state_on_instance.py style. A matches
-# Table tab:storagematrix, mugs 0 is why tau_2 in the text breaks the stock
-# condition. The other shelves are illustrative.
+# Stock under each shelf, the 01c_storage_state_on_instance.py style. A, B and C
+# match Table tab:storagematrix (the text sends a tea line to the nearer of A and
+# C), mugs 0 is why tau_2 in the text breaks the stock condition. The two
+# unnamed shelves are illustrative.
 STOCK = {
     168: [("tea", 12), ("coffee", 4), ("mugs", 0)],
     158: [("coffee", 6)],
-    178: [("mugs", 5)],
-    172: [("tea", 3), ("mugs", 2)],
+    178: [("coffee", 3), ("mugs", 6)],   # B
+    172: [("tea", 5), ("mugs", 2)],      # C
     157: [("coffee", 2)],
 }
 def instance():
@@ -51,8 +52,9 @@ def instance():
                 ha="center", color=C["agent"], fontsize=14)
     # In-node letters: storage vertex A and delivery workstation W1, the same convention
     # as fig:observation and slap_mapd_coupling.
-    ax.annotate("A", pos[SHELF_A], ha="center", va="center", fontsize=9,
-                fontweight="bold", color=C["store_e"], zorder=6)
+    for v, name in ((SHELF_A, "A"), (178, "B"), (172, "C")):
+        ax.annotate(name, pos[v], ha="center", va="center", fontsize=9,
+                    fontweight="bold", color=C["store_e"], zorder=6)
     ax.annotate("W1", pos[WORKSTATION], ha="center", va="center", fontsize=7,
                 fontweight="bold", color=C["del_e"], zorder=6)
     for v, held in STOCK.items():
@@ -74,7 +76,7 @@ def instance():
     handles = wh.legend_handles() + [
         Line2D([], [], marker="o", ls="", color=C["agent"], ms=10, label="agent"),
         Line2D([], [], ls=(0, (4, 3)), color=C["agent"], lw=1.8,
-               label=r"Active set $\mathcal{B}_t$ for Task $\tau_1=(5,\,A,\,W_1,\,\mathrm{tea})$"),
+               label=r"route of $a_2$ while $\tau_1$ is active"),
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.01),
               ncol=3, frameon=False, fontsize=10)

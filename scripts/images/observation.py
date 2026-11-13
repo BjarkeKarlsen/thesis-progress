@@ -9,12 +9,12 @@ from m8 import Warehouse
 # tau_1 at A and is back on the aisle on its way to W1. a_1 is also heading
 # for W1. Matches the worked example in the thesis text: the field of view
 # holds 5 vertices besides a_1's own, 2 of them occupied (delta_1 = 2/5), and
-# a_4 sits just outside it. a_1 chooses between B (eta=3), with a_2 just past
-# it, and C (eta=5).
+# a_4 sits just outside it. a_1 chooses between v (eta=3), with a_2 just past
+# it, and w (eta=5).
 CROP = dict(x_max=10.5, x_faded=12.0, y_min=9.0)
 EGO, DEPTH, TARGET, SHELF_A = 88, 2, 159, 168
 AGENTS = {88: "$a_1$", 86: "$a_2$", 81: "$a_3$", 98: "$a_4$"}
-MOVES = {87: "B", 89: "C"}
+MOVES = {87: "$v$", 89: "$w$"}  # aisle vertices, not shelves: B and C name shelves (Table I)
 
 
 def observation():
@@ -45,8 +45,8 @@ def observation():
     # a_1's two moves, named in the text. B is shorter but a_2 is just past it,
     # C is longer.
     for v, label in MOVES.items():
-        ax.annotate(label, wh.pos[v], ha="center", va="center", fontsize=10,
-                    fontweight="bold", color=C["text"], zorder=6)
+        ax.annotate(label, wh.pos[v], ha="center", va="center", fontsize=12,
+                    color=C["text"], zorder=6)
     ax.annotate("A", wh.pos[SHELF_A], ha="center", va="center", fontsize=9,
                 fontweight="bold", color=C["store_e"], alpha=0.5, zorder=6)
     ax.annotate("W1", wh.pos[TARGET], ha="center", va="center", fontsize=7,

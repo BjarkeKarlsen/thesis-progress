@@ -19,7 +19,7 @@ from base import OUT
 from instance import instance
 from instance_simple import instance_simple
 from observation import observation
-from shelf_loop import shelf_loop
+from shelf_loop import shelf_loop, arrival_tea
 from lifecycle import lifecycle
 from conflicts import conflicts
 from concentration import concentration
@@ -30,7 +30,6 @@ from wellformed import wellformed
 # nothing above this line is touched.
 from instance_mini import instance_mini
 from observation_mini import observation_mini
-from congestion_mini import congestion_mini
 from resolution_simple import resolution_simple
 from methodloop_simple import methodloop_simple
 from assignment_masking import assignment_masking
@@ -44,13 +43,12 @@ from actions_example import actions_example
 from storage_matrix import storage_matrix
 from storage_update_example import storage_update_example
 
-from controllers_example import controllers_example
+from controllers_window import controllers_window
 from posg_schematic import posg_schematic
 from two_layer_feedback import two_layer_feedback
 from scoring_run import scoring_run
 from decision_problem_grid import decision_problem_grid
 from timeline import timeline
-from arrival_storage import arrival_storage
 from warehouses import warehouses
 from stock_moments import stock_moments
 
@@ -58,13 +56,13 @@ if __name__ == "__main__":
     instance(); instance_simple(); observation(); shelf_loop()
     lifecycle(); conflicts(); concentration()
     congestion(); wellformed()
-    instance_mini(); observation_mini(); congestion_mini()
+    instance_mini(); observation_mini()
     resolution_simple(); methodloop_simple(); assignment_masking()
     architecture_simple()
     potential_example()
     graph_basics(); actions_example(); storage_matrix()
-    storage_update_example(); controllers_example(); posg_schematic()
+    storage_update_example(); controllers_window(); posg_schematic()
     two_layer_feedback(); scoring_run(); decision_problem_grid()
-    timeline(); arrival_storage(); warehouses()
+    timeline(); arrival_tea(); warehouses()
     stock_moments()
     print("wrote figures to", os.path.abspath(OUT))
