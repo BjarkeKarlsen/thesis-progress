@@ -2431,7 +2431,10 @@ wrong under [A32] are marked.
   the box diagram of `loop.tex`, which repeated the Introduction and `fig:methodloop` and never
   showed standing still. `K` is renamed the *blocking cost*, because since [A93] it charges blocking,
   not crowding (it was the crowding cost, and the congestion term in the Background). `\delta_i(t)`
-  is the *crowding feature* everywhere (it was also the congestion feature and the crowding number).
+  is the *crowding feature* everywhere (it was also the congestion feature and the crowding number),
+  and the reward's last term, which charges it, is the *crowding term* (was the congestion term).
+  Its weight is `n_{\mathrm{crowd}}` (was `n_{\mathrm{cng}}`, which looked like `F_{\mathrm{cng}}`). The
+  code keeps its own name for the weight.
   Storage reads standing still and not the crowding feature, because a crowd that keeps moving costs
   no time. A storage rule on `\delta` itself was not run. Review:
   `active/readability_review/review_loop_figure.pdf` (v3).

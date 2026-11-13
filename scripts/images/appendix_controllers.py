@@ -61,7 +61,7 @@ def reward_terms(fleet=8, last=0.1):
 
 
 def reward_cng():
-    """The crowding weight n_cng in {0, 0.1, 1, 2} on the 8-agent warehouse: (a) the mean
+    """The crowding weight n_crowd in {0, 0.1, 1, 2} on the 8-agent warehouse: (a) the mean
     crowding, (b) the mean blocked time, (c) the throughput, one line per learned arm. Choose
     the smallest weight that lowers blocked time without lowering throughput."""
     parameter = "reward.congestion_weight"
@@ -86,7 +86,7 @@ def reward_cng():
         ax.axvline(0.1, color=C["node"], ls=":", lw=1)
         panel_title(ax, f"({panel})")
         style(ax)
-    axes[-1].set_xlabel(r"crowding weight $n_{\mathrm{cng}}$")
+    axes[-1].set_xlabel(r"crowding weight $n_{\mathrm{crowd}}$")
     if rows:
         axes[0].legend(frameon=False, fontsize=9)
     else:
