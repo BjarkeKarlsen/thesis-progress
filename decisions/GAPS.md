@@ -2452,6 +2452,11 @@ wrong under [A32] are marked.
   Passing also runs under demand storage (was "fixed storage" only); the storage score is used at
   each storage update, the pickup rule every timestep. Open: the workstation lock figure uses runs
   trained under the old signal.
+- **Refills in the Problem Formulation and the figures (author, 2026-11-13).** "How stock changes"
+  says stock comes in refills of Q, each whole onto one shelf as one put-away. The storage update
+  example uses three refills of 3 tea (6 of 9 placed) with `storage_update.png` beside it
+  (`fig:storageupdate`). Stage 1 of `methodloop.pdf` names the pickup rule. An Overleaf tab opened
+  before a push reverted `app:cal:beta` (`76033fe`); the merge kept the new text.
 - **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
   per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
   pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`
