@@ -2137,6 +2137,76 @@ wrong under [A32] are marked.
 - **Code.** Not written yet. `environment/observation.py` (the feature) and the tests that check its
   values. Do it before the step 5 training runs.
 
+### [A79] The shaping potential at t+1 is read after assignment and parking (Correction, thesis text edited 2026-11-04)
+
+- **Where.** `sec:method:rl`, the paragraph after `eq:reward`, and one new paragraph after it.
+- **What the edit says.** Phi_i(t+1) is the potential the robot sees at t+1, after new tasks and
+  parking vertices are handed out. A free robot's target is its own vertex, or its parking vertex
+  when it stands in another robot's way (D26).
+- **Why.** The code computed the reward before assignment and parking, so the jump in the
+  potential when a robot got a new target was never charged. The shaping then no longer cancelled,
+  which Devlin and Kudenko's guarantee needs. Each task carried a free bonus of about its distance
+  to the shelf. With D26 an idle robot could earn it again and again by standing in the way, a loop
+  the policy can learn. A fleet 8 check with a robot that always steps towards its goal (2000 steps)
+  found 12 jumps the reward never charged, adding up to -95.
+- **Rejected.** Leaving free robots out of the shaping, which removes the parking loop but not the
+  free bonus of every task.
+- **Cost.** A robot pays a one-off amount when it gets a task. It does not choose its tasks, so no
+  best behaviour changes, but the value head has to learn the drop.
+- **Code.** `environment/multi_agent_env.py::step`: the rewards move after `_release_and_assign`
+  and `_update_parking`, and the parking target is read before and after the step, not once. A test
+  checks that the potentials match from one step to the next.
+
+### [A80] Raising the move cost above the wait cost (Rejected 2026-11-10, thesis text removed)
+
+- **What was tried.** c_move = 0.25 against c_wait = 0.2 (edited 2026-11-04), so that a blocked
+  robot waits instead of stepping away and back. With c_move = 0.1 stepping away and back costs 0.2
+  over two steps against 0.4 for two waits, and the fleet 32 decentralised runs of 2026-11-04 did
+  that before they collapsed (tasks done 113 at iteration 4, 1 at 16).
+- **Why rejected.** It froze the robots instead. Fleet 8 decentralised fixed_only, 25 iterations
+  each, one seed (`~/thesis_runs/training_fixes_test/ablation/`): with the reward order of `[A79]`
+  alone the run reached 155 tasks done per episode at iterations 21 to 25 and 33 % standing still.
+  Adding c_move = 0.25 gave 4 tasks and 79 % standing still. The run without any fix (main
+  `514624c`) gave 182 tasks and 37 %.
+- **Now.** c_move stays 0.1 and `[A43]` stands. The stepping back and forth is left to the
+  following rule of `[A81]`, which removes many of the blocks behind it. To check again on fleet
+  32, where the collapse happened.
+
+### [A81] Conflict resolution lets a robot follow a robot that leaves (Design change, thesis text edited 2026-11-04)
+
+- **Where.** `sec:method:resolution`, the rule and the two paragraphs after it.
+- **What the edit says.** A robot that moves onto another robot's vertex is handled after that
+  robot. Of the robots that are ready, the priority order decides. Robots whose chain of wants
+  closes into a circle (a swap is the shortest) wait. The claim mask is unchanged and stricter, so
+  the centralised and section-based joint actions are accepted whole.
+- **Why.** Under `[A53]` a robot could not move onto the vertex of a robot later in the order even
+  when that robot left, so following another robot in an aisle cost a wait and the override
+  penalty. The robot cannot see its priority, so the penalty looked random to the policy. The
+  decentralised arm had a 10 to 20 % override rate against about 0 % for the others, and blocked
+  moves towards the target fed the stepping back and forth seen in the fleet 32 runs (`[A80]`).
+- **Rejected.** Leaving it and naming it as a limitation.
+- **Cost.** A robot ahead in a chain is handled before robots earlier in the order, so it can win
+  an empty vertex against them. Circles of three or more robots still wait.
+- **Code.** `resolution/conflict_resolution.py::resolve_conflicts` (`move_blocked` stays the claim
+  mask), tests in `tests/unit/test_conflict_resolution.py`.
+- **Revises.** `[A53]` (the rule, the claim-mask wording).
+
+### [A82] The network also reads the distance to the target, scaled (Design change, thesis text edited 2026-11-04)
+
+- **Where.** `sec:method:model` (a paragraph "How far the target is" and the scaled label after
+  `eq:relativeeta`), `eq:features` in Appendix C.
+- **What the edit says.** Each vertex also gets eta_i(v,t) / 50, as in van Knippenberg et al.
+  (2021), next to the relative label of `[A78]`. The same 50 in every warehouse.
+- **Why.** With the relative label alone the robot cannot tell 2 steps from 40, so the value head
+  cannot see a value that grows with the distance (the cost noted in `[A78]`). Dividing by one
+  fixed number keeps the feature near 0 to 1 next to the 0/1 features, which `[A78]` was about.
+- **Rejected.** Raw distances (the scale problem of `[A78]` again). Dropping the relative label.
+- **Cost.** One more feature (9 per vertex). Old checkpoints no longer load.
+- **Code.** `environment/observation.py` (`DISTANCE_SCALE`), `models/gnn_encoder.py`
+  (`NODE_FEATURE_DIM` 9), `models/local_subgraph_encoding.py`, `models/window_tables.py` (the
+  compact "eta" holds both labels).
+- **Revises.** `[A78]` (its rejected option).
+
 ### [A83] Readability pass on the introduction, and the research questions on hold (Design change, thesis text edited 2026-11-10, uncommitted)
 
 - **Where.** `2.Introduction.tex`, the whole introduction and project description. Tagged `% [A83]`.
@@ -2353,8 +2423,24 @@ wrong under [A32] are marked.
   `3.Background.tex`, `4.Implementation.tex` (`eq:storagegreedy`, the estimate paragraph, the [A36]
   paragraph removed), `C.ModelDetails.tex` (`eq:estimates`, the pick order, the measures note),
   `G.StorageValues.tex` (`app:cal:beta`), notation and parameters. Tagged `% [A93]`. Review:
-  `active/readability_review/review_shelf_blocking.pdf`. Open in the text: the loop figure, and
-  the Token Passing and learned numbers of `app:cal:beta` (TODO comments).
+  `active/readability_review/review_shelf_blocking.pdf`. Open in the text: the Token Passing and
+  learned numbers of `app:cal:beta` (TODO comments).
+- **The loop figure and the names (author, 2026-11-13).** `fig:loop` is now `shelf_loop.png`
+  (`scripts/images/shelf_loop.py`), the tea example of `fig:storageexample` one period later: picks
+  queue at shelf A, so the next line takes C and the new tea goes to the quiet aisle. It replaces
+  the box diagram of `loop.tex`, which repeated the Introduction and `fig:methodloop` and never
+  showed standing still. `K` is renamed the *blocking cost*, because since [A93] it charges blocking,
+  not crowding (it was the crowding cost, and the congestion term in the Background). `\delta_i(t)`
+  is the *crowding feature* everywhere (it was also the congestion feature and the crowding number).
+  Storage reads standing still and not the crowding feature, because a crowd that keeps moving costs
+  no time. A storage rule on `\delta` itself was not run. Review:
+  `active/readability_review/review_loop_figure.pdf` (v3).
+- **RQ2 and the Introduction (author, 2026-11-13).** The goal is unchanged, but closing the loop now
+  acts in two places. RQ2 reads "storage also avoids shelves where robots get blocked" (was "avoids
+  crowded aisles"), and the Introduction says the rule steers both new stock and picks away from
+  those shelves. RQ2 measures both parts together (option a). This is said in the RQ2 results and
+  listed as a threat to validity. Splitting them (Token Passing with only the placement or only the
+  pick part, Appendix G) was option b, left for when the `app:cal:beta` reruns happen.
 - **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
   per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
   pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`

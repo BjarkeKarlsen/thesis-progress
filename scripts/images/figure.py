@@ -19,7 +19,7 @@ from base import OUT
 from instance import instance
 from instance_simple import instance_simple
 from observation import observation
-from loop import loop
+from shelf_loop import shelf_loop
 from lifecycle import lifecycle
 from conflicts import conflicts
 from concentration import concentration
@@ -55,7 +55,7 @@ from warehouses import warehouses
 from stock_moments import stock_moments
 
 if __name__ == "__main__":
-    instance(); instance_simple(); observation(); loop()
+    instance(); instance_simple(); observation(); shelf_loop()
     lifecycle(); conflicts(); concentration()
     congestion(); wellformed()
     instance_mini(); observation_mini(); congestion_mini()
