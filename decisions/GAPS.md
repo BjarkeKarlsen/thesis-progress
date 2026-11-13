@@ -2468,6 +2468,17 @@ wrong under [A32] are marked.
   `observation.png`: the aisle vertices are v and w (were B and C, which name shelves).
   `instance.png`: shelves B and C carry Table I's stock, the legend says "route of a_2 while tau_1 is
   active" (was "Active set B_t", with the task missing its units).
+- **Appendix check (author, 2026-11-13).** Appendix C "The arrivals" and `eq:arrivals` now follow the
+  refill rule the runs use (`rule: refill`, `refill_amounts`): one refill of Q for every Q units
+  ordered since the last refill, the rest carries over, the (R, nQ) policy of Axsater (2015) with the
+  reorder point one refill below the starting stock (citation not checked against the book). It was
+  the top-up rule (margin epsilon, floor x_min), which the code keeps but the thesis runs do not use.
+  Notation: `y^ord_t(k)` added, epsilon, x_min, rho^unit and q^wait removed. Appendix G: the
+  congestion-aware rule described by standing still (was the edge waiting), the weight checked at
+  beta = 1 against demand storage (was a sweep 0 to 4), refills in "Shelf capacity", conclusion
+  updated. "Adaptive" and "demand-only" replaced in A, C, E, F, G; "robot" is "agent" in C, E, G, H,
+  J, L. Review: `active/readability_review/review_arrivals.pdf`. `C.ModelDetailsV1.tex` (unused draft
+  with another outline) left for the author.
 - **Code.** `slap-mapd-coupling` branch `feat/a93-shelf-standing-still`: `ShelfStandingStill` and the
   per-shelf reading in `environment/storage_estimates.py`, the reading per finished pick and the
   pick rule in `environment/multi_agent_env.py`, the score in `storage/arrival.py`

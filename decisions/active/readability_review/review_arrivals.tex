@@ -1,0 +1,113 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,xcolor,enumitem}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\oldmath}[1]{\textcolor{gray}{#1}}
+\newcommand{\mockup}[1]{\textit{#1}}
+\title{Proposed change [A93], the arrivals of Appendix C follow the refill rule of the code}
+\date{13 November 2026, version 1}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what is wrong. Part~2 shows Appendix~C's ``The arrivals'' as it would read, and the
+notation rows. \new{Green} is new text, \old{struck} text goes, a removed equation is grey and marked
+``removed''. Part~3 has the questions. Nothing is changed in the thesis yet.
+
+\section*{Part 1. What is wrong}
+
+Appendix~C defines how much arrives by the \emph{top-up} rule. Each SKU is filled up to
+$(1+\varepsilon)$ times last period's orders, never below a floor $x_{\min}$. The code has that rule
+(\texttt{stock\_rule: topup}), but the thesis runs use the other one, \texttt{rule: refill} with
+\texttt{refill\_units: 10} in every \texttt{configs/step12/fleet\_<m>.yaml}.
+
+Under the refill rule each SKU counts the units ordered since its last refill, from the moment a line is
+released (\texttt{multi\_agent\_env.py}, \texttt{\_ordered\_since\_refill}). At an arrival it gets one
+refill of $Q$ units for every $Q$ it has counted, and the rest carries over
+(\texttt{storage/arrival.py}, \texttt{refill\_amounts}). Every refill is one put-away to one shelf.
+Counting the units on their way and leaving out the units lines wait for, a SKU's stock then stays
+between its starting stock less $Q$ and its starting stock.
+
+Appendix~G (``Setting'') and the Problem Formulation already describe refills. Only Appendix~C and
+two rows of the notation table still describe the top-up rule. $\hat\rho^{\mathrm{unit}}_t$ is used
+only there, so its row goes too.
+
+\section*{Part 2. The text}
+
+\subsection*{Appendix C, ``The arrivals''}
+
+How much arrives is set by the orders alone, so it is the same under every
+rule. \new{Stock comes back a refill at a time. Each SKU counts the units
+ordered since its last refill, from the moment a line is released, whether
+the units are picked yet or still wait. At a storage update a SKU gets one
+refill of $Q$ units for every $Q$ it has counted, and what is left over
+counts towards the next one. So with $Q = 10$, if 23 units of tea were
+ordered since the last refill, two refills of tea arrive and 3 units carry
+over. A SKU's stock, counting the units on their way and leaving out the
+units lines wait for, then stays between its starting stock less $Q$ and
+its starting stock. This is the $(R, nQ)$ policy of inventory control
+(Axs\"ater, 2015, \texttt{axsater2015inventory}), with the reorder point $R$ one refill below
+the starting stock.}
+\old{Each SKU is filled up to what the last period's orders suggest, with a
+margin, and never to fewer than a floor of units. The units that lines still
+wait for are added on top. Arrivals count units, while $\hat\rho_t$ counts
+lines, so a second estimate counts the units ordered. So if 30 units of tea
+were ordered in the last period, the margin is $1$ and the floor is $8$, tea
+is filled up to $60$ units plus the units still waited for. Units still on
+their way to a shelf count as stock, so stock already ordered is not ordered
+again, and the arrivals stay the same under every rule.}
+
+\new{Formally, write $y^{\mathrm{ord}}_t(k)$ for the units of SKU $k$ ordered
+since its last refill, just before the update at $t$, with ``ord'' for
+ordered. The \emph{arrivals} are}
+\old{Formally, with margin $\varepsilon \ge 0$, floor $x_{\min}$,
+$\hat\rho^{\mathrm{unit}}_t(k)$ the units of $k$ ordered per step in the
+window, and $q^{\mathrm{wait}}_t(k)$ the units of $k$ that lines wait for at
+$t$, the \emph{arrivals} are}
+\begin{equation*}
+  \new{y_t(k) = Q \left\lfloor \frac{y^{\mathrm{ord}}_t(k)}{Q} \right\rfloor ,}
+  \tag{\texttt{eq:arrivals}}
+\end{equation*}
+\new{and $y^{\mathrm{ord}}_t(k) - y_t(k)$, fewer than $Q$ units, carries over.}
+
+\oldmath{Removed:
+$y_t(k) = \max\bigl(0,\; x^{\mathrm{up}}_t(k) + q^{\mathrm{wait}}_t(k)
+- \sum_{v} (x_t^{-}(k,v) - r_t(k,v) + x^{\mathrm{in},-}_t(k,v))\bigr)$,
+$x^{\mathrm{up}}_t(k) = \max(x_{\min},\, \lceil (1+\varepsilon)\, \Delta\,
+\hat\rho^{\mathrm{unit}}_t(k) \rceil)$,} \old{where $\Delta\,\hat\rho^{\mathrm{unit}}_t(k)$ is the
+number of units of $k$ ordered in the period.}
+
+\subsection*{Notation table (Appendix A)}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+symbol & name & meaning \\
+\midrule
+\old{$\varepsilon \ge 0$} & \old{stock margin} & \old{Stock kept above the last period's orders} \\
+\old{$x_{\min}$} & \old{stock floor} & \old{Fewest units a SKU is filled up to} \\
+\old{$\hat\rho^{\mathrm{unit}}_t(k)$} & \old{unit demand estimate} & \old{Units of SKU $k$ ordered per step \ldots} \\
+\new{$y^{\mathrm{ord}}_t(k)$} & \new{units ordered} & \new{Units of SKU $k$ ordered since its last refill, before the update at $t$} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\mockup{The row for $Q$, the refill size, already exists. The same rows change in the unused copy
+\texttt{Chapters/2.Notation.tex}, which follows Appendix~A.}
+
+\section*{Part 3. Questions}
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{The citation.} The code calls the rule the $(R, nQ)$ policy. I could not open Axs\"ater's
+  book to check its definition there. Keep the citation and the clause on the reorder point if it
+  matches, or say only ``ordering in fixed batches of $Q$'' without a source?
+\item \textbf{The worked numbers.} 23 units ordered, two refills, 3 carry over. Keep the example, or
+  leave it to the equation?
+\item \textbf{The stock bound.} The sentence that a SKU's stock stays between its starting stock less
+  $Q$ and its starting stock comes from the code's comment. It explains why a home shelf always has
+  room (Appendix~G, ``Shelf capacity''). Keep it here, or only in Appendix~G?
+\end{enumerate}
+
+\end{document}
