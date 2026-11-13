@@ -43,9 +43,9 @@ Do the Kaggle smoke test first ([kaggle.md](kaggle.md)). This guide assumes the 
 ```python
 BRANCH = "feat/workstation-sections"  # a pushed branch
 CONFIG = "configs/step12/fleet_32.yaml"
-REGIME = "fixed_only"                 # or "matched" (trained under demand storage)
+REGIME = "fixed"                      # the storage rule it trains under: "fixed", "demand" or "congestion"
 LOAD = None                           # the fleet's main load, from results/E_load/
-NAME = "fleet_32/fixed_only"
+NAME = "fleet_32/fixed"
 HOURS = 20                            # stop cleanly before the session would end
 BUDGET = None                         # env steps, None keeps the config's budget
 GPU = False                           # True only on a GPU runtime
@@ -88,13 +88,6 @@ with open(f"{RUN}/commit.txt", "a") as f:
     f.write(f"{COMMIT} {BRANCH}\n")
 
 config = os.path.abspath(f"code/{CONFIG}")
-if REGIME == "matched" and not RESUME:
-    # As bedtime.bash does: trained under the rule it is evaluated in, demand storage.
-    import yaml
-    data = yaml.safe_load(open(config))
-    data.update(regime="matched", evaluation_storage_mode="demand")
-    config = f"{RUN}/config.yaml"
-    yaml.safe_dump(data, open(config, "w"), sort_keys=False)
 print("continuing" if RESUME else "new run", DRIVE_RUN)
 ```
 

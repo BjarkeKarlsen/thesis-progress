@@ -17,7 +17,7 @@ import sys
 BRANCH = "main"                       # a pushed branch of slap-mapd-coupling
 CONTROLLER = "decentralised"          # or "centralised", "section"
 FLEET = 8                             # 8, 16, 32 or 64
-REGIME = "matched"                    # or "matched" (trained under demand storage)
+REGIME = "fixed"                      # the storage rule it trains under: "fixed", "demand" or "congestion"
 COMMUNICATION = False                 # True: decentralised with local communication (RQ5)
 HOURS = 11                            # stop cleanly before Kaggle's 12 h limit (11 for a real run)
 BUDGET = None                         # env steps, None keeps the config's budget (smoke test: 60000)
@@ -58,13 +58,6 @@ with open(f"{RUN}/commit.txt", "a") as f:
             f"{' communication' if COMMUNICATION else ''}\n")
 
 config = os.path.abspath(f"code/{CONFIG}")
-if REGIME == "matched" and not RESUME_FROM:
-    # As bedtime.bash does: trained under the rule it is evaluated in, demand storage.
-    import yaml
-    data = yaml.safe_load(open(config))
-    data.update(regime="matched", evaluation_storage_mode="demand")
-    config = f"{RUN}/config.yaml"
-    yaml.safe_dump(data, open(config, "w"), sort_keys=False)
 
 # ------------------------------------------------------------------ the warehouse tables
 # A dataset in "dataset_sources" of kernel-metadata.json that holds a pool_key.txt is a set of

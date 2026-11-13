@@ -12,9 +12,10 @@
 #                                                is continued on a fresh machine (RESTARTS)
 #   colab.bash stop   SESSION                    stop the session
 #
-# ARM is decentralised or section, REGIME fixed_only or matched. The run goes to
-# TRAINING/fleet_<m>/<arm>/<regime>, the same place as bedtime.bash. When that folder already
-# holds a run, start sends it up and the machine continues it with `slap-mapd resume`.
+# ARM is decentralised or section, REGIME the storage rule it trains under: fixed, demand or
+# congestion. The run goes to TRAINING/fleet_<m>/<arm>/<regime>, the same place as bedtime.bash.
+# When that folder already holds a run, start sends it up and the machine continues it with
+# `slap-mapd resume`.
 #
 # Settings, from the environment:
 #   TRAINING  where runs live at home (~/thesis_runs/training; a scratch folder for a smoke test)
@@ -87,7 +88,7 @@ start() {
     local session=$1 fleet=$2 arm=$3 regime=$4
     local dest=$TRAINING/fleet_$fleet/$arm/$regime key commit tmp
     tmp=$(mktemp -d)
-    trap 'rm -rf "$tmp"' RETURN
+    trap 'rm -rf "$tmp"; trap - RETURN' RETURN  # the trap clears itself, so it does not fire again in watch
     # `colab status` exits 0 for a session that does not exist, so look in the list.
     if ! colab sessions 2>/dev/null | grep -q "^\[$session\] "; then
         log "opening session $session${GPU:+ with a $GPU GPU}"

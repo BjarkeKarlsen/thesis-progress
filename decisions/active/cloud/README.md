@@ -47,7 +47,7 @@ Whether `--gpu` helps is not known yet. The smoke test below measures it.
    run, and a downloaded run evaluates at home. It also times one iteration with and without
    the GPU.
 3. **Decide what goes to the cloud.** Good candidates are the training arms that do not need the
-   PC: fleet 8 and 16, `fixed_only` and `matched`. One notebook per fleet and regime. Each needs
+   PC: fleet 8 and 16, trained under `fixed` and `demand` storage. One notebook per fleet and regime. Each needs
    the fleet's main load from `thesis-progress/results/E_load/`.
 4. **Run them on Kaggle.** CPU sessions do not use the weekly GPU quota. A run longer than 11 h
    continues in a second session.

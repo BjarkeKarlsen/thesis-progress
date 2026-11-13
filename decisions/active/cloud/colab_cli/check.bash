@@ -12,8 +12,8 @@ set -uo pipefail
 FLEET=${1:-32}
 TRAINING=${TRAINING:-$HOME/thesis_runs/training}
 PYTHON=~/.venvs/rl/bin/python
-JOBS=("dec-fix decentralised fixed_only" "dec-mat decentralised matched"
-      "sec-fix section fixed_only" "sec-mat section matched")
+JOBS=("dec-fix decentralised fixed" "dec-dem decentralised demand"
+      "sec-fix section fixed" "sec-dem section demand")
 
 live=$(colab sessions 2>/dev/null)
 for job in "${JOBS[@]}"; do

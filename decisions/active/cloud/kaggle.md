@@ -26,7 +26,8 @@ everything in `/kaggle/working` as the kernel's output. A run that does not fini
 - `kaggle_kernel/train.py`. Clones `slap-mapd-coupling`, installs it with the same Ray as at
   home (2.57.0), trains one arm with `slap-mapd train`, and stops it cleanly with Ctrl-C after
   `HOURS`, so the run folder is always in a state `slap-mapd resume` can continue. The settings at
-  the top are the only part to edit: `CONTROLLER`, `FLEET`, `REGIME`, `HOURS`, `BUDGET`, `GPU` and
+  the top are the only part to edit: `CONTROLLER`, `FLEET`, `REGIME` (the storage rule it
+  trains under: `fixed`, `demand` or `congestion`), `HOURS`, `BUDGET`, `GPU` and
   `RESUME_FROM`. Everything else, the fleet's main load included, comes from the config
   `configs/fleet_<FLEET>/<CONTROLLER>.yaml`.
 - `kaggle_kernel/kernel-metadata.json`. A private script kernel, CPU only, internet on.
@@ -69,8 +70,8 @@ folder and give the copy its own `id` and `title` (for example `slap-mapd-train-
 
 ```bash
 kaggle kernels output bjarkekarlsen/slap-mapd-train -p /tmp/kaggle_out
-mkdir -p ~/thesis_runs/training/fleet_8/decentralised/fixed_only
-cp -r /tmp/kaggle_out/run/. ~/thesis_runs/training/fleet_8/decentralised/fixed_only/
+mkdir -p ~/thesis_runs/training/fleet_8/decentralised/fixed
+cp -r /tmp/kaggle_out/run/. ~/thesis_runs/training/fleet_8/decentralised/fixed/
 ```
 
 ## Continuing
@@ -90,7 +91,7 @@ Then evaluate it at home. The tables are rebuilt or found in `~/thesis_runs/ware
 ```bash
 mkdir -p /var/tmp/ray_eval
 RAY_TMPDIR=/var/tmp/ray_eval ~/.venvs/rl/bin/python -m slap_mapd_coupling.main evaluate \
-    ~/thesis_runs/training/fleet_8/decentralised/fixed_only
+    ~/thesis_runs/training/fleet_8/decentralised/fixed
 ```
 
 Finally copy `decentralised_<regime>_training_progress.jsonl` to

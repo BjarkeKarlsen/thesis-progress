@@ -1,0 +1,16 @@
+{
+  "id": "bjarkekarlsen/slap-mapd-train-comm-demand",
+  "title": "slap-mapd-train-comm-demand",
+  "code_file": "train.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "bjarkekarlsen/slap-wh-fleet8-decentralised-f681777fff13"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}

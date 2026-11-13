@@ -63,13 +63,6 @@ try:
         f.write(f"{JOB['commit']} colab {JOB['controller']} fleet {JOB['fleet']} "
                 f"{JOB['regime']}\n")
     config = f"{CODE}/configs/fleet_{JOB['fleet']}/{JOB['controller']}.yaml"
-    if JOB["regime"] == "matched" and not resume:
-        # As bedtime.bash does: trained under the rule it is evaluated in, demand storage.
-        import yaml
-        data = yaml.safe_load(open(config))
-        data.update(regime="matched", evaluation_storage_mode="demand")
-        config = f"{RUN}/config.yaml"
-        yaml.safe_dump(data, open(config, "w"), sort_keys=False)
 
     env = dict(os.environ, RAY_TMPDIR="/tmp/ray_c", SLAP_WAREHOUSE_STORE=STORE,
                PYTHONUNBUFFERED="1")
