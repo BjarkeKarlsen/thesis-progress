@@ -65,7 +65,7 @@ Status of every tag. *In force* entries are below. *History* entries are in
 | [A7] | Section-based assignment in `tab:information` | In force |
 | [A8] | Model: two open points for full-graph and zone passes | History, resolved by [A29] |
 | [A9] | Training: equal budget and credit | In force |
-| [A10] | Computational cost reporting | In force |
+| [A10] | Computational cost reporting | In force, hardware per method in [A95] |
 | [A11] | Model figure | In force |
 | [A12] | The learning problem still described one learned arm | In force |
 | [A13] | The critic sees the same window as the policy | In force |
@@ -104,7 +104,7 @@ Status of every tag. *In force* entries are below. *History* entries are in
 | [A46] | Orders with several lines and amounts | In force |
 | [A47] | Robots carry the put-away | In force, result measure revised by [A50] |
 | [A48] | The storage rule is a dynamic SLAP, solved with rules | In force |
-| [A49] | Keep-up is throughput against the release rate | In force |
+| [A49] | Keep-up is throughput against the release rate | In force, the measure is the served share since [A96] |
 | [A50] | The result is the mean service time of picks | In force |
 | [A51] | The gain between controllers is a percentage of fixed-storage service time | In force |
 | [A52] | Borrowed concepts and fewer equations | In force |
@@ -1588,6 +1588,8 @@ wrong under [A32] are marked.
     how many agents one decision covers.
   - Pham et al. (2024) does not isolate communication. The sentence now says
     what their experiment shows.
+    **Revised by [A101] (2026-11-18).** This was wrong. Their ablation (Table II)
+    switches messages off. See [A101].
   - Appendix K. The distance-label bound limits how much one step shortens
     `eta_i`, not how much it lengthens it. The "worst case is bounded" claim
     is removed.
@@ -1612,7 +1614,7 @@ wrong under [A32] are marked.
   per timestep are reported next to task throughput.
 - **Why.** External review, 2026-10-20. Split lines and put-aways change the task
   count without changing the customers served.
-- **Open.** The author should confirm `F_fix`-only training as the main result.
+- **Open.** Closed by [A114] (2026-11-23): the author chose matched training only, F_fix-only training is dropped.
   The seed counts are still the open mockup.
 - **Code.** None. `num_completed_orders` is already in `RunMetrics`.
 
@@ -2488,3 +2490,416 @@ wrong under [A32] are marked.
 - **To rerun.** Listed in SESSION_CONTEXT.md: the Token Passing `app:cal:beta` and the congestion
   rows of `app:cal:period`, the congestion-regime training at fleets 8, 16 and 32, and decentralised
   with messages at 16. Fixed and demand runs stay valid.
+
+### [A95] Runtime is measured on one machine, the learned controllers on the GPU and Token Passing on the CPU (Design change 2026-11-15, thesis text edited 2026-11-15)
+
+- **Where.** `4.Implementation.tex`, `sec:impl:cost`. `5.Experiments.tex`, the compute environment
+  paragraph. Tagged `% [A95]`.
+- **What the edit says.** The time per decision is logged on the same machine for every controller.
+  The learned controllers run their policy on its GPU. Token Passing runs on the CPU, the hardware it
+  is built for, so each method is timed on its own hardware. Token Passing's planning time per
+  decision is still what the learned routers' decision time is compared with.
+- **Why.** The learned controllers are a GPU workload and were trained and tested with the policy on
+  the GPU. Token Passing cannot use a GPU. Timing each on its own hardware still shows whether the
+  learned routers decide faster.
+- **Rejected.** kappa_T on the CPU for every controller (the author's choice of 2026-11-13). It holds
+  the learned controllers to hardware they are not built for.
+- **Code.** None. `evaluate --gpu` with 3 test seeds, one policy at a time with nothing else heavy on
+  the PC (unit `rt16-gpu`, `~/thesis_runs/runtime_gpu_2026-11-15_fleet16/`, into `runtime_gpu/`).
+- **Open.** Token Passing's own time per decision must come from this PC too. Fill the
+  "runtime measurement" row of `tab:exp:compute` (RTX 2070 SUPER) once the run is done.
+
+### [A96] The keep-up check counts the work served in the window (Design change 2026-11-16, thesis text edited 2026-11-16)
+
+- **Where.** `3.ProblemFormulation.tex`, "Keeping up" (a new paragraph, eq:throughput and its
+  sentence, the measures table). `E.Load.tex`, the check and how a failing run is reported. Notation
+  rows in `A.Notation.tex` and `2.Notation.tex`. Tagged `% [A96]`. Review:
+  `decisions/active/readability_review/review_served_share.pdf`.
+- **What the edit says.** The check compares the tasks finished in the measured window, whenever
+  they were released, with the tasks released in it, for picks (with ship tasks) and put-aways apart
+  ([A59]). Each share must be at least f_up. New sets R^pick_T, D^pick_T and the same for put-aways
+  (D, since calligraphic F is the storage rule class). A failing run is reported by its served share.
+  C^put_T is no longer used and left the notation table. f_up stays 0.8 (the author's yes of
+  2026-11-16, read as keeping it).
+- **Why.** Since [A66] the old check counted only tasks released in the window. A fleet that fell
+  behind in the warm-up works through its older tasks in the window, so the old share was near 0
+  however much it served. Every learned fleet 16 run read "0 of 20" and the arms could not be told
+  apart, although centralised fixed never went more than about 68 steps without finishing a task.
+  The served share asks what the check is for, whether the queue grows or holds.
+- **Rejected.** Reporting the share next to the old check. The old check fails every run that fell
+  behind early, however much it serves later.
+- **Code.** Branch `feat/served-share` (worktree `~/worktrees/served-share`), uncommitted:
+  `served_counts`, `served_keep_up_parts`, `RunMetrics.served_share` and its pick and put-away parts,
+  `row_keeps_up` reads the shares when a row has them. Tests in `test_evaluator.py`,
+  `test_horizon.py`.
+- **Open.** (1) Appendix E's capacities and so every fleet's main load were found with the old check.
+  Token Passing keeps up with almost no backlog at the main load, so its rows pass either way, but at
+  the capacity edge the two checks can differ. Its rows hold no served counts, so checking needs the
+  load sweep near the capacity played again. Queued 2026-11-16 (unit `load-served`,
+  `~/thesis_runs/load_served_2026-11-16/`, rows in `results/E_load/fleet_<m>/served_check/`). One fleet
+  8 seed at 0.15 reproduced the old row exactly, served share 0.99 picks, 0.97 put-aways. (2) The fleet 16 tests are replayed with the new counts
+  (`~/thesis_runs/replay_served_2026-11-16/`). Until then `fleet16_results.py` draws an estimate from
+  the backlog slope. (3) Fleets 8 and 32 tests have no served counts either.
+- **Revised 2026-11-17 (author's yes, review `readability_review/review_served_share_lines.pdf` v4).**
+  (1) An order line released in the window that still waits for stock at T counts as one released
+  pick. A pick task is made only once its stock is on a shelf, so a fleet whose put-aways fail
+  released almost no picks and its pick share read high (fleet 16 decentralised fixed 4.8, 835 lines
+  waiting). Option chosen: one per line (a line is 1.03 to 1.18 tasks). Rejected: counting by order
+  line, cleaner but new code and every run played again for no change in any verdict, and counting
+  only lines released in the window, which brings back what [A96] fixed. Checked on the replay rows:
+  no keep-up verdict changes, the pick share lands on the put-away share. (2) Lambda_T counts every
+  task finished in the window, whenever released, per step after the warm-up (said in words, no
+  warm-up symbol). It counted only tasks released in the window, centralised fixed 0.036 against
+  0.143. C_T left the formula and the notation rows. Changes the Regime 1 claim in Appendix L about
+  the policy with messages. Thesis: `3.ProblemFormulation.tex` "Keeping up", `A.Notation.tex`,
+  `2.Notation.tex`. Code: branch `fix/served-share-lines` (worktree `~/worktrees/served-lines`),
+  uncommitted. Old rows are updated from their counts (`num_finished_in_window`,
+  `num_waiting_orders`), not replayed. Checkpoints already chosen stay, since validation rows are
+  read back.
+
+
+### [A97] The model's definitions come back from Appendix C, and the idle target is in the Problem Formulation again (Clarity and catch-up, thesis text edited 2026-11-17, uncommitted)
+
+- **Where.** `3.ProblemFormulation.tex`, tagged `% [A97]`: the environment (graph, not grid, vertex
+  numbers break ties, reachability against van Knippenberg), agents and collisions (why not a reward
+  penalty), where the items are (eq:arrivals, the starting stock, eq:estimates, the rule set
+  F and the three rules), orders and tasks (eq:pickuprule), who decides (eq:partition,
+  eq:sectionpolicy), what a decentralised agent sees (the idle target, the two forms the policy reads,
+  eq:congestion, eq:commgraph), the learning problem (tab:posg, the action list), how a run is scored
+  (eq:runtime, eq:decisionproblem), scope (docks without limit, what deadlines and re-tasking would
+  change). `C.ModelDetails.tex`: the arrivals, starting stock, the game table and action list, the
+  reported measures, the decision problem, "What the model leaves out" and the moved "Definitions in
+  full" are removed. The q_i(t) row in `A.Notation.tex` and `2.Notation.tex`. Review:
+  `decisions/active/readability_review/review_pf_content.pdf`.
+- **What the edit says.** Each definition is in words first, then the equation, with an example on
+  numbers the chapter already has. The idle target is in words only: an agent with no task targets its
+  own vertex, or the nearest free endpoint while it is in the way. The free-agent condition stays in
+  words, without its display.
+- **Why.** The chapter had shrunk from about 13,500 words (19 October) to 9,330, and it used symbols
+  it defined only in Appendix C (kappa_T, the section-based policy, F_fix and F, the communication
+  graph). The author's rule of 2026-10-23 says the model's formal definitions stay in the thesis. The
+  idle target of [A72] was lost from the thesis while every config has `idle_parking: true`. The
+  author asked that the text not become too complex, so the short forms of the review were taken.
+- **Cost.** Against [A52], displayed equations go from 34 to 43, and the chapter to about 10,600
+  words.
+- **Code.** None. Checked against `origin/main`: `storage/arrival.py` (refills),
+  `storage_estimates.py` (last five readings), `observation.py` (crowding denominator, the two
+  distance forms), `reward_function.py::current_target`, `idle_parking: true` in every config.
+- **Open.** Docks without limit was a TODO in Appendix C and is now stated. Well-formed warehouses
+  stay out of the chapter.
+- **Revises.** [A52] (definitions moved out), catches up [A72].
+
+### [A98] The Problem Formulation opens with the problem, and the expected outcome names the coupling
+
+**Where.** `3.ProblemFormulation.tex`, opening of Section `sec:problem`. `2.Introduction.tex`, Subsection "Expected outcome".
+
+**What.** The Problem Formulation now opens by naming the three decisions it couples (storage assignment, task assignment, path finding), then states in plain words what is decided, the three limits (room, no collisions, pick only stock on the shelf) and the score (order time, among pairs that keep up). It points forward to `eq:decisionproblem` in `sec:pf:measures`. The expected outcome now says the thesis delivers a coupling of the three problems, and lists the measured answer each research question gives.
+
+**Why.** The formal statement needs symbols built over the whole chapter, so it stays at the end. A reader still needs to know from the first lines what the chapter builds towards. Asked by the author 2026-11-17.
+
+Later the same day the expected outcome also got the predictions per research question, written before the results are read. The centralised controller gaining most comes from `5.Experiments.tex` ("What deciding together changes"). Keeping up and coming close to Token Passing is the author's aim. The RQ2 balance comes from the introduction. The decentralised controller stopping first (RQ3) and messages helping where routes cross (RQ4) follow from the controllers' design.
+
+**Model change.** None. Wording only.
+
+### [A99] Results and Discussion for 8 and 16 agents, served share first
+
+**Where.** `5.Experiments.tex`, Results and Discussion. `L.Results.tex`, 16-agent block and the new `tab:app:locks`.
+
+**What.** Review `review_results_discussion_fleet16.pdf` v5, approved 2026-11-17. Results report 8 and 16 agents side by side, with a 32-agent column left TBD. The learned controllers are compared by served share, because even seeds that pass the keep-up check leave work behind and their orders take 300 to 3200 steps against 150 to 280 under Token Passing. Service time and its gain are reported for Token Passing only, as the order time (the result of the Problem Formulation) with the pick time beside it. New tables `tab:exp:served`, `tab:exp:locks`, `tab:exp:time`, and `tab:exp:rq1` rewritten per fleet. Discussion fills "What was expected" ([A98]) and adds "The load" and "What could have been done differently" (longer training episodes, more training, a way out of locks, imitation of Token Passing).
+
+**Decisions by the author (2026-11-17).** f_up stays 0.8, every result uses it. The main loads stay, because every run used them, and the Discussion says they assumed every controller would keep up. Order time is the headline. Fleet 32 gets its own column. Token Passing at 8 agents is replayed on the test seeds (`~/thesis_runs/tp_testseeds8_2026-11-17`).
+
+**Open.** Token Passing fleet 8 rows still play seeds 0 to 19 until the replay is home (TODO in `5.Experiments.tex`). Fleet 8 centralised fixed (Kaggle). The section-based Regime 1 row in `tab:app:regime1:16` (rerun20). Fleet 32 tests. `fleet16_served.png` to redraw from the revised counts.
+
+### [A100] RQ4 drops its second part, on where routes cross
+
+**Where.** `2.Introduction.tex`, RQ4 in Subsection "Research question". Tagged `% [A100]`.
+
+**What.** RQ4 now asks only whether local communication makes the decentralised controller route better than what a robot sees on its own. The second part, whether that depends on robots close on the graph being the ones whose routes cross, is dropped.
+
+**Why.** Nothing in the thesis measures whether close agents are the ones whose routes cross, and no experiment varies it, so that part could not be answered. Raised in the review `readability_review/review_project_description.pdf` v2, decided by the author 2026-11-17.
+
+**Closed by [A102] (2026-11-18).** The prediction and the Conclusion sentence are reworded there.
+
+**Was open.** The RQ4 prediction in the Expected outcome ("messages should help most where agents close on the graph are also the ones whose routes cross") and the Conclusion sentence in `5.Experiments.tex` ("Messages helped only under fixed storage, not where routes cross in general") still use the idea. Their wording waits for the author.
+
+**Model change.** None. Wording only.
+
+### [A101] Background and Related Work rewritten, Pham and Bera corrected
+
+**Where.** `3.Background.tex`, all of it. `references.bib`, five new entries. Tagged `% [A101]`.
+
+**What.** Review `readability_review/review_background_related_v2.pdf`, approved 2026-11-18. The Background explains ideas only. It has no sentences about this thesis and no forward references. Subsection "Multi-Agent Reinforcement Learning" is now "Reinforcement learning", with many agents in its last paragraphs. Each paper is described once, in the Related Work, with what it found and what it leaves fixed. Wang (2009) is dropped. The weak sources are replaced: Reyes et al. (2019) for the company blog, Ma (2022) for the teaching handout and for NP-hardness (both costs), Hardin (1968) for the CoMSES page. The knapsack textbook and Y. Li et al. (2023) are gone. New entries are Q. Li et al. (2020), Q. Li et al. (2021, MAGAT) and Z. Ma et al. (2021, DHC). Their text follows their arXiv abstracts. The bib data comes from Crossref.
+
+**Pham and Bera, correcting [A55].** [A55] said they never test their policy without messages. Their ablation (Fig. 5, Table II) does. In an 80 x 80 world with 4 agents, success falls from 85% to 79% without messages and to 75% without the crowd reward. The fair criticism is one test setting and baselines copied from earlier papers. The thesis's on/off test of messages (RQ4) is still a clean comparison, but not the first one.
+
+**Open.** Two TODOs in the chapter. Weidinger et al. and Merschformann et al. need one sentence of result each, and their abstracts must confirm that traffic is not fed back into storage. The last paragraph of the research gap was done in [A102].
+
+**Model change.** None. Wording and sources only.
+
+### [A102] Project Description and the end of the research gap rewritten, RQ4 no longer conditional
+
+**Where.** `2.Introduction.tex` (Project Description, and "drive" in the Introduction), `3.Background.tex` (last paragraphs of `sec:rw:gap`), `3.ProblemFormulation.tex` (two sentences on RQ4), `5.Experiments.tex` (factors paragraph, factor table, Discussion). Tagged `% [A102]`.
+
+**What.** Review `readability_review/review_project_description_v3.pdf`, approved 2026-11-18.
+- Scope. The main load is one where every controller *should* keep up. Congestion-aware storage runs at the main load and a higher load, and a sweep of rising loads shows when the gain of demand storage disappears.
+- Measures. Order times are compared only when both runs keep up. Otherwise the served share is compared, and it also answers RQ4.
+- Questions. The main question drops "graph-based warehouse". RQ2 asks whether closing the loop makes orders faster than demand storage, and whether a fleet that falls behind serves more. RQ3 asks whether the gain grows, shrinks or disappears. The paragraph after the questions keeps only the reason for the percentage. The communication paragraph is cut, its reason moved to the list of factors.
+- Expected outcome. Shorter, keeps "coupling" ([A98]). The RQ4 prediction is now that messages help the decentralised controller clear crowding near it and finish more tasks.
+- Research gap. Names two results, the controlled comparison of fixed and demand storage first, closing the loop with congestion-aware storage (the thesis's own rule) second.
+- RQ4 is no longer called conditional anywhere. The Discussion drops "not where routes cross in general".
+
+**Decisions by the author (2026-11-18).** Keep the main question. The served share in the measures is enough for RQ1 with learned controllers. RQ3 wording fine. Order of the two results as above.
+
+**Model change.** None. Wording only.
+
+
+### [A103] Problem Formulation up to "Orders and tasks" made readable, pallets, contributions in one place
+
+**Where.** `3.ProblemFormulation.tex` (opening, `sec:pf:env`, `sec:pf:agents`, `sec:pf:storage`, one phrase in `sec:pf:measures`, "Docks without limit"), `4.Implementation.tex` (`sec:method:storage`, `sec:method:resolution`), `2.Introduction.tex` (new `sec:pd-contributions`), `3.Background.tex` (end of `sec:rw:gap`), `5.Experiments.tex`, `A.Notation.tex`, `2.Notation.tex`, `B.Parameters.tex`, `C.ModelDetails.tex`, `E.Load.tex`, `G.StorageValues.tex`, `H.Horizon.tex`, `styles/eqnames.tex`, figures `arrival_storage.png`, `storage_update.png`, `shelf_loop.png`. Tagged `% [A103]`.
+
+**What.** Review `readability_review/review_pf_env_storage.pdf` v4, approved 2026-11-18.
+- Contributions are listed once, in a new subsection after the research questions. The expected outcome keeps only the expectations. The research gap ends by pointing to the contributions.
+- The Problem Formulation names what it borrows and points back to the Background by number and name ("Section III-A, Storage assignment"). No forward references are added.
+- Reachability now says what the code builds. Every warehouse (layout v2, `instances/generator.py`) is well-formed, and so strongly connected. The old sentence said the model asks for less than van Knippenberg's condition.
+- The move equation `eq:transition` goes. The action model is said in words, with its name and citation. The penalty argument moves to `sec:method:resolution`.
+- `sec:pf:storage` gets a new order: storage state and room, how stock changes, the storage rule and the three rules with the tea example, what the rule reads, the storage update with its example. SKU and room are explained in words. The symbols for stock on its way, `x_0`, `y^ord` and the equations `eq:upd:*` go. `eq:storageupdate` is a signature written mostly in words. `eq:estimates` keeps only the order estimate.
+- `D`, `K` and `D + beta K` (`eq:storageobjective`) and the five-period formula of `omega_hat` (new `eq:standstill`) move to `sec:method:storage`.
+- "Pallet" replaces "refill" as the name of a batch of new stock, in every chapter and appendix. The verb "refilled" and the labels stay. The code keeps `refill_units`.
+- The three tea figures are redrawn in the look of the pygame viewer ([A104]), with short panel titles and a one-line legend.
+
+**Decisions by the author (2026-11-18).** Keep `c(v,w)`. Keep `rho_hat` as a display, since the next equation uses it. Pallet is the only name. The two tea figures may swap numbers. The text follows the code from now on, because the results are run.
+
+**Model change.** None. Wording, order and notation only.
+
+### [A104] The style every thesis figure follows: the pygame viewer decides (Figure style, decided 2026-11-18)
+
+**Where.** All figures drawn by `thesis-progress/scripts/images/`, copied to `thesis/Images/`. First applied to `arrival_storage.png`, `storage_update.png` and `shelf_loop.png` ([A103]).
+
+**The rule.** The pygame viewer of `slap-mapd-coupling` decides how the warehouse looks. Its values are in `viz/theme.py` (`ROLE_STYLES`) and `viz/pygame_renderer.py` (`_PHASE_COLOURS`, `_RANK_STOPS`, `_draw_slots`, `_marker`). They are copied into `base.py` as `PG`, `RANK_STOPS` and `rank_colour()`, so `thesis-progress` does not import the other repo. If the viewer changes, `base.py` follows it.
+
+**The style.**
+- **Base.** Every script imports `base.py`: serif text, math in the LaTeX font (`mathtext.fontset = "cm"`).
+- **Marks, as in the viewer.** An aisle position is a small white circle with a grey rim (`aisle_node`). A shelf is a square slot, white with a blue rim (`shelf_slot`). A workstation is an orange-filled square (`work_mark`). A dock is a purple triangle (`dock_mark`). A parking endpoint is a green diamond. A shelf and a workstation are both squares, and they are told apart by the fill, white with a blue rim against orange.
+- **Stock on a shelf.** The slot fills from the bottom, one band per SKU, the most popular lowest, in the viewer's popularity colours (dark red, then orange, light blue, pale blue). New stock on its way is striped in the put-away colour on top. A slot a put-away reached gets a purple rim.
+- **Agents and trips.** An agent has the viewer's colour for what it does: grey when idle, orange on its way to a pick, red on its way to a workstation, purple on a put-away, green when shipping. A trip is a thin line in that colour along the aisles it uses, just beside the edges. A put-away is dashed. When two trips use the same edge they run on opposite sides. No free curved arrows. Named agents are $a_1$, $a_2$, ...
+- **Text.** One dark grey for all labels and notes. Panel titles are short names, "(a) Fixed storage", not sentences. The figure carries only the numbers the text uses ("6 edges", "stood still 5 steps", "20/20"). No aisle labels, and nothing the caption already says.
+- **Legend.** One line under the figure, plain words (shelf, workstation, dock, aisle), then the SKUs, the fills and the lines the figure uses.
+
+**Why.** The author decided the viewer sets the look, so a figure and a screen of the viewer show the same warehouse. Earlier figures looked machine-made (sentence titles with colons, notes in several colours, curved arrows, legends of eight to ten entries), and the shelf marks differed from figure to figure.
+
+**Redrawn (2026-11-18).** Every thesis figure that draws a warehouse now uses these marks: `arrival_storage.png`, `storage_update.png`, `shelf_loop.png`, `instance_simple.png` (Fig. 1), `instance.png`, `observation.png`, `warehouses.png`, `warehouses_seeds.png` and `workstation_lock.png`. `base.py` `ROLE_MARK` holds the role marks for whole-warehouse drawings, which `m8.py`, `warehouses.py` and `workstation_lock.py` share. One-way edges are blue arrows, as in the viewer. A route takes the phase colour of each leg (orange to the pickup, red to the workstation), and agents in `workstation_lock.png` take their traced phase. `conflicts.png` and `wellformed.png` draw only aisle circles and parking diamonds, which already match.
+
+**How.** Change the script, run it, look at the PNG, then copy it to `thesis/Images/`. Never edit a PNG in `thesis/Images/` directly.
+
+### [A105] "Orders and tasks" and "A task's life" made readable, the stock condition at creation, the standing-still measure explained
+
+**Where.** `3.ProblemFormulation.tex` (`sec:pf:storage` four paragraphs, `sec:pf:tasks` and `sec:pf:lifecycle` rewritten, sigma(j) defined in "Direction to the target", one phrase in `sec:pf:scope`), `4.Implementation.tex` (`sec:method:storage`, the tie rule), `5.Experiments.tex` (Discussion, new paragraph "What the congestion measure misses" and a threats item), `6.Conclusion.tex` (Future work, learned storage), `2.Notation.tex` and `A.Notation.tex` (rows of tau_j, s_j, q_i(t)), figures `pickup_rule.png` (new, `pickup_rule.py`) and `lifecycle.png` (redrawn in the viewer style, [A104]). Tagged `% [A105]`.
+
+**What.** From the author's red comments on the PDF of 2026-11-18, through a review PDF approved and applied the same day and then deleted.
+- `sec:pf:tasks` tells one story: orders, sections, from order to tasks, three kinds of task (new `tab:taskkinds`), the task, promised stock, the pickup rule with `fig:pickuprule`, the stock condition, congestion-aware storage (new `tab:rules`), running out.
+- Reasons added for drifting popularity, sections (logic only, the step 12 sweep stays in its appendix), one workstation per order, reservation, and an agent carrying any amount.
+- "Pickup vertex" is dropped. s_j is "where the task picks up", a shelf, dock or workstation by kind. The notation table says "pickup place", the word of the Background.
+- Ma et al. (2017) cited for the task (s_j, g_j), and for the service time. Release time, SKU and amount are the thesis's own.
+- The tie rule (lower vertex number first) moves to the Implementation chapter.
+- The online shop sentence and "tally" go. "Storage layer" goes.
+- `sec:pf:lifecycle`: the reason for three stages first, the description list merged into `eq:lifecycle` with names, sigma(j) moved to where it is used, the repeated service time paragraph cut.
+- Discussion: congestion-aware storage cannot see detours (only stated, no claim about the learned controllers). Threats: no storage rule is learned. Future work: storage is not learned because of training cost and because two learners make the source of a result unclear.
+
+**Model change.** None. Two places now say what the code does ([code decides], 2026-11-18): the stock condition holds when the pick is created, not at `t_j^released`, since a pick keeps its order's release time when its line waited for stock. A line short of stock takes what there is and only the rest waits. `hat omega` counts every step a pick stands still, whatever the reason.
+
+**Follow-up the same day (author asked to check flow and the appendices).** Wording only. Two repeats cut (popularity said twice in the order paragraphs, the wait-for-an-agent reason said twice in `sec:pf:lifecycle`). `q` named before `eq:pickuprule`. The goods-to-person sentence moved before the order's path. "The same number" in the congestion-aware bullet named. "Has to stand still" became "stands still", to match "whatever the reason". Appendices: `F.Demand.tex` (a line gives one pick or more, "storage layer" gone), `D.Warehouses.tex` (the flow paragraph told in order, without "First, Second", and a short line takes the rest from the next storage vertex), both notation tables (`V_str` "shelves", `g_j` "delivery place", the release time of a pick that waited). `D.Warehouses.tex` keeps "storage vertex", since it builds the graph.
+
+### [A106] "Who decides" made readable, the full-view setting removed, one name "controller"
+
+**Where.** `3.ProblemFormulation.tex` (`sec:pf:controllers` rewritten, conflict resolution named in `sec:pf:agents`, `fig:crowding` new in "How crowded the neighbourhood is", the state in `sec:pf:game` points back, one sentence on `pi_theta` after `eq:objective`, `sec:pf:coupling`, `sec:pf:measures`), `4.Implementation.tex` (opening, `fig:methodloop` caption, `eq:credit` paragraph, `sec:method:reference` now "A reference point"), `5.Experiments.tex`, `6.Conclusion.tex`, `2.Notation.tex` and `A.Notation.tex`, `B.Parameters.tex`, `J.Training.tex`, `L.Results.tex`, `styles/eqnames.tex`, figures `controllers_window.png` (redrawn without delta, short titles) and `crowding.png` (new, `crowding.py`). Tagged `% [A106]`.
+
+**What.** From the author's red comments on the PDF of 2026-11-18, through a review PDF approved and applied the same day and then deleted.
+- `sec:pf:controllers` in one order: what a controller decides, what the three share (one assignment rule, conflict resolution, the kind of network, the budget), the state `s_t` defined before use, then centralised, section-based and decentralised once each, with short paragraph headings, and the table and figure last as a summary. The Assignment column of `tab:information` goes.
+- Forward references to `sec:method:resolution`, `sec:method:controllers`, `sec:method:training` and "the next section" go. "Trained the same way" and "trained only on what it can see" go (method, and the reason is in `sec:method:training`).
+- The centralised controller gets the sentence on why it is still central. The collision rule keeps only what differs from `sec:pf:agents`. The claim mask details stay in `sec:method:controllers`.
+- The decentralised policy is `pi^dec_theta`, new `eq:decentralisedpolicy`. `pi_theta` in `eq:objective` stays generic, with one sentence naming the three policies.
+- Conflict resolution is named in `sec:pf:agents`, "one of the agents waits instead". The order stays in `sec:method:resolution`.
+- delta leaves `fig:controllers-example` and gets `fig:crowding` in V-G3. `sec:pf:coupling` and `sec:pf:measures` point to it.
+- The full-view setting goes from the thesis, because it was not run. The code keeps `configs/full_view.yaml`.
+- "controller" replaces "arm" (33 lines, Experiments and appendices B, J, L, RQ4) and "architecture" where it meant a controller. "Architecture" stays where it means the network.
+- The overview before Scope is aligned: `lambda_task` counts order lines (as the code and the notation table), the storage objective and `K` are no longer named in the Problem Formulation, the seeding sentence points back to `sec:pf:tasks`.
+
+**Model change.** None.
+
+### [A107] Small text-to-code fixes in "Choosing together" and "When moves still clash"
+
+**Where.** `4.Implementation.tex`, `sec:method:controllers` and `sec:method:resolution`, `fig:workstationlock` caption. Tagged `% [A107]`.
+
+**What.** From `readability_review/method_controllers_comments.md` (A1, A3, A4, C1 in part) and `method_resolution_comments.md` (A1, A4, B1, C1), applied 2026-11-20 on the author's word to fix small known mistakes. The text now follows the code (rule of 2026-11-18).
+- The centralised network runs on every vertex an agent can stand on, not "all vertices" (`arm_windows`).
+- The one shared pass is named as Knippenberg's single-agent setup (his Section 6.2).
+- The zones are blocks of neighbouring aisles (`zones_by_aisle`). Whether a zone and a SKU section get different names is still open (C1).
+- Halo vertices carry every feature and no agent on them chooses in the zone. The old text said they show only role and occupancy and get no move scores. The halo's range keeps a border agent's whole field of view in its window. The old reason, that it keeps the crowding feature the same, did not hold, because crowding is always counted over the field of view.
+- "Handled after that agent" cites Knippenberg (Section 4.2).
+- "The order priority" and "successor vertex" in the conflict resolution steps become "the priority order" and "the vertex it asks for".
+- Only a centralised joint action is always accepted whole. A section-based one can be changed at a zone border.
+- The caption of `fig:workstationlock` names the decentralised controller without messages and an earlier run, instead of "test seed 200000".
+
+**Model change.** None. The readability points and the open questions stay in `review_controllers.pdf` and `method_resolution_comments.md`.
+
+### [A108] Small known mistakes fixed by the section and appendix review subagents
+
+**Where.** `4.Implementation.tex` (`sec:method:training`, `sec:method:reference`, `sec:implementation`), Appendices A to L, `styles/eqnames.tex`. Tagged `% [A108]`.
+
+**What.** On 2026-11-20 the author asked for the rest of the Method chapter and every appendix to be reviewed by one subagent each (`readability_review/SUBAGENT_BRIEF.md`), with small known mistakes fixed directly. Each fix makes a sentence, caption, table cell or reference agree with the code, the cited paper or the thesis. The full list, with the evidence for each fix, is under "Fixed ([A108])" in each comments file (`method_training`, `method_reference`, `implementation`, `appendix_A` to `appendix_L` in `readability_review/`). In short:
+- Method: "router" becomes "controller"; the critic "sees the same window as its own policy"; a broken `\nref` sentence on the coupling; Token Passing runs under every storage rule and its vertex rule is stricter than Ma et al.'s; the correctness checks run in the test suite and, for conflicts and capacity, at every training step, not "on every experiment"; doubled equation names; a shipment is a task kind.
+- A: c_wait is from van Knippenberg; two unused rows removed; the backlog counts order lines; W_T is per pick; omega_i(t) and the waiting-line rule added; `eq:relativeeta` gets a name in `eqnames.tex`.
+- B: tables made to fit; gamma 0.99 and the three PPO values cited from Schulman et al.; d_obs 5 from van Knippenberg; 20 test seeds; the main loads 0.09, 0.18, 0.3, 0.6 replace the 3-agent pilot of [A31]; "drift period".
+- C: eleven fixes, among them the random docks, the mean over neighbours, the CRAMP feature index, v named in the two masks, Table C.1 matched to Fig. 9.
+- D: the shelf count, parking placement, Table D.1 and the Results numbers rerun on the current generator ([A77]).
+- E, F, G, H, I, J, K, L: wording that contradicted the served check ([A96]), the pick gain named as pick, references to the right sections, seed and fleet details, typos, column headers that called pick service time zeta-bar.
+
+**Model change.** None.
+
+### [A109] The worst text-to-code mistakes fixed without the author
+
+**Where.** `3.ProblemFormulation.tex`, `4.Implementation.tex`, `5.Experiments.tex`, Appendices A, B, C, F, H, I, J, K, `2.Notation.tex`, `styles/eqnames.tex`. Tagged `% [A109]`.
+
+**What.** On 2026-11-20 the author asked for the worst mistakes to be fixed without them (`readability_review/FIX_BRIEF.md`). The code decides (rule of 2026-11-18). Choices stay with the author and are listed in `method_review_queue.md`.
+- **Reward ([A89], [A90]).** The reward text now matches the code. [A89] and [A90] were adopted in the code (`reward_function.py`, on `main`) after the RL review of 2026-11-10, but had no GAPS entry. [A89] makes the potential minus the distance left in the whole task, before pickup the distance to the pickup plus the trip on to the delivery, after pickup the distance to the delivery (new `eq:taskpotential`), so it does not jump at pickup. The observation's distance label is unchanged. [A90] counts progress only within the task served at t. The finishing step ends at potential 0, a new task is never charged, and an idle agent gets no shaping. This replaces [A79]'s "charge once" rule, which made fleet 32 agents stop just before the workstation. Ng's guarantee now holds only within a task. Also corrected: over a route a detour of k steps costs k c_move against k c_wait for waiting, so "yielding is cheaper than a detour" was false, and the section now says who pays the override term under each controller. Places: `sec:method:rl`, one sentence in `sec:method:model`, the Phi row of `A.Notation.tex` and `2.Notation.tex`, `I.Reward.tex`. Left: the code docstring of `reward_function.py` still describes [A79], and `3.Background.tex:109` presents Devlin and Kudenko for a potential that changes over time.
+- **Problem Formulation, Experiments, Appendices C and F, facts.** No model change. Every network reads only its own agent's crowding delta_i (PF V-G and C.2.2 had said a zone or the centralised controller reads all its agents' values). The transition kernel also draws the dock of each shipment and put-away at random (PF V-H and the scope item). The backlog counts order lines waiting for stock, not orders. The Zipf weight 1/(r+1) applies within the section of the drawn workstation, so a SKU's overall share is only roughly 1/(r+1) (Experiments, Appendix F). The drift rotates the ranking, so the top SKUs drop to the bottom in one step. The fleet is calligraphic A at PF line 87. `sec:impl:instances` moved from a paragraph to its subsection, so it prints VIII-A, not VIII-A0c. Appendix C cites `eq:standstill` for omega-hat.
+- **The lock and Token Passing (`sec:method:resolution`, `sec:method:reference`).** The lock of Fig. 15 is told as it happens in the trace, not as a circle the rule forces. Agents in front of the workstation often choose to wait, and the rule refuses moves onto an agent that stays. When both ask at once they swap and both wait. In the trace both happen (295 of 843 steps contain a circle, 748 refused moves are onto an agent that chose to wait). Who pays, from `reward_function.py`: a refused move costs c_wait + n_blocked, a chosen wait c_wait, and in a circle every agent pays. Messages do not change the credit. The rejected rule is named as the [A91] cap on tasks per workstation, and no back-out rule is added so that learning to back out stays part of what is measured. Why Token Passing never locks (the vertex hold and well-formed warehouses, [A91]) is said once in `sec:method:reference`. The randomness of P includes the random docks. Model and code unchanged.
+- **Stall and horizon.** No model change, the code decides. The thesis said a stall is one agent holding a task that stands still too long. The code (`evaluator.py`, D18) flags a run as stalled when the whole fleet goes longer than the stall length after the warm-up without finishing a task. The per-agent stand-still is only a diagnostic, because under Token Passing an agent's waits are often planned. The PF, Appendices H and K and Table B.5 now say this. The stall length stays TBD because no config sets it, so no reported run counts stalls. The evaluation horizon was "2000 or more, open". Every reported test run plays T = 10000 and leaves the first 5000 out (D22), and training episodes are 2000 steps. Appendix H, the Experiments and Table B.5 now give these values. H's figures are not redrawn, their captions say they come from the earlier graph runs of 24 October.
+- **Main session.** The Experiments say that m of the rack faces left over become parking and the rest are not built (`generator.py` `_v2_stations_and_slots`, D25), not every leftover face and wall cell. The trip of a shelf at 8 agents is 17 to 38 steps (`eq:shelftrip`, rerun in `results/D_warehouses/instance_report_2026-11-20`), not 11 to 34. Shelf ties in `sec:method:storage` are broken by the plain trip and then by index (`storage/arrival.py` `_refill_scores`), not by index alone. `styles/eqnames.tex` gains names for `eq:relativeeta` and `eq:taskpotential`.
+- **Training values.** Code decides. The text called the training values TBD or planned to sweep them, but every trained run uses the same ones: L = 2, hidden and head width 32, minibatch 128, 5 epochs, entropy 0.02, value-loss weight 1.0, one episode per runner, seeds 250/5/20, 500 000 steps on 2000-step episodes, reward weights 10/0.5/0.1, 3 zones. Appendices B and J give these values, "set" where ours by choice and "open, not tuned" for the model and PPO values. No sweep of L, width or PPO values was run, so J's planned sweep tables are removed. J says the loss is RLlib 2.57's PPO loss, which adds an adaptive KL penalty (0.2, target 0.01) and a value-loss clip of 10. Validation uses 5 seeds at the training episode length. Lines per order is 1 + Poisson(4). Safety stock per fleet is 16/18/17/16 from G. The further training of the 16-agent runs (warm start, 2 000 000 steps on 16 000-step episodes) is stated as a fact, not as the policies the results use. `sec:method:training` drops the unused fallback. Not a model change.
+
+**Model change.** In the text only. [A89] and [A90] (the reward) and D18 (the fleet-level stall) and D22 (10000 steps with 5000 left out) were already in the code and are now in the thesis. The code is unchanged.
+
+### [A110] The learned controllers compared on served share, seed by seed, and the chapter reports 16 agents (author approved 2026-11-23, review_seed_spread.pdf v4)
+
+**Where.** `5.Experiments.tex` (Scoring a condition, the results opening, Keeping up, new "Why the count does not follow the mean", `tab:exp:served`, `tab:exp:locks`, RQ1 the controller, RQ2, RQ4, What was expected, Why the learned controllers fall behind, What could have been done differently), new `fig:exp:seeds` (`Images/fleet16_seeds.png` from `thesis-progress/scripts/images/fleet16_seeds.py`), `L.Results.tex` (8 agents opening). Tagged `% [A110]`.
+
+**What.**
+- Service time is compared only when both runs keep up on every seed (unchanged). Every other pair is compared on served share, with the paired difference over the same 20 seeds and a 95 % interval. The count of seeds that keep up is a gate and does not rank, because it follows the spread of the seeds, not the mean. Hard seeds are shared by every controller (correlation between runs 0.57 to 0.93) and locks drop single seeds far down. Under congestion-aware storage the three learned controllers cannot be told apart (centralised minus section-based 0.020 [-0.033, 0.073], minus decentralised 0.013 [-0.022, 0.048]).
+- Rejected: comparing service time on the seeds where both runs pass, because it keeps only the easy seeds.
+- The chapter reports 16 agents. The 8-agent learned results move to Appendix L, because those policies trained only the first budget (500 000 steps on 2000-step episodes, checkpoint chosen on 2000-step runs), while the 16-agent policies were trained again for 2 000 000 steps on 16 000-step episodes. Side by side the two fleets would mix fleet size with training length. Token Passing's 8-agent gain stays in RQ1, since it needs no training (author). The 32-agent columns leave the chapter tables for the same reason (author).
+- `tab:exp:served` holds served share and seeds that keep up in two blocks, no brackets.
+- The Discussion no longer says the policies trained on 2000-step episodes. It says what the long training did (decentralised congestion-aware 0.66 to 0.80, section-based fixed 0.63 to 0.76), and longer episodes are no longer offered as untried.
+- Open: the cells of centralised fixed and demand, section-based demand and with messages under demand and congestion-aware storage are first-run numbers until their long runs are evaluated (`% TODO [A110]`).
+
+**Model change.** None.
+
+### [A111] The keep-up threshold f_up from 0.8 to 0.9 (author approved 2026-11-23, review_seed_spread.pdf v4)
+
+**Where.** `3.ProblemFormulation.tex` after `eq:throughput`, `E.Load.tex` (`app:cal:load`, conclusion), `B.Parameters.tex`, `5.Experiments.tex` (Keeping up, The load). Tagged `% [A111]`. Code: `keep_up_threshold` in the configs (author's PR), `served_counts.py` `F_UP`.
+
+**Why.** 0.8 came from the 630-step pilot of [A31], where the tasks under way at the end were a large part of the run. Under the [A96] count the tasks under way at the start and at the end roughly cancel, and a steady fleet serves about 1.0. Token Passing on the test seeds: lowest seed 0.947 at 8 agents, 0.954 at 16, all 120 runs pass 0.9. At 0.8 the learned seeds that pass still grow their queue by 38 to 101 tasks over the measured steps (orders 1200 to 1700 steps), so "passing means steady" was false for them. At 0.9 their passing seeds stay within -28 to +14 tasks. With the served count, 0.9 gives back Appendix E's capacities (0.15, 0.3, 0.5, 1.0, served_check rows), so the main loads stay at 0.6 of capacity, and the Discussion's "about 0.5 of capacity" goes. 0.95 is too tight (Token Passing's put-aways reach 0.954).
+
+**No rerun.** Every row stores the pick and put-away shares, so keep-up is recounted. The checkpoint choice ([A60]) recomputed at 0.9 from the validation rows picks the same checkpoint for all seven evaluated long runs. The calculation was checked: `served_counts` matches `eq:throughput`, and arriving minus finished work matches the measured queue growth (correlation 0.986 over 140 long-run seeds).
+
+**Open.** Capacity also needs every lower tested rate to pass at 0.9. Played again on Kaggle (`slap-load-sweep-low`, 2026-11-23), `% TODO [A111]` in Appendix E. Appendix L's keep-up columns are recounted when its tables are rebuilt with the long runs.
+
+**Model change.** The value only.
+
+### [A112] Shipments are created only when their order is complete, a known limit (author approved 2026-11-23)
+
+**Where.** `5.Experiments.tex`, Threats to validity. Tagged `% [A112]`.
+
+**What.** A ship task is created when the order's last unit reaches the workstation (`_ship`, `multi_agent_env.py`). A fleet that falls behind owes shipments that are not counted yet, so its served share reads high, the same fault [A96] fixed for lines waiting for stock. Estimated from the rows at about 0.01 for the best learned runs and 0.05 for the weakest, one seed's verdict changes. Token Passing finishes nearly every order. Measured exactly after all evaluations by a replay of the order stream alone (queued in `SESSION_CONTEXT.md`). Counting one shipment per arrived order is not applied to the finished runs, so all runs keep one count. It is the fix for later work.
+
+**Model change.** None.
+
+### [A113] No controller sees orders, and deadlines on orders as future work (author 2026-11-23)
+
+**Where.** `5.Experiments.tex`, new paragraph "Orders are not seen" and an item in "What could have been done differently". Tagged `% [A113]`.
+
+**What.** Checked in the code. The assignment rule hands out the oldest waiting task to the nearest free agent (`controllers/assignment.py`), the network chooses only moves and sees no order or task age (`environment/observation.py`), the reward pays every finished task alike (`reward_function.py`), and Token Passing takes the task nearest to its agent (`planners/token_passing.py`). So no controller favours finishing an order, while the result is order service time. A first step needs no deadline, an assignment rule that finishes started orders first (author). Future work after van Knippenberg et al. (2021, Section 4.1, Table 1, checked): a deadline per order, an earlier deadline per task derived from it, assignment by least time to spare, the time left as an agent feature, a cost per late step.
+
+**Model change.** None now. The scope already excludes deadlines.
+
+### [A114] One training setup, each storage rule with its own policy (author approved 2026-11-23, review_training_setup.pdf v3)
+
+**Where.** `sec:method:training` (`4.Implementation.tex`), `5.Experiments.tex` (Training paragraph and its mockup, Run plan, training results mockup and `fig:exp:learning`, RQ2, the training-time row), `J.Training.tex`, `L.Results.tex` (`app:results:regime1` and `tab:app:regime1:16` removed). Tagged `% [A114]`.
+
+**What.** Replaces [A56] on the training setups. The thesis reports only policies trained under the rule they are tested with, and does not mention the other setup. The fixed-trained test (Regime 1) is dropped. Its rows and the removed text are kept in `thesis-progress/results/dropped/regime1_fixed_trained/`. The RQ2 claim that the gain comes with training, not the rule alone, rested on that test and is cut.
+
+**Why.** The results already used this setup. The Regime 1 rows came from the old 500 000-step policies, the research questions do not need them, and one training run per rule could not separate rule from training anyway. Rejected: rerunning Regime 1 on the long policies.
+
+**Model change.** None.
+
+### [A115] Names: SKU category, W_1, h(k) without hat, v*_i(t), N_t, v_(i) (author approved 2026-11-23)
+
+**Where.** `thesis/Chapters/3.ProblemFormulation.tex`, `thesis/Chapters/4.Implementation.tex`, `thesis/Chapters/5.Experiments.tex`, `thesis/Chapters/2.Notation.tex`, `thesis/Appendices/A.Notation.tex`, `thesis/Appendices/B.Parameters.tex`, `thesis/Appendices/C.ModelDetails.tex`, `thesis/Appendices/D.Warehouses.tex`, `thesis/Appendices/E.Load.tex`, `thesis/Appendices/F.Demand.tex` (rename words only), `thesis/Appendices/G.StorageValues.tex`, `thesis/Appendices/K.Checks.tex`. Tagged `% [A115]`.
+
+**What.** Seven naming points.
+1. The group of SKUs served by four workstations is a *category*, not a section, in prose, captions, tables and the notation table. The section-based controller, $\pi^{\mathrm{sec}}$, zones $Y_q$, document sections and all labels keep their names.
+2. The workstation of `fig:workstationlock` is $W_1$, as in the Problem Formulation examples. The image still prints $w$ and is redrawn later.
+3. A SKU's category is $h(k)$, and the hat $\hat h_t(k)$ is dropped. An order draws its workstation first and takes lines only from that workstation's category, and a refill only follows a line, so the demand rules' estimate always equals $h(k)$ when used (`multi_agent_env.py`). The text says the demand rules learn $h(k)$ from the SKU's first order line. `eq:tripdistance` uses $h(k)$ for every rule.
+4. The current target `eq:currenttarget` is $v^{\star}_i(t)$, so $\eta_i(v,t) = d_G(v, v^{\star}_i(t))$. $q$, $q_j$, $q^{(i)}$ and the zone index $q$ are unchanged.
+5. The backlog is $N_t$, split at the horizon into $N^{\mathrm{pick}}_T$ and $N^{\mathrm{put}}_T$. The sets $\mathcal{Q}_t$, $\mathcal{B}_t$, $\mathcal{C}_t$ and $N^{+}(v)$ are unchanged.
+6. The pickup rule lists the shelves as $v_{(1)}, v_{(2)}, \dots$, and $V = \{v_1, \dots, v_{|V|}\}$ keeps its numbering.
+7. $s$ is unchanged.
+
+**Why.** A SKU "section" was confused with zones, with the section-based controller and with document sections. $w$ was both the vertex a move leads to and the workstation of Fig. 15, a page apart. The hat warned of a guess that is never wrong in the runs. $q_i(t)$ was a place among $q$ letters meaning units. $B_t$ and $\mathcal{B}_t$ met in one formula. $v_1$ meant both the first vertex of $V$ and the nearest shelf.
+
+**Model change.** None, names only. The code keeps its identifiers (`sku_sections` etc.).
+
+### [A116] Appendix F rewritten: order gain beside pick gain, the three runs in order (author approved 2026-11-23, review_appendix_F.pdf v2)
+
+**Where.** `Appendices/F.Demand.tex` (whole appendix), `Images/app_demand_sweep.png` (from `thesis-progress/scripts/images/appendix_load.py`, `demand_sweep()`). Tagged `% [A116]` at the top and in the Summary, Setting and Conclusion.
+
+**What.** The order gain, the thesis result, is reported beside the pick gain (new `tab:app:demandgain`: 14.1, 17.5, 17.7, 14.6 percent against 10.9, 13.9, 13.2, 10.2 at 8 to 64 agents). The pilot, the initial run, what changed and the updated run are told once each, in order (new labels `app:demand:first`, `app:demand:changes`; `app:demand:sweep` now on the updated run). The Setting says what demand is with categories (1, 2, 4, 8 categories; at 8 agents one category served by every workstation), states the test length and what it means for a drift period of 400. The Zipf law, its exponent and the drift are stated as the thesis's own, with Silva et al. (2020) as an example of class-based skew. Uniform demand is "expected to gain little, not run". The keep-up of these pre-[A96] rows is argued, not rerun: the earlier count is never above the served share (apart from at most 0.35 percent waiting lines) and the lowest seed is 0.92. Numbers recomputed per seed (eq:relgain): initial run 32 agents 6 not 5 percent, put-away cost 9, 12, 13, 14. The figure shows order gain, pick gain and put-away cost in percent, no keep-up row. The 8-agent single category does not explain a smaller gain (travel cut 21.8 percent, as large as at 16 and 32), and the text says the runs do not say why. The sentence that an order gains more because its lines come one after another was dropped (not measured).
+
+**Why.** Review of 2026-11-20 (`appendix_F_demand_comments.md`): F read the pick while the thesis result is the order, mixed the runs and repeated the pilot. Pilot rows restored from the Trash to `thesis-progress/results/F_demand/pilot_2026-10-17/`.
+
+**Model change.** None.
+
+### [A117] Appendix G: the 32 and 64 agent rows of the [A93] rerun merged (author approved 2026-11-23)
+
+**Where.** `Appendices/G.StorageValues.tex` (`app:cal:period` congestion sentence, `app:cal:beta` sentence and `tab:app:beta`), `thesis-progress/results/G_storage/fleet_{32,64}/storage_rule.{congestion_weight,epoch_length}/`. Tagged `% [A117]`.
+
+**What.** The tp-a93 rerun (finished 2026-11-14) is merged for fleets 32 and 64 the same way as 8 and 16: `congestion_weight` replaced, `epoch_length` congestion rows replaced with `merge_a93_period_rows.py`, fixed and demand rows kept. Checks: demand rows match the period-100 demand rows on all 20 seeds, period-100 congestion rows match beta 1 on all 20 seeds, the computation reproduces the 8 and 16 rows exactly. Table G.2 gains 32 (2.1, -5.1 ± 2.8, +1.3 ± 0.9, +0.2 ± 2.4, +0.5 ± 2.3) and 64 (2.4, -5.3 ± 2.6, +1.0 ± 0.6, +0.1 ± 1.6, +1.5 ± 1.7). Two sentences change: a pick stands still 1 to 2.5 steps (not under 2), and the cut in standing still by period is 3 to 6 percent up to 200 steps and 1 to 3 at 400 from 16 agents on, with no pattern at 8. The conclusion holds at every fleet: congestion-aware storage is no faster than demand storage under Token Passing.
+
+**Model change.** None. The previous rows stay in the git history of thesis-progress.
+
+### [A118] The stall length: 36 order lines' worth of arrivals at the main load (author approved 2026-11-23)
+
+**Where.** `3.ProblemFormulation.tex` (stall paragraph of the measures), `B.Parameters.tex` (`tab:evalparams` stall row), `H.Horizon.tex` (Summary, Method, `app:cal:stall`, Conclusion, new `fig:app:standstill`), TODO in `L.Results.tex`. Code: branch `fix/stall-length` (worktree `~/worktrees/stall-length`, from origin/main 2cce82e, uncommitted): `stall_length` in every `configs/fleet_<m>/*.yaml`, passed through `training/spec.py` to `ExperimentConfig`, comment in `core/experiment_config.py` fixed, test in `tests/unit/test_training_spec.py`. Tagged `% [A118]`.
+
+**What.** A stall is a stretch after the warm-up in which no agent finishes a task (model revision D18, `longest_completion_gap`) longer than the stall length. The stall length is 36 / lambda_task steps: 400, 200, 120 and 60 at 8, 16, 32 and 64 agents.
+
+**Why.** The author kept the stall at 200 steps. Checked against Appendix H's rule (above the longest stretch of a healthy Token Passing run at the main load): Token Passing reaches 316, 114, 53 and 12 steps (F_demand demand.skew rows at skew 1, 40 runs per fleet), so 200 would call 12 of 40 healthy 8-agent runs stalled. A light load leaves longer quiet stretches, so the length is counted in arriving work. 36 lines gives 200 at 16 agents and clears every fleet. At 16 agents 33 of 220 learned test runs stall, none of which keeps up. Rejected: one length in steps for every fleet. Stalls are counted from the stored rows, no rerun.
+
+**Model change.** A value only (was TBD). No run changes; `RunMetrics.stalled` was None in every row.
+
+### [A119] Claim mask swap clause, the halo's source, the reading of the priority sign, Fig. claim mask (author approved 2026-11-23, review_controllers.pdf questions)
+
+**Where.** `4.Implementation.tex` (`sec:method:controllers`, the claim mask and section-based paragraphs, new `fig:claimmask` from `thesis-progress/scripts/images/claim_mask.py`), `3.ProblemFormulation.tex` (where u_{\prec i}(t) is introduced), `references.bib` (`zheng2020distdgl`). Tagged `% [A119]`.
+
+**What.** The claim mask keeps its three conditions, as the code does (`environment/spaces.py` `claim_mask` calls `move_blocked`), and the text adds that a swap never arises inside one decision, because the earlier agent could not move onto an agent that had not chosen yet; the swap rule works in conflict resolution. The figure shows zone Y_2 with its halo and the two cases that can fire. The halo is cited to the HALO vertices of DistDGL (Zheng et al. 2020, Section III-B, checked in the arXiv PDF, now in `papers/`), with the width as the thesis's own (the field of view). The sign of the priority order is read once as "comes before" instead of renaming it.
+
+**Why.** Questions 1 to 6 of `review_controllers.pdf`: zones and categories settled by [A115], d_obs = 5 already cited to van Knippenberg et al. Table 5, the mean's reasons kept, the halo needed a source ([A6] called it standard with none), the figure asked for, border overrides kept as a cost of deciding in zones (Discussion list).
+
+**Model change.** None.
+
+### [A120] "Choosing together" reworded from review_controllers.pdf (author approved 2026-11-23)
+
+**Where.** `4.Implementation.tex`, `sec:method:controllers`. Tagged `% [A120]` with the point of `method_controllers_comments.md` it answers.
+
+**What.** Text about the text dropped (D4). The override sentence of the claim mask paragraph now lives only in `sec:method:rl` (D1). "Seeing the whole window" becomes "What the larger window adds": what the mean covers per controller, that it is the readout of Gilmer et al. (2017) in its simplest form, why a mean (same size for any window, no dependence on numbering), and that a centralised agent sees its neighbours in detail and the rest only as an average, so what sets it apart is the earlier choices near it, the claim mask and the shared credit (B1, B2). Zones are blocks of neighbouring aisles as equal as the aisles allow, not a SKU category (C1). The sentences on entering the next zone and on p = 1 are cut (D2). A section-based agent can be overridden at a zone border, a cost of deciding in zones that the comparison keeps (B4). The closing paragraph names the credit as a difference between the controllers (D3). "All vertices" stays, since every vertex can be stood on (author).
+
+**Model change.** None.
+
+### [A121] Experiments: how the tested checkpoint is chosen (author 2026-11-23)
+
+**Where.** `5.Experiments.tex`, Training paragraph. Tagged `% [A121]`.
+
+**What.** Two mockups ("levelled off, judged by criterion" and "which checkpoint is evaluated") replaced by the rule already in Appendix J (`app:cal:checkpoint`, [A60]): a checkpoint every three iterations, each on 5 validation seeds, the shortest mean pick service time among those that keep up on every validation seed, else the highest throughput, only that one tested. The training return is not used. From `review_evaluation_setup.pdf` 2.1, the rest of which is out of date (moved to done/).
+
+**Model change.** None.
+
+### [A122] The two legs of a shelf's trip are weighted by how often they are walked (author approved 2026-11-23, review_trip_legs.pdf v3)
+
+**Where.** `4.Implementation.tex` (`sec:method:storage`: the trip paragraph with the tea example, `eq:storageobjective`, fixed, demand and congestion-aware storage, `eq:storagegreedy`), `C.ModelDetails.tex` (`eq:tripdistance` now the two legs, overflow sentence), `A.Notation.tex` (rows for the pallet rate and the two legs), `styles/eqnames.tex` (name "the two legs"). Tagged `% [A122]`.
+
+**What.** The text follows the code (`storage/arrival.py`, `_refill_scores`, `leg_weighted_distance`). The workstation leg d^work(k,v) is weighted by the lines of the SKU per step, the dock leg d^dock(v) by its pallets per step (units ordered per step over Q), and congestion-aware storage adds beta times the standing still to the workstation leg. The unweighted trip distance d^trip(k,v) is gone; Appendix D keeps its plain trip d^trip(v), which breaks ties. Fixed storage sends a pallet that misses its home shelf by the same weighted legs; the ratio of the weights is about Q over units per line for every SKU, so fixed storage still favours no SKU. Overflow at 16 agents: about 8 percent of arriving units under Token Passing, 40 to 60 percent under the learned controllers. The sentence that a SKU is put away about as often as it is picked is removed (a SKU is picked about three times as often). The "SKU with no line yet" case is left out, since it never happens in the runs.
+
+**Why.** Review of 2026-11-20 (`method_storage_comments.md` A1): text and code differed, and from 2026-11-18 the code decides because every run used it.
+
+**Model change.** None, text only. Follow-up: draw the tea example on `fig:storageexample`.

@@ -1,45 +1,56 @@
+"""
+The life of the tea task tau_1 (fig:lifecycle), in the look of the pygame viewer ([A104],
+base.py PG). One label per moment, the time under it. The waiting stage is grey, the agent's
+idle colour. The active stage takes the agent's colours of fig:taskroute (instance.py), orange
+on the way to the shelf and red on the way to the workstation. The times are those of tau_1 in
+instance.py: released 5, assigned 9, picked up 11, delivered 14.
+"""
 import matplotlib.pyplot as plt
 
-from base import OUT, C
+from base import OUT, PG
+
+T = dict(released=5, assigned=9, pickup=11, finish=14)
 
 
 def lifecycle():
-    """
-    Colors are chosen to match fig:taskroute (instance.py), not just to
-    look distinct: pickup uses the storage-vertex blue (C["store_e"]),
-    finish uses the delivery-vertex orange (C["del_e"]), assignment uses
-    the agent's own red (C["agent"]). Released has no vertex of its own,
-    so it gets the one role color unused elsewhere (C["comm"]). The two
-    figures then share one color language instead of two clashing ones.
-    Concrete values are those of the running example tau_1 (see
-    tab:tau1timeline / the instance.py route): released=5, assigned=9,
-    pickup=11, finish=14.
-    """
-    fig, ax = plt.subplots(figsize=(12, 3.9))
-    ax.set_xlim(0, 10); ax.set_ylim(0, 3.4); ax.axis("off")
-    ax.annotate("", xy=(9.7, 1.25), xytext=(0.3, 1.25),
-                arrowprops=dict(arrowstyle="-|>", lw=2.2, color=C["text"]))
-    ax.text(9.75, 1.05, "$t$", fontsize=13)
-    events = [
-        (1.2, r"$t_j^{\mathrm{released}}$", "release", "$t=5$", C["comm"]),
-        (3.6, r"$t_j^{\mathrm{assigned}}$", "assignment", "$t=9$", C["agent"]),
-        (5.6, r"$t_j^{\mathrm{pickup}}$", r"pickup at $s_j$", "$t=11$", C["store_e"]),
-        (8.8, r"$t_j^{\mathrm{finish}}$", r"delivery at $g_j$", "$t=14$", C["del_e"]),
-    ]
-    for x, sym, word, val, col in events:
-        ax.plot([x, x], [1.02, 1.48], lw=3.2, color=col)
-        ax.annotate(sym + "\n" + word, (x, 1.58), ha="center", fontsize=12, color=col)
-        ax.annotate(val, (x, 0.92), ha="center", fontsize=11, color=col)
+    fig, ax = plt.subplots(figsize=(10, 3.0))
+    x = {k: 1.0 + (v - 5) * 0.85 for k, v in T.items()}
+    ax.set_xlim(0.2, 10.4); ax.set_ylim(-0.2, 3.0); ax.axis("off")
 
-    def span(x0, x1, y, lab, col):
-        ax.annotate("", xy=(x1, y), xytext=(x0, y),
-                    arrowprops=dict(arrowstyle="<->", lw=2.0, color=col))
-        ax.text((x0 + x1) / 2, y - 0.33, lab, ha="center", fontsize=12, color=col)
+    axis_y = 1.3
+    ax.annotate("", xy=(10.2, axis_y), xytext=(0.4, axis_y),
+                arrowprops=dict(arrowstyle="-|>", lw=1.6, color=PG["text"]))
+    ax.text(10.25, axis_y - 0.05, "$t$", fontsize=13, va="top", color=PG["text"])
 
-    span(1.2, 3.6, 0.55, r"$\tau_j\in\mathcal{Q}_t$  (waiting)", C["comm"])
-    span(3.6, 8.8, 0.55, r"$\tau_j\in\mathcal{B}_t$  (active)", C["agent"])
-    span(1.2, 8.8, 2.85, r"service time $\zeta_j=t_j^{\mathrm{finish}}-t_j^{\mathrm{released}}=9$", C["text"])
-    ax.text(9.15, 0.22, r"$\tau_j\in\mathcal{C}_t$", fontsize=12, color=C["del_e"])
+    events = [("released", "released"), ("assigned", "assigned"),
+              ("pickup", "picked up at A"), ("finish", r"delivered at $W_1$")]
+    for key, word in events:
+        ax.plot([x[key]] * 2, [axis_y - 0.1, axis_y + 0.1], lw=2.2, color=PG["text"])
+        ax.text(x[key], axis_y + 0.22, word, ha="center", va="bottom", fontsize=11.5,
+                color=PG["text"])
+        ax.text(x[key], axis_y - 0.22, f"$t={T[key]}$", ha="center", va="top", fontsize=11,
+                color=PG["text"])
+
+    def span(x0, x1, y, colour, lw=5):
+        ax.plot([x0, x1], [y, y], color=colour, lw=lw, solid_capstyle="butt")
+
+    stage_y = 0.25
+    span(x["released"], x["assigned"], stage_y, PG["idle"])
+    span(x["assigned"], x["pickup"], stage_y, PG["to_pickup"])
+    span(x["pickup"], x["finish"], stage_y, PG["to_delivery"])
+    ax.text((x["released"] + x["assigned"]) / 2, stage_y - 0.15, r"waiting, $\mathcal{Q}_t$",
+            ha="center", va="top", fontsize=11.5, color=PG["text"])
+    ax.text((x["assigned"] + x["finish"]) / 2, stage_y - 0.15, r"active, $\mathcal{B}_t$",
+            ha="center", va="top", fontsize=11.5, color=PG["text"])
+    ax.text(x["finish"] + 0.3, stage_y, r"done, $\mathcal{C}_t$", ha="left", va="center",
+            fontsize=11.5, color=PG["text"])
+
+    top = 2.55
+    ax.annotate("", xy=(x["finish"], top), xytext=(x["released"], top),
+                arrowprops=dict(arrowstyle="<->", lw=1.4, color=PG["text"]))
+    ax.text((x["released"] + x["finish"]) / 2, top + 0.08,
+            r"service time $\zeta_1 = 14 - 5 = 9$", ha="center", va="bottom", fontsize=11.5,
+            color=PG["text"])
     fig.savefig(f"{OUT}/lifecycle.png"); plt.close(fig)
 
 

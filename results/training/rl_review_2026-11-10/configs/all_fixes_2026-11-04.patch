@@ -1,0 +1,1756 @@
+diff --git a/configs/centralised.yaml b/configs/centralised.yaml
+index 900ea3d..714acee 100644
+--- a/configs/centralised.yaml
++++ b/configs/centralised.yaml
+@@ -27,7 +27,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -86,5 +86,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/decentralised.yaml b/configs/decentralised.yaml
+index cd5e1ce..f1106dc 100644
+--- a/configs/decentralised.yaml
++++ b/configs/decentralised.yaml
+@@ -28,7 +28,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -87,5 +87,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/fleet_16/centralised.yaml b/configs/fleet_16/centralised.yaml
+index 6a59a16..3a42983 100644
+--- a/configs/fleet_16/centralised.yaml
++++ b/configs/fleet_16/centralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_16/decentralised.yaml b/configs/fleet_16/decentralised.yaml
+index cfee668..ed38e9a 100644
+--- a/configs/fleet_16/decentralised.yaml
++++ b/configs/fleet_16/decentralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_16/section.yaml b/configs/fleet_16/section.yaml
+index 3a5bd78..78bc90f 100644
+--- a/configs/fleet_16/section.yaml
++++ b/configs/fleet_16/section.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_32/centralised.yaml b/configs/fleet_32/centralised.yaml
+index 5568b87..3a01eed 100644
+--- a/configs/fleet_32/centralised.yaml
++++ b/configs/fleet_32/centralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_32/decentralised.yaml b/configs/fleet_32/decentralised.yaml
+index d9d02d1..9bf083d 100644
+--- a/configs/fleet_32/decentralised.yaml
++++ b/configs/fleet_32/decentralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_32/section.yaml b/configs/fleet_32/section.yaml
+index 7999404..d69090c 100644
+--- a/configs/fleet_32/section.yaml
++++ b/configs/fleet_32/section.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_64/centralised.yaml b/configs/fleet_64/centralised.yaml
+index 4cdd071..fdc54fa 100644
+--- a/configs/fleet_64/centralised.yaml
++++ b/configs/fleet_64/centralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_64/decentralised.yaml b/configs/fleet_64/decentralised.yaml
+index 9996584..109b2d4 100644
+--- a/configs/fleet_64/decentralised.yaml
++++ b/configs/fleet_64/decentralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_64/section.yaml b/configs/fleet_64/section.yaml
+index 343f254..290d7dd 100644
+--- a/configs/fleet_64/section.yaml
++++ b/configs/fleet_64/section.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_8/centralised.yaml b/configs/fleet_8/centralised.yaml
+index cd28377..d054d7f 100644
+--- a/configs/fleet_8/centralised.yaml
++++ b/configs/fleet_8/centralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_8/decentralised.yaml b/configs/fleet_8/decentralised.yaml
+index 5a62d47..7560484 100644
+--- a/configs/fleet_8/decentralised.yaml
++++ b/configs/fleet_8/decentralised.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/fleet_8/section.yaml b/configs/fleet_8/section.yaml
+index 2e910e7..0707af9 100644
+--- a/configs/fleet_8/section.yaml
++++ b/configs/fleet_8/section.yaml
+@@ -31,7 +31,7 @@ experiment:
+   # completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   idle_parking: true        # D26, an idle robot in the way goes to the nearest free parking leaf
+@@ -112,7 +112,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+ 
+ # Every seed plays its own generated warehouse (D27).
+diff --git a/configs/full_view.yaml b/configs/full_view.yaml
+index 03a181f..e2b562e 100644
+--- a/configs/full_view.yaml
++++ b/configs/full_view.yaml
+@@ -29,7 +29,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -88,5 +88,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium/centralised.yaml b/configs/medium/centralised.yaml
+index 1b59112..499b8b8 100644
+--- a/configs/medium/centralised.yaml
++++ b/configs/medium/centralised.yaml
+@@ -32,7 +32,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -104,5 +104,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium/decentralised.yaml b/configs/medium/decentralised.yaml
+index 9e30a06..ebe2a5a 100644
+--- a/configs/medium/decentralised.yaml
++++ b/configs/medium/decentralised.yaml
+@@ -32,7 +32,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -104,5 +104,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium/full_view.yaml b/configs/medium/full_view.yaml
+index f6c19f4..4c412ee 100644
+--- a/configs/medium/full_view.yaml
++++ b/configs/medium/full_view.yaml
+@@ -32,7 +32,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -104,5 +104,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium/section.yaml b/configs/medium/section.yaml
+index 1b199d7..e5092c6 100644
+--- a/configs/medium/section.yaml
++++ b/configs/medium/section.yaml
+@@ -32,7 +32,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -104,5 +104,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_arrival/centralised.yaml b/configs/medium_arrival/centralised.yaml
+index 0a614b4..ed6ba0f 100644
+--- a/configs/medium_arrival/centralised.yaml
++++ b/configs/medium_arrival/centralised.yaml
+@@ -35,7 +35,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -117,5 +117,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_arrival/decentralised.yaml b/configs/medium_arrival/decentralised.yaml
+index 5399fa5..978d5c7 100644
+--- a/configs/medium_arrival/decentralised.yaml
++++ b/configs/medium_arrival/decentralised.yaml
+@@ -35,7 +35,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -117,5 +117,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_arrival/full_view.yaml b/configs/medium_arrival/full_view.yaml
+index 114730d..66d2a29 100644
+--- a/configs/medium_arrival/full_view.yaml
++++ b/configs/medium_arrival/full_view.yaml
+@@ -35,7 +35,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -117,5 +117,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_arrival/section.yaml b/configs/medium_arrival/section.yaml
+index b241138..80e7957 100644
+--- a/configs/medium_arrival/section.yaml
++++ b/configs/medium_arrival/section.yaml
+@@ -35,7 +35,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -117,5 +117,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_putaway/centralised.yaml b/configs/medium_putaway/centralised.yaml
+index c04de1c..1df0493 100644
+--- a/configs/medium_putaway/centralised.yaml
++++ b/configs/medium_putaway/centralised.yaml
+@@ -34,7 +34,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -118,5 +118,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_putaway/decentralised.yaml b/configs/medium_putaway/decentralised.yaml
+index 278aaa0..0d1d3d1 100644
+--- a/configs/medium_putaway/decentralised.yaml
++++ b/configs/medium_putaway/decentralised.yaml
+@@ -34,7 +34,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -118,5 +118,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_putaway/full_view.yaml b/configs/medium_putaway/full_view.yaml
+index 6388bd6..f7156c8 100644
+--- a/configs/medium_putaway/full_view.yaml
++++ b/configs/medium_putaway/full_view.yaml
+@@ -34,7 +34,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -118,5 +118,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/medium_putaway/section.yaml b/configs/medium_putaway/section.yaml
+index df7bb84..f932acf 100644
+--- a/configs/medium_putaway/section.yaml
++++ b/configs/medium_putaway/section.yaml
+@@ -34,7 +34,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -118,5 +118,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/section.yaml b/configs/section.yaml
+index 1d7bea8..05cd225 100644
+--- a/configs/section.yaml
++++ b/configs/section.yaml
+@@ -27,7 +27,7 @@ experiment:
+   # term outweighing a small completion bonus.
+   deliver_reward: 10.0
+   override_penalty: 0.5
+-  move_cost: 0.1            # c_move, after van Knippenberg et al. (2021)
++  move_cost: 0.25           # c_move, above c_wait so a blocked robot waits ([A80])
+   congestion_reward_weight: 0.1
+   congestion_sensitive: false
+   seed: 0
+@@ -86,5 +86,5 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3              # iterations between checkpoints, 0 keeps only the one at the end
+   num_to_keep: null         # keep every one, a checkpoint is chosen on validation seeds
+-  score_attribute: episode_return_mean   # a top-level key of the result
++  score_attribute: episode_tasks_completed_mean   # a top-level key of the result
+   score_order: max
+diff --git a/configs/step12/fleet_16.yaml b/configs/step12/fleet_16.yaml
+index 4dc38b9..b86c7e0 100644
+--- a/configs/step12/fleet_16.yaml
++++ b/configs/step12/fleet_16.yaml
+@@ -77,7 +77,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3
+   num_to_keep: null
+-  score_attribute: episode_return_mean
++  score_attribute: episode_tasks_completed_mean
+   score_order: max
+ warehouse_per_seed: true
+ instance:
+diff --git a/configs/step12/fleet_32.yaml b/configs/step12/fleet_32.yaml
+index 2a6d6aa..623fa4a 100644
+--- a/configs/step12/fleet_32.yaml
++++ b/configs/step12/fleet_32.yaml
+@@ -77,7 +77,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3
+   num_to_keep: null
+-  score_attribute: episode_return_mean
++  score_attribute: episode_tasks_completed_mean
+   score_order: max
+ warehouse_per_seed: true
+ instance:
+diff --git a/configs/step12/fleet_64.yaml b/configs/step12/fleet_64.yaml
+index f75d98b..6c3986a 100644
+--- a/configs/step12/fleet_64.yaml
++++ b/configs/step12/fleet_64.yaml
+@@ -77,7 +77,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3
+   num_to_keep: null
+-  score_attribute: episode_return_mean
++  score_attribute: episode_tasks_completed_mean
+   score_order: max
+ warehouse_per_seed: true
+ instance:
+diff --git a/configs/step12/fleet_8.yaml b/configs/step12/fleet_8.yaml
+index 2fe0c20..91d853e 100644
+--- a/configs/step12/fleet_8.yaml
++++ b/configs/step12/fleet_8.yaml
+@@ -77,7 +77,7 @@ test_seed_count: 6
+ checkpoint:
+   frequency: 3
+   num_to_keep: null
+-  score_attribute: episode_return_mean
++  score_attribute: episode_tasks_completed_mean
+   score_order: max
+ warehouse_per_seed: true
+ instance:
+diff --git a/docs/TRAINING.md b/docs/TRAINING.md
+index 28662ac..f800110 100644
+--- a/docs/TRAINING.md
++++ b/docs/TRAINING.md
+@@ -59,9 +59,14 @@ Checkpointing is Tune's own (`tune.CheckpointConfig`), set by `CheckpointSetting
+   the end of the run, which is always written.
+ - `num_to_keep` keeps that many checkpoints, the best by `score_attribute`, and always the latest.
+   None keeps all of them.
+-- `score_attribute` is `episode_return_mean` and `score_order` is `max`, so the best
+-  checkpoint is the one with the highest training return. The score must be a top-level key of the
+-  result, so `TrainingProgressCallbacks` copies `env_runners/episode_return_mean` there. Tune ranks
++- `score_attribute` is `episode_tasks_completed_mean` and `score_order` is `max`, so the best
++  checkpoint is the one that completed the most tasks per training episode. Neither return is a
++  good score. The shaping term pays (1 - gamma) times the distance to the target on every step, so
++  its plain sum grows while robots stand far from their targets. The return without it
++  (`return_unshaped`, logged and plotted) rises when robots swap waits for cheaper moves that lead
++  nowhere, as in the fleet 32 runs of 2026-11-04. The score must be a top-level key of the result,
++  so `TrainingProgressCallbacks` copies `env_runners/episode_tasks_completed` there, next to
++  `episode_return_mean`. Tune ranks
+   by a nested key only when it reads the best one back and deletes by recency, which keeps the newest
+   checkpoints and not the best, so `CheckpointSettings` rejects a name with a `/`.
+ 
+diff --git a/examples/04_decentralised_training.py b/examples/04_decentralised_training.py
+index 2e47c4a..ce6f3be 100644
+--- a/examples/04_decentralised_training.py
++++ b/examples/04_decentralised_training.py
+@@ -234,7 +234,7 @@ def build_config(
+         # with the per-step shaping term outweighing a small completion bonus.
+         deliver_reward=10.0,
+         override_penalty=0.5,
+-        move_cost=0.1,  # c_move, after van Knippenberg et al. (2021)
++        move_cost=0.25,  # c_move, above c_wait so a blocked robot waits ([A80])
+         congestion_reward_weight=0.1,
+     )
+ 
+diff --git a/src/slap_mapd_coupling/environment/multi_agent_env.py b/src/slap_mapd_coupling/environment/multi_agent_env.py
+index 8f749ce..1fc2d9e 100644
+--- a/src/slap_mapd_coupling/environment/multi_agent_env.py
++++ b/src/slap_mapd_coupling/environment/multi_agent_env.py
+@@ -584,7 +584,8 @@ class WarehouseMAPDEnv:
+         dict[AgentId | str, dict],
+     ]:
+         """Advance one timestep: stages 3 to 6, then stages 1 and 2 for the new t
+-        unless the episode ends. Returns
++        unless the episode ends, then the reward, so that its potential at t+1 sees the
++        tasks and parking leaves of t+1 ([A79]). Returns
+         (observations, rewards, terminated, truncated, infos), dict-keyed
+         by agent id plus an "__all__" entry (RLlib/PettingZoo convention)
+         signalling whether the whole episode is done.
+@@ -594,6 +595,7 @@ class WarehouseMAPDEnv:
+         """
+         before_fleet = self.fleet
+         congestion = self._congestion_by_agent  # delta_i(t), at the step the action is chosen in
++        parking_before = dict(self._parking)  # each idle robot's parking leaf at t (D26)
+ 
+         # Stages 1 and 2 already ran for this t, at the end of reset() or of the
+         # previous step. Under the task lifecycle a task assigned at self._t is
+@@ -658,11 +660,6 @@ class WarehouseMAPDEnv:
+                 self._update_storage(delta)
+             clock = self._timed("storage_update", clock)
+ 
+-        rewards = self._compute_rewards(
+-            before_locations, active_by_agent, result.overridden, next_t, congestion
+-        )
+-        clock = self._timed("reward", clock)
+-
+         self._t = next_t
+         episode_done = self._t >= self.config.horizon
+         if not episode_done:
+@@ -670,7 +667,19 @@ class WarehouseMAPDEnv:
+             clock = self._timed("release_and_assign", clock)
+             self._update_parking(proposed, result.overridden)
+             self._record_crowding()
+-            self._timed("crowding", clock)
++            clock = self._timed("crowding", clock)
++
++        # [A79]: the reward reads Phi_i(t+1) as the robot sees it at t+1, after the new
++        # tasks and parking leaves are handed out, so a new target is charged once.
++        rewards = self._compute_rewards(
++            before_locations,
++            active_by_agent,
++            result.overridden,
++            next_t,
++            congestion,
++            parking_before,
++        )
++        self._timed("reward", clock)
+         observations = dict(self.fleet.locations())
+         terminated: dict[AgentId | str, bool] = {aid: False for aid in self.fleet.agents}
+         terminated["__all__"] = False
+@@ -1334,9 +1343,12 @@ class WarehouseMAPDEnv:
+         overridden: frozenset[AgentId],
+         next_t: int,
+         congestion: Mapping[AgentId, float],
++        parking_before: Mapping[AgentId, VertexId],
+     ) -> dict[AgentId, float]:
+         """R_i(t), the reward, for every robot. `congestion` holds delta_i(t) at the
+-        step the action was chosen in. A planner run has no reward weights and gets zero. Every
++        step the action was chosen in, and `parking_before` each idle robot's parking leaf at t.
++        It runs after the assignment and the parking update of t+1, so the tasks and the
++        parking leaves of t+1 are those the robots see then ([A79]). A planner run has no reward weights and gets zero. Every
+         other run also adds each robot's terms to the episode log."""
+         if self.config.controller is None:
+             return {aid: 0.0 for aid in self.fleet.agents}
+@@ -1381,7 +1393,8 @@ class WarehouseMAPDEnv:
+                 move_cost=self.config.move_cost,
+                 wait_cost=self.config.wait_cost,
+                 congestion_reward_weight=self.config.congestion_reward_weight,
+-                parking=self._parking.get(agent_id),
++                parking_now=parking_before.get(agent_id),
++                parking_next=self._parking.get(agent_id),
+             )
+             self.log.record_reward_terms(agent_id, terms, was_overridden)
+             rewards[agent_id] = terms.total
+diff --git a/src/slap_mapd_coupling/environment/observation.py b/src/slap_mapd_coupling/environment/observation.py
+index b7d9317..e65a956 100644
+--- a/src/slap_mapd_coupling/environment/observation.py
++++ b/src/slap_mapd_coupling/environment/observation.py
+@@ -33,6 +33,11 @@ from slap_mapd_coupling.core.graph import VertexId, VertexRole, WarehouseGraph
+ from slap_mapd_coupling.core.tasks import Task, active_tasks_by_agent
+ from slap_mapd_coupling.environment.reward_function import current_target
+ 
++# [A82]: the distance label divided by this one number, the same in every warehouse, so the
++# feature stays near 0 to 1 next to the 0/1 features (about 30 steps in fleet 8, over 50 in
++# fleet 64). As in van Knippenberg et al. (2021) the robot then sees how far its target is.
++DISTANCE_SCALE = 50.0
++
+ 
+ @dataclass(frozen=True)
+ class VertexFeatures:
+@@ -49,6 +54,7 @@ class VertexFeatures:
+     occupied: bool
+     claimed: bool = False
+     receiving: bool = False
++    distance: float = 0.0  # [A82] eta_i(v,t) / DISTANCE_SCALE, the distance label itself
+ 
+ 
+ @dataclass(frozen=True)
+@@ -165,6 +171,7 @@ def build_observation(
+             occupied=v in occupied_vertices,
+             claimed=v in claimed_vertices,
+             receiving=receiving,
++            distance=eta(graph, v, target) / DISTANCE_SCALE,
+         )
+ 
+     congestion = occupancy_fraction(fleet, field_of_view, excl={agent_id})
+diff --git a/src/slap_mapd_coupling/environment/reward_function.py b/src/slap_mapd_coupling/environment/reward_function.py
+index f497e87..5086f63 100644
+--- a/src/slap_mapd_coupling/environment/reward_function.py
++++ b/src/slap_mapd_coupling/environment/reward_function.py
+@@ -26,9 +26,15 @@ Every move pays c_move, whether the agent serves a task or not. A move is a chan
+ vertex between t and t+1, so a move that conflict resolution turned into a wait is not one.
+ 
+ Free agent: the current target defines q_i(t) only for
+-an agent serving a task. Here a free agent's target is its own vertex, so
+-it gets no shaping signal while idle. This is an open thesis decision,
+-see issue #102.
++an agent serving a task. Here a free agent's target is its own vertex, or its
++parking leaf when it was sent to one (D26), so it gets no shaping signal while
++idle and in nobody's way.
++
++[A79]: Phi_i(t+1) is the potential the robot sees at t+1, read after stage 1 and 2
++of t+1 (new tasks) and the parking update. So the task and the parking leaf of the
++two potentials are passed apart, and a new target is charged once, on the step it
++is handed out. The environment computes the reward after both
++(environment/multi_agent_env.py::step).
+ """
+ 
+ from __future__ import annotations
+@@ -98,13 +104,15 @@ def reward_terms(
+     move_cost: float,
+     wait_cost: float,
+     congestion_reward_weight: float,
+-    parking: VertexId | None = None,
++    parking_now: VertexId | None = None,
++    parking_next: VertexId | None = None,
+ ) -> RewardTerms:
+     """The six terms of R_i(t), the reward, separately. See `reward` for the
+-    arguments. `parking` is the idle robot's parking leaf over the step (D26), the target of
+-    both potentials when it has no task."""
+-    phi_now = potential(graph, location_now, task_now, parking)
+-    phi_next = potential(graph, location_next, task_next, parking)
++    arguments. `parking_now` and `parking_next` are the idle robot's parking leaf (D26) at t
++    and at t+1, read after the parking update of t+1 ([A79]). Each is the target of its
++    potential when the robot has no task at that time."""
++    phi_now = potential(graph, location_now, task_now, parking_now)
++    phi_next = potential(graph, location_next, task_next, parking_next)
+     return RewardTerms(
+         shaping=discount * phi_next - phi_now,
+         delivery=deliver_reward * completed_task,
+@@ -136,9 +144,10 @@ def reward(
+ ) -> float:
+     """R_i(t), the reward: the sum of the terms of `reward_terms`.
+ 
+-    `task_now`/`task_next` are whichever task the agent is serving just
+-    before / just after this timestep's transition -- None for a free
+-    agent. `moved` is 1[a_i moves at t] and `move_cost` is c_move. `stood_still` is
++    `task_now`/`task_next` are whichever task the agent is serving at t and
++    at t+1 -- None for a free agent. `task_next` is read after the assignment
++    of t+1, so a task handed out then is already the agent's ([A79]).
++    `moved` is 1[a_i moves at t] and `move_cost` is c_move. `stood_still` is
+     omega_i(t) and `wait_cost` is c_wait. `congestion` is
+     delta_i(t), the congestion feature, computed upstream and only weighted here.
+     """
+diff --git a/src/slap_mapd_coupling/models/gnn_encoder.py b/src/slap_mapd_coupling/models/gnn_encoder.py
+index 9b6f19a..50c7f5d 100644
+--- a/src/slap_mapd_coupling/models/gnn_encoder.py
++++ b/src/slap_mapd_coupling/models/gnn_encoder.py
+@@ -47,9 +47,9 @@ from torch import nn
+ from slap_mapd_coupling.core.graph import VertexId, WarehouseGraph
+ from slap_mapd_coupling.environment.observation import Observation, VertexFeatures
+ 
+-# storage, delivery, endpoint, transit, eta, occupied, claimed, receiving
+-# (the vertex features)
+-NODE_FEATURE_DIM = 8
++# storage, delivery, endpoint, transit, eta, occupied, claimed, receiving, distance
++# (the vertex features, distance [A82])
++NODE_FEATURE_DIM = 9
+ 
+ # The keys of the senders' padded views in an encoded observation. They are
+ # present exactly when GNNEncoderConfig.communication is on.
+@@ -94,6 +94,7 @@ def _node_feature_vector(features: VertexFeatures) -> list[float]:
+         float(features.occupied),
+         float(features.claimed),
+         float(features.receiving),
++        features.distance,
+     ]
+ 
+ 
+diff --git a/src/slap_mapd_coupling/models/local_subgraph_encoding.py b/src/slap_mapd_coupling/models/local_subgraph_encoding.py
+index 422b52c..dcf0559 100644
+--- a/src/slap_mapd_coupling/models/local_subgraph_encoding.py
++++ b/src/slap_mapd_coupling/models/local_subgraph_encoding.py
+@@ -368,6 +368,7 @@ def encode_view(
+             float(f.occupied),
+             float(f.claimed),
+             float(f.receiving),
++            f.distance,
+         )
+     if structure:
+         node_mask, edge_index, edge_mask = window_structure(graph, selected, d_max, config)
+diff --git a/src/slap_mapd_coupling/models/window_tables.py b/src/slap_mapd_coupling/models/window_tables.py
+index b6ea4b4..1ab2430 100644
+--- a/src/slap_mapd_coupling/models/window_tables.py
++++ b/src/slap_mapd_coupling/models/window_tables.py
+@@ -58,10 +58,11 @@ from slap_mapd_coupling.models.local_subgraph_encoding import (
+ )
+ 
+ # The columns of the vertex features (gnn_encoder.py): storage, delivery, endpoint, transit,
+-# eta, occupied, claimed, receiving. The role flags are stored once per window, in the order
+-# role_flags returns them.
++# eta, occupied, claimed, receiving, distance. The role flags are stored once per window, in the
++# order role_flags returns them. The two distance features ([A82]) are stored together under
++# "eta", the relative label first.
+ STATIC_COLUMNS = (0, 1, 2, 3, 7)
+-ETA_COLUMN = 4
++ETA_COLUMNS = [4, 8]
+ FLAG_COLUMNS = (5, 6)
+ 
+ # The compact sample's keys for the robot's own key and its senders' keys. They are present
+@@ -134,9 +135,7 @@ def pad_tables(tables: WindowTables, num_nodes: int, d_max: int) -> WindowTables
+     """`tables` padded to `num_nodes` window vertices, so the tables of warehouses built with
+     different caps line up. The padding is masked out, as a window below the cap always is."""
+     if tables.move_target_index.shape[1] != d_max:
+-        raise ValueError(
+-            f"the tables have d_max {tables.move_target_index.shape[1]}, not {d_max}."
+-        )
++        raise ValueError(f"the tables have d_max {tables.move_target_index.shape[1]}, not {d_max}.")
+     extra = num_nodes - tables.node_mask.shape[1]
+     if extra < 0:
+         raise ValueError(f"the tables hold windows of {num_nodes + extra} vertices, over the cap.")
+@@ -231,7 +230,7 @@ def compact_observation_space(
+     )
+     spaces: dict[str, gym.Space] = {
+         "vertex": vertex,
+-        "eta": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(num_nodes,), dtype=np.float32),
++        "eta": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(num_nodes, 2), dtype=np.float32),
+         "flags": gym.spaces.Box(low=0, high=1, shape=(num_nodes, 2), dtype=np.uint8),
+         "congestion": gym.spaces.Box(low=0.0, high=1.0, shape=(), dtype=np.float32),
+     }
+@@ -262,7 +261,7 @@ def compact_rllib_dict(
+         raise ValueError("the encoded observation has no location, so it has no compact form.")
+     observations: dict[str, Any] = {
+         "vertex": np.int64(position[item.location]),
+-        "eta": np.ascontiguousarray(item.node_features[:, ETA_COLUMN]),
++        "eta": np.ascontiguousarray(item.node_features[:, ETA_COLUMNS]),
+         "flags": item.node_features[:, FLAG_COLUMNS].astype(np.uint8),
+         "congestion": np.float32(item.congestion),
+     }
+@@ -335,7 +334,7 @@ class WindowLookup(nn.Module):
+             (*static.shape[:-1], NODE_FEATURE_DIM), dtype=static.dtype, device=static.device
+         )
+         features[..., STATIC_COLUMNS] = static
+-        features[..., ETA_COLUMN] = eta.to(static.dtype)
++        features[..., ETA_COLUMNS] = eta.to(static.dtype)
+         features[..., FLAG_COLUMNS] = flags.to(static.dtype)
+         return {
+             "node_features": features,
+@@ -404,7 +403,7 @@ class StoredWindowLookup(WindowLookup):
+             # No context rows, when a minibatch holds all its senders. Any tables give the
+             # empty views, so take the ones just read for the minibatch itself.
+             return next(reversed(self._joined.values()))[0], vertex
+-        seed_of =torch.div(vertex, VERTEX_KEY_STRIDE, rounding_mode="floor")
++        seed_of = torch.div(vertex, VERTEX_KEY_STRIDE, rounding_mode="floor")
+         seeds = tuple(int(seed) for seed in torch.unique(seed_of).tolist())
+         key = (seeds, str(device))
+         if key not in self._joined:
+@@ -414,9 +413,7 @@ class StoredWindowLookup(WindowLookup):
+                 row_start.append(row_start[-1] + len(part["window_of"]))
+                 window_start.append(window_start[-1] + len(part["node_mask"]))
+             joined = {
+-                k: torch.cat([part[k] for part in parts])
+-                for k in parts[0]
+-                if k != "window_of"
++                k: torch.cat([part[k] for part in parts]) for k in parts[0] if k != "window_of"
+             }
+             joined["window_of"] = torch.cat(
+                 [part["window_of"] + start for part, start in zip(parts, window_start)]
+diff --git a/src/slap_mapd_coupling/resolution/conflict_resolution.py b/src/slap_mapd_coupling/resolution/conflict_resolution.py
+index 2fd2d3f..aec37be 100644
+--- a/src/slap_mapd_coupling/resolution/conflict_resolution.py
++++ b/src/slap_mapd_coupling/resolution/conflict_resolution.py
+@@ -2,66 +2,50 @@
+ 
+ Turns a proposed joint action into a collision-free one. A priority
+ permutation sigma of {1,...,m} is drawn once per episode from the episode
+-seed and held fixed for that episode. At each timestep, agents are
+-processed in sigma order: each one's proposed successor is tentatively
+-accepted unless it violates the vertex rule or the swap rule against
+-the already-finalised successors of higher-priority agents, in which case
+-it is overridden to `wait` (always legal in the action set) and its
++seed and held fixed for that episode. A robot whose proposed move is not
++accepted is overridden to `wait` (always legal in the action set) and its
+ override flag for t is set. That flag feeds the -n_blocked term of the
+ reward and defines omega_j(t) in the mean blocked time (sec:impl:logging).
+-It is logged once, here, rather than re-derived at either call site.
+-
+-Deviation from the thesis text (flagged, not silently patched -- see the
+-PR for issue #7): the text's own feasibility argument for step 3 ("waiting
+-never conflicts with an already-finalised successor other than by
+-occupying the current vertex, impossible since the joint state at t was
+-collision-free") conflates "no one occupies v at t" with "no one's
+-successor targets v at t+1." It does not, and cannot rule out a
+-higher-priority agent moving INTO a lower-priority agent's current
+-vertex before that agent is processed: the two-agent head-on swap
+-(v1<->v2, both propose to trade places) is the concrete counterexample --
+-agent 1 (higher priority) is accepted onto v2 with nothing yet to check
+-against, agent 2 is then correctly caught as a swap conflict and
+-"overridden to wait," but waiting means staying at v2, which agent 1 has
+-already claimed: a fresh vertex conflict the text's proof says cannot
+-happen. This implementation closes the gap by also reserving each other
+-agent's *current* vertex against being moved into until that agent has
+-itself been finalised as having vacated it (`move_blocked`'s second check
+-below) -- still a single deterministic pass over sigma, still a pure
+-function of state and seed, just conservative about chains of moves that
+-depend on a not-yet-processed agent's own choice.
+-
+-With that reservation in place, "waiting always terminates in a feasible
+-joint action" (sec:pf:agents's Figure~2.x(c), sec:method:resolution) can
+-actually be shown, not just asserted, by induction over the order agents
+-are processed in:
+-
+-  Inductive hypothesis: after processing agents sigma(1),...,sigma(k-1),
+-  `finalised` is pairwise collision-free (no vertex-rule or
+-  swap-rule violation among any two of them) -- vacuously true for k=1.
+-
+-  Step: when agent sigma(k) is processed, `move_blocked` either accepts its
+-  proposed candidate (then it doesn't conflict with any already-finalised
+-  successor by construction, and `finalised` for k agents is still
+-  pairwise collision-free by the hypothesis plus this one check), or
+-  rejects it and candidate falls back to `start` = before_loc[sigma(k)].
+-  This fallback cannot itself be blocked: (a) no already-finalised
+-  successor can equal `start`, because any earlier agent that tried to
+-  move there would itself have been rejected by the current-vertex
+-  reservation while sigma(k) still held it (sigma(k) is only finalised
+-  now, at step k); (b) no not-yet-finalised agent's current vertex can
+-  equal `start` either, because `before` is collision-free -- at most one
+-  agent occupies any vertex at t, and that's sigma(k) itself. So the
+-  fallback is always accepted, and the hypothesis holds for k agents too.
+-
+-  After all m agents: `finalised` is pairwise collision-free, i.e. `after`
+-  satisfies the vertex rule and the swap rule for every pair -- this
+-  is what the RuntimeError in resolve_conflicts asserts is unreachable,
+-  and this argument is why.
++
++[A81]: a robot is handled after the robot standing on the vertex it wants,
++so it may follow a robot that leaves. Robot i depends on robot j when i
++proposes to move onto l_j(t). Every robot depends on at most one other, and
++a robot that waits on none. The robots are handled one at a time: of the
++robots that depend on no one, or on a robot already handled, the earliest
++in sigma goes next. Its move is accepted unless it breaks the vertex rule or
++the swap rule against the successors already accepted, and otherwise it
++waits. Robots that are never ready, because their chain of dependencies runs
++into a cycle (a swap is a cycle of two), wait. So the priority order decides
++between robots that compete for a vertex, and the chains decide who goes
++first along an aisle.
++
++Why it never collides:
++
++  (a) A robot is accepted onto a vertex only if no accepted robot ends
++  there (vertex rule) and, if a robot stood there at t, that robot was
++  handled first (the dependency). So no accepted move ends on the vertex of
++  a robot not yet handled.
++
++  (b) A robot that waits keeps its own vertex. No robot handled before it
++  moved there, by (a), and no robot handled after it starts there, since
++  the robots stood apart at t. So a wait is always accepted, and the robots
++  left over at the end, which all wait, keep vertices nobody moved onto.
++
++  (c) No two robots swap. A swap needs i to move onto l_j(t) and j onto
++  l_i(t), so each depends on the other, a cycle, and both wait. The swap
++  check is kept as a guard.
++
++Under the earlier rule ([A53]) a robot could not move onto the vertex of a
++robot later in sigma even when that robot left, so following it cost a wait
++and an override. The claim mask of the centralised and section-based
++routers still uses that stricter rule (`move_blocked`), because a robot
++choosing there does not yet know whether a later robot will leave. A joint
++action that passes the claim mask is therefore accepted whole here.
+ """
+ 
+ from __future__ import annotations
+ 
++import heapq
+ import random
+ from dataclasses import dataclass
+ from typing import Mapping, Sequence
+@@ -111,8 +95,9 @@ def move_blocked(
+     `finalised` holds the successors of the agents that have chosen, and an
+     agent missing from it counts as not having chosen. A move is blocked by
+     the vertex rule, by the swap rule, or by an agent that has not chosen yet
+-    and stands on `candidate`. The claim mask uses this same rule, so
+-    conflict resolution never overrides a centralised agent.
++    and stands on `candidate`. The claim mask uses it. It is stricter than
++    `resolve_conflicts` (module docstring), so conflict resolution never
++    overrides a centralised agent.
+     """
+     for other_id, other_candidate in finalised.items():
+         if other_candidate == candidate:  # vertex rule
+@@ -136,7 +121,7 @@ def resolve_conflicts(
+     proposed: Mapping[AgentId, Action],
+     priority: Sequence[AgentId],
+ ) -> ResolutionResult:
+-    """Apply sec:method:resolution's three-step operator for one timestep.
++    """Apply sec:method:resolution's operator for one timestep (module docstring).
+ 
+     `priority` is sigma, fixed for the whole episode (see
+     priority_permutation above) -- this function does not draw it, since
+@@ -151,35 +136,85 @@ def resolve_conflicts(
+     before_loc = before.locations()
+     if set(priority) != set(before_loc):
+         raise ValueError("priority must be a permutation of exactly before's agent ids.")
++    rank = {agent_id: k for k, agent_id in enumerate(priority)}
++    standing_on = {v: agent_id for agent_id, v in before_loc.items()}
+ 
+-    finalised: dict[AgentId, VertexId] = {}
+-    overridden: set[AgentId] = set()
+-
++    candidates: dict[AgentId, VertexId] = {}
++    dependants: dict[AgentId, list[AgentId]] = {}
++    ready: list[tuple[int, AgentId]] = []
+     for agent_id in priority:
+         start = before_loc[agent_id]
+-        action = proposed[agent_id]
+-        candidate = _successor(start, action)
++        candidate = _successor(start, proposed[agent_id])
+         if not is_legal_transition(graph, start, candidate):
+             raise ValueError(
+                 f"Agent {agent_id} proposed an illegal transition {start}->{candidate} "
+                 "(the move rule); conflict resolution assumes already-masked proposals."
+             )
++        candidates[agent_id] = candidate
++        ahead = standing_on.get(candidate) if candidate != start else None
++        if ahead is None:
++            ready.append((rank[agent_id], agent_id))
++        else:
++            dependants.setdefault(ahead, []).append(agent_id)
++    heapq.heapify(ready)
+ 
+-        if move_blocked(agent_id, start, candidate, before_loc, finalised):
++    finalised: dict[AgentId, VertexId] = {}
++    taken: set[VertexId] = set()
++    overridden: set[AgentId] = set()
++    while ready:
++        _, agent_id = heapq.heappop(ready)
++        start = before_loc[agent_id]
++        candidate = candidates[agent_id]
++        if candidate != start and _clashes(
++            agent_id, start, candidate, before_loc, finalised, taken
++        ):
+             candidate = start
+             overridden.add(agent_id)
+-            if move_blocked(agent_id, start, candidate, before_loc, finalised):
+-                raise RuntimeError(
+-                    f"Agent {agent_id} still conflicts after being overridden to wait at "
+-                    f"{start}. With the current-vertex reservation in place (see module "
+-                    "docstring) this should be unreachable given a collision-free `before` "
+-                    "state -- treat this as a correctness bug (AGENTS.md), not something to "
+-                    "paper over here."
+-                )
+-
++        if candidate == start and start in taken:
++            raise RuntimeError(
++                f"Agent {agent_id} cannot wait at {start}, another robot was accepted onto it. "
++                "The dependency order rules this out (module docstring), so this is a "
++                "correctness bug (AGENTS.md), not something to paper over here."
++            )
+         finalised[agent_id] = candidate
++        taken.add(candidate)
++        for follower in dependants.get(agent_id, ()):
++            heapq.heappush(ready, (rank[follower], follower))
++
++    # Robots whose chain runs into a cycle were never ready. They wait, on vertices nobody
++    # was accepted onto (module docstring, (b)).
++    for agent_id in priority:
++        if agent_id in finalised:
++            continue
++        start = before_loc[agent_id]
++        if start in taken:
++            raise RuntimeError(
++                f"Agent {agent_id} is left in a cycle but its vertex {start} was taken, "
++                "a correctness bug (AGENTS.md)."
++            )
++        finalised[agent_id] = start
++        taken.add(start)
++        if candidates[agent_id] != start:
++            overridden.add(agent_id)
+ 
+     after = FleetState(
+         agents={aid: AgentState(agent_id=aid, location=loc) for aid, loc in finalised.items()}
+     )
+     return ResolutionResult(fleet=after, overridden=frozenset(overridden))
++
++
++def _clashes(
++    agent_id: AgentId,
++    start: VertexId,
++    candidate: VertexId,
++    before_loc: Mapping[AgentId, VertexId],
++    finalised: Mapping[AgentId, VertexId],
++    taken: set[VertexId],
++) -> bool:
++    """Whether a move breaks the vertex rule or the swap rule against the robots already
++    handled. The robot on `candidate` at t, if any, is among them (the dependency)."""
++    if candidate in taken:  # vertex rule
++        return True
++    return any(  # swap rule, a guard, since a swap is a cycle and never handled
++        before_loc[other] == candidate and finalised[other] == start for other in finalised
++    )
+diff --git a/src/slap_mapd_coupling/training/callbacks.py b/src/slap_mapd_coupling/training/callbacks.py
+index d29b61e..6d29039 100644
+--- a/src/slap_mapd_coupling/training/callbacks.py
++++ b/src/slap_mapd_coupling/training/callbacks.py
+@@ -136,8 +136,13 @@ def episode_metrics(env: WarehouseMAPDEnv) -> dict[str, float]:
+     The six `return_*` values are the terms of the reward summed over the robots and the
+     steps of the episode (environment/reward_function.py::RewardTerms, each signed). They add
+     up to the episode return RLlib reports, also when the credit is a group mean, which
+-    only moves reward between robots. `override_rate` is the share of robot-steps in which a
+-    robot was overridden by conflict resolution. `episode_max_agent_override_share` is the
++    only moves reward between robots. `return_unshaped` is that return without the shaping
++    term, a breakdown of what the reward pays for. The shaping term pays (1 - gamma) times the
++    distance to the target on every step, so its plain sum over an episode grows while robots
++    stand far from their targets. Neither return measures how well the robots work. The
++    unshaped one also rises when robots swap waits for cheaper moves that lead nowhere, so the
++    training curve is `episode_tasks_completed`. `override_rate` is the share of robot-steps
++    in which a robot was overridden by conflict resolution. `episode_max_agent_override_share` is the
+     share of all the episode's overrides that fell on the single most overridden robot, and
+     is 0 when there were none. A planner run has no reward, so all of these are 0 for it.
+     """
+@@ -145,6 +150,14 @@ def episode_metrics(env: WarehouseMAPDEnv) -> dict[str, float]:
+     finish_times = [task.finish_time for task in env.tasks if task.finish_time is not None]
+     overrides = sum(log.overrides_by_agent.values())
+     agent_steps = env.config.num_agents * env.t
++    # Added in the order of RewardTerms.total, without the shaping term.
++    unshaped = (
++        sum(log.return_delivery_by_agent.values())
++        + sum(log.return_override_by_agent.values())
++        + sum(log.return_move_by_agent.values())
++        + sum(log.return_wait_by_agent.values())
++        + sum(log.return_congestion_by_agent.values())
++    )
+     return {
+         "return_shaping": sum(log.return_shaping_by_agent.values()),
+         "return_deliver": sum(log.return_delivery_by_agent.values()),
+@@ -152,6 +165,7 @@ def episode_metrics(env: WarehouseMAPDEnv) -> dict[str, float]:
+         "return_move": sum(log.return_move_by_agent.values()),
+         "return_wait": sum(log.return_wait_by_agent.values()),
+         "return_congestion": sum(log.return_congestion_by_agent.values()),
++        "return_unshaped": unshaped,
+         "override_rate": overrides / agent_steps if agent_steps else 0.0,
+         "episode_tasks_completed": float(len(finish_times)),
+         "episode_tasks_released": float(len(env.tasks)),
+@@ -191,6 +205,10 @@ class StandingStillCounter:
+ # when the score is a top-level key, and RLlib nests the return under "env_runners", so
+ # on_train_result copies it here (see training/trainer.py::CheckpointSettings).
+ EPISODE_RETURN_KEY = "episode_return_mean"
++# The mean number of tasks completed per episode (`episode_metrics`), copied to the top level the
++# same way. It is the default checkpoint score, since either return can rise while fewer tasks
++# are done.
++TASKS_COMPLETED_KEY = "episode_tasks_completed_mean"
+ 
+ # Warehouse timesteps of the finished episodes, summed over the runners and the run. Neither
+ # RLlib step counter gives it, since both count sub-steps or observations, so this is what
+@@ -208,8 +226,8 @@ class TrainingProgressCallbacks(CorrectnessInvariantCallbacks):
+     over the environments (see `progress_metrics`).
+ 
+     The exact per-episode totals are the `episode_*` keys, together with `return_shaping`,
+-    `return_deliver`, `return_override`, `return_move`, `return_wait`, `return_congestion` and
+-    `override_rate`, logged when an episode ends (see `episode_metrics`).
++    `return_deliver`, `return_override`, `return_move`, `return_wait`, `return_congestion`,
++    `return_unshaped` and `override_rate`, logged when an episode ends (see `episode_metrics`).
+     """
+ 
+     def __init__(self, *args: Any, **kwargs: Any) -> None:
+@@ -229,8 +247,9 @@ class TrainingProgressCallbacks(CorrectnessInvariantCallbacks):
+     def on_train_result(
+         self, *, algorithm=None, metrics_logger=None, result: dict, **kwargs: Any
+     ) -> None:
+-        """Copies the mean episode return to the top level of the result, which is where Tune
+-        looks for the score of a checkpoint. An iteration without a finished episode has none.
++        """Copies the mean episode return, and the mean number of tasks completed per episode,
++        to the top level of the result, which is where Tune looks for the score of a checkpoint.
++        An iteration without a finished episode has neither.
+ 
+         Also stops the run if the iteration has fewer episodes than runners. That happens when
+         RLlib's sample timeout drops a slow runner's episode, and the arms would then train on
+@@ -248,6 +267,9 @@ class TrainingProgressCallbacks(CorrectnessInvariantCallbacks):
+         value = result.get("env_runners", {}).get("episode_return_mean")
+         if _is_number(value):
+             result[EPISODE_RETURN_KEY] = float(value)
++        completed = result.get("env_runners", {}).get("episode_tasks_completed")
++        if _is_number(completed):
++            result[TASKS_COMPLETED_KEY] = float(completed)
+         timesteps = result.get("env_runners", {}).get(TIMESTEPS_KEY)
+         if _is_number(timesteps):
+             result[TIMESTEPS_KEY] = int(timesteps)
+@@ -291,6 +313,7 @@ _EPISODE_KEYS = (
+     "return_move",
+     "return_wait",
+     "return_congestion",
++    "return_unshaped",
+     "override_rate",
+     "episode_tasks_completed",
+     "episode_tasks_released",
+@@ -341,16 +364,15 @@ def format_iteration(i: int, n: int, result: Mapping[str, Any]) -> str:
+     """One line per training iteration, in plain numbers (no exponents).
+ 
+     The episode return mean comes first because it is the number PPO
+-    reports. An iteration in which no episode ended has none, and then the line
+-    shows 0. A real return of 0 prints as 0.0, so the two can still be told apart.
++    reports, then the return without the shaping term, which says what the reward paid for.
++    An iteration in which no episode ended has neither, and then the line shows 0. A real
++    return of 0 prints as 0.0, so the two can still be told apart.
+     """
+     runners = result.get("env_runners", {})
+-    episode_return = runners.get("episode_return_mean")
+-    parts = [
+-        f"episode_return_mean={episode_return:.1f}"
+-        if _is_number(episode_return)
+-        else "episode_return_mean=0"
+-    ]
++    parts = []
++    for key in ("episode_return_mean", "return_unshaped"):
++        value = runners.get(key)
++        parts.append(f"{key}={value:.1f}" if _is_number(value) else f"{key}=0")
+     for key in _COUNT_KEYS:
+         value = runners.get(key)
+         parts.append(f"{key}={value:.0f}" if _is_number(value) else f"{key}=n/a")
+diff --git a/src/slap_mapd_coupling/training/trainer.py b/src/slap_mapd_coupling/training/trainer.py
+index 15cd0d8..94b9663 100644
+--- a/src/slap_mapd_coupling/training/trainer.py
++++ b/src/slap_mapd_coupling/training/trainer.py
+@@ -10,9 +10,9 @@ config first.
+ Checkpoints are Tune's own (`tune.CheckpointConfig`). A run writes one every
+ `CheckpointSettings.frequency` iterations and one at the end, keeps the `num_to_keep` best by
+ `score_attribute` (and always the latest), and `TrainingRun.best_checkpoint` is the best one by
+-that score. The score is the mean training return by default, which is the number PPO reports. It is
+-not the evaluation result, so a high score is no promise of completed tasks (see the note on
+-`deliver_reward` in examples/04_decentralised_training.py).
++that score. The score is the mean number of tasks completed per training episode by default.
++Either training return can rise while fewer tasks are done (training/callbacks.py::episode_metrics).
++It is not the evaluation result, which chooses the checkpoint to test on the validation seeds.
+ """
+ 
+ from __future__ import annotations
+@@ -29,6 +29,7 @@ from ray.rllib.algorithms.ppo import PPOConfig
+ from slap_mapd_coupling.training.callbacks import (
+     EPISODE_RETURN_KEY,
+     TIMESTEPS_KEY,
++    TASKS_COMPLETED_KEY,
+     TrainingProgressCallbacks,
+     format_iteration,
+     iteration_record,
+@@ -36,7 +37,7 @@ from slap_mapd_coupling.training.callbacks import (
+ from slap_mapd_coupling.training.config import DEFAULT_POLICY_ID
+ 
+ BUDGET_METRIC = TIMESTEPS_KEY  # one environment step is one timestep (sec:method:training)
+-DEFAULT_SCORE_ATTRIBUTE = EPISODE_RETURN_KEY
++DEFAULT_SCORE_ATTRIBUTE = TASKS_COMPLETED_KEY
+ 
+ 
+ class CheckpointSettings(BaseModel):
+@@ -52,7 +53,7 @@ class CheckpointSettings(BaseModel):
+     `score_attribute` must be a top-level key of the training result. Tune ranks by a nested key
+     such as "env_runners/episode_return_mean" only when it reads the best checkpoint back, and
+     deletes by recency, so it would keep the newest checkpoints and not the best. The default is
+-    the return that TrainingProgressCallbacks copies to the top level.
++    the mean number of tasks completed, which TrainingProgressCallbacks copies to the top level.
+     """
+ 
+     model_config = ConfigDict(frozen=True, extra="forbid")
+diff --git a/src/slap_mapd_coupling/viz/training_run.py b/src/slap_mapd_coupling/viz/training_run.py
+index f08328b..46edcb4 100644
+--- a/src/slap_mapd_coupling/viz/training_run.py
++++ b/src/slap_mapd_coupling/viz/training_run.py
+@@ -101,16 +101,27 @@ _MAX_RAW_POINTS = 60
+ # ---------------------------------------------------------------------------
+ 
+ 
++# The reward terms other than shaping, which add up to the return without the shaping term.
++_UNSHAPED_TERMS = ("deliver", "override", "move", "wait", "congestion")
++
++
+ def load_progress(path: Path) -> Progress:
+-    """A progress log as one float array per key, with null or missing values as NaN."""
++    """A progress log as one float array per key, with null or missing values as NaN.
++
++    A log written before `return_unshaped` was logged gets it as the sum of its other terms,
++    when it has all of them, so an older run reads the same way as a new one."""
+     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+     keys = sorted({key for row in rows for key in row})
+-    return {
++    progress = {
+         key: np.array(
+             [np.nan if row.get(key) is None else float(row[key]) for row in rows], dtype=float
+         )
+         for key in keys
+     }
++    parts = [f"return_{term}" for term in _UNSHAPED_TERMS]
++    if "return_unshaped" not in progress and all(key in progress for key in parts):
++        progress["return_unshaped"] = sum(progress[key] for key in parts)
++    return progress
+ 
+ 
+ @dataclass(frozen=True)
+@@ -343,11 +354,18 @@ def plot_training_progress(logs: dict[str, Progress], out: Path) -> Path | None:
+     """Training progress of one or several arms, written to `out`. None when nothing can be drawn.
+ 
+     One panel per measure with a line for every arm, and one panel per arm with the episode
+-    return and its five terms. Lines of different measures in one panel differ in style.
++    return, its terms and the return without the shaping term. The tasks panel is the
++    training curve, since either return can rise while fewer tasks are done. Lines of different measures in one panel differ in style.
+     """
+     looks = _arm_looks(logs)
+     measures = [  # title, [(key, line style, label)]
+-        ("Episode return", [("episode_return_mean", "-", "episode return")]),
++        (
++            "Episode return",
++            [
++                ("episode_return_mean", "-", "episode return"),
++                ("return_unshaped", "--", "without shaping"),
++            ],
++        ),
+         (
+             "Overrides and standing still",
+             [
+@@ -396,6 +414,11 @@ def plot_training_progress(logs: dict[str, Progress], out: Path) -> Path | None:
+             if _has(log.get("episode_return_mean")):
+                 _draw_series(ax, x, log["episode_return_mean"], INK, "-", "s")
+                 ax.plot([], [], color=INK, marker="s", lw=1.8, ms=4, label="episode return")
++            if _has(log.get("return_unshaped")):
++                _draw_series(ax, x, log["return_unshaped"], INK, "--", "D")
++                ax.plot(
++                    [], [], color=INK, ls="--", marker="D", lw=1.8, ms=4, label="without shaping"
++                )
+             ax.axhline(0, color=MUTED, lw=0.8)
+             ax.set_title(f"Return and its terms, {arm}", loc="left")
+             ax.set_xlabel("training iteration")
+diff --git a/tests/unit/test_conflict_resolution.py b/tests/unit/test_conflict_resolution.py
+index 8f6e585..184e948 100644
+--- a/tests/unit/test_conflict_resolution.py
++++ b/tests/unit/test_conflict_resolution.py
+@@ -112,11 +112,9 @@ def test_follow_move_into_already_vacated_vertex_succeeds():
+     assert is_collision_free(before, result.fleet)
+ 
+ 
+-def test_move_into_not_yet_processed_agents_vertex_is_blocked():
+-    # Agent 1 wants to move onto agent 2's current vertex, but agent 2
+-    # (lower priority) hasn't been processed yet -- unknown whether it
+-    # will vacate, so the move is blocked (agent 1 waits) even though
+-    # agent 2's own proposal happens to move it elsewhere.
++def test_a_robot_follows_a_later_robot_that_leaves():
++    # [A81]: agent 1 comes first in the order and wants agent 2's vertex. Agent 2 moves on, so
++    # agent 2 is handled first and agent 1 follows it in the same step, with no override.
+     vertices = {i: Vertex(id=i) for i in (1, 2, 3)}
+     edges = (Edge(source=1, target=2, cost=1.0), Edge(source=2, target=3, cost=1.0))
+     graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
+@@ -124,11 +122,104 @@ def test_move_into_not_yet_processed_agents_vertex_is_blocked():
+     proposed = {1: _move(2), 2: _move(3)}
+ 
+     result = resolve_conflicts(graph, before, proposed, priority=(1, 2))
+-    assert result.fleet.locations() == {1: 1, 2: 3}
+-    assert result.overridden == frozenset({1})
++    assert result.fleet.locations() == {1: 2, 2: 3}
++    assert result.overridden == frozenset()
+     assert is_collision_free(before, result.fleet)
+ 
+ 
++def test_a_whole_line_moves_up_together():
++    vertices = {i: Vertex(id=i) for i in range(1, 6)}
++    edges = tuple(Edge(source=i, target=i + 1, cost=1.0) for i in range(1, 5))
++    graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
++    before = _fleet({1: 1, 2: 2, 3: 3, 4: 4})
++    proposed = {aid: _move(aid + 1) for aid in (1, 2, 3, 4)}
++
++    result = resolve_conflicts(graph, before, proposed, priority=(1, 2, 3, 4))
++    assert result.fleet.locations() == {1: 2, 2: 3, 3: 4, 4: 5}
++    assert result.overridden == frozenset()
++
++
++def test_a_robot_behind_a_robot_that_is_stopped_waits():
++    # Agent 2 is stopped by agent 3, which takes vertex 9 first, so agent 1 behind it waits too.
++    vertices = {i: Vertex(id=i) for i in (1, 2, 3, 9)}
++    edges = (
++        Edge(source=1, target=2, cost=1.0),
++        Edge(source=2, target=9, cost=1.0),
++        Edge(source=3, target=9, cost=1.0),
++    )
++    graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
++    before = _fleet({1: 1, 2: 2, 3: 3})
++    proposed = {1: _move(2), 2: _move(9), 3: _move(9)}
++
++    result = resolve_conflicts(graph, before, proposed, priority=(1, 3, 2))
++    assert result.fleet.locations() == {1: 1, 2: 2, 3: 9}
++    assert result.overridden == frozenset({1, 2})
++    assert is_collision_free(before, result.fleet)
++
++
++def test_the_priority_order_decides_who_takes_a_vertex_that_is_left():
++    # Agents 1 and 3 both want the vertex agent 2 leaves. Both wait for agent 2, and then agent
++    # 1, earlier in the order, takes it, although agent 3 comes right after agent 2.
++    vertices = {i: Vertex(id=i) for i in (1, 2, 3, 4)}
++    edges = (
++        Edge(source=1, target=2, cost=1.0),
++        Edge(source=3, target=2, cost=1.0),
++        Edge(source=2, target=4, cost=1.0),
++    )
++    graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
++    before = _fleet({1: 1, 2: 2, 3: 3})
++    proposed = {1: _move(2), 2: _move(4), 3: _move(2)}
++
++    result = resolve_conflicts(graph, before, proposed, priority=(1, 2, 3))
++    assert result.fleet.locations() == {1: 2, 2: 4, 3: 3}
++    assert result.overridden == frozenset({3})
++
++
++def test_a_rotation_and_the_robots_behind_it_wait():
++    # Agents 1, 2, 3 each want the next one's vertex, a cycle, and agent 4 wants agent 1's.
++    vertices = {i: Vertex(id=i) for i in (1, 2, 3, 4)}
++    edges = (
++        Edge(source=1, target=2, cost=1.0),
++        Edge(source=2, target=3, cost=1.0),
++        Edge(source=3, target=1, cost=1.0),
++        Edge(source=4, target=1, cost=1.0),
++    )
++    graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
++    before = _fleet({1: 1, 2: 2, 3: 3, 4: 4})
++    proposed = {1: _move(2), 2: _move(3), 3: _move(1), 4: _move(1)}
++
++    result = resolve_conflicts(graph, before, proposed, priority=(4, 3, 2, 1))
++    assert result.fleet.locations() == {1: 1, 2: 2, 3: 3, 4: 4}
++    assert result.overridden == frozenset({1, 2, 3, 4})
++
++
++def test_a_joint_action_that_passes_the_claim_mask_is_accepted_whole():
++    # Agents choose in priority order with move_blocked as the claim mask. Whatever they choose,
++    # conflict resolution overrides none of them.
++    vertices = {i: Vertex(id=i) for i in range(1, 7)}
++    edges = tuple(
++        Edge(source=a, target=b, cost=1.0)
++        for a in range(1, 7)
++        for b in range(1, 7)
++        if a != b and abs(a - b) <= 2
++    )
++    graph = WarehouseGraph(vertices=vertices, edges=edges, wait_cost=0.0)
++    before_loc = {1: 1, 2: 3, 3: 5}
++    before = _fleet(before_loc)
++    priority = (2, 3, 1)
++    for wanted in ((3, 5, 2), (5, 4, 1), (2, 6, 3), (4, 6, 2)):
++        chosen: dict[int, int] = {}
++        proposed: dict[int, Action] = {}
++        for agent_id, target in zip(priority, wanted):
++            start = before_loc[agent_id]
++            ok = target != start and not move_blocked(agent_id, start, target, before_loc, chosen)
++            proposed[agent_id] = _move(target) if ok else _wait()
++            chosen[agent_id] = target if ok else start
++        result = resolve_conflicts(graph, before, proposed, priority)
++        assert result.overridden == frozenset()
++        assert is_collision_free(before, result.fleet)
++
++
+ def test_operator_is_a_pure_function_of_inputs():
+     vertices = {i: Vertex(id=i) for i in (1, 2, 9)}
+     edges = (Edge(source=1, target=9, cost=1.0), Edge(source=2, target=9, cost=1.0))
+@@ -176,7 +267,7 @@ def test_three_agents_all_targeting_one_vertex_only_top_priority_moves():
+     assert is_collision_free(before, result.fleet)
+ 
+ 
+-def test_move_blocked_is_the_rule_resolve_conflicts_applies():
++def test_move_blocked_is_the_rule_of_the_claim_mask():
+     before_loc = {1: 1, 2: 2, 3: 3}
+     # vertex rule
+     assert move_blocked(2, 2, 9, before_loc, {1: 9})
+diff --git a/tests/unit/test_idle_parking.py b/tests/unit/test_idle_parking.py
+index 158c14b..d7cf670 100644
+--- a/tests/unit/test_idle_parking.py
++++ b/tests/unit/test_idle_parking.py
+@@ -137,6 +137,6 @@ def test_the_parking_leaf_is_the_target_of_the_shaping(study):
+         graph, location_now=here, task_now=None, location_next=leaf, task_next=None,
+         completed_task=False, overridden=False, moved=True, stood_still=False, congestion=0.0,
+         discount=1.0, deliver_reward=0.0, override_penalty=0.0, move_cost=0.0, wait_cost=0.0,
+-        congestion_reward_weight=0.0, parking=leaf,
++        congestion_reward_weight=0.0, parking_now=leaf, parking_next=leaf,
+     )  # fmt: skip
+     assert terms.shaping == pytest.approx(graph.distance(here, leaf))
+diff --git a/tests/unit/test_reward_order.py b/tests/unit/test_reward_order.py
+new file mode 100644
+index 0000000..a58430b
+--- /dev/null
++++ b/tests/unit/test_reward_order.py
+@@ -0,0 +1,70 @@
++"""[A79]: the shaping potential at t+1 is the one the robot sees at t+1, after the new tasks and
++parking leaves are handed out. So the shaping term of every step is gamma * Phi(t+1) - Phi(t) with
++both potentials read from the state the robot sees, and a new target is charged on the step it
++is handed out."""
++
++from pathlib import Path
++
++import pytest
++
++from slap_mapd_coupling.core.tasks import active_tasks_by_agent
++from slap_mapd_coupling.environment.multi_agent_env import WarehouseMAPDEnv
++from slap_mapd_coupling.environment.reward_function import current_target, potential
++from slap_mapd_coupling.environment.spaces import slot_for_action
++from slap_mapd_coupling.training.spec import build_experiment_config, build_study, load_spec
++
++ROOT = Path(__file__).resolve().parents[2]
++FLEET_8 = ROOT / "configs" / "fleet_8" / "decentralised.yaml"
++
++
++def _potentials(env: WarehouseMAPDEnv) -> dict[int, float]:
++    active = active_tasks_by_agent(env.tasks, env.t)
++    locations = env.fleet.locations()
++    return {
++        agent_id: potential(
++            env.graph, locations[agent_id], active.get(agent_id), env.parking_targets.get(agent_id)
++        )
++        for agent_id in locations
++    }
++
++
++def _towards_target(env: WarehouseMAPDEnv) -> dict[int, int]:
++    """Every robot steps to the neighbour nearest its target, waiting on a tie."""
++    active = active_tasks_by_agent(env.tasks, env.t)
++    slots = {}
++    for agent_id, here in env.fleet.locations().items():
++        target = current_target(here, active.get(agent_id), env.parking_targets.get(agent_id))
++        best = min(
++            env.graph.legal_actions(here),
++            key=lambda a: (
++                env.graph.distance(here if a.kind == "wait" else a.target, target),
++                a.kind != "wait",
++            ),
++        )
++        slots[agent_id] = slot_for_action(env.graph, here, best)
++    return slots
++
++
++def test_the_shaping_uses_the_potential_the_robot_sees_at_the_next_step():
++    spec = load_spec(FLEET_8)
++    study = build_study(spec)
++    config = build_experiment_config(spec, 0, "fixed")
++    env = WarehouseMAPDEnv(study.instance.graph, study.skus, study.counts, study.capacities, config)
++    gamma = config.discount
++    new_targets = 0
++    for _ in range(300):
++        before = _potentials(env)
++        shaping_before = dict(env.log.return_shaping_by_agent)
++        env.step(_towards_target(env))
++        after = _potentials(env)
++        for agent_id in before:
++            paid = env.log.return_shaping_by_agent.get(agent_id, 0.0) - shaping_before.get(
++                agent_id, 0.0
++            )
++            assert paid == pytest.approx(gamma * after[agent_id] - before[agent_id], abs=1e-9)
++        # Count the steps where a robot's target moved, a new task or a parking leaf, so the
++        # test is known to cover the case [A79] is about.
++        new_targets += sum(
++            1 for agent_id in before if after[agent_id] < before[agent_id] - 1.0 - 1e-9
++        )
++    assert new_targets > 0
+diff --git a/tests/unit/test_trainer.py b/tests/unit/test_trainer.py
+index a3a42b5..3b85737 100644
+--- a/tests/unit/test_trainer.py
++++ b/tests/unit/test_trainer.py
+@@ -39,9 +39,9 @@ def test_the_checkpoint_settings_become_tunes_checkpoint_config():
+     assert config.checkpoint_at_end is True
+ 
+ 
+-def test_the_default_score_is_the_episode_return_and_the_best_is_the_highest():
++def test_the_default_score_is_the_tasks_completed_and_the_best_is_the_highest():
+     settings = CheckpointSettings()
+-    assert settings.score_attribute == DEFAULT_SCORE_ATTRIBUTE == "episode_return_mean"
++    assert settings.score_attribute == DEFAULT_SCORE_ATTRIBUTE == "episode_tasks_completed_mean"
+     assert settings.score_order == "max"
+ 
+ 
+@@ -82,6 +82,16 @@ def test_the_return_is_copied_to_the_top_level_of_the_result():
+     assert "episode_return_mean" not in empty
+ 
+ 
++def test_the_tasks_completed_are_copied_to_the_top_level_too():
++    callbacks = TrainingProgressCallbacks()
++    result = {"env_runners": {"episode_return_mean": 12.5, "episode_tasks_completed": 7.0}}
++    callbacks.on_train_result(result=result)
++    assert result["episode_tasks_completed_mean"] == 7.0
++    empty = {"env_runners": {"episode_tasks_completed": float("nan")}}
++    callbacks.on_train_result(result=empty)
++    assert "episode_tasks_completed_mean" not in empty
++
++
+ def test_a_misspelt_checkpoint_setting_is_rejected():
+     with pytest.raises(ValidationError):
+         CheckpointSettings(every=3)  # type: ignore[call-arg]
+@@ -102,15 +112,15 @@ def test_a_run_saves_periodic_checkpoints_and_returns_its_best(tmp_path):
+         progress_path=progress,
+     )
+ 
+-    returns = [
+-        json.loads(line)["episode_return_mean"] for line in progress.read_text().splitlines()
+-    ]
+-    assert len(returns) == 4
++    rows = [json.loads(line) for line in progress.read_text().splitlines()]
++    scores = [row["episode_tasks_completed"] for row in rows]
++    assert len(scores) == 4
+     assert run.env_steps_sampled == 520
+-    # The checkpoint of iteration i is checkpoint_<i - 1>. The best is the highest return, and
+-    # it is kept along with the latest, so no more than two folders remain.
+-    best_iteration = max(range(4), key=returns.__getitem__) + 1
+-    assert run.best_checkpoint.name == f"checkpoint_{best_iteration - 1:06d}"
++    # The checkpoint of iteration i is checkpoint_<i - 1>. The best has the most tasks completed,
++    # the default score, and it is kept along with the latest, so no more than two folders
++    # remain. A short run often ties on tasks, so the test checks the score, not the index.
++    best_index = int(run.best_checkpoint.name.removeprefix("checkpoint_"))
++    assert scores[best_index] == max(scores)
+     kept = sorted(path.name for path in run.trial_dir.glob("checkpoint_*"))
+     assert len(kept) <= 3 and run.best_checkpoint.name in kept and run.checkpoint.name in kept
+     # Both open as modules without a Ray cluster.
+diff --git a/tests/unit/test_training_progress.py b/tests/unit/test_training_progress.py
+index 59138b4..99763bd 100644
+--- a/tests/unit/test_training_progress.py
++++ b/tests/unit/test_training_progress.py
+@@ -118,8 +118,9 @@ def test_format_iteration_prints_the_return_only_when_it_is_a_finite_number():
+     line = format_iteration(2, 5, {"env_runners": {**full, "episode_return_mean": 1.5}})
+     assert line.startswith("  iter 2/5:")
+     assert line == (
+-        "  iter 2/5: episode_return_mean=1.5 tasks_completed=3 tasks_released=10 backlog=7 "
+-        "steps_since_last_completion=120 standing_still_fraction=0.25"
++        "  iter 2/5: episode_return_mean=1.5 return_unshaped=0 tasks_completed=3 "
++        "tasks_released=10 backlog=7 steps_since_last_completion=120 "
++        "standing_still_fraction=0.25"
+     )
+     big = {**full, "tasks_released": 1234.5, "episode_return_mean": 1390.04}
+     line = format_iteration(1, 1, {"env_runners": big})
+@@ -180,6 +181,7 @@ _EPISODE_KEY_NAMES = (
+     "return_move",
+     "return_wait",
+     "return_congestion",
++    "return_unshaped",
+     "override_rate",
+     "episode_tasks_completed",
+     "episode_tasks_released",
+@@ -360,6 +362,9 @@ def test_on_episode_end_logs_the_terms_that_add_up_to_the_episode_return(control
+         episode_return, abs=1e-9
+     )
+     assert deliver >= 0.0 and override <= 0.0 and congestion <= 0.0
++    # The return without the shaping term is the episode return less the shaping term.
++    (unshaped,) = logger.values["return_unshaped"]
++    assert unshaped == pytest.approx(episode_return - shaping, abs=1e-9)
+ 
+     log = env.core.log
+     overrides = sum(log.overrides_by_agent.values())
+diff --git a/tests/unit/test_training_run.py b/tests/unit/test_training_run.py
+index 9cd0322..257dd34 100644
+--- a/tests/unit/test_training_run.py
++++ b/tests/unit/test_training_run.py
+@@ -145,6 +145,23 @@ def test_load_progress_turns_nulls_into_nan(tmp_path: Path):
+     assert list(log["tasks_completed"]) == [1.5, 3.0, 4.5]
+ 
+ 
++def test_an_old_log_gets_the_return_without_shaping_from_its_terms(tmp_path: Path):
++    rows = _full_rows(3)
++    for row in rows:
++        row["return_move"], row["return_wait"] = -0.25, -0.75
++    path = tmp_path / "x_training_progress.jsonl"
++    _write_progress(path, rows)
++
++    log = load_progress(path)
++
++    expected = [row["return_deliver"] + row["return_override"] - 1.0 + row["return_congestion"]
++                for row in rows]  # fmt: skip
++    assert list(log["return_unshaped"]) == pytest.approx(expected)
++    # A log missing a term is left without it, rather than given a wrong sum.
++    _write_progress(path, _full_rows(3))
++    assert "return_unshaped" not in load_progress(path)
++
++
+ def test_load_progress_tolerates_missing_keys(tmp_path: Path):
+     path = tmp_path / "x_training_progress.jsonl"
+     _write_progress(

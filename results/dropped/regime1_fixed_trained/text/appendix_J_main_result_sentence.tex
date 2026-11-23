@@ -1,0 +1,11 @@
+$L$ rounds an embedding reflects the vertices within $L$ edges. The hidden
+width is the size of the vertex embeddings, and the head width the size of
+the hidden layer of the policy and value heads. The budget counts environment
+steps, one per timestep however many agents choose in it, and it is the same
+for every learned controller (Section~\ref{sec:method:training}). The main
+result uses policies trained under fixed storage and tested under every
+storage rule.
+
+These values decide how well each controller learns within the budget. A
+controller that has not finished learning makes its way of deciding look
+worse than it is. Holding every value the same for every controller keeps a

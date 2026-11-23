@@ -1,0 +1,13 @@
+
+\paragraph{Training.} Each learned controller is trained with PPO under
+the same budget of environment steps, using the values in
+Table~\ref{tab:trainparams}. Both training regimes of
+Section~\ref{sec:method:training} are run. In the first the controller
+trains under fixed storage and is evaluated under all three storage
+rules. In the second it trains under the storage rule it is evaluated
+with. The main result uses the first. Training seeds and evaluation % [A56]
+seeds are counted apart. The spread over training seeds shows how much the
+result depends on the trained policy, and the spread over evaluation seeds
+how much it depends on the order stream.
+\mockup{Number of training seeds per controller and regime. Whether one
+policy is trained for each load level and congestion setting, or one

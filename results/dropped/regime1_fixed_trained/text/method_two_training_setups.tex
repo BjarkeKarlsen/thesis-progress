@@ -1,0 +1,13 @@
+Two training setups are reported, and they answer different questions. % [A56] [A9]
+In the first, each controller is trained under fixed storage only, and the
+one frozen policy then meets every storage rule. The gain then measures the
+storage rule for that policy, and this is the main result. In the second,
+each storage rule gets its own policy, trained under the same rule it is
+evaluated with. The gain then compares two whole systems, storage rule and
+policy together, and part of it can come from training. This setup is also
+harder to learn, because demand and congestion-aware storage change which % [A108]
+shelves the picks come from, through \nref{eq:coupling}, while the policy is
+learning (Section~\ref{sec:pf:coupling}).
+
+% [APP] tab:trainparams moved to app:params
+

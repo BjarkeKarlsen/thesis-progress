@@ -1,0 +1,64 @@
+{
+ "run_dir": "/kaggle/working/run",
+ "controller": "decentralised",
+ "communication": true,
+ "trained_under": "fixed",
+ "num_agents": 8,
+ "training_load": 0.09,
+ "budget_env_steps": 500000,
+ "checkpoint_every": 3,
+ "rule": "[A60]: of the checkpoints that keep up on every validation seed, the one with the shortest mean pick service time, else the highest throughput.",
+ "chosen": {
+  "checkpoint": "checkpoint_000021",
+  "iteration": 66,
+  "path": "/kaggle/working/run/decentralised_fixed_comm/PPO_warehouse_mapd_multi_agent_env_1495f_00000_0_2026-11-12_07-31-33/checkpoint_000021"
+ },
+ "last": {
+  "checkpoint": "checkpoint_000027",
+  "iteration": 84,
+  "path": "/kaggle/working/run/decentralised_fixed_comm/PPO_warehouse_mapd_multi_agent_env_1495f_00000_0_2026-11-12_07-31-33/checkpoint_000027"
+ },
+ "checkpoints_validated": 28,
+ "validation": {
+  "seeds": [
+   100000,
+   100001
+  ],
+  "horizon": 2000,
+  "warmup": 0
+ },
+ "test": {
+  "seeds": [
+   200000,
+   200001,
+   200002,
+   200003,
+   200004,
+   200005,
+   200006,
+   200007,
+   200008,
+   200009,
+   200010,
+   200011,
+   200012,
+   200013,
+   200014,
+   200015,
+   200016,
+   200017,
+   200018,
+   200019
+  ],
+  "horizon": 10000,
+  "warmup": 5000,
+  "load": 0.09,
+  "storage_modes": [
+   "fixed",
+   "congestion"
+  ]
+ },
+ "device": "cpu",
+ "code_commit": "0c9742371e4f1a7c537c62ac5959bf2debdd16e5",
+ "finished": "2026-11-17T10:15"
+}

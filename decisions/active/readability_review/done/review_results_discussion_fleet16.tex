@@ -1,0 +1,314 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,xcolor,enumitem,graphicx,float}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\citet}[1]{Krnjaic et al.}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{plc}{HTML}{888888}
+\newcommand{\placeholder}[1]{\textcolor{plc}{\small Replaces the placeholder: #1}\par}
+\newcommand{\tbd}{\textcolor{orange}{TBD}}
+\sloppy
+\title{Proposed change, Results and Discussion with 8 and 16 agents}
+\date{17 November 2026, version 5 (both fleets, served share first, plain style)}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what changes from version 4. Part~2 is the Results and Discussion of the Experiments
+chapter (\texttt{5.Experiments.tex}) as they would read. All of Part~2 is new text. A grey line
+above a paragraph names the placeholder it replaces. Numbers sit in the tables, and the prose says
+what they mean. Part~3 has the questions. Nothing is changed in the thesis yet.
+
+\section*{Part 1. What changes from version 4}
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{Fleet 32 added.} \emph{(Author, 17 November.)} A third column for 32 agents, filled once
+  its runs are trained and tested. The centralised controller and the arm with messages are not
+  trained at 32 agents. The prose for 32 agents follows the numbers.
+\item \textbf{Both fleets.} 8 and 16 agents are reported side by side. At 8 agents the learned
+  controllers keep up on most seeds. At 16 agents they fall behind. Together they show where the
+  learned controllers stop working, which 16 agents alone cannot.
+\item \textbf{Served share is the main measure for the learned controllers.} It reads simply, since
+  1.0 means a fleet serves all the work that arrives. Service time is compared only for Token
+  Passing. The reason is in ``Keeping up'' below. Even the learned seeds that pass the check leave
+  part of the work behind, so their orders wait five to ten times longer than under Token Passing.
+\item \textbf{Token Passing is the reference, not the winner.} It shows what a planner that keeps up
+  gains from storage, and it sets the bar the learned controllers are measured against.
+\item \textbf{Messages.} They help under fixed storage at both fleets, and not under the other two
+  rules. The text says exactly that.
+\item \textbf{Decision time at 32 and 64 agents.} The scaling probe is added to Costs. Token Passing
+  stays the fastest, but it grows faster with the fleet than the decentralised controller does.
+\item \textbf{Order time is the headline.} \emph{(Author, 17 November.)} The pick time stands beside it.
+\item \textbf{Keep-up threshold stays at 0.8.} \emph{(Author, 17 November.)} Every result uses it.
+\item \textbf{The load and what could have been done differently.} \emph{(Author, 17 November.)}
+  The main loads stay, because every run used them. The Discussion says the load assumed every
+  controller would keep up, why the learned controllers do not reach Token Passing, and what could
+  have been done differently, such as longer training episodes.
+\item \textbf{What was expected.} The new Discussion paragraph answers the predictions of the
+  Expected outcome one by one.
+\item \textbf{Plain style.} One finding per sentence, the numbers in four small tables.
+\item \textbf{Still open.} Token Passing at 8 agents plays seeds 0 to 19, not the test seeds, until
+  its replay runs (marked $^\dagger$ here only). The centralised controller under fixed storage at
+  8 agents comes from Kaggle. The section-based arm's fixed policy under congestion-aware storage
+  (16 agents) ends this afternoon. Fleet 32 is still training.
+\end{itemize}
+
+\section*{Part 2. The text}
+
+\subsection*{Results}
+
+\placeholder{One opening sentence that states the main finding once it is known.}
+The results are for 8 and 16 agents, the fleets every controller could be trained on in the time
+available. Demand storage makes Token Passing's orders 14\,\% faster at 8 agents and 20\,\% faster at
+16. The learned controllers keep up on most seeds at 8 agents and fall behind at 16, so for them
+the gain cannot be measured.
+
+\paragraph{Keeping up.}
+\placeholder{Which conditions pass the keep-up check. Report the backlog trace of one condition that
+falls behind.}
+Token Passing serves all the work at both fleets, under every rule (Table~\ref{tab:served}).
+
+The learned controllers serve most of the work at 8 agents. They serve between 0.81 and 0.91 of it,
+and each keeps up on 11 to 15 of the 20 seeds. The arm with messages under fixed storage does best,
+at 0.96 and 18 seeds.
+
+At 16 agents they fall behind. The section-based arm serves the most, between 0.54 and 0.69. The
+centralised arm serves about half. The decentralised arm serves 0.12 under fixed storage and 0.66
+under congestion-aware storage. Only 2 to 7 seeds keep up, all of them for the section-based or the
+decentralised arm.
+
+Passing the check does not mean serving everything. A seed passes when it serves at least 0.8 of
+its work. The rest waits, and the wait grows through the run. So even on seeds that pass, a learned
+controller's orders take 300 to 3200 steps, against 150 to 280 under Token Passing. Their service
+times say more about the backlog than about storage, so the learned controllers are compared by how
+much they serve.
+
+\begin{table}[H]
+  \centering
+  \caption{Share of the arriving work that is served, mean over 20 test seeds. In brackets, the seeds
+    that keep up. n.t., not trained at that fleet.}
+  \label{tab:served}
+  \footnotesize\setlength{\tabcolsep}{3pt}
+  \begin{tabular}{l ccc ccc ccc}
+    \toprule
+    & \multicolumn{3}{c}{8 agents} & \multicolumn{3}{c}{16 agents} & \multicolumn{3}{c}{32 agents} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+    controller & fix. & dem. & cng. & fix. & dem. & cng. & fix. & dem. & cng. \\
+    \midrule
+    Token Passing  & 0.98 (20)$^\dagger$ & 0.99 (20)$^\dagger$ & 0.99 (20)$^\dagger$ & 1.00 (20) & 1.00 (20) & 1.00 (20) & \tbd & \tbd & \tbd \\
+    centralised    & \tbd      & 0.90 (15) & 0.81 (11) & 0.54 (0) & 0.52 (0) & 0.59 (0) & n.t. & n.t. & n.t. \\
+    section-based  & 0.87 (14) & 0.81 (12) & 0.91 (14) & 0.63 (7) & 0.54 (0) & 0.69 (5) & \tbd & \tbd & \tbd \\
+    decentralised  & 0.84 (12) & 0.87 (13) & 0.82 (11) & 0.12 (0) & 0.39 (0) & 0.66 (2) & \tbd & \tbd & \tbd \\
+    with messages  & 0.96 (18) & 0.66 (9)  & 0.82 (13) & 0.37 (0) & 0.28 (0) & 0.34 (0) & n.t. & n.t. & n.t. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Locks.}
+Locks explain most of the decentralised arm's failure at 16 agents (Table~\ref{tab:locks}). A seed
+locks when two agents hold the same task for 500 steps or more. Locks are rare at 8 agents. At 16
+agents the decentralised arm locks on every seed under fixed and demand storage, with or without
+messages. Token Passing never locks.
+
+\begin{table}[H]
+  \centering
+  \caption{Test seeds that lock, out of 20.}
+  \label{tab:locks}
+  \footnotesize
+  \begin{tabular}{l ccc ccc ccc}
+    \toprule
+    & \multicolumn{3}{c}{8 agents} & \multicolumn{3}{c}{16 agents} & \multicolumn{3}{c}{32 agents} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+    controller & fix. & dem. & cng. & fix. & dem. & cng. & fix. & dem. & cng. \\
+    \midrule
+    Token Passing  & 0 & 0 & 0 & 0 & 0 & 0 & \tbd & \tbd & \tbd \\
+    centralised    & \tbd & 0 & 0 & 5 & 3 & 2 & n.t. & n.t. & n.t. \\
+    section-based  & 0 & 6 & 0 & 7 & 8 & 4 & \tbd & \tbd & \tbd \\
+    decentralised  & 7 & 1 & 6 & 20 & 20 & 5 & \tbd & \tbd & \tbd \\
+    with messages  & 0 & 10 & 5 & 19 & 20 & 18 & n.t. & n.t. & n.t. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{RQ1, storage adaptation.}
+\placeholder{Gain in mean service time of $F_{\mathrm{dem}}$ and $F_{\mathrm{cng}}$ over
+$F_{\mathrm{fix}}$ for each controller.}
+Demand storage makes Token Passing's orders faster at both fleets (Table~\ref{tab:gain}). The gain is
+14\,\% at 8 agents and 20\,\% at 16, and it shows on nearly every seed. A single pick gains less, 15\,\% at 16 agents [11.3, 18.3]. Fleet 8's pick gain follows once its test-seed rows are home. The time saved is travel and
+the wait for an agent. Popular stock sits closer to the workstations, so a trip is shorter and the
+agent is free sooner. Time spent blocked stays near 2 steps per pick.
+
+For the learned controllers demand storage has no clear effect on how much they serve. It raises
+the share for some and lowers it for others (Table~\ref{tab:served}). Each rule has its own trained
+policy, so a change here mixes the rule with the training run.
+
+\begin{table}[H]
+  \centering
+  \caption{Token Passing's mean order service time under fixed storage, and the gain of each rule
+    over it, with 95\,\% intervals over 20 seeds paired by seed.}
+  \label{tab:gain}
+  \small
+  \begin{tabular}{l c cc cc}
+    \toprule
+    fleet & $\bar\zeta_T$ under $F_{\mathrm{fix}}$ & gain of $F_{\mathrm{dem}}$ & seeds faster
+      & gain of $F_{\mathrm{cng}}$ & seeds faster \\
+    \midrule
+    8 agents$^\dagger$  & 177.5 & 14.1\,\% [8.3, 19.9]  & 18 & 12.3\,\% [6.7, 18.0]  & 17 \\
+    16 agents           & 278.9 & 20.0\,\% [16.0, 24.1] & 20 & 19.9\,\% [15.0, 24.9] & 20 \\
+    32 agents           & \tbd & \tbd & \tbd & \tbd & \tbd \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{RQ1, the controller.}
+\placeholder{Compare the gains of Table~\ref{tab:gain} across controllers.}
+The expected order, with the centralised controller first, does not hold. At 8 agents the three
+learned controllers serve about the same. At 16 agents the section-based controller serves the
+most and the decentralised controller the least, except under congestion-aware storage, where the
+two are close. Deciding for the whole fleet at once did not pay.
+
+\paragraph{RQ2, congestion-aware storage.}
+\placeholder{Change in crowding $\bar\delta_T$ and blocked time $W_T$ from demand to congestion-aware
+storage.}
+Congestion-aware storage gives Token Passing no more than demand storage does
+(Table~\ref{tab:gain}). Token Passing plans each path ahead, and an agent waits its turn as part of
+the plan. Its agents are blocked for under 2 steps per pick, so the rule has little to avoid.
+
+The learned controllers are blocked far more, 13 to 26 steps per pick at 16 agents. There, every
+learned controller serves more under congestion-aware storage than under demand storage. The gain
+comes with the training, not with the rule alone. The policy trained under fixed storage, played
+under congestion-aware storage, serves no more than under fixed storage (Appendix~L). At 8 agents
+the effect is mixed.
+
+\paragraph{RQ4, communication.}
+\placeholder{Only if reached.}
+Messages help the decentralised controller under fixed storage, at both fleets. At 8 agents its
+served share rises from 0.84 to 0.96, the highest of any learned run, and at 16 agents from 0.12 to
+0.37. Under demand storage messages lower the share at both fleets. Under congestion-aware storage
+they lower it at 16 agents and leave it unchanged at 8. At 16 agents the arm with messages still
+locks on 18 to 20 seeds, so messages do not let two agents back out of a lock.
+
+\paragraph{Costs.}
+\placeholder{Mean service time of put-aways, runtime per controller.}
+Demand storage costs put-away time. Under Token Passing at 16 agents a put-away takes 37 steps under
+fixed storage and 43 under demand storage, because new stock goes further to reach the best shelves.
+
+Decision time grows with how much of the warehouse a controller reads (Table~\ref{tab:time}).
+Token Passing is the fastest at every fleet size. It also grows the fastest, about tenfold from 16
+to 64 agents, while the decentralised controller grows less than threefold. The 32 and 64 agent
+times come from policies trained at 16 agents and played for 500 steps, so they measure time only,
+not how well the controllers do.
+
+\begin{table}[H]
+  \centering
+  \caption{Mean time per decision step in milliseconds. Learned controllers on the GPU, Token
+    Passing on the CPU.}
+  \label{tab:time}
+  \small
+  \begin{tabular}{l ccc}
+    \toprule
+    controller & 16 agents & 32 agents & 64 agents \\
+    \midrule
+    Token Passing  & 2   & 6$^\ast$   & 19$^\ast$ \\
+    centralised    & 110 & 266 & 792 \\
+    section-based  & 73  & 106 & 235 \\
+    decentralised  & 13  & 15  & 32 \\
+    \bottomrule
+  \end{tabular}
+
+  \smallskip
+  {\footnotesize $^\ast$ At the lowest load tested, 0.4 and 0.8 tasks per step, above the main load.}
+\end{table}
+
+\subsection*{Discussion}
+
+\placeholder{Open with the answer to the main research question in one or two sentences.}
+Storage that follows demand makes orders 14 to 20\,\% faster, when the controller keeps up. Only
+Token Passing keeps up on every seed, so only for Token Passing can the gain be measured.
+
+\paragraph{What was expected.}
+\placeholder{The TODO added on 17 November.}
+Some predictions of the Expected outcome held and some did not. Demand storage did shorten orders,
+through shorter trips, as predicted. The learned controllers did not keep up at 16 agents and did
+not come close to Token Passing. The centralised controller did not gain the most. It never kept up
+at 16 agents, and at 8 agents it served about as much as the others. Closing the loop changed little for
+Token Passing, as predicted, because it is rarely blocked. Messages helped only under fixed
+storage, not where routes cross in general. RQ3 waits for the larger fleets.
+
+\paragraph{The load.}
+The main load assumed that every controller could keep up. It was set from what Token Passing can
+serve, at about 0.6 of its capacity, before any learned controller was trained
+(Appendix~E). Under the served check of the final runs, Token Passing's capacity is
+one tested step higher, so the main load sits at about 0.5 of it. Every run was trained and tested
+at this load, so it stays. The assumption held for Token Passing and nearly held for the learned
+controllers at 8 agents. At 16 agents it did not hold.
+
+\paragraph{Why adaptation helps.}
+Demand storage helps because it puts popular stock near the workstations. A pick travels less and
+its agent is free sooner. Blocked time hardly moves, so there is no sign that adaptation crowds the
+aisles.
+
+\paragraph{Why the learned controllers fall behind.}
+The learned controllers fall behind mostly through locks and through runs that were too short.
+Two agents that each wait for the other hold one task for the rest of the run, and the agents behind
+them queue. Krnjaic et al.\ saw the same with agents that share one policy, and a manager that spread
+the goals over the warehouse avoided it. The section-based controller does much the same and locks
+less. The policies also trained and were chosen on runs of 2000 steps, while a test lasts 10000. A
+policy that falls behind slowly looks fine in the short run.
+
+\paragraph{What could have been done differently.}
+Four changes could have brought the learned controllers closer to Token Passing.
+\begin{itemize}[leftmargin=1.2em]
+  \item \emph{Longer training episodes.} The policies trained on 2000 steps and were tested on
+    10000. A backlog that grows slowly hardly shows in 2000 steps, so training never punished it.
+    Training on longer episodes, or choosing the checkpoint on a long validation run, targets the
+    failure seen in the test.
+  \item \emph{More training.} Each run had 84 iterations and one seed. More iterations, or several
+    training seeds per controller and rule, would show whether a run is simply unlucky.
+  \item \emph{A way out of locks.} Most of the decentralised arm's loss is locks. A shared reward,
+    or a rule that makes one of two locked agents give way, would let them back out.
+  \item \emph{Starting from Token Passing.} Training the policies first to copy Token Passing's moves,
+    as PRIMAL does with a planner, would start them from a fleet that already keeps up.
+\end{itemize}
+Longer test runs would not have helped. A learned run that falls behind falls further behind the
+longer it runs, so a longer test would only lower its served share.
+
+\paragraph{The price of avoiding congestion.}
+Congestion-aware storage pays only where agents get blocked. Token Passing is rarely blocked, so the
+rule has nothing to win there. The learned controllers are blocked often, and the policies trained
+under the rule serve more at 16 agents. Whether the rule pays for a learned controller that keeps up
+stays open.
+
+\paragraph{Relation to earlier work.}
+Learned controllers beat hand-made rules in Krnjaic et al.\ and lose to Token Passing here. The two
+results do not clash. Their agents choose only where to go next, and a path search moves them there.
+Here the learned controllers choose every move and are compared with a planner whose paths never
+meet. Learning which task to take can pay, while learning to move 16 agents without collisions is
+where the learned controllers fall behind. Lifelong MAPD, the GCN routing of van Knippenberg et al.\
+and crowd-aware routing, still to write.
+
+\paragraph{Threats to validity.}
+Three items added.
+\begin{itemize}[leftmargin=1.2em]
+  \item The checkpoint is chosen on runs of 2000 steps and tested on 10000. Every learned policy did
+    better in validation than in the test.
+  \item Each controller and rule has one training run. A rule whose policy does better may only have
+    had a better run. Playing one policy under every rule separates the two, and there the rule alone
+    made no difference.
+  \item The decision times at 32 and 64 agents come from policies trained at 16 agents.
+\end{itemize}
+
+\subsection*{Appendix L}
+Tables~\ref{tab:served} and \ref{tab:locks} also go in Appendix~L, ``The test runs in full'', with the
+lock threshold of 1250 steps beside 500.
+
+\section*{Part 3. Questions}
+
+Settled on 17 November. The keep-up threshold stays at 0.8. Token Passing at 8 agents is replayed
+on the test seeds (running). Fleet 32 gets its own column. The order time is the main result, with
+the pick time beside it (at 16 agents, orders 20.0\,\% faster and picks 14.8\,\% faster).
+
+No questions are open.
+
+\end{document}

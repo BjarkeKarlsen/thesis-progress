@@ -3,12 +3,12 @@ The main result across the controllers (L.Results.tex, app:results), and the row
 
 Run:  python thesis-progress/scripts/images/appendix_results.py   (from the workspace root)
 Out:  thesis-progress/scripts/Images/app_results_gain.png        the gain per controller
-      thesis-progress/results/L_results/fleet_<m>/tables.tex       the rows of tab:app:check,
+      thesis-progress/results/L_results/earlier_runs/fleet_<m>/tables.tex       the rows of tab:app:check,
                                                                    tab:app:result, tab:app:cost,
                                                                    tab:app:backlog, tab:app:stock
 
 Reads, per fleet,
-- the learned arms: results/L_results/fleet_<m>/<arm>/fixed_only/test.jsonl, the test rows of
+- the learned arms: results/L_results/earlier_runs/fleet_<m>/<arm>/fixed_only/test.jsonl, the test rows of
   `slap-mapd evaluate --storage-modes fixed demand --horizon 10000 --warmup 5000`, copied there
   by thesis-progress/scripts/collect_run.py. Only the chosen checkpoint is read.
 - Token Passing: the rows of the updated Token Passing run at the main load and the thesis
@@ -27,7 +27,10 @@ import statistics
 from appendix_data import (RESULTS, FLEETS, ARMS, ARM_COLOUR, RULES, C, plt, read_jsonl,
                            paired_gain, share, style, panel_title, placeholder, save)
 
-LEARNED = ("centralised", "section", "decentralised")
+ARMS = {**ARMS, "decentralised_comm": "with messages"}
+ARM_COLOUR = {**ARM_COLOUR, "decentralised_comm": C["comm"]}
+LEARNED = ("centralised", "section", "decentralised", "decentralised_comm")
+EVAL = "evaluation_horizon10000_warmup5000"
 CONTROLLERS = ("token_passing",) + LEARNED
 REGIME = "fixed_only"
 RULE_ORDER = ("fixed", "demand", "congestion")
@@ -48,10 +51,26 @@ def token_passing_rows(fleet):
 
 
 def learned_rows(fleet, arm):
-    """A learned arm's test rows of its chosen checkpoint, per storage rule."""
-    rows = read_jsonl(os.path.join(RESULTS, "L_results", f"fleet_{fleet}", arm, REGIME,
-                                   "test.jsonl"))
+    """A learned arm's test rows of its chosen checkpoint, per storage rule, each rule played by
+    the policy trained under it (Regime 2). They are the rows `fleet16_results.py` copies to
+    results/L_results/earlier_runs/fleet_<m>/rows/<arm>/<rule>/. The decision runtime kappa_T is taken from
+    the runtime runs beside them (runtime_gpu/, the PC's GPU, alone on the machine), since the
+    test runs played several episodes at once. Older runs: <arm>/fixed_only/test.jsonl."""
+    base = os.path.join(RESULTS, "L_results", "earlier_runs", f"fleet_{fleet}", "rows", arm)
     out = {}
+    for rule in RULE_ORDER:
+        rows = [r for r in read_jsonl(os.path.join(base, rule, EVAL, "test.jsonl"))
+                if r.get("role", "chosen") == "chosen" and r["storage_mode"] == rule]
+        if not rows:
+            continue
+        runtime = [r["mean_decision_runtime_seconds"]
+                   for r in read_jsonl(os.path.join(base, rule, "runtime_gpu", "test.jsonl"))]
+        kappa = statistics.fmean(runtime) if runtime else None
+        out[rule] = [{**r, "mean_decision_runtime_seconds": kappa} for r in rows]
+    if out:
+        return out
+    rows = read_jsonl(os.path.join(RESULTS, "L_results", "earlier_runs", f"fleet_{fleet}", arm, REGIME,
+                                   "test.jsonl"))
     for r in rows:
         if r.get("role", "chosen") == "chosen":
             out.setdefault(r["storage_mode"], []).append(r)
@@ -80,7 +99,10 @@ def results_gain():
             rules = data.get(controller, {})
             fixed = rules.get("fixed", [])
             for k, rule in enumerate(("demand", "congestion")):
-                if rule in rules and fixed:
+                # The gain is given only when every seed of both rules keeps up, as in
+                # comparison.md, since a pick service time of a run that falls behind grows
+                # with its horizon.
+                if rule in rules and fixed and all(r["keeps_up"] for r in rules[rule] + fixed):
                     gain, half = paired_gain(rules[rule], fixed)
                     top.errorbar(i + (k - 0.5) * 0.25, gain, yerr=half, ls="none",
                                  marker=RULE_MARK[rule], ms=6, capsize=3,
@@ -157,7 +179,7 @@ WIDTH = {"tab:app:check": 5, "tab:app:result": 8, "tab:app:cost": 6, "tab:app:ba
 
 def table_rows():
     """For each fleet with a run, the body rows of the five tables of app:results, as LaTeX, in
-    results/L_results/fleet_<m>/tables.tex, to paste over the TBD rows."""
+    results/L_results/earlier_runs/fleet_<m>/tables.tex, to paste over the TBD rows."""
     paths = []
     for fleet in FLEETS:
         data = rows_of(fleet)
@@ -171,9 +193,9 @@ def table_rows():
                     rows = data.get(controller, {}).get(rule)
                     values = cells(rows, controller) if rows else ["TBD"] * WIDTH[label]
                     first = rule.ljust(10) if i == 0 else " " * 10
-                    lines.append(f"    {first} & {ARMS[controller]:<13} & "
+                    lines.append(f"    {first} & {ARMS[controller]:<14} & "
                                  + " & ".join(values) + " \\\\")
-        folder = os.path.join(RESULTS, "L_results", f"fleet_{fleet}")
+        folder = os.path.join(RESULTS, "L_results", "earlier_runs", f"fleet_{fleet}")
         os.makedirs(folder, exist_ok=True)
         path = os.path.join(folder, "tables.tex")
         with open(path, "w") as out:

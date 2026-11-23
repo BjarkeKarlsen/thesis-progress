@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newenvironment{greenblock}{\color{newc}}{}
+\title{Proposed change, the two legs of a shelf's trip}
+\date{23 November 2026, version 3 (follows the code, equations fit the page)}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+Version 2 follows the decisions of 23 November. The text follows the code,
+because every run was trained and tested on it. The idea is said in plain
+words first, then ``Formally,'' and the formula. No new name such as
+``weighted trip'' is added. The two legs get their own symbols, because the
+formula cannot be written right without them. Fixed storage's overflow gets
+one sentence. The SKU with no order line is left out, because it never
+happens in the runs.
+
+Black text stays, \new{green} is new and \old{struck} text goes. Part~1 is
+what the code does. Parts~2 to~4 show the paragraphs that change. Part~5 is
+what changes elsewhere. Nothing below is in the thesis yet.
+
+\section*{Part 1. What the code does}
+Checked in \texttt{slap-mapd-coupling} on \texttt{origin/main},
+\texttt{storage/arrival.py} (\texttt{\_refill\_scores},
+\texttt{leg\_weighted\_distance}, \texttt{putaway\_fixed},
+\texttt{putaway\_congestion}), with the run configs (pallets of 10,
+put-away by the agents, docks drawn at random, categories).
+\begin{itemize}[nosep]
+  \item The dock leg is the mean distance from the docks to the shelf. The
+        workstation leg is the mean distance from the shelf to the four
+        workstations of the SKU's category. The text has both right.
+  \item The legs are not added with the same weight. The workstation leg is
+        weighted by the order lines of the SKU per step, one pick per line.
+        The dock leg is weighted by the pallets of the SKU per step, the units
+        ordered per step divided by the pallet size, one put-away per pallet.
+  \item Congestion-aware storage adds $\beta$ times the standing still of the
+        shelf to the workstation leg, so it is weighted by the lines per step
+        too. This matches the blocking cost $K$.
+  \item Demand and congestion-aware storage take the SKUs from most to least
+        ordered. Fixed storage takes them in index order, home shelf first.
+        A pallet that misses its home shelf goes by the same two weighted
+        legs. For one SKU the order of its shelves depends only on how the
+        two weights compare, about pallet size over units per line, $10/3$,
+        the same for every SKU. So fixed storage favours no SKU.
+  \item Equal scores are broken by the plain trip of Appendix~D, the mean
+        over the docks plus the nearest workstation, then by vertex number.
+  \item How often a pallet misses its home shelf under fixed storage, at 16
+        agents: about 8 percent of the arriving units under Token Passing, 40
+        to 60 percent under the learned controllers (long runs, test seeds),
+        whose fleets fall behind and leave the shelves full.
+\end{itemize}
+
+\section*{Part 2. \texttt{4.Implementation.tex}, Where arriving stock goes}
+
+\subsection*{The trip paragraph}
+A shelf is judged by the trip a unit makes through it, from a dock to the
+shelf and on to a workstation of the SKU's category. The first leg is the
+mean over the docks, because the dock of a pallet is drawn at random. The
+second leg is the mean over the category's four workstations, because an
+order may use any of them.
+\old{Both legs count timesteps, so they add without a weight. This is the
+\emph{trip distance} $d^{\mathrm{trip}}(k,v)$ (C.2) (Appendix C.1).}
+\begin{greenblock}
+The two legs are not walked equally often. Every pick of the SKU goes from
+the shelf to a workstation of its category, so the second leg counts once per
+pick. Every pallet goes from a dock to the shelf, so the first leg counts once
+per pallet. A line asks for 3 units on average and a pallet holds 10, so a
+SKU is picked about three times as often as it gets a pallet, and the second
+leg weighs more.
+
+Formally, write $d^{\mathrm{dock}}(v)$ for the first leg and
+$d^{\mathrm{work}}(k,v)$ for the second, both in timesteps (Appendix~C).
+Write $\hat\rho^{\mathrm{pal}}_t(k)$ for the pallets of $k$ per step, the
+units of $k$ ordered per step in the last storage period divided by the
+pallet size $Q$ (``pal'' for pallet). Each leg is weighted by how often it is
+walked,
+\begin{equation*}
+  \hat\rho_t(k)\, d^{\mathrm{work}}(k,v) + \hat\rho^{\mathrm{pal}}_t(k)\, d^{\mathrm{dock}}(v) .
+\end{equation*}
+Take tea with $\hat\rho_t = 0.3$ lines per step, so about $0.09$ pallets per
+step. Shelf $A$ is 4 steps from tea's workstations and 10 from the docks.
+Shelf $B$ is 8 and 4. Unweighted, $B$ is shorter, 12 against 14. Weighted,
+$A$ scores $0.3\cdot4+0.09\cdot10=2.1$ and $B$ scores
+$0.3\cdot8+0.09\cdot4=2.76$, so tea goes to $A$, closer to its workstations,
+because it is picked far more often than it is put away.
+\end{greenblock}
+The demand rules are not told a SKU's category $h(k)$. They learn it from
+its first order line, which always goes to a workstation of that category.
+Fixed storage uses $h(k)$ directly.
+
+\subsection*{The cost paragraph and eq.~(storageobjective)}
+The demand rules can be read as keeping a cost small. The classic slotting
+cost $D$ adds up, over the pallets placed at an update, how often their SKU
+is \old{ordered times the length of their trip}\new{picked times the second
+leg, plus how often it gets a pallet times the first leg}. The blocking cost
+$K$ is the thesis's own [\dots unchanged]. The two costs and the value the
+rules aim to keep small are
+\begin{align*}
+D &= \sum_{k\in\mathcal{K}}\sum_{v\in V_{\mathrm{str}}}
+  \bigl(\hat\rho_t(k)\,d^{\mathrm{work}}(k,v)+\hat\rho^{\mathrm{pal}}_t(k)\,d^{\mathrm{dock}}(v)\bigr)\,x^{\mathrm{new}}_t(k,v),\\
+K &= \sum_{k\in\mathcal{K}}\sum_{v\in V_{\mathrm{str}}}
+  \hat\rho_t(k)\,\hat\omega_t(v)\,x^{\mathrm{new}}_t(k,v),
+  \qquad D+\beta K .
+\end{align*}
+The old first line was
+$D=\sum_k\sum_v \old{\hat\rho_t(k)\,d^{\mathrm{trip}}(k,v)}\,x^{\mathrm{new}}_t(k,v)$.
+\new{In words, the bracket is the picks times the second leg, plus the
+pallets times the first leg.}
+
+\subsection*{Fixed storage}
+[\dots] SKUs are taken in index order. A pallet that does not fit on the home
+shelf goes to the nearest shelf \old{by $d^{\mathrm{trip}}(k,v)$} with room
+for it\new{. ``Nearest'' counts both legs, the trip to the workstations
+about three times as much as the trip from the docks, as for every rule. That
+weight comes from how often a SKU is picked against how often it gets a
+pallet, which is about the same for every SKU. So the overflow shelf does not
+depend on how popular the SKU is, and fixed storage still favours no SKU}.
+
+\subsection*{Demand storage}
+[\dots] It takes the SKUs from most to least ordered, by the estimated demand
+$\hat\rho_t(k)$, and gives each the \old{nearest shelves by
+$d^{\mathrm{trip}}(k,v)$}\new{shelves with the smallest weighted legs. The
+weights differ per SKU, so each SKU has its own order of shelves}. This keeps
+the slotting cost $D$ small, with $\beta=0$, greedily and not exactly.
+
+\subsection*{Congestion-aware storage, eq.~(storagegreedy)}
+[\dots] Formally, the \emph{congestion-aware score} of SKU $k$ at shelf $v$ is
+\begin{equation*}
+  \mathrm{score}(k,v) = \hat\rho_t(k)\bigl(d^{\mathrm{work}}(k,v) + \beta\,\hat\omega_t(v)\bigr)
+  + \hat\rho^{\mathrm{pal}}_t(k)\,d^{\mathrm{dock}}(v) .
+\end{equation*}
+The old score was $\hat\rho_t(k)\bigl(d^{\mathrm{trip}}(k,v)+\beta\,\hat\omega_t(v)\bigr)$.
+\new{Standing still joins the second leg, because every pick from the shelf
+meets it.} [\dots rest unchanged]
+
+\subsection*{The ties sentence}
+Ties, between SKUs or between shelves, are broken by index, SKU first and
+then shelf, \new{and equal scores first by the plain trip of
+Appendix~D,} so each rule gives exactly one placement.
+
+\section*{Part 3. Appendix C, the trip distance (\texttt{eq:tripdistance})}
+\old{The trip distance,}
+\begin{equation*}
+d^{\mathrm{trip}}(k,v) = d^{\mathrm{dock}}(v) + d^{\mathrm{work}}(k,v) \quad\text{(old, removed)}
+\end{equation*}
+\new{The two legs of a shelf's trip,}
+\begin{greenblock}
+\begin{equation*}
+  d^{\mathrm{dock}}(v) = \frac{1}{|V_{\mathrm{dock}}|} \sum_{g \in V_{\mathrm{dock}}} d_G(g, v),
+  \qquad
+  d^{\mathrm{work}}(k,v) = \frac{1}{|h(k)|} \sum_{w \in h(k)} d_G(v, w),
+\end{equation*}
+\end{greenblock}
+where $h(k)$ is the category of SKU $k$ [\dots unchanged].
+\new{A pallet that misses its home shelf under fixed storage is placed by
+these legs. At 16 agents this is about 8 percent of the arriving units under
+Token Passing and 40 to 60 percent under the learned controllers, whose
+fleets fall behind and leave the shelves full.}
+
+\section*{Part 4. Problem Formulation}
+No change. It says demand storage picks ``the shelves with the shortest
+trip'', which stays true in words.
+
+\section*{Part 5. Elsewhere in the same change}
+\begin{itemize}[nosep]
+  \item \texttt{A.Notation.tex}: add $d^{\mathrm{dock}}(v)$,
+        $d^{\mathrm{work}}(k,v)$ and $\hat\rho^{\mathrm{pal}}_t(k)$. No trip
+        distance row exists today.
+  \item The label \texttt{eq:tripdistance} stays on the Appendix~C equation,
+        so references still work. Its name becomes ``the two legs''.
+  \item Appendix~D keeps its plain trip $d^{\mathrm{trip}}(v)$. It describes
+        the warehouse and breaks ties, as the code uses it.
+  \item The worked example of tea is in the text. It can also be drawn on
+        the tea figure of the Problem Formulation (\texttt{fig:storageexample})
+        once the text is approved.
+  \item \texttt{GAPS.md}: a new entry, text follows the code, no model
+        change. Tags on the changed lines.
+\end{itemize}
+
+\end{document}

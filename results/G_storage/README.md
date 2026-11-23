@@ -178,4 +178,4 @@ since the cover at the bottom of a lot is the rank 0 quantile either way.
   `capacity.json` with `load_sweep.py`'s own functions, without playing an episode. Run it from the
   `slap-mapd-coupling` worktree with `PYTHONPATH=src:scripts/sweep`, arguments
   `<m> <this folder> <run folder> <staging folder> configs/step12/fleet_<m>.yaml`.
-- Fleets 32 and 64: the same two steps once tp-a93 finishes them.
+- Fleets 32 and 64: the same two steps, done 2026-11-23 ([A117]). Demand rows match the period-100 demand rows on all 20 seeds, and the period-100 congestion rows match beta 1 on all 20 seeds, at both fleets.

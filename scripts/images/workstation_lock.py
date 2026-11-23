@@ -12,17 +12,16 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from base import C, OUT, plt  # noqa: E402
+from base import C, OUT, PG, ROLE_MARK, plt  # noqa: E402
 from matplotlib.patches import FancyArrowPatch, Rectangle  # noqa: E402
 
 DATA = os.path.join(os.path.dirname(__file__), "data", "workstation_lock_t{}.json")
 STEPS = (900, 1157, 1500)  # the queue forms, the lock forms, still locked
-STYLE = {  # role: marker, face, edge, size
-    "aisle": ("o", "white", C["node"], 60),
-    "storage": ("o", C["store_f"], C["store_e"], 60),
-    "delivery": ("s", C["del_f"], C["del_e"], 90),
-    "dock": ("^", C["del_f"], C["del_e"], 90),
-    "endpoint": ("D", C["ep_f"], C["ep_e"], 50),
+STYLE = {  # role: marker, face, edge, size, the viewer's marks ([A104], base.py ROLE_MARK)
+    "aisle": ("o", "white", PG["transit"], 30),
+    **{role: (ROLE_MARK[key][2], ROLE_MARK[key][0], ROLE_MARK[key][1], 75 * ROLE_MARK[key][3])
+       for role, key in (("storage", "storage"), ("delivery", "delivery"),
+                         ("dock", "receiving"), ("endpoint", "endpoint"))},
 }
 
 
@@ -45,14 +44,15 @@ def draw(ax, d, box=None, scale=1.0, agents=True, labels=False):
         return pos
     for name, a in d["agents"].items():
         x, y = pos[a["at"]]
-        ax.scatter(x, y, s=60 * scale ** 2, c=C["agent"], edgecolors="white", linewidths=1.0,
+        colour = PG.get(a.get("phase"), PG["idle"])  # the viewer's colour for its phase
+        ax.scatter(x, y, s=60 * scale ** 2, c=colour, edgecolors="white", linewidths=1.0,
                    zorder=4)
         if labels:
             ax.annotate(f"$a_{{{name}}}$", (x, y), textcoords="offset points", xytext=(-6, 13),
-                        color=C["agent"], fontsize=11, zorder=5)
+                        color=PG["text"], fontsize=11, zorder=5)
             if a["intent"] is not None and a["intent"] != a["at"]:
                 ax.add_patch(FancyArrowPatch(pos[a["at"]], pos[a["intent"]], arrowstyle="-|>",
-                                             mutation_scale=12, color=C["agent"], lw=1.3,
+                                             mutation_scale=12, color=colour, lw=1.3,
                                              shrinkA=8, shrinkB=8, zorder=3,
                                              connectionstyle="arc3,rad=0.35"))
     return pos
@@ -72,20 +72,28 @@ def main():
     ax = axes[0][0]
     draw(ax, d, scale=0.7)
     ax.add_patch(Rectangle((box[0], box[2]), box[1] - box[0], box[3] - box[2], fill=False,
-                           ec=C["comm"], lw=1.6, ls="--", zorder=6))
+                           ec=PG["text"], lw=1.6, ls="--", zorder=6))
     ax.set_title(f"(a) the warehouse at $t = {STEPS[1]}$", fontsize=12)
     for ax, f, letter in zip((axes[0][1], axes[1][0], axes[1][1]), frames, "bcd"):
         draw(ax, f, box=box, scale=1.3, labels=True)
         ax.set_xlim(box[0] - 0.6, box[1] + 0.6)
         ax.set_ylim(box[2] - 0.6, box[3] + 0.6)
         wx, wy = pos[f["workstation"]]
-        ax.annotate("$w$", (wx, wy), textcoords="offset points", xytext=(0, -24), ha="center",
-                    color=C["del_e"], fontsize=13)
+        ax.annotate("$W_1$", (wx, wy), textcoords="offset points", xytext=(0, -24), ha="center",
+                    color=PG["work_e"], fontsize=13)
         ax.set_title(f"({letter}) $t = {f['t']}$, {f['completed']} tasks done", fontsize=12)
     for ax in axes.flat:
         ax.set_aspect("equal")
         ax.invert_yaxis()  # as the trace viewer draws it, row 0 at the top
         ax.axis("off")
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker=m, ls="", mfc=f, mec=e, ms=9, label=lab) for lab, m, f, e in (
+        ("shelf", "s", "white", PG["slot_rim"]), ("workstation", "s", PG["work_f"], PG["work_e"]),
+        ("dock", "^", PG["dock_f"], PG["dock_e"]),
+        ("agent to a pick", "o", PG["to_pickup"], "white"),
+        ("agent to a workstation", "o", PG["to_delivery"], "white"))]
+    fig.legend(handles=handles, loc="lower center", ncol=len(handles), frameon=False,
+               fontsize=11, bbox_to_anchor=(0.5, 0.1), handletextpad=0.4, columnspacing=1.2)
     path = os.path.join(OUT, "workstation_lock.png")
     fig.savefig(path)
     print("wrote", path)

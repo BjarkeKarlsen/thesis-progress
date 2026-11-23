@@ -74,7 +74,7 @@ def load_run(folder):
     horizon = 2000
     spec = glob.glob(os.path.join(folder, "*_spec.json"))
     if spec:
-        horizon = json.load(open(spec[0])).get("experiment", {}).get("horizon", horizon)
+        horizon = json.load(open(spec[0])).get("horizon", horizon)
     health = []
     result = glob.glob(os.path.join(folder, "*", "*", "result.json"))
     if result:

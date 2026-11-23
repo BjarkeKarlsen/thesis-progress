@@ -27,7 +27,13 @@
 #   BATCH_ON_CPU  1 keeps the train batch in host memory, for a batch too big for the GPU
 #   BUDGET    env steps, empty keeps the config's budget
 #   HOURS     stop cleanly after this many hours (20)
+#   RESUME_COMMIT  the commit a continued run uses instead of the one in its commit.txt
 #   RUNNERS   env runners, the same on every machine (3, as bedtime.bash)
+#   SUFFIX    appended to the run folder, such as _long (none)
+#   HORIZON   episode length in steps, empty keeps the config's
+#   INIT      a checkpoint folder at home to warm start from (train --init-checkpoint)
+#   NO_VALIDATE  1 trains with --no-validate, validation afterwards with evaluate
+#   COMMUNICATION  1 trains decentralised with messages
 #   INTERVAL  seconds between fetches of `watch` (1800)
 #   STOP      1 stops the session when `watch` ends (1)
 #   RESTARTS  times `watch` continues a stopped run on a fresh machine (6)
@@ -55,6 +61,11 @@ LEARNER_CPUS=${LEARNER_CPUS:-}
 INTERVAL=${INTERVAL:-1800}
 STOP=${STOP:-1}
 RESTARTS=${RESTARTS:-6}
+SUFFIX=${SUFFIX:-}
+HORIZON=${HORIZON:-}
+INIT=${INIT:-}
+NO_VALIDATE=${NO_VALIDATE:-}
+COMMUNICATION=${COMMUNICATION:-}
 
 log() { echo "$(date '+%Y-%m-%d %H:%M') $*"; }
 
@@ -86,7 +97,7 @@ print(pool_key(load_spec(Path(f"configs/fleet_{sys.argv[1]}/{sys.argv[2]}.yaml")
 
 start() {
     local session=$1 fleet=$2 arm=$3 regime=$4
-    local dest=$TRAINING/fleet_$fleet/$arm/$regime key commit tmp
+    local dest=$TRAINING/fleet_$fleet/$arm/$regime$SUFFIX key commit tmp
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"; trap - RETURN' RETURN  # the trap clears itself, so it does not fire again in watch
     # `colab status` exits 0 for a session that does not exist, so look in the list.
@@ -95,7 +106,8 @@ start() {
         colab new -s "$session" --high-mem ${GPU:+--gpu "$GPU"} || return 1
     fi
     if [ -f "$dest/commit.txt" ]; then
-        commit=$(head -n 1 "$dest/commit.txt" | cut -d' ' -f1)
+        # RESUME_COMMIT continues it on a newer commit, for example 8478c99 (resume --gpu).
+        commit=${RESUME_COMMIT:-$(head -n 1 "$dest/commit.txt" | cut -d' ' -f1)}
     else
         git -C "$REPO" fetch -q origin main
         commit=${COMMIT:-$(git -C "$REPO" rev-parse origin/main)}
@@ -115,14 +127,26 @@ start() {
         log "sending the run to continue, $(du -h "$tmp/run.tgz" | cut -f1)"
         colab upload -s "$session" "$tmp/run.tgz" /content/run.tgz || return 1
     fi
+    # The checkpoint to warm start from, for a new run only.
+    local init_name=""
+    if [ -n "$INIT" ] && ! ls "$dest"/*_spec.json > /dev/null 2>&1; then
+        init_name=$(basename "$INIT")
+        tar -czf "$tmp/init.tgz" -C "$(dirname "$INIT")" "$init_name"
+        log "sending the warm-start checkpoint $INIT"
+        colab upload -s "$session" "$tmp/init.tgz" /content/init.tgz || return 1
+    fi
     "$PYTHON" -c 'import json, sys
-fleet, arm, regime, commit, hours, runners, budget, learner, gpu, on_cpu, out = sys.argv[1:]
+(fleet, arm, regime, commit, hours, runners, budget, learner, gpu, on_cpu, horizon, init,
+ no_validate, communication, out) = sys.argv[1:]
 json.dump(dict(fleet=int(fleet), controller=arm, regime=regime, commit=commit,
                hours=float(hours), runners=int(runners), budget=int(budget) if budget else None,
                learner_cpus=int(learner) if learner else None, gpu=bool(gpu),
-               batch_on_cpu=on_cpu == "1"),
+               batch_on_cpu=on_cpu == "1", horizon=int(horizon) if horizon else None,
+               init=f"/content/init/{init}" if init else None, validate=no_validate != "1",
+               communication=communication == "1"),
           open(out, "w"))' "$fleet" "$arm" "$regime" "$commit" "$HOURS" "$RUNNERS" "$BUDGET" \
-        "$LEARNER_CPUS" "$GPU" "$BATCH_ON_CPU" "$tmp/job.json"
+        "$LEARNER_CPUS" "$GPU" "$BATCH_ON_CPU" "$HORIZON" "$init_name" "$NO_VALIDATE" \
+        "$COMMUNICATION" "$tmp/job.json"
     colab upload -s "$session" "$tmp/job.json" /content/job.json || return 1
     if [ -n "$PATCH" ]; then
         log "sending the patch $PATCH"
@@ -136,7 +160,8 @@ if os.path.exists("/content/state.txt") and open("/content/state.txt").read().sp
         "installing", "warehouses", "training"):
     print("already running:", open("/content/state.txt").read().strip())
 else:
-    for name, target in (("warehouses.tgz", "/content/warehouses"), ("run.tgz", "/content/run")):
+    for name, target in (("warehouses.tgz", "/content/warehouses"), ("run.tgz", "/content/run"),
+                         ("init.tgz", "/content/init")):
         path = f"/content/{name}"
         if os.path.exists(path):
             os.makedirs(target, exist_ok=True)
@@ -163,7 +188,7 @@ EOF
 # machine built when this PC does not have them yet. Prints the machine's state last.
 fetch() {
     local session=$1 fleet=$2 arm=$3 regime=$4
-    local dest=$TRAINING/fleet_$fleet/$arm/$regime key tmp out
+    local dest=$TRAINING/fleet_$fleet/$arm/$regime$SUFFIX key tmp out
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' RETURN
     mkdir -p "$dest"
@@ -229,18 +254,18 @@ EOF
 
 # As bedtime.bash's finish_training: the progress log where the appendix figures read it.
 finish() {
-    local fleet=$1 arm=$2 regime=$3 dest=$TRAINING/fleet_$1/$2/$3
+    local fleet=$1 arm=$2 regime=$3 dest=$TRAINING/fleet_$1/$2/$3$SUFFIX
     [ -f "$dest/done" ] || return 0
     echo "$(date '+%Y-%m-%d %H:%M') colab, $RUNNERS runners" >> "$dest/done"
     if [ "$TRAINING" = "$HOME/thesis_runs/training" ]; then
-        mkdir -p "$RESULTS/training/fleet_$fleet/${arm}_$regime"
+        mkdir -p "$RESULTS/training/fleet_$fleet/${arm}_$regime$SUFFIX"
         cp "$dest"/*_training_progress.jsonl \
-            "$RESULTS/training/fleet_$fleet/${arm}_$regime/progress.jsonl" 2>/dev/null || true
+            "$RESULTS/training/fleet_$fleet/${arm}_$regime$SUFFIX/progress.jsonl" 2>/dev/null || true
     fi
 }
 
 iterations_at_home() {  # iterations_at_home FLEET ARM REGIME: lines of the progress log at home
-    cat "$TRAINING/fleet_$1/$2/$3"/*_training_progress.jsonl 2>/dev/null | wc -l
+    cat "$TRAINING/fleet_$1/$2/$3$SUFFIX"/*_training_progress.jsonl 2>/dev/null | wc -l
 }
 
 # Continues a run on a fresh machine: stops what is left of the old one and starts again, which

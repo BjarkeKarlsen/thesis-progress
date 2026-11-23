@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from base import OUT, C
+from base import OUT, PG
 from m8 import Warehouse
 
 
@@ -13,7 +13,7 @@ def instance_simple():
     fig, ax = plt.subplots(figsize=(10, 7.2))
     wh.draw(ax, node_scale=0.55)
     handles = wh.legend_handles() + [
-        Line2D([], [], marker=">", ls="-", color=C["node"], lw=1.4, ms=7,
+        Line2D([], [], marker=">", ls="-", color=PG["one_way"], lw=1.4, ms=7,
                label="one-way edge"),
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.01),

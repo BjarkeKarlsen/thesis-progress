@@ -1,0 +1,163 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\title{Proposed change, Choosing together}
+\date{20 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This proposal applies the points of \texttt{method\_controllers\_comments.md}
+to \texttt{sec:method:controllers} (pages 40 and 41 of \texttt{main.pdf}).
+Part~1 is the subsection as it would read. Black text stays, \new{green} is
+new and \old{struck} text goes. Part~2 lists what changes elsewhere, and
+Part~3 the questions. Where a point needs your choice, the text below uses my
+suggestion and the question says so. Nothing below is in the thesis yet.
+
+Each change carries the point it answers, in brackets, for example [A1].
+
+\section*{Part 1. The subsection}
+
+\subsection*{D. Choosing together}
+
+The centralised and section-based controllers use the same network, but on a
+larger window and for one agent after another. The Problem Formulation gives
+the order and the rule that keeps the agents of one decision apart
+(Section V-F). \old{This subsection gives how the network carries them
+out.} [D4]
+
+\textbf{Centralised.} The network runs on \old{all vertices}\new{every
+vertex an agent can stand on} [A3], once for each agent in priority order.
+Each run uses the agent's own distance label and the vertices the earlier
+agents have chosen, and the move it draws becomes part of what the next
+agent sees. A timestep therefore takes $m$ runs, one after another, so
+runtime grows with the size of the fleet. One pass shared by all agents, as
+in \new{the single-agent setup of} Knippenberg, Holenderski, and Menkovski
+(2021), would be cheaper, but then no agent would see another's choice. [A4]
+
+\textbf{The claim mask.} The rule that keeps the agents of one decision
+apart enters as a second mask\new{, the \emph{claim mask} $M^{\prec}_i$
+(C.6). It switches off every move that rule forbids.}\old{. It switches off
+a move to $w$ when an earlier agent has chosen $w$, when $w$ holds an agent
+that has not chosen yet, or when the earlier agent standing on $w$ has
+chosen to move to $v$, which would be a swap.} [D1] Waiting is never
+switched off, so an agent always has an action left. \old{This is the claim
+mask $M^{\prec}_i$ (C.6), and it}\new{The claim mask} is zero for a
+decentralised agent. Conflict resolution therefore never overrides a
+centralised agent\old{, and the override term of the reward (48) is always
+zero for it}. [D1]
+
+\textbf{\old{Seeing the whole window}\new{What the larger window adds}.}
+[B1] After $L$ rounds a vertex only knows about vertices \new{at most} $L$
+\old{hops}\new{edges} away, so a larger window alone adds little. The
+centralised and section-based networks therefore add the mean vector over
+the vertices the controller owns. \new{These are every vertex an agent can
+stand on for the centralised controller, and the zone for the
+section-based one.} [B2] This mean is also how an agent learns of earlier
+choices more than $L$ \old{hops}\new{edges} away. \new{It is the readout
+over all vertices of Gilmer et al.\ (2017) in its simplest form. A mean has
+the same size for a window of any size, and the numbering of the vertices
+does not change it.} [B2] It does not say which agent chose which vertex,
+so the network cannot use every detail of the earlier choices, but the
+claim mask still stops every collision.
+
+In a large warehouse one earlier choice changes the mean very little.
+\old{So the centralised controller mostly learns from choices close to the
+agent, and the claim mask keeps the agents apart.}\new{So a centralised
+agent sees the agents near it in detail and the rest of the warehouse only
+as an average. What sets it apart from a decentralised agent is mainly that
+it knows the earlier choices near it, that the claim mask keeps it clear of
+them, and that it shares the credit of the whole fleet
+(Section VI-G).} [B1]
+
+These controllers use no messages (Section V-G), so \old{the message term
+is replaced by}\new{the mean takes the place of the message term in} \new{the
+readout (45)}. Formally, with $V_i^{\mathrm{pool}}$ the vertices the
+controller owns, the \emph{pooled readout} is
+\begin{equation*}
+  \bar h_i(t) = \frac{1}{|V_i^{\mathrm{pool}}|}
+    \sum_{v \in V_i^{\mathrm{pool}}} h_v^{(L)}, \qquad
+  z_i = h_{\ell_i(t)}^{(L)} \;\Vert\; \bar h_i(t) \;\Vert\; \delta_i(t) .
+  \tag{47}
+\end{equation*}
+
+\textbf{Section-based.} Each zone does the same on its own part of the
+warehouse. \new{The zones are blocks of neighbouring aisles, as equal in
+size as the aisles allow. A zone is not a section of SKUs, and the two are
+drawn apart.} [C1] Zone $Y_q$ runs the network for each of its agents in
+priority order, on its own vertices together with a halo $H_q$ (C.3). The
+halo is the strip of vertices outside the zone within field-of-view range
+of it. \old{Its vertices show their role and whether an agent stands there,
+but they get no move scores and no loss, and they are left out of the mean
+because they are only context.}\new{Its vertices carry the same facts as any
+other vertex. No agent on them chooses in this zone, and they are left out
+of the mean, because they are only context.} [A1] \old{The halo uses the
+same range as the field of view, so the crowding feature means the same
+under every controller.}\new{The halo reaches as far as the field of view,
+so the window of an agent at the zone edge still holds its whole field of
+view. A section-based agent therefore never sees a smaller part of the floor
+than a decentralised one.} [A2] \new{The halo is our own construction.}
+[B3]
+
+A zone does not know the choices made in other zones, so an agent treats
+every occupied halo vertex as holding an agent that has not chosen yet, and
+does not move onto it. \old{An agent belongs to the next zone from the
+timestep it enters it.} [D2] The weights are shared, so \old{this}\new{moving
+into the next zone} changes the agent's context but not its policy. The
+zones run in parallel, and two zones may still send agents onto the same
+empty vertex at the border. Conflict resolution removes these clashes as it
+does everywhere else. \new{So, unlike a centralised agent, a section-based
+agent can be overridden at a zone border. This is part of what deciding in
+zones costs, and the comparison keeps it.} [B4] \old{With $p=1$ the halo is
+empty and the section-based controller is the centralised one.} [D2]
+
+The three learned controllers share the network, the masks, the reward
+\new{of each agent} and the training. They differ only in which agents
+choose together, and so in the window the network runs on\old{ and}\new{,} in
+which earlier choices an agent sees\new{, and in the credit each agent gets}. [D3] \old{A difference in results between them is therefore
+a difference in how many agents one decision covers, which is the contrast
+RQ1 asks about.}\new{This is the contrast RQ1 asks about.} [D3]
+
+\section*{Part 2. What changes elsewhere}
+\begin{itemize}[nosep]
+  \item \texttt{B.Parameters.tex}, \texttt{tab:modelparams}, the row for
+        the zones $p$. ``TBD (sweep)'' becomes 3 for the trained runs, with
+        the scaling probe in its own appendix. [C1]
+  \item \texttt{A.Notation.tex}. No change, $V_i^{\mathrm{pool}}$ and
+        $\bar h_i(t)$ stay.
+  \item \texttt{sec:method:rl}. The sentence that the override term is
+        always zero for a centralised agent moves there, next to the term
+        itself. [D1]
+  \item \texttt{GAPS.md}. One new entry for the halo sentences and the zone
+        cut, since both change what the text says the model does.
+  \item The Discussion gets two points, what the centralised agent really
+        sees [B1] and the overrides at zone borders [B4].
+  \item No figure yet. [E1] waits for question~5.
+\end{itemize}
+
+\section*{Part 3. Questions}
+\begin{enumerate}
+  \item \textbf{Zone and section [C1].} I kept both names and said they
+        differ. The other options are to rename the controller
+        (zone-based) or the SKU sections. Which one?
+  \item \textbf{What the centralised agent sees [B1].} Is the new
+        paragraph fair to the centralised controller, or too strong?
+  \item \textbf{The mean [B2].} I gave two reasons, the same size for any
+        window and no dependence on numbering. Are those your reasons, or
+        was there another one?
+  \item \textbf{The halo [B3].} GAPS [A6] calls it the standard way to run a
+        GNN on a split graph, but gives no source. I wrote ``our own''. Do
+        you have a paper to cite instead?
+  \item \textbf{A figure [E1].} Draw one zone, its halo and the three
+        claim mask cases with $a_1$, $a_2$, in the viewer style?
+  \item \textbf{Overrides at the border [B4].} Keep them as a cost of
+        deciding in zones, as written?
+\end{enumerate}
+
+\end{document}

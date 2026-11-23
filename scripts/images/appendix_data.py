@@ -39,6 +39,21 @@ def read_jsonl(path):
         return [json.loads(line) for line in f if line.strip()]
 
 
+# Runs trained before the regime rename store fixed_only and matched in their spec, so
+# collect_run.py writes them under those names. A figure asks for the new name and gets either.
+OLD_REGIME = {"fixed": "fixed_only", "demand": "matched"}
+
+
+def run_folder(base, fleet, arm, regime):
+    """The results folder of one run, under the new regime name or, failing that, the old."""
+    for name in (regime, OLD_REGIME.get(regime)):
+        if name:
+            path = os.path.join(base, f"fleet_{fleet}", arm, name)
+            if os.path.isdir(path):
+                return path
+    return os.path.join(base, f"fleet_{fleet}", arm, regime)
+
+
 def read_glob(pattern):
     rows = []
     for path in sorted(glob.glob(pattern)):

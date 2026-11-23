@@ -1,0 +1,165 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\citet}[1]{Ma et al.}
+\title{Proposed change to [A96], the served share counts the orders that wait for stock, and the throughput every finished task}
+\date{17 November 2026, version 4, question 1 settled}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what went wrong in the replay. Part~2 shows the ``Keeping up'' paragraphs of
+\texttt{3.ProblemFormulation.tex} as they would read. \new{Green} is new text and \old{struck} text
+goes. Part~3 has the questions. Nothing is changed in the thesis or the code yet.
+
+\section*{Part 1. What went wrong}
+
+The fleet 16 replay with the served share came home on 17 November. Token Passing reads 1.00 under
+every rule, as expected. Several learned runs read above 1 for the picks. A share above 1 is allowed
+by design, since a fleet that clears an old queue finishes more than arrives. These runs are not
+clearing a queue. Their queues grow fastest.
+
+\begin{center}
+\begin{tabular}{lrrr}
+  \toprule
+  run (one seed) & tasks finished & pick share & orders waiting for stock at the end \\
+  \midrule
+  decentralised, fixed & 0 & 6.0 & 835 \\
+  centralised, fixed & 81 & 0.98 & 498 \\
+  section-based, congestion-aware & 549 & 0.81 & 205 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The cause is when a pick becomes a task. An order line arrives, but its pick task is made only once
+its stock is on a shelf. Until then the line waits as an order. A fleet whose put-aways fail gets
+almost no stock onto the shelves, so almost no pick tasks are made. The check then divides by a
+handful of released picks and reads high. The decentralised run above finished no task at all and
+reads 6.0.
+
+The backlog $B_T$ already counts the waiting orders. Only the check leaves them out. So the fix is to
+count them in the check as well.
+
+A second fault is in how the replay ran, not in the measure. It played each spec's own number of test
+seeds. The fixed and demand specs of the section-based arm, the decentralised arm and the arm with
+messages list 6, so 9 of the 16 runs played 6 seeds, not 20. The main test passed \texttt{--test-seeds
+20}. The new replay will do the same.
+
+\subsection*{The same fault in the throughput}
+
+The throughput $\Lambda_T$ has the fault [A96] fixed in the check. It counts only the tasks released
+in the window, so a fleet that fell behind gets no credit for the older tasks it finishes. The
+replay rows hold both counts. Tasks done per step, means over the replayed seeds:
+
+\begin{center}
+\begin{tabular}{llrr}
+  \toprule
+  arm & rule & $\Lambda_T$ now & every task finished in the window \\
+  \midrule
+  centralised & fixed & 0.036 & 0.143 \\
+  section-based & fixed & 0.147 & 0.186 \\
+  decentralised & fixed & 0.000 & 0.030 \\
+  decentralised & congestion-aware & 0.104 & 0.186 \\
+  with messages & fixed & 0.013 & 0.113 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The learned arms do far more work than $\Lambda_T$ shows, and the gaps between them shrink. The
+centralised arm does four times as much. Token Passing keeps up, so both counts agree for it. The
+proposal is that $\Lambda_T$ counts every task finished in the window, the set
+$\mathcal{D}_T$ of the check, so the throughput and the served share count the same work. The
+tasks per step in Appendix~L and the results review, the Regime~1 table among them, then change
+with the replay.
+
+\section*{Part 2. The text}
+
+\subsection*{Problem Formulation, ``Keeping up'' (lines 1178 to 1183)}
+
+The check counts every task the fleet finishes in the measured steps, also one released before them.
+A fleet that fell behind earlier still works through its older tasks, and that work is what shows
+whether the queue grows or holds. So the measure is the share of the arriving work the fleet serves.
+With 900 tasks released in the measured steps and 600 tasks finished in them, the share is two thirds
+and the queue grows by 300.
+
+\new{A pick counts as released when its order arrives, also while its stock is not yet on a shelf.
+The order is work the fleet owes, and the backlog already counts it. Left out, a fleet whose
+put-aways fail would release almost no picks and seem to keep up. Such a fleet with 800 orders
+waiting for stock and 10 picks finished serves about one pick in eighty.}
+
+\subsection*{Problem Formulation, the formal part (lines 1193 to 1196)}
+
+Formally, \old{with $\mathcal{C}_T$ the tasks completed within a horizon $T$, throughput is
+$\Lambda_T = |\mathcal{C}_T| / T$.} \new{throughput is $\Lambda_T = |\mathcal{D}_T| / T$, with
+$\mathcal{D}_T = \mathcal{D}^{\mathrm{pick}}_T \cup \mathcal{D}^{\mathrm{put}}_T$ the tasks finished in
+the measured window, whenever they were released.}
+Write $\mathcal{R}^{\mathrm{pick}}_T$ for the picks released in the measured window
+\new{, with one for each order line from the window that still waits for stock at the horizon,}
+and $\mathcal{D}^{\mathrm{pick}}_T$ for the picks finished in it, whenever they were released, and
+the same for put-aways. The served share of a kind is the second over the first \dots
+
+Equation \texttt{eq:throughput} and $f_{\mathrm{up}} = 0.8$ stay as they are.
+
+\subsection*{What changes in the code}
+
+\begin{itemize}[leftmargin=1.2em]
+\item \texttt{served\_counts} adds to the released picks every order line released in the window
+  that still misses units at $T$, once per line. The finished side does not change.
+\item The throughput counts every task finished in the window, as \texttt{num\_finished\_in\_window}
+  does already. \texttt{num\_completed\_tasks} keeps its old meaning under a new name, so old rows
+  can still be read.
+\item The rows keep \texttt{num\_released\_in\_window} and add the number of waiting lines from the
+  window, so the two parts can be read apart.
+\item A test, a run with no put-away done, must read a pick share near 0, not above 1.
+\item Both replays (fleet 16 Regime 2 and Regime 1) and the fleet 8 replay run again with
+  \texttt{--test-seeds 20}. About 15 hours for fleet 16 on the PC.
+\end{itemize}
+
+\subsection*{What it changes, checked on the replay rows}
+
+The rows already hold what both fixes need, so they were checked before any replay.
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The pick fix changes no keep-up verdict}, in any of the 12 cells. A run whose put-aways
+  fail already fails the put-away part. The corrected pick share lands close to the put-away share
+  (centralised fixed 0.54 against 0.51), because picks wait for the stock the put-aways bring. So
+  this fix only corrects the number reported, and makes the check count what the backlog counts.
+\item \textbf{The throughput fix agrees with the served share, the old one does not.} Token Passing
+  serves all the work at 0.29 tasks per step. Centralised fixed at 0.143 is half of that, as its
+  shares of about 0.5 say. At 0.036 it would be an eighth.
+\item \textbf{It changes one written claim.} Appendix~L says the decentralised policy and the policy
+  with messages trained under fixed storage finish almost nothing, so storage has nothing to change.
+  Counted in full they finish 0.030 and 0.113 tasks per step. The policy with messages finishes
+  0.035 fewer under congestion-aware storage, worse on all 6 replayed seeds. The centralised result
+  stays, no difference ($-0.001$ [$-0.006$, 0.005]).
+\item \textbf{The main picture stays.} No learned arm comes near Token Passing, which does 1.5 to 2
+  times their work and keeps up on every seed.
+\end{itemize}
+
+Token Passing is not affected. It never leaves an order waiting at the end (0.0 in
+\texttt{tab:app:backlog:16}), so its rows stay as they are.
+
+\section*{Part 3. Questions}
+
+\begin{enumerate}[leftmargin=1.4em]
+\item A waiting line counts as one pick. A line becomes 1.03 to 1.18 tasks on average when its stock
+  is spread over shelves, so the count is a little low for those lines. Counting units instead would
+  be exact but changes every other count too. One per line, fine? \new{Settled 17 November, option 1, one per line. Counting by order line would need new code and every run played again, for no change in any verdict.}
+\item The worked example in green, 800 orders waiting and 10 picks finished, keep it or leave the
+  paragraph without numbers?
+\item The throughput counts every task finished in the window. This changes the tasks per step of
+  every learned run already written, and the Regime~1 finding must be checked again. Agreed?
+\item The thesis has no symbol for the warm-up, so $T$ above stays the horizon, while the code divides
+  by the measured steps. Add a symbol for the warm-up in the notation table, or say ``per measured
+  step'' in words?
+\item Order of the work: the code fix on a branch from \texttt{main}, then the fleet 16 replay, then
+  fleet 8. Fine?
+\end{enumerate}
+
+\end{document}

@@ -96,7 +96,7 @@ def horizon_gain():
                     yerr=[p[1][1] for p in points], color=colour, marker=marker, ms=5, lw=2,
                     capsize=3, elinewidth=1)
     ax.set_xlabel("drift periods $k$ after the warm-up")
-    ax.set_ylabel("gain of demand\nover fixed")
+    ax.set_ylabel("gain over fixed\n(share of fixed)")
     style(ax)
     if not found:
         placeholder(ax, "results/H_horizon/fleet_<m>/load_sweep.jsonl")
@@ -105,28 +105,34 @@ def horizon_gain():
 
 
 def stand_still():
-    """The longest time a robot holding a task stood still in a run, Token Passing under fixed
-    storage at the rate nearest the main load, one box per fleet. The stall length is set
-    above what a healthy run reaches (tab:evalparams, still TBD)."""
+    """The stall length against what a healthy fleet reaches (app:cal:stall, [A118]). Per fleet,
+    the longest stretch after the warm-up in which no agent finished a task, over the Token
+    Passing runs at the main load (fixed and demand storage, 20 seeds each, the demand sweep at
+    its thesis values, results/F_demand/fleet_<m>/demand.skew at skew 1), one box per fleet. The
+    bar is the stall length, 36 order lines' worth of arrivals, 36 / arrival_rate steps."""
     fig, ax = plt.subplots(figsize=(5.2, 2.8))
-    data, labels = [], []
+    data, labels, stall = [], [], []
     for fleet in FLEETS:
-        rows = read_jsonl(os.path.join(LOAD, f"fleet_{fleet}", "load_sweep.jsonl"))
-        main = ((read_json(os.path.join(LOAD, f"fleet_{fleet}", "capacity.json")) or {})
-                .get("by_mode", {}).get("fixed", {}).get("main_load"))
-        rows = [r for r in rows if r["storage_mode"] == "fixed"]
-        if not rows or main is None:
+        rows = read_jsonl(os.path.join(RESULTS, "F_demand", f"fleet_{fleet}", "demand.skew",
+                                       "load_sweep.jsonl"))
+        rows = [r for r in rows if r.get("value") == 1.0
+                and r.get("longest_completion_gap") is not None]
+        if not rows:
             continue
-        nearest = min({r["arrival_rate"] for r in rows}, key=lambda x: abs(x - main))
-        data.append([r["longest_stand_still"] for r in rows if r["arrival_rate"] == nearest])
+        data.append([r["longest_completion_gap"] for r in rows])
         labels.append(f"{fleet}")
+        stall.append(round(36 / rows[0]["arrival_rate"]))
     if data:
         ax.boxplot(data, tick_labels=labels, widths=0.5,
                    medianprops=dict(color=C["accent"], lw=2))
+        for i, value in enumerate(stall, start=1):
+            ax.hlines(value, i - 0.35, i + 0.35, color=C["text"], lw=2, ls="--")
+            ax.annotate(f"{value}", (i + 0.38, value), va="center", fontsize=8, color=C["text"])
+        ax.set_yscale("log")
     else:
-        placeholder(ax, "results/E_load/fleet_<m>")
+        placeholder(ax, "results/F_demand/fleet_<m>/demand.skew")
     ax.set_xlabel("agents $m$")
-    ax.set_ylabel("longest stand-still\n(steps)")
+    ax.set_ylabel("longest stretch with\nno task finished (steps)")
     style(ax)
     return save(fig, "app_stand_still.png")
 

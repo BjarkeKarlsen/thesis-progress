@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from base import OUT, C
+from base import OUT, C, PG
 from m8 import Warehouse
 
 # The top-left corner of the real 8-agent warehouse (m8.py), from the left wall
@@ -45,16 +45,24 @@ def instance():
     fig, ax = plt.subplots(figsize=(6.4, 5.6))
     wh.draw(ax)
 
-    xs, ys = zip(*(pos[v] for v in ROUTE))
-    ax.plot(xs, ys, color=C["agent"], lw=3.0, ls=(0, (4, 3)), zorder=2)
-    ax.scatter(*pos[A_START], s=150, c=C["agent"], zorder=5, edgecolors="white", linewidths=1.2)
+    # The viewer's trip colours ([A104]): orange on the way to the pick at A, red on the
+    # way to the workstation.
+    k = ROUTE.index(SHELF_A)
+    # The two trips share the edge to A, so each is drawn just beside it.
+    for part, colour, dy in ((ROUTE[:k + 1], PG["to_pickup"], 0.1),
+                             (ROUTE[k:], PG["to_delivery"], -0.1)):
+        xs, ys = zip(*((pos[v][0], pos[v][1] + dy) for v in part))
+        ax.plot(xs, ys, color=colour, lw=3.0, ls=(0, (4, 3)), zorder=2)
+    # At t=9 a_2 is on its way to a pick, so it has the viewer's to-pickup colour.
+    ax.scatter(*pos[A_START], s=150, c=PG["to_pickup"], zorder=5, edgecolors="white",
+               linewidths=1.2)
     ax.annotate(r"$a_2$", pos[A_START], textcoords="offset points", xytext=(0, 13),
-                ha="center", color=C["agent"], fontsize=14)
+                ha="center", color=PG["text"], fontsize=14)
     # In-node letters: storage vertex A and delivery workstation W1, the same convention
     # as fig:observation and slap_mapd_coupling.
     for v, name in ((SHELF_A, "A"), (178, "B"), (172, "C")):
         ax.annotate(name, pos[v], ha="center", va="center", fontsize=9,
-                    fontweight="bold", color=C["store_e"], zorder=6)
+                    fontweight="bold", color=PG["slot_rim"], zorder=6)
     ax.annotate("W1", pos[WORKSTATION], ha="center", va="center", fontsize=7,
                 fontweight="bold", color=C["del_e"], zorder=6)
     for v, held in STOCK.items():
@@ -69,14 +77,15 @@ def instance():
     offsets = {87: (0, -15), 86: (0, 15), 168: (0, 15), 80: (-20, -14), 159: (24, 0)}
     for v, ts in times.items():
         ax.annotate(f"$t{{=}}{','.join(ts)}$", pos[v], textcoords="offset points",
-                    xytext=offsets[v], fontsize=8, color=C["agent"], ha="center", va="center",
+                    xytext=offsets[v], fontsize=8, color=PG["text"], ha="center", va="center",
                     bbox=dict(boxstyle="round,pad=0.15", facecolor="white", edgecolor="none",
                               alpha=0.8), zorder=8)
 
     handles = wh.legend_handles() + [
-        Line2D([], [], marker="o", ls="", color=C["agent"], ms=10, label="agent"),
-        Line2D([], [], ls=(0, (4, 3)), color=C["agent"], lw=1.8,
-               label=r"route of $a_2$ while $\tau_1$ is active"),
+        Line2D([], [], marker="o", ls="", color=PG["to_pickup"], ms=10, label="agent"),
+        Line2D([], [], ls=(0, (4, 3)), color=PG["to_pickup"], lw=1.8, label="to the pickup"),
+        Line2D([], [], ls=(0, (4, 3)), color=PG["to_delivery"], lw=1.8,
+               label="to the workstation"),
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.01),
               ncol=3, frameon=False, fontsize=10)

@@ -1,0 +1,118 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,xcolor,enumitem}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\oldmath}[1]{\textcolor{gray}{#1}}
+\title{Proposed change [A96], the keep-up check counts the work served in the window}
+\date{16 November 2026, version 1}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 says what is wrong with the check as it stands. Part~2 shows the ``Keeping up'' paragraph of
+the Problem Formulation as it would read. \new{Green} is new text, \old{struck} text goes, a removed
+equation is grey and marked ``removed''. Part~3 has the questions. Nothing is changed in the thesis yet.
+
+\section*{Part 1. What is wrong}
+
+The check compares the tasks finished, $|\mathcal{C}_T|$, with the tasks finished plus the backlog
+left at $T$. Since [A66] only tasks released in the measured window $[T_{\mathrm{warm}}, T]$ count in
+$\mathcal{C}_T$. A task released in the warm-up and finished in the window counts nowhere.
+
+For a fleet that keeps up this makes no difference. For a fleet that falls behind it does. Such a
+fleet enters the window with a queue from the warm-up. Its agents keep working, but on those older
+tasks, and the tasks released in the window wait at the back of the queue. So $|\mathcal{C}_T|$ is
+close to zero even while the agents finish a task every few dozen steps.
+
+The fleet 16 tests show it. No learned arm keeps up, and the completed share is near zero for most of
+them. The centralised arm under fixed storage scores 0.13, yet on average it never goes more than 68
+steps without finishing a task. The number says that the new tasks were not reached, not how much work
+the fleet does. Every learned run then reads ``0 of 20'', and the arms cannot be told apart.
+
+\textbf{The change.} Count every task finished in the window, whenever it was released, and compare
+it with the tasks released in the window. The ratio is the share of the arriving work the fleet
+serves. At 1 the queue holds its size. At 0.6 the fleet serves 60\,\% of what arrives, and the queue
+grows by the other 40\,\%. The check then asks for a share of at least $f_{\mathrm{up}}$, for picks
+and put-aways apart as before ([A59]). A run that fails it is reported by this share, which now
+says how far it falls short.
+
+\textbf{A rough estimate} from the backlog slope of the stored runs gives shares of about 0.5 to 0.7
+for centralised, section-based and decentralised, and about 0.4 with messages, against about 1 for
+Token Passing. The exact shares need the tests played again with the new code.
+
+\textbf{Code.} Branch \texttt{feat/served-share}, uncommitted. \texttt{RunMetrics} gains the tasks
+released and finished in the window and the share, overall and for picks and put-aways.
+\texttt{keeps\_up} is not changed yet, it follows the thesis once this is approved.
+
+\section*{Part 2. The text}
+
+\subsection*{Problem Formulation, ``Keeping up''}
+
+A fleet keeps up when it finishes tasks about as fast as they are released. If it falls behind,
+unfinished tasks pile up, and an average over the finished ones no longer describes the run. This is
+the bounded service time that \texttt{ma2017lifelong\_mapf} require of a solved instance. The queue is
+the backlog $B_t$, the tasks released but not yet finished and the orders still waiting for stock.
+
+Throughput is the number of tasks finished per timestep. It is the measure lifelong MAPF uses for
+warehouses \texttt{li2021lifelong} and the pick rate that \texttt{krnjaic2022warehouse\_marl} optimise.
+The check compares it with the rate at which tasks were actually released in the run, not the expected
+rate, because orders arrive at random and one seed releases more than another.
+
+\new{The check counts every task the fleet finishes in the measured steps, also one released before
+them. A fleet that fell behind earlier still works through its older tasks, and that work is what
+shows whether the queue grows or holds. So the measure is the share of the arriving work the fleet
+serves. With 900 tasks released in the measured steps and 600 tasks finished in them, the share is
+two thirds and the queue grows by 300.}
+
+Picks and put-aways are checked separately, and a run must pass both. [unchanged]
+
+Formally, with $\mathcal{C}_T$ the tasks completed within a horizon $T$,
+throughput is $\Lambda_T = |\mathcal{C}_T| / T$. \new{Write $\mathcal{R}^{\mathrm{pick}}_T$ for the
+picks released in the measured window and $\mathcal{F}^{\mathrm{pick}}_T$ for the picks finished in
+it, whenever they were released, and the same for put-aways. The served share of a kind is the second
+over the first, and the run passes the \emph{keep-up check} if}
+\begin{equation*}
+  \new{\frac{|\mathcal{F}^{\mathrm{pick}}_T|}{|\mathcal{R}^{\mathrm{pick}}_T|} \;\ge\; f_{\mathrm{up}}
+  \quad\text{and}\quad
+  \frac{|\mathcal{F}^{\mathrm{put}}_T|}{|\mathcal{R}^{\mathrm{put}}_T|} \;\ge\; f_{\mathrm{up}} ,}
+\end{equation*}
+\oldmath{\[
+  \frac{|\mathcal{C}^{\mathrm{pick}}_T|}{T} \;\ge\; f_{\mathrm{up}}\, \frac{|\mathcal{C}^{\mathrm{pick}}_T| + B^{\mathrm{pick}}_T}{T}
+  \quad\text{and}\quad
+  \frac{|\mathcal{C}^{\mathrm{put}}_T|}{T} \;\ge\; f_{\mathrm{up}}\, \frac{|\mathcal{C}^{\mathrm{put}}_T| + B^{\mathrm{put}}_T}{T}
+  \qquad\text{(removed)}
+\]}
+\old{where each right side is the release rate of that kind scaled by a threshold
+$f_{\mathrm{up}} \le 1$ that leaves room for tasks still under way at the horizon.}
+\new{where the threshold $f_{\mathrm{up}} \le 1$ leaves room for tasks still under way at the
+horizon. Ship tasks count with the picks.} A run that does not keep up is reported by
+\old{its throughput} \new{its served share} and is not compared on service time. The check looks at
+one finite horizon, so passing it does not prove that the backlog stays bounded. [rest unchanged]
+
+\subsection*{Notation table}
+\new{$\mathcal{R}^{\mathrm{pick}}_T, \mathcal{F}^{\mathrm{pick}}_T$, and the same for put-aways. Tasks
+released in the measured window, and tasks finished in it whenever released.} The rows of
+$B^{\mathrm{pick}}_T, B^{\mathrm{put}}_T$ stay, since the backlog is still reported.
+
+\section*{Part 3. Questions}
+
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{Replace the check, or only report the share next to it?} I propose to replace it. The
+  old check fails every run that fell behind in the warm-up, however much it serves later. The new one
+  asks the question the check is for, whether the queue grows. A run that fell behind early but holds
+  its queue would pass, with a long service time, and the backlog over the run stays reported.
+\item \textbf{Keep $f_{\mathrm{up}} = 0.8$?} With the new share, 0.8 lets the queue grow by a fifth of
+  what arrives. A stricter value such as 0.95 is closer to ``the queue holds''. Token Passing is at
+  about 1, so either keeps its rows passing.
+\item \textbf{Replay the fleet 16 tests} with the new code, about a day on the PC (or the cloud), so the
+  exact shares go in the tables and the graph? Training is not touched.
+\item \textbf{Do the [A66] measures change too?} No. Service time and the other window measures still
+  count the tasks released in the window. Only the check changes.
+\end{enumerate}
+
+\end{document}

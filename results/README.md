@@ -15,6 +15,8 @@ folder's README holds what its part of the run found, and how it compares with t
 | `F_demand/` | F, demand drift | skew, drift period and drift step at the main load | `app:demand:sweep`, `fig:app:demandsweep` |
 | `G_storage/` | G, storage rule values | storage period, congestion weight, refill size, the random check, the safety stock check | `app:cal:period`, `app:cal:beta`, `app:cal:refill`, `app:cal:random`, `app:cal:safety` |
 | `K_checks/` | K, checks | the Ma et al. (2017) Token Passing reproduction | `app:repro:ma` |
+| `L_results/` | L, results | `fleet_16/` the long 16-agent runs (main result), `earlier_runs/` the first, shorter training | `app:results` |
+| `dropped/` | none | results taken out of the thesis, kept as data (`regime1_fixed_trained/`) | nothing |
 
 ## What every run shares
 

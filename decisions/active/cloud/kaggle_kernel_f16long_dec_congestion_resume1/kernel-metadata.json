@@ -1,0 +1,17 @@
+{
+  "id": "bjarkekarlsen/slap-f16long-dec-congestion-resume1",
+  "title": "slap-f16long-dec-congestion-resume1",
+  "code_file": "train.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "bjarkekarlsen/slap-wh-fleet16-decentralised-a12d69cd80dd",
+    "bjarkekarlsen/slap-init-f16-decentralised"
+  ],
+  "competition_sources": [],
+  "kernel_sources": ["bjarkekarlsen/slap-f16long-dec-congestion"]
+}

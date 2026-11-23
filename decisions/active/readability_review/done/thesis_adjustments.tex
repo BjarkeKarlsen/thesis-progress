@@ -1,0 +1,122 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.5em}\setlength{\parindent}{0pt}
+\setlist{nosep,leftmargin=1.4em}
+\title{Adjustments made on 20 November 2026}
+\date{The thesis and every appendix as they stand after [A107], [A108] and [A109]}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+The pages before this list are the thesis and its twelve appendices, built
+after the changes. Every changed line in the sources carries a
+\texttt{\% [A107]}, \texttt{\% [A108]} or \texttt{\% [A109]} tag, and each tag
+has an entry in \texttt{GAPS.md}. Part~1 says what changed, Part~2 what is
+still waiting for you, and Part~3 where the details are. Where the text and
+the code differed, the text now follows the code. The code is unchanged.
+
+\section*{Part 1. What changed}
+
+\subsection*{[A107] Small fixes in ``Choosing together'' and ``When moves still clash''}
+\begin{itemize}
+  \item The centralised network runs on every vertex an agent can stand on.
+  \item The one shared pass is named as Knippenberg's single-agent setup.
+  \item The zones are blocks of neighbouring aisles.
+  \item Halo vertices carry every feature, and no agent on them chooses in the
+        zone. The halo's range keeps a border agent's whole field of view in
+        its window.
+  \item ``Handled after that agent'' cites Knippenberg. ``The priority order''
+        and ``the vertex it asks for'' replace two awkward phrases.
+  \item Only a centralised joint action is always accepted whole.
+  \item The caption of Fig.~15 names the controller and the run.
+\end{itemize}
+
+\subsection*{[A108] Small known mistakes, one review subagent per part}
+\begin{itemize}
+  \item \textbf{Method.} ``Controller'' for ``router''. The critic sees the same
+        window as its policy. A broken sentence on the coupling. Token Passing
+        runs under every storage rule, and its vertex rule is stricter than
+        Ma et al.'s. The correctness checks run in the test suite and, for
+        conflicts and capacity, at every training step. Two doubled equation
+        names. Shipments are a task kind.
+  \item \textbf{A, Notation.} c\_wait cites Knippenberg. Two unused rows go. The
+        backlog counts order lines. W\_T is per pick. A missing equation name.
+  \item \textbf{B, Parameters.} Tables fit the page. The discount, the three PPO
+        values, d\_obs, the 20 test seeds and the main loads 0.09, 0.18, 0.3,
+        0.6 are filled in.
+  \item \textbf{C, Model details.} Eleven fixes, among them the random docks, the
+        mean over neighbours and the agent's own vertex named in both masks.
+  \item \textbf{D, Warehouses.} The shelf count, parking, Table D.1 and the trip
+        numbers come from a fresh run of the current generator.
+  \item \textbf{E to L.} Wording that contradicted the served check, the pick gain
+        called a pick gain, references to the right sections, seed and fleet
+        details, typos, and column headers that called pick service time
+        $\bar\zeta_T$.
+\end{itemize}
+
+\subsection*{[A109] The worst text-to-code mistakes}
+\begin{itemize}
+  \item \textbf{Reward.} The potential is minus the distance left in the whole
+        task, new equation (task potential). Progress counts only within a
+        task, a new task is never charged, and an idle agent gets no shaping.
+        Ng's guarantee holds only within a task. Over a route a detour is
+        cheaper than waiting the same number of steps. The text says who pays
+        the override term under each controller.
+  \item \textbf{Stall.} A run stalls when the whole fleet finishes no task for
+        longer than the stall length. The stall length stays open.
+  \item \textbf{Horizon.} Every test run plays 10\,000 steps and leaves the first
+        5\,000 out. Training episodes are 2\,000 steps.
+  \item \textbf{Training values.} Appendices B and J give the values every
+        trained run uses, and say no sweep was run. The PPO loss includes
+        RLlib's KL penalty and value-loss clip. The longer training of the
+        16-agent runs is stated as a fact.
+  \item \textbf{Problem Formulation and Experiments.} Each network reads only its
+        own agent's crowding. The random dock is part of what is random. The
+        backlog counts order lines. The popularity weights apply within a
+        section, and the drift drops the top SKUs to the bottom in one step.
+        The broken section number ``VIII-A0c'' is gone. Only $m$ leftover
+        rack faces become parking. A shelf's trip at 8 agents is 17 to 38
+        steps. Shelf ties are broken by the plain trip, then by index.
+  \item \textbf{The lock.} Fig.~15 is told as it happens in the trace. Agents in
+        front of the workstation choose to wait, or swap and both wait. Who
+        pays is stated from the code. The rejected rule is the cap on tasks
+        per workstation. Why Token Passing never locks is said once.
+\end{itemize}
+
+\section*{Part 2. Waiting for you}
+These are choices, not facts, so no agent made them.
+\begin{enumerate}
+  \item Which training setup gives the main result. The Method and Appendix J
+        say fixed storage only, Appendix L uses each rule's own policy.
+  \item Which checkpoint counts. Appendix L mixes two policies in some rows.
+  \item Which 16-agent policies the results use, the 500\,000-step ones or
+        the long warm-start runs.
+  \item Appendix E capacities. Under the new served check the main loads are
+        about half of capacity, not 0.6.
+  \item Names and symbols. Zone or section, $w$, message, $h(k)$, $B$ and $Q$,
+        $q$.
+  \item Reporting the order gain beside the pick gain in Appendix F.
+  \item The trip legs proposal, which now also reaches Appendix G.
+  \item The stall length, and whether a fleet-level gap is fair across loads.
+  \item Merging the 32 and 64 agent congestion rows into Appendix G.
+  \item Figures to redraw. H.1 to H.3, D.2, D.3, L.1, L.2, Fig.~15 in the
+        viewer colours, J.1 and K.1.
+  \item The questions of \texttt{review\_controllers.pdf}.
+  \item The reasons the text still lacks, under B in each comments file.
+\end{enumerate}
+
+\section*{Part 3. Where the details are}
+All in \texttt{thesis-progress/decisions/}.
+\begin{itemize}
+  \item \texttt{GAPS.md}, entries [A107], [A108] and [A109].
+  \item \texttt{active/readability\_review/method\_review\_queue.md}, the
+        decisions, the mistakes, the Discussion points and the carry-forward
+        list.
+  \item One comments file and one annotated PDF per section and appendix in
+        \texttt{active/readability\_review/}, with tick boxes. A fixed point
+        says ``Fixed'' and the tag.
+\end{itemize}
+
+\end{document}

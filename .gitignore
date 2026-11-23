@@ -252,3 +252,4 @@ results/tests/step12_watch16/traces/
 
 # A local token file, never committed
 decisions/active/cloud/info
+decisions/active/readability_review/thesis_full_*.pdf

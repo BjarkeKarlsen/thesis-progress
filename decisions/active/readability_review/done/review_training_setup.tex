@@ -1,0 +1,136 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\title{Proposed change, one training setup}
+\date{23 November 2026, version 3}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This proposal settles decision 1 of \texttt{method\_review\_queue.md}
+(\texttt{method\_training\_comments.md} A1). The author decided on
+23 November to drop the fixed-trained test (Regime 1). Every storage rule
+keeps its own policy, trained under that rule, and that is the only setup
+the thesis reports.
+
+Black text stays, \new{green} is new and \old{struck} text goes. Parts~1 to~4 show each
+passage that changes. Part~5 is the GAPS.md entry. Version 3 drops the reasons, which the author already agreed. Version 2 dropped every sentence about testing a policy
+under another rule (author), so the thesis does not mention the dropped
+setup at all. Nothing below is in the thesis
+yet. The data and the old text are kept in
+\texttt{thesis-progress/results/dropped/regime1\_fixed\_trained/}.
+
+\section*{Part 1. Method, \texttt{sec:method:training} (\texttt{4.Implementation.tex}, line 665)}
+
+\old{Two training setups are reported, and they answer different questions.
+In the first, each controller is trained under fixed storage only, and the
+one frozen policy then meets every storage rule. The gain then measures the
+storage rule for that policy, and this is the main result. In the second,
+each storage rule gets its own policy, trained under the same rule it is
+evaluated with.}
+\new{Each storage rule gets its own policy, trained under the same rule it
+is tested with, because a warehouse would train its fleet under the rule it
+runs.}
+The gain then compares two whole systems, storage rule and policy together,
+and part of it can come from training.
+\old{This setup is also harder to learn, because}
+\new{Training under demand and congestion-aware storage is also harder,
+because these rules}
+\old{demand and congestion-aware storage}
+change which shelves the picks come from, through eq.~(coupling), while the
+policy is learning (Section on the coupling).
+
+\section*{Part 2. Experiments, Training paragraph (\texttt{5.Experiments.tex}, line 186)}
+
+Each learned controller is trained with PPO under the same budget of
+environment steps, using the values in Table (trainparams).
+\old{Both training regimes of Section (method:training) are run. In the first
+the controller trains under fixed storage and is evaluated under all three
+storage rules. In the second it trains under the storage rule it is
+evaluated with. The main result uses the first.}
+\new{Each storage rule has its own policy, trained under the rule it is
+tested with (Section on how the controllers learn).}
+Training seeds and evaluation seeds are counted apart. [Rest of the
+paragraph unchanged.]
+
+In the mockup after it: ``Number of training seeds per controller and
+\old{regime}\new{storage rule}.''
+
+\textbf{Run plan mockup} (line 230): ``Number of trained policies and of
+evaluation runs, from Table (expfactors), \old{the two training regimes}
+\new{one policy per controller and storage rule} and the seed counts.''
+
+\textbf{Training results mockup and figure} (lines 276 to 287):
+``Learning curves of the three learned controllers \old{under both training
+regimes}\new{under each storage rule}. State whether all three reached a
+stable return within the budget, and whether \old{matched training was
+harder}\new{training under demand and congestion-aware storage was harder},
+as Section (method:training) expects.'' Figure mockup: ``one panel per
+\old{training regime}\new{storage rule}''. Caption: ``Training return of the
+three learned controllers \old{under both training regimes}\new{under each
+storage rule}.''
+
+\section*{Part 3. Experiments, RQ2 (\texttt{5.Experiments.tex}, line 442)}
+
+The learned controllers are blocked far more, 13 to 26 steps per pick at 16
+agents. There, every learned controller serves more under congestion-aware
+storage than under demand storage.
+\old{The gain comes with the training, not with the rule alone. The policy
+trained under fixed storage, played under congestion-aware storage, serves
+no more than under fixed storage (Appendix L, same policy under each rule).}
+
+Nothing replaces the two sentences. Training each policy under its own rule
+is the only setup, so the thesis does not mention the other.
+
+\section*{Part 4. Appendices}
+
+\textbf{Appendix J} (\texttt{J.Training.tex}, line 52). ``The budget counts
+environment steps \dots\ and it is the same for every learned controller
+(Section on how the controllers learn).
+\old{The main result uses policies trained under fixed storage and tested
+under every storage rule.}
+\new{Each storage rule has its own policy, trained and tested under that
+rule.}''
+
+\textbf{Appendix L} (\texttt{L.Results.tex}, lines 358 to 406). The whole
+subsection ``The same policy under each rule''
+(\texttt{app:results:regime1}) goes, with its three paragraphs, the
+\texttt{TODO rerun20} comment and Table \texttt{tab:app:regime1:16}. Its
+text is kept in the dropped folder. The opening of Appendix L already says
+``Each storage rule is played by the policy trained under it'', so nothing
+else in L changes.
+
+\textbf{No other references.} The only \texttt{\textbackslash
+ref\{app:results:regime1\}} is the RQ2 sentence of Part~3. The [A56] tag on
+``Orders finished'' in the Problem Formulation is about order throughput and
+stays.
+
+\section*{Part 5. GAPS.md entry}
+
+\textbf{[A114] One training setup, each storage rule with its own policy
+(author 2026-11-23, review\_training\_setup.pdf).}
+\begin{itemize}[nosep]
+  \item \textbf{Where.} \texttt{sec:method:training}, the Experiments
+        Training paragraph, run plan, training results and RQ2,
+        \texttt{J.Training.tex},
+        \texttt{L.Results.tex} (\texttt{app:results:regime1} removed).
+        Tagged \texttt{\% [A114]}.
+  \item \textbf{What.} Replaces [A56] on the training setups. The thesis
+        reports only policies trained under the rule they are tested with.
+        The fixed-trained test (Regime 1) is dropped, its rows and text kept
+        in \texttt{results/dropped/regime1\_fixed\_trained/}.
+  \item \textbf{Why.} The results already used this setup. The Regime 1 rows
+        were from the old 500\,000-step policies, the research questions do
+        not need them, and one training run per rule could not separate rule
+        from training anyway. Rejected: rerunning Regime 1 on the long
+        policies (8 evaluations on a full queue).
+  \item \textbf{Model change.} None.
+\end{itemize}
+
+\end{document}

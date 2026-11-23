@@ -1,0 +1,444 @@
+{
+ "run": {
+  "fleet": 16,
+  "controller": "centralised",
+  "arm_folder": "centralised",
+  "communication": false,
+  "trained_under": "demand",
+  "regime_in_settings": "demand",
+  "run_dir": "/home/bjarkek/thesis_runs/training/fleet_16/centralised/demand",
+  "trained": {
+   "place": "this PC",
+   "commit": "d204dbd",
+   "done_file": "pc, commit d204dbd"
+  },
+  "budget_env_steps": 500000,
+  "iterations": 84,
+  "checkpoint_every": 3,
+  "training_load": 0.18,
+  "training_episode": {
+   "horizon": 2000,
+   "warmup": 0
+  }
+ },
+ "policy": {
+  "rule": "[A60]: of the checkpoints that keep up on every validation seed, the one with the shortest mean pick service time. If none keeps up, the highest throughput.",
+  "checkpoints_validated": 28,
+  "chosen": {
+   "checkpoint": "checkpoint_000023",
+   "training_iteration": 72,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/centralised/demand/centralised_demand/PPO_warehouse_mapd_multi_agent_env_60726_00000_0_2026-11-14_16-59-30/checkpoint_000023",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.1376,
+     "ci_low": 0.12721706042591296,
+     "ci_high": 0.14798293957408704,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 421.20097277729656,
+     "ci_low": 368.5643552029066,
+     "ci_high": 473.8375903516865,
+     "seeds": 5
+    }
+   }
+  },
+  "last": {
+   "checkpoint": "checkpoint_000027",
+   "training_iteration": 84,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/centralised/demand/centralised_demand/PPO_warehouse_mapd_multi_agent_env_60726_00000_0_2026-11-14_16-59-30/checkpoint_000027",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.12410000000000002,
+     "ci_low": 0.11301680115344007,
+     "ci_high": 0.13518319884655997,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 471.51256044689006,
+     "ci_low": 434.3687977117627,
+     "ci_high": 508.65632318201745,
+     "seeds": 5
+    }
+   }
+  },
+  "training_best": {
+   "score": "episode_tasks_completed_mean",
+   "checkpoint": "checkpoint_000008",
+   "training_iteration": 27,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/centralised/demand/centralised_demand/PPO_warehouse_mapd_multi_agent_env_60726_00000_0_2026-11-14_16-59-30/checkpoint_000008",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.11989999999999998,
+     "ci_low": 0.11365454117328319,
+     "ci_high": 0.12614545882671677,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 480.579374393263,
+     "ci_low": 425.7749703992028,
+     "ci_high": 535.3837783873231,
+     "seeds": 5
+    }
+   }
+  },
+  "chosen_is_training_best": false
+ },
+ "evaluation": {
+  "commit": "02d407a37d17838c8106bd1b6a9e9db7578c87a5",
+  "code": "https://github.com/BjarkeKarlsen/slap-mapd-coupling",
+  "device": "cpu",
+  "command": "PYTHONPATH=src python -m slap_mapd_coupling.main evaluate /home/bjarkek/thesis_runs/training/fleet_16/centralised/demand --test-seeds 20 --horizon 10000 --warmup 5000",
+  "queue": null,
+  "validation": {
+   "seeds": [
+    100000,
+    100001,
+    100002,
+    100003,
+    100004
+   ],
+   "horizon": 2000,
+   "warmup": 0,
+   "storage_mode": "demand"
+  },
+  "test": {
+   "seeds": [
+    200000,
+    200001,
+    200002,
+    200003,
+    200004,
+    200005,
+    200006,
+    200007,
+    200008,
+    200009,
+    200010,
+    200011,
+    200012,
+    200013,
+    200014,
+    200015,
+    200016,
+    200017,
+    200018,
+    200019
+   ],
+   "horizon": 10000,
+   "warmup": 5000,
+   "storage_modes": [
+    "demand"
+   ],
+   "load": 0.18,
+   "num_agents": 16
+  },
+  "finished": "2026-11-15T17:49",
+  "lock_measure": "longest_two_agent_hold per episode ([A91]). Seeds at or above 500, 1250 steps are listed. The threshold the thesis uses is chosen from how the numbers spread."
+ },
+ "results": {
+  "chosen": {
+   "demand": {
+    "throughput": {
+     "mean": 0.02643,
+     "ci_low": 0.011489382680343245,
+     "ci_high": 0.04137061731965675,
+     "seeds": 20
+    },
+    "keeps_up": {
+     "mean": 0.0,
+     "ci_low": 0.0,
+     "ci_high": 0.0,
+     "seeds": 20
+    },
+    "mean_service_time": {
+     "mean": 3824.3793107283286,
+     "ci_low": 3363.7874626380258,
+     "ci_high": 4284.971158818632,
+     "seeds": 11
+    },
+    "mean_wait_for_agent": {
+     "mean": 3731.123986210539,
+     "ci_low": 3270.7737473503466,
+     "ci_high": 4191.474225070731,
+     "seeds": 11
+    },
+    "mean_travel_time": {
+     "mean": 70.65430819162098,
+     "ci_low": 65.9240257631594,
+     "ci_high": 75.38459062008256,
+     "seeds": 11
+    },
+    "mean_blocked_time": {
+     "mean": 22.601016326167517,
+     "ci_low": 20.48160490183141,
+     "ci_high": 24.720427750503625,
+     "seeds": 11
+    },
+    "mean_order_completion": {
+     "mean": 4363.142857142857,
+     "ci_low": null,
+     "ci_high": null,
+     "seeds": 1
+    },
+    "mean_putaway_service_time": {
+     "mean": 3833.4300077689495,
+     "ci_low": 3376.578760880521,
+     "ci_high": 4290.281254657379,
+     "seeds": 11
+    },
+    "mean_crowding": {
+     "mean": 0.1308026506699106,
+     "ci_low": 0.10995626407123268,
+     "ci_high": 0.1516490372685885,
+     "seeds": 20
+    },
+    "longest_completion_gap": {
+     "mean": 75.15,
+     "ci_low": 44.2434103679651,
+     "ci_high": 106.05658963203491,
+     "seeds": 20
+    },
+    "longest_two_agent_hold": {
+     "mean": 480.05,
+     "ci_low": 266.69829155336583,
+     "ci_high": 693.4017084466342,
+     "seeds": 20
+    },
+    "mean_decision_runtime_seconds": {
+     "mean": 0.18589153467539604,
+     "ci_low": 0.174138571871028,
+     "ci_high": 0.1976444974797641,
+     "seeds": 20
+    },
+    "seeds": [
+     200000,
+     200001,
+     200002,
+     200003,
+     200004,
+     200005,
+     200006,
+     200007,
+     200008,
+     200009,
+     200010,
+     200011,
+     200012,
+     200013,
+     200014,
+     200015,
+     200016,
+     200017,
+     200018,
+     200019
+    ],
+    "locked_seeds": {
+     "500": [
+      200006,
+      200009,
+      200012
+     ],
+     "1250": [
+      200012
+     ]
+    }
+   }
+  },
+  "last": {
+   "demand": {
+    "throughput": {
+     "mean": 0.01034,
+     "ci_low": 0.0004011870387715978,
+     "ci_high": 0.020278812961228403,
+     "seeds": 20
+    },
+    "keeps_up": {
+     "mean": 0.0,
+     "ci_low": 0.0,
+     "ci_high": 0.0,
+     "seeds": 20
+    },
+    "mean_service_time": {
+     "mean": 4301.762216069839,
+     "ci_low": 3700.3756846547367,
+     "ci_high": 4903.148747484942,
+     "seeds": 8
+    },
+    "mean_wait_for_agent": {
+     "mean": 4209.4525097432615,
+     "ci_low": 3602.211573196493,
+     "ci_high": 4816.69344629003,
+     "seeds": 8
+    },
+    "mean_travel_time": {
+     "mean": 67.66050666814868,
+     "ci_low": 57.786367152720985,
+     "ci_high": 77.53464618357638,
+     "seeds": 8
+    },
+    "mean_blocked_time": {
+     "mean": 24.64919965842885,
+     "ci_low": 20.25765158827224,
+     "ci_high": 29.04074772858546,
+     "seeds": 8
+    },
+    "mean_order_completion": null,
+    "mean_putaway_service_time": {
+     "mean": 4293.670408705546,
+     "ci_low": 3691.9341377839764,
+     "ci_high": 4895.406679627115,
+     "seeds": 8
+    },
+    "mean_crowding": {
+     "mean": 0.1219147938823775,
+     "ci_low": 0.10607895579565021,
+     "ci_high": 0.13775063196910478,
+     "seeds": 20
+    },
+    "longest_completion_gap": {
+     "mean": 60.5,
+     "ci_low": 45.270501005232305,
+     "ci_high": 75.7294989947677,
+     "seeds": 20
+    },
+    "longest_two_agent_hold": {
+     "mean": 465.3,
+     "ci_low": 378.74335579637716,
+     "ci_high": 551.8566442036229,
+     "seeds": 20
+    },
+    "mean_decision_runtime_seconds": {
+     "mean": 0.1690035655465743,
+     "ci_low": 0.1628881590032659,
+     "ci_high": 0.17511897208988272,
+     "seeds": 20
+    },
+    "seeds": [
+     200000,
+     200001,
+     200002,
+     200003,
+     200004,
+     200005,
+     200006,
+     200007,
+     200008,
+     200009,
+     200010,
+     200011,
+     200012,
+     200013,
+     200014,
+     200015,
+     200016,
+     200017,
+     200018,
+     200019
+    ],
+    "locked_seeds": {
+     "500": [
+      200000,
+      200006,
+      200008,
+      200009,
+      200012,
+      200017,
+      200018
+     ],
+     "1250": []
+    }
+   }
+  }
+ },
+ "evaluate": {
+  "run_dir": "/content/runs/f16_centralised_demand",
+  "controller": "centralised",
+  "communication": false,
+  "trained_under": "demand",
+  "num_agents": 16,
+  "training_load": 0.18,
+  "budget_env_steps": 500000,
+  "checkpoint_every": 3,
+  "rule": "[A60]: of the checkpoints that keep up on every validation seed, the one with the shortest mean pick service time, else the highest throughput.",
+  "chosen": {
+   "checkpoint": "checkpoint_000023",
+   "iteration": 72,
+   "path": "/content/runs/f16_centralised_demand/centralised_demand/PPO_warehouse_mapd_multi_agent_env_60726_00000_0_2026-11-14_16-59-30/checkpoint_000023"
+  },
+  "last": {
+   "checkpoint": "checkpoint_000027",
+   "iteration": 84,
+   "path": "/content/runs/f16_centralised_demand/centralised_demand/PPO_warehouse_mapd_multi_agent_env_60726_00000_0_2026-11-14_16-59-30/checkpoint_000027"
+  },
+  "checkpoints_validated": 28,
+  "validation": {
+   "seeds": [
+    100000,
+    100001,
+    100002,
+    100003,
+    100004
+   ],
+   "horizon": 2000,
+   "warmup": 0
+  },
+  "test": {
+   "seeds": [
+    200000,
+    200001,
+    200002,
+    200003,
+    200004,
+    200005,
+    200006,
+    200007,
+    200008,
+    200009,
+    200010,
+    200011,
+    200012,
+    200013,
+    200014,
+    200015,
+    200016,
+    200017,
+    200018,
+    200019
+   ],
+   "horizon": 10000,
+   "warmup": 5000,
+   "load": 0.18,
+   "storage_modes": [
+    "demand"
+   ]
+  },
+  "device": "cpu",
+  "code_commit": "02d407a37d17838c8106bd1b6a9e9db7578c87a5",
+  "finished": "2026-11-15T17:49"
+ }
+}

@@ -19,7 +19,7 @@ A missing run is drawn as a placeholder.
 import os
 import statistics
 
-from appendix_data import (RESULTS, ARMS, ARM_COLOUR, C, plt, read_jsonl, mean_and_half_width,
+from appendix_data import (RESULTS, run_folder, ARMS, ARM_COLOUR, C, plt, read_jsonl, mean_and_half_width,
                            style, panel_title, placeholder, save)
 
 TRAINING = os.path.join(RESULTS, "J_training")
@@ -38,7 +38,7 @@ def reward_terms(fleet=8, last=0.1):
     width = 0.8 / len(LEARNED)
     found = False
     for k, arm in enumerate(LEARNED):
-        rows = read_jsonl(os.path.join(TRAINING, f"fleet_{fleet}", arm, "progress.jsonl"))
+        rows = read_jsonl(os.path.join(run_folder(TRAINING, fleet, arm, "fixed"), "progress.jsonl"))
         if not rows:
             continue
         found = True
@@ -56,7 +56,7 @@ def reward_terms(fleet=8, last=0.1):
     if found:
         ax.legend(frameon=False, fontsize=9)
     else:
-        placeholder(ax, f"results/J_training/fleet_{fleet}/<arm>/progress.jsonl")
+        placeholder(ax, f"results/J_training/fleet_{fleet}/<arm>/fixed/progress.jsonl")
     return save(fig, "app_reward_terms.png")
 
 

@@ -10,23 +10,19 @@ from collections import deque
 from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch
 
-from base import C
+from base import C, PG, ROLE_MARK
 
 DATA = os.path.join(os.path.dirname(__file__), "data", "warehouse_m8.json")
 
-STYLE = {  # face, edge, marker, size
-    "": ("white", C["node"], "o", 260),
-    "storage": (C["store_f"], C["store_e"], "o", 300),
-    "delivery": (C["del_f"], C["del_e"], "s", 340),
-    "receiving": (C["rcv_f"], C["rcv_e"], "^", 340),
-    "endpoint": (C["ep_f"], C["ep_e"], "D", 260),
+STYLE = {  # face, edge, marker, size: the viewer's marks ([A104], base.py ROLE_MARK)
+    role: (face, edge, marker, 320 * rel) for role, (face, edge, marker, rel) in ROLE_MARK.items()
 }
 LEGEND = {
-    "storage": (r"$V_{\mathrm{str}}$", "o", 10),
+    "storage": (r"$V_{\mathrm{str}}$", "s", 10),
     "delivery": (r"$V_{\mathrm{work}}$", "s", 10),
     "receiving": (r"$V_{\mathrm{dock}}$", "^", 10),  # [A86]
     "endpoint": (r"$V_{\mathrm{ep}}$", "D", 9),
-    "": ("aisle", "o", 10),  # [A86] V_mov dropped
+    "": ("aisle", "o", 6),  # [A86] V_mov dropped
 }
 
 
@@ -74,7 +70,7 @@ class Warehouse:
             if one_way:
                 ax.add_patch(FancyArrowPatch(self.pos[u], self.pos[v], arrowstyle="-|>",
                                              mutation_scale=12 * node_scale ** 0.5,
-                                             color=C["node"], lw=1.4, shrinkA=8 * node_scale,
+                                             color=PG["one_way"], lw=1.4, shrinkA=8 * node_scale,
                                              shrinkB=8 * node_scale, alpha=alpha, zorder=1))
             else:
                 ax.plot(*zip(self.pos[u], self.pos[v]), color=C["edge"], lw=1.8,
@@ -83,6 +79,10 @@ class Warehouse:
             for alpha, group in ((1.0, [v for v in self.pos if v not in pale]),
                                  (alpha_dim, [v for v in self.pos if v in pale])):
                 nodes = [v for v in group if self.roles[v] == role]
+                if nodes and alpha < 1.0:  # an opaque white face first, so no edge shows
+                    ax.scatter([self.pos[v][0] for v in nodes], [self.pos[v][1] for v in nodes],
+                               s=size * node_scale, c="white", edgecolors="none",
+                               marker=marker, zorder=3)
                 if nodes:
                     ax.scatter([self.pos[v][0] for v in nodes], [self.pos[v][1] for v in nodes],
                                s=size * node_scale, c=face, edgecolors=edge, marker=marker,
@@ -90,6 +90,6 @@ class Warehouse:
 
     def legend_handles(self):
         """One legend entry per vertex role, in the order of LEGEND."""
-        return [Line2D([], [], marker=marker, ls="", mfc=STYLE[role][0], mec=STYLE[role][1],
-                       ms=ms, label=label)
+        return [Line2D([], [], marker=STYLE[role][2], ls="", mfc=STYLE[role][0],
+                       mec=STYLE[role][1], ms=ms, label=label)
                 for role, (label, marker, ms) in LEGEND.items()]

@@ -1,0 +1,50 @@
+\subsection{The same policy under each rule}
+\label{app:results:regime1}
+
+% [A96] revised counts (2026-11-17). TODO: the section-based arm and the arm with messages are still
+% on 6 seeds (rerun20). Fill their TBD rows and the two sentences marked below.
+Each controller's policy trained under fixed storage was also played under congestion-aware storage. The
+policy stays the same, so any change comes from the storage rule alone. The test is the same as
+above, 20 seeds of 10000 steps with the first 5000 left out. Under demand storage these policies were
+played only before the served share was counted, so that rule is left out here.
+
+The storage rule on its own changes nothing the test can measure (Table~\ref{tab:app:regime1:16}).
+Under congestion-aware storage the centralised policy finishes 0.143 tasks per step, the same as
+under fixed storage. The decentralised policy finishes 0.028 against 0.025. Compared seed by seed,
+the 95\,\% interval holds zero for both, and the rule does better on only 9 and 10 of the 20 seeds.
+No run keeps up under either rule.
+% TODO rerun20: one sentence each for the section-based arm and the arm with messages. On the first
+% 6 seeds, messages finish 0.035 fewer tasks per step under congestion-aware storage [-0.068, -0.001],
+% fewer on all 6, and section-based 0.010 more [-0.014, 0.034].
+
+The better congestion-aware rows of Section~\ref{app:results:tests:16} come from the training run,
+not from storage. Under the same rule, the decentralised policy trained under congestion-aware
+storage finishes 0.186 tasks per step, and the one trained under fixed storage 0.028. For the
+centralised controller it is 0.161 against 0.143. Both do better on all 20 seeds. Each controller has one training
+run per rule, so this cannot tell training under the rule apart from a better training run. The
+decentralised run trained under fixed storage was already weak in validation, at 0.088 tasks per step % validation rows use the old count
+against 0.210.
+
+The decentralised policy trained under fixed storage serves only about an eighth of the work under
+either rule, so the rule has little to work on there.
+
+\begin{table}[H]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \caption{Tasks done per step on 16 agents, the fixed-trained policy under each rule, means over
+  20 seeds. The last column is the policy trained under congestion-aware storage.}
+  \label{tab:app:regime1:16}
+  \begin{tabular}{lrrrr}
+    \toprule
+    controller & fixed & \shortstack{congestion-\\aware} & \shortstack{difference to fixed\\{[95\,\% interval]}} & \shortstack{own policy,\\congestion-aware} \\
+    \midrule
+    centralised    & 0.143 & 0.143 & $-0.001$ [$-0.006$, 0.005] & 0.161 \\
+    section-based  & TBD   & TBD   & TBD                        & 0.198 \\
+    decentralised  & 0.025 & 0.028 & 0.002 [$-0.005$, 0.010]    & 0.186 \\
+    with messages  & 0.091 & TBD   & TBD                        & 0.084 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% -----------------------------------------------------------------

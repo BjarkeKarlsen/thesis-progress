@@ -1,0 +1,150 @@
+diff --git a/src/slap_mapd_coupling/environment/reward_function.py b/src/slap_mapd_coupling/environment/reward_function.py
+index 5086f63..0436861 100644
+--- a/src/slap_mapd_coupling/environment/reward_function.py
++++ b/src/slap_mapd_coupling/environment/reward_function.py
+@@ -7,8 +7,10 @@ R_i(t) = gamma*Phi_i(t+1) - Phi_i(t)
+          - c_wait    * omega_i(t)
+          - n_cng     * delta_i(t)
+ 
+-Phi_i(t) = -eta_i(l_i(t),t), built from the distance label
+-eta_i(v,t) = d_G(v, q_i(t)). The first term is
++Phi_i(t) is minus the distance left in the robot's task ([A83]): to the pickup vertex
++plus the trip on to the delivery vertex before pickup, and to the delivery vertex
++after. It does not jump at pickup, where the current target q_i(t) switches. The
++distance label eta_i(v,t) = d_G(v, q_i(t)) of the observation is unchanged. The first term is
+ potential-based shaping (Ng, Harada & Russell 1999), which leaves the
+ game's equilibria unchanged, also for a potential that changes whenever
+ the current target switches (Devlin & Kudenko 2012).
+@@ -59,9 +61,23 @@ def current_target(
+ def potential(
+     graph: WarehouseGraph, location: VertexId, task: Task | None, parking: VertexId | None = None
+ ) -> float:
+-    """Phi_i(t) = -eta_i(l_i(t),t) = -d_G(l_i(t), q_i(t)), from the distance
+-    label."""
+-    return -graph.distance(location, current_target(location, task, parking))
++    """Phi_i(t), minus the distance left in the robot's task ([A83]).
++
++    Before pickup it is the distance to the pickup vertex plus the trip from there to the
++    delivery vertex, and after pickup the distance to the delivery vertex. At the pickup both
++    give the same value, so the potential does not jump when the current target switches. A
++    robot with no task has its current target (its own vertex or its parking leaf) as before.
++
++    The distance label of the observation still points to the current target q_i(t)
++    (environment/observation.py). Only the reward uses the distance left."""
++    if task is None:
++        return -graph.distance(location, current_target(location, task, parking))
++    if task.pickup_time is None:
++        return -(
++            graph.distance(location, task.pickup_vertex)
++            + graph.distance(task.pickup_vertex, task.delivery_vertex)
++        )
++    return -graph.distance(location, task.delivery_vertex)
+ 
+ 
+ @dataclass(frozen=True)
+@@ -111,10 +127,20 @@ def reward_terms(
+     arguments. `parking_now` and `parking_next` are the idle robot's parking leaf (D26) at t
+     and at t+1, read after the parking update of t+1 ([A79]). Each is the target of its
+     potential when the robot has no task at that time."""
+-    phi_now = potential(graph, location_now, task_now, parking_now)
+-    phi_next = potential(graph, location_next, task_next, parking_next)
++    # [A84]: progress is counted within the task the robot serves at t only. The step that
++    # finishes it ends at potential 0, a task handed out at t+1 starts counting on the next
++    # step from its own start, and a robot with no task gets no shaping. So no step ever pays
++    # for the distance of a new task, and finishing a task is never followed by a penalty.
++    # `parking_now` and `parking_next` are kept for the callers and no longer used here.
++    if task_now is None:
++        shaping = 0.0
++    else:
++        same_task = task_next is not None and task_next.task_id == task_now.task_id
++        phi_now = potential(graph, location_now, task_now)
++        phi_next = potential(graph, location_next, task_next) if same_task else 0.0
++        shaping = discount * phi_next - phi_now
+     return RewardTerms(
+-        shaping=discount * phi_next - phi_now,
++        shaping=shaping,
+         delivery=deliver_reward * completed_task,
+         override=-override_penalty * overridden,
+         move=-move_cost * moved,
+diff --git a/tests/unit/test_idle_parking.py b/tests/unit/test_idle_parking.py
+index d7cf670..ba4f09e 100644
+--- a/tests/unit/test_idle_parking.py
++++ b/tests/unit/test_idle_parking.py
+@@ -139,4 +139,5 @@ def test_the_parking_leaf_is_the_target_of_the_shaping(study):
+         discount=1.0, deliver_reward=0.0, override_penalty=0.0, move_cost=0.0, wait_cost=0.0,
+         congestion_reward_weight=0.0, parking_now=leaf, parking_next=leaf,
+     )  # fmt: skip
+-    assert terms.shaping == pytest.approx(graph.distance(here, leaf))
++    # [A84]: a robot with no task gets no shaping, its parking leaf only steers its observation.
++    assert terms.shaping == 0.0
+diff --git a/tests/unit/test_reward_function.py b/tests/unit/test_reward_function.py
+index 5d4fc1a..39b1f18 100644
+--- a/tests/unit/test_reward_function.py
++++ b/tests/unit/test_reward_function.py
+@@ -50,10 +50,23 @@ def test_potential_zero_for_free_agent_at_own_location():
+     assert potential(graph, location=2, task=None) == 0.0
+ 
+ 
+-def test_potential_is_negative_distance_to_goal():
++def test_potential_is_minus_the_distance_left_in_the_task():
++    # [A83]: before pickup the distance to the pickup plus the trip on to the delivery,
++    # after pickup the distance to the delivery.
+     graph = _line_graph(5)
+     task = _task(pickup=4, delivery=0)
+-    assert potential(graph, location=0, task=task) == pytest.approx(-4.0)
++    assert potential(graph, location=0, task=task) == pytest.approx(-(4.0 + 4.0))
++    assert potential(graph, location=2, task=task.pick_up(t=2)) == pytest.approx(-2.0)
++
++
++def test_the_potential_does_not_jump_at_pickup():
++    # The current target switches from the pickup to the delivery vertex, but the distance
++    # left in the task is the same just before and just after the pickup.
++    graph = _line_graph(5)
++    task = _task(pickup=4, delivery=0)
++    before = potential(graph, location=4, task=task)
++    after = potential(graph, location=4, task=task.pick_up(t=3))
++    assert before == pytest.approx(after) == pytest.approx(-4.0)
+ 
+ 
+ def test_reward_is_pure_shaping_with_no_other_terms():
+@@ -78,8 +91,8 @@ def test_reward_is_pure_shaping_with_no_other_terms():
+         wait_cost=1.0,
+         congestion_reward_weight=1.0,
+     )
+-    phi_now = -4.0  # d_G(0, 4)
+-    phi_next = -3.0  # d_G(1, 4)
++    phi_now = -8.0  # d_G(0, 4) + d_G(4, 0), the distance left in the task ([A83])
++    phi_next = -7.0  # d_G(1, 4) + d_G(4, 0)
+     assert r == pytest.approx(0.9 * phi_next - phi_now)
+ 
+ 
+diff --git a/tests/unit/test_reward_order.py b/tests/unit/test_reward_order.py
+index a58430b..0ced003 100644
+--- a/tests/unit/test_reward_order.py
++++ b/tests/unit/test_reward_order.py
+@@ -54,6 +54,7 @@ def test_the_shaping_uses_the_potential_the_robot_sees_at_the_next_step():
+     new_targets = 0
+     for _ in range(300):
+         before = _potentials(env)
++        active_before = active_tasks_by_agent(env.tasks, env.t)
+         shaping_before = dict(env.log.return_shaping_by_agent)
+         env.step(_towards_target(env))
+         after = _potentials(env)
+@@ -61,7 +62,16 @@ def test_the_shaping_uses_the_potential_the_robot_sees_at_the_next_step():
+             paid = env.log.return_shaping_by_agent.get(agent_id, 0.0) - shaping_before.get(
+                 agent_id, 0.0
+             )
+-            assert paid == pytest.approx(gamma * after[agent_id] - before[agent_id], abs=1e-9)
++            # [A84]: progress within the task served at t only, 0 for a free robot.
++            task_before = active_before.get(agent_id)
++            task_after = active_tasks_by_agent(env.tasks, env.t).get(agent_id)
++            if task_before is None:
++                expected = 0.0
++            elif task_after is not None and task_after.task_id == task_before.task_id:
++                expected = gamma * after[agent_id] - before[agent_id]
++            else:
++                expected = -before[agent_id]
++            assert paid == pytest.approx(expected, abs=1e-9)
+         # Count the steps where a robot's target moved, a new task or a parking leaf, so the
+         # test is known to cover the case [A79] is about.
+         new_targets += sum(

@@ -1,0 +1,557 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,float}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\tbd}{\textcolor{orange}{TBD}}
+\title{Proposed change, keeping up, the threshold and how the results are compared}
+\date{23 November 2026, version 4}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+Part~1 says what changed from versions 1 and 2. Part~2 explains the problem in
+plain words, with the numbers behind it. Part~3 is the proposed text, place
+by place. Black text stays, \new{green} is new and \old{struck} text goes.
+Part~4 lists what changes outside the text, Part~5 the GAPS entries and
+Part~6 the questions. Nothing below is in the thesis yet.
+
+All numbers are 20 test seeds, counted with \texttt{served\_counts.py}
+([A96]). At 16 agents the long-trained runs are used where they are
+evaluated. A seed \emph{locks} when two agents hold the same task for 500
+steps or more.
+
+\section*{Part 1. What changes}
+\textbf{From version 3} (author, 23 November). No controller knows which
+tasks make up an order, so the Discussion says so, and deadlines on orders
+become future work (3.13, [A113]).
+
+\textbf{From version 2} (author, 23 November).
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The chapter reports 16 agents, and the learned controllers at
+  8 agents move to Appendix~L}, with the reason (3.12). The 16-agent policies
+  were trained again for much longer, so the two fleets are not trained
+  alike. Token Passing needs no training, so its 8-agent gain stays in RQ1
+  (Question~1).
+\item \textbf{\texttt{tab:exp:served} is easier to read.} Served share and
+  seeds that keep up sit in two blocks, with no brackets (3.4).
+\item \textbf{The Discussion no longer says the policies trained on
+  2000-step episodes} (3.11). It says what the longer training did.
+\item The lower load rates are queued for a Token Passing rerun after the
+  evaluations. The strip plot goes in the chapter, and the paired
+  differences stay in the text only.
+\end{itemize}
+
+\textbf{From version 1.}
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The threshold goes from 0.8 to 0.9} ([A111]). At 0.8, seeds
+  that pass still have a queue that grows all run long, so ``passing means
+  steady'' was false for the learned controllers. At 0.9 it holds.
+\item \textbf{The shipment count is named as a limit} ([A112]), with its
+  size. It is measured exactly after all evaluations (queued in
+  \texttt{SESSION\_CONTEXT.md}).
+\item \textbf{The comparison rule stays as the thesis has it.} Version~1
+  suggested comparing service time on the seeds where both runs keep up.
+  That would compare only the easy seeds, since the same seeds are hard for
+  every controller. So a pair is compared on service time only when both
+  runs keep up on every seed, as \emph{Scoring a condition} already says.
+  Every other pair is compared on served share.
+\item The strip plot is redrawn at 0.9, and the counts in
+  \texttt{tab:exp:served} are recounted at 0.9 for both fleets.
+\end{itemize}
+
+\section*{Part 2. The problem, in plain words}
+
+\textbf{Two measures, each useful on one side.} Orders arrive at random, as
+in Ma et al.\ (2017). A fleet that keeps up finishes what arrives, so its
+tasks per step only repeat the arrival rate and cannot rank it. Its service
+time can. A fleet that falls behind has a growing queue. Its service time
+then grows with the length of the run, and it averages only the orders that
+finished, so a worse fleet can look faster. The decentralised controller
+under demand storage serves 0.53 of its work, yet its finished orders take
+2255 steps, fewer than the 3355 of the centralised controller's failing
+seeds, which serve more. For such a fleet the served share is the measure.
+It is the work finished over the work that arrived.
+
+\textbf{The gate.} The keep-up check decides which measure a run gets. It
+is a gate, not a result. Service time is the result, and it is compared only
+for runs that pass.
+
+\textbf{Why 0.9.} Read the served share as ``of every 10 tasks that arrive,
+how many get done''. A fleet that keeps up gets about 10 of 10 done.
+Token Passing at the main load does, and its worst seed still serves 0.95.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lcccc}
+\toprule
+Token Passing, test seeds & served, mean & lowest seed & passes 0.9 & queue growth per 100 steps\\
+\midrule
+8 agents, every rule & 1.00 & 0.947 & 20 of 20 & $-0.02$ to 0.00\\
+16 agents, every rule & 1.00 & 0.954 & 20 of 20 & $-0.05$ to 0.04\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At 0.8 a seed may leave 2 tasks in 10 undone and still pass. Those tasks
+stay in the queue. At 0.9 the queue of a passing seed stays about flat.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lcccc}
+\toprule
+16 agents, long runs & passes 0.8 & queue growth & passes 0.9 & queue growth\\
+\midrule
+centralised, congestion-aware & 10 & $+101$ tasks & 5 & $-20$ tasks\\
+section-based, congestion-aware & 9 & $+68$ & 6 & $+2$\\
+section-based, fixed & 9 & $+62$ & 6 & $-14$\\
+decentralised, congestion-aware & 8 & $+38$ & 6 & $-28$\\
+with messages, fixed & 4 & $+75$ & 3 & $+14$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The growth is over the 5000 measured steps, averaged over the passing seeds.
+On the seeds that pass at 0.9 the queue is steady but long. It built up
+before the measured steps, and orders take 850 to 1250 steps, against 210
+to 260 under Token Passing.
+
+\textbf{Why 0.9 costs no rerun.}
+\begin{itemize}[leftmargin=1.2em]
+\item Every row stores its pick and put-away shares, so keep-up is recounted
+  at any threshold.
+\item The checkpoint choice ([A60]) uses the check on the validation seeds.
+  Recomputed at 0.9 from the saved validation rows, all seven evaluated long
+  runs choose the same checkpoint.
+\item At 0.9 the load sweep, counted with the served share, gives Appendix
+  E's capacities (0.15, 0.3, 0.5 and 1.0), so the main loads stay 0.6 of
+  capacity. At 0.8 the capacities move one step up and the main loads sit at
+  about 0.5. The lower sweep rates are not yet checked with the served
+  share (Question~1).
+\end{itemize}
+
+\textbf{The calculation is right.} The code (\texttt{served\_counts} in
+\texttt{evaluator.py}) computes eq.~(throughput) as written. The served
+share and the queue agree. Over 140 long-run seeds, the arriving minus the
+finished work matches the measured queue growth with a correlation of 0.986.
+
+\textbf{One counting limit, shipments.} An order of 5 lines needs 6 trips.
+5 picks bring the units to the workstation, then 1 shipment takes the order
+to a dock. The shipment is created only once all 5 picks are done. A fleet
+that falls behind has many orders with some picks done, and their shipments
+are not yet counted as owed. So its arriving work is counted a little low,
+and its share reads a little high. Estimated from the rows, by about 0.01
+for the best learned runs and about 0.05 for the weakest. Token Passing
+finishes nearly every order, so its result is not affected.
+
+\textbf{Why the count of passing seeds does not follow the mean} (from
+version~1). The mean says how much is served. The count says how many seeds
+land above the line, so it follows how the seeds spread. The same seeds are
+hard for every controller (correlation between runs 0.57 to 0.93), and a
+seed that locks drops far below the rest. Compared seed by seed, the three
+controllers under congestion-aware storage cannot be told apart. The
+centralised controller serves 0.020 more than the section-based one
+[$-0.033$, 0.073] and 0.013 more than the decentralised one
+[$-0.022$, 0.048].
+
+\section*{Part 3. The proposed text}
+
+\subsection*{3.1 Problem Formulation, ``Keeping up'', after eq.~(throughput)}
+
+where the threshold \old{$f_{\mathrm{up}} \le 1$ leaves room for tasks
+still under way at the horizon.}\new{$f_{\mathrm{up}}$ sits just below 1.
+A fleet that keeps up serves about all of its work, and the room below 1
+keeps such a fleet from failing on an unlucky seed.} The throughput
+$\Lambda_T$ counts the same finished tasks, \dots
+
+\subsection*{3.2 Experiments, ``Scoring a condition''}
+
+\dots Only pairs in which both runs keep up under every seed are compared
+on service time, and the others are reported as falling behind.
+\new{A run that falls behind is compared on its served share instead, seed
+by seed. Its service time grows with the length of the run, and it averages
+only the orders that finished, so it would show the queue and not the
+storage rule.} For the pairs that remain, \dots
+
+\subsection*{3.3 Experiments, ``Keeping up'' (Results)}
+
+Token Passing serves all the work \old{at both fleets}\new{at 16 agents},
+under every rule (Table \texttt{tab:exp:served}).
+
+\old{The learned controllers serve most of the work at 8 agents. They serve
+between 0.81 and 0.91 of it, and each keeps up on 11 to 15 of the 20 seeds.
+The decentralised controller with messages under fixed storage does best,
+at 0.96 and 18 seeds.}
+
+\old{At 16 agents they fall behind.}\new{The learned controllers fall
+behind.} \old{The section-based controller serves the
+most, between 0.54 and 0.69. The centralised controller serves about half.
+The decentralised controller serves 0.12 under fixed storage and 0.66 under
+congestion-aware storage. Only 2 to 7 seeds keep up, all of them for the
+section-based or the decentralised controller.}\new{Under congestion-aware
+storage the centralised, section-based and decentralised controllers each
+serve about 0.8 of the work and keep up on 5 or 6 seeds. Under fixed and
+demand storage they serve less, and only the section-based controller and
+the one with messages keep up on any seed.} \tbd{} (follows the long runs
+once all are evaluated)
+
+\old{Passing the check does not mean serving everything. A seed passes when
+it serves at least $f_{\mathrm{up}} = 0.8$ of its work. The rest waits, and
+the wait grows through the run. So even on seeds that pass, a learned
+controller's orders take 300 to 3200 steps, against 150 to 280 under Token
+Passing. Their service times say more about the backlog than about storage,
+so the learned controllers are compared by how much they serve.}
+
+\new{A seed that keeps up is steady, but its queue can still be long. On
+the learned controllers' passing seeds at 16 agents the queue no longer
+grows, but it built up before the measured steps. Their orders take 850 to
+1250 steps, against 210 to 260 under Token Passing. Service time is compared
+only when both runs keep up on every seed, so the learned controllers are
+compared by how much they serve.}
+
+\new{\textbf{Why the count does not follow the mean.} A run can serve less
+on average and still keep up on more seeds. The mean says how much a
+controller serves. The count says how many seeds land above
+$f_{\mathrm{up}}$, so it follows how the seeds spread
+(Figure~\ref{fig:exp:seeds}).}
+
+\new{Some seeds are harder than others for every controller. A seed's share
+under one controller predicts its share under another, with a correlation
+between 0.57 and 0.93. On the hardest seeds many order lines still wait for
+stock at the end. Token Passing serves these seeds too, so they are harder,
+not impossible.}
+
+\new{Locks spread the seeds further. When two agents hold one task for
+hundreds of steps, the work behind them waits, and the seed falls far below
+the rest. The section-based controller under fixed storage locks on five
+seeds, and four of them serve only 0.39 to 0.53.}
+
+\new{So the learned controllers are compared on served share, seed by seed.
+Two controllers play the same 20 seeds, so the difference on each seed
+leaves out how hard the seed is. Under congestion-aware storage the
+centralised controller serves 0.020 more than the section-based one
+[$-0.033$, 0.073] and 0.013 more than the decentralised one
+[$-0.022$, 0.048], so the three cannot be told apart. The count of seeds
+that keep up stays a check and is not used to rank.}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{../../../scripts/Images/fleet16_seeds.png}
+\caption{\new{Served share of each test seed at 16 agents. A seed that locks
+can fall far below the rest.}}
+\label{fig:exp:seeds}
+\end{figure}
+
+\subsection*{3.4 Table \texttt{tab:exp:served}, 16 agents, two blocks}
+
+The 8- and 32-agent columns leave the table (3.12, Question~2). The served
+share and the seeds that keep up get a block each, so no number sits in
+brackets.
+
+\begin{table}[H]\centering\small
+\new{Share of the arriving work served at 16 agents, mean over 20
+test seeds, and the seeds that keep up.}\par\smallskip
+\begin{tabular}{l ccc c ccc}
+\toprule
+& \multicolumn{3}{c}{served share} && \multicolumn{3}{c}{seeds that keep up}\\
+\cmidrule(lr){2-4}\cmidrule(lr){6-8}
+controller & fix. & dem. & cng. && fix. & dem. & cng.\\
+\midrule
+Token Passing & 1.00 & 1.00 & 1.00 && 20 & 20 & 20\\
+centralised & 0.54$^\ast$ & 0.52$^\ast$ & 0.81 && 0$^\ast$ & 0$^\ast$ & 5\\
+section-based & 0.76 & 0.54$^\ast$ & 0.79 && 6 & 0$^\ast$ & 6\\
+decentralised & 0.29 & 0.53 & 0.80 && 0 & 0 & 6\\
+with messages & 0.63 & 0.28$^\ast$ & 0.34$^\ast$ && 3 & 0$^\ast$ & 0$^\ast$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$^\ast$ Only in this review, a first-round number until its long run is
+evaluated. In the thesis every learned row is a long run, so no mark is
+needed. Token Passing's shares are the test-seed replays, which also closes
+the 8-agent TODO above the table.
+
+\subsection*{3.5 Experiments, Discussion, ``The load''}
+
+The main load assumed that every controller could keep up. It was set from
+what Token Passing can serve, at \old{about} 0.6 of its capacity, before
+any learned controller was trained (Appendix~E). \old{Under the served
+check of the final runs, Token Passing's capacity is one tested step
+higher, so the main load sits at about 0.5 of it. Every run was trained and
+tested at this load, so it stays.} The assumption held for Token Passing\old{
+and nearly held for the learned controllers at 8 agents. At 16 agents it
+did not hold.}\new{, and at 16 agents it did not hold for the learned
+controllers.}
+
+\subsection*{3.6 Experiments, Discussion, ``Threats to validity'', new item}
+
+\new{A shipment is created only once the last unit of its order reaches
+the workstation. A fleet that falls behind therefore owes shipments that
+are not counted yet, so its served share reads slightly high. At 16 agents
+this is about 0.01 for the controllers that serve the most and about 0.05
+for the weakest, too little to change a ranking. Token Passing finishes
+nearly every order, so the main result is not affected.} \tbd{} (measured
+range after the queued replay)
+
+\subsection*{3.7 Appendix E, ``The keep-up threshold''}
+
+The keep-up threshold is $f_{\mathrm{up}} =
+\old{0.8}\new{0.9}$. \old{It leaves room for tasks that are still in
+progress when the finite run ends.}\new{A fleet that keeps up finishes
+about as much work as arrives, so its served share sits near 1. Under Token
+Passing at the main load it is 1.00 on average at both 8 and 16 agents, and
+no seed falls below 0.94. The threshold sits below that, so a fleet that
+keeps up does not fail by chance. It sits high enough that a passing run
+lets at most one task in ten pile up. A lower value such as 0.8 lets runs
+pass whose queue grows through the whole run.} A run passes only when it
+finishes at least this share of both the order work and the put-aways
+released in the measured steps, counting work released earlier too.
+
+The threshold is not varied. The backlog growth is reported next to the
+check, because it shows whether unfinished work keeps growing at a rate
+that passes. At every main load of the updated run the backlog shrinks
+slightly. \new{With 0.9 and the served counts, the load sweep gives the
+capacities of Table \texttt{tab:app:capacity}.}
+
+In the Conclusion: ``The share 0.6 and the threshold
+$f_{\mathrm{up}}=\old{0.8}\new{0.9}$ are settings of this study \dots''
+
+\subsection*{3.8 Appendix B, Table of parameters}
+
+$f_{\mathrm{up}}$ \dots\ \old{0.8}\new{0.9}, tested, \texttt{app:cal:load}.
+
+\subsection*{3.9 Experiments, the 8-agent learned results leave the chapter}
+
+\textbf{Results, opening paragraph.}
+The results are for \old{8 and 16 agents, the fleets every controller could
+be trained on in the time available}\new{16 agents, the fleet whose
+controllers were trained in full in the time available}. Demand storage
+makes Token Passing's orders 14\,\% faster at 8 agents and 20\,\% faster at
+16. The learned controllers \old{keep up on most seeds at 8 agents and}
+fall behind at 16, so for them the gain cannot be measured. \new{Their
+results at 8 agents, from the first and shorter training, are in
+Appendix~L.}
+
+\textbf{RQ1, the controller.} The expected order, with the centralised
+controller first, does not hold. \old{At 8 agents the three learned
+controllers serve about the same.} At 16 agents \dots\ \tbd{} (the rest
+follows the long runs, now the three are level under congestion-aware
+storage).
+
+\textbf{RQ2, congestion-aware storage}, last sentence. \old{At 8 agents the
+effect is mixed.}
+
+\textbf{RQ4, communication.} Messages help the decentralised controller
+under fixed storage\old{, at both fleets}. \old{At 8 agents its served share
+rises from 0.84 to 0.96, the highest of any learned run, and at 16 agents
+from 0.12 to 0.37.}\new{At 16 agents its served share rises from 0.29 to
+0.63.} Under demand storage messages lower the share\old{ at both fleets}.
+Under congestion-aware storage they lower it\old{ at 16 agents and leave it
+unchanged at 8}. \tbd{} (both follow the long runs with messages)
+
+\textbf{Discussion, ``What was expected''.} The centralised controller did
+not gain the most. \old{It never kept up at 16 agents, and at 8 agents it
+served about as much as the others.}\new{At 16 agents it serves about as
+much as the others under congestion-aware storage.}
+
+\subsection*{3.10 Table \texttt{tab:exp:locks}, 16 agents only}
+
+\begin{table}[H]\centering\small
+Test seeds that lock, out of 20, at 16 agents.\par\smallskip
+\begin{tabular}{l ccc}
+\toprule
+controller & fix. & dem. & cng.\\
+\midrule
+Token Passing & 0 & 0 & 0\\
+centralised & 5$^\ast$ & 3$^\ast$ & 0\\
+section-based & 5 & 8$^\ast$ & 3\\
+decentralised & 20 & 13 & 3\\
+with messages & 15 & 20$^\ast$ & 18$^\ast$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The text before it: \dots\ \old{Locks are rare at 8 agents.} At 16 agents
+the decentralised controller locks on \old{every seed}\new{13 to 20 seeds}
+under fixed and demand storage, \old{with or without messages}\new{and with
+messages on 15 under fixed storage}. Token Passing never locks. \tbd{} (the
+starred cells)
+
+\subsection*{3.11 Discussion, the training length}
+
+\textbf{Why the learned controllers fall behind.} The learned controllers
+fall behind mostly through locks\old{ and through runs that were too
+short}. Two agents that each wait for the other hold one task for the rest
+of the run, and the agents behind them queue. \dots\ The section-based
+controller does much the same and locks less. \old{The policies also
+trained and were chosen on runs of 2000 steps, while a test lasts 10000. A
+policy that falls behind slowly looks fine in the short run.}\new{The first
+policies also trained and were chosen on runs of 2000 steps, while a test
+lasts 10000. A policy that fell behind slowly looked fine in training. The
+16-agent policies were then trained again on runs of 16\,000 steps and
+chosen on runs of the same length. That raised the served share of every
+run. Under congestion-aware storage the decentralised controller went from
+0.66 to 0.80, and under fixed storage the section-based one from 0.63 to
+0.76. They still fall behind, so short runs were part of the cause, not all
+of it.}
+
+\textbf{What could have been done differently.} \old{Four changes could
+have brought the learned controllers closer to Token Passing.}\new{Longer
+training episodes were the first change, and they helped. Three more could
+bring the learned controllers closer to Token Passing.}
+\begin{itemize}[leftmargin=1.2em]
+\item \old{\emph{Longer training episodes.} The policies trained on 2000
+  steps and were tested on 10000. A backlog that grows slowly hardly shows in
+  2000 steps, so training never punished it. Training on longer episodes, or
+  choosing the checkpoint on a long validation run, targets the failure seen
+  in the test.}
+\item \emph{More training \new{seeds}.} Each run had \old{84 iterations
+  and} one seed. \old{More iterations, or several}\new{Several} training
+  seeds per controller and rule would show whether a run is simply unlucky.
+\item \emph{A way out of locks.} (unchanged)
+\item \emph{Starting from Token Passing.} (unchanged)
+\end{itemize}
+
+\subsection*{3.12 Appendix L, ``8 agents'', a new opening paragraph}
+
+\new{The learned controllers at 8 agents trained only the first budget,
+500\,000 steps on episodes of 2000 steps. The 16-agent policies were trained
+again for 2\,000\,000 steps on episodes of 16\,000 steps, and that raised
+the served share of every 16-agent run (Appendix~J). So the 8-agent
+policies are less trained than the 16-agent ones. Set side by side, the two
+fleets would mix the size of the fleet with the length of training. The
+chapter therefore reports 16 agents, and the 8-agent runs are given here as
+a first result. Token Passing needs no training, so its gain at 8 agents
+stays in the chapter.}
+
+The 8-agent tables keep their numbers, with keep-up recounted at 0.9.
+Served share (seeds that keep up at 0.9):
+centralised 0.86 (6), 0.90 (8), 0.81 (5); section-based 0.87 (11),
+0.81 (8), 0.91 (10); decentralised 0.84 (9), 0.87 (9), 0.82 (11); with
+messages 0.96 (15), 0.66 (5), 0.82 (10), for fixed, demand and
+congestion-aware storage. Token Passing 1.00 (20) under every rule.
+
+\subsection*{3.13 Discussion, orders are not seen, and deadlines as future work}
+
+Checked in the code. The assignment rule hands out the oldest waiting task
+first, to the nearest free agent (\texttt{controllers/assignment.py}), and
+the network chooses only the moves. The network sees the vertex roles, the
+distance to its own target, the other agents and the crowding, not the
+order or the age of a task (\texttt{environment/observation.py}). The reward
+pays the same for every finished task (\texttt{reward\_function.py}). Token
+Passing takes the task nearest to its agent
+(\texttt{planners/token\_passing.py}). Van Knippenberg et al.\ (2021) give
+each job a start and a deadline, count both down in the node features, and
+add a cost of 0.1 per step past a soft deadline (their Section~4.1 and
+Table~1). Checked in the paper.
+
+\textbf{New paragraph, after ``Why the learned controllers fall behind''.}
+
+\new{\textbf{Orders are not seen.} No controller knows which tasks belong to
+the same order. The assignment rule hands out the oldest task first, to the
+nearest free agent, and the network then chooses only the moves. Token
+Passing takes the task nearest to its agent. The reward pays the same for
+every finished task. So an order with four of its five lines at the
+workstation waits for its last line like any other task, although the
+customer waits for the whole order. The oldest-first rule helps a little,
+because the lines of an order mostly share their release time.}
+
+\textbf{New item in ``What could have been done differently''.}
+\begin{itemize}[leftmargin=1.2em]
+\item \new{\emph{Deadlines on orders.} Each order could get a deadline, as
+  in the time-constrained routing of van Knippenberg et al.\ (2021). Each of
+  its tasks would then get its own, earlier deadline, the order's deadline
+  minus the time still needed after the task, such as the shipment to the
+  dock. The assignment rule could hand out the task with the least time to
+  spare first, instead of the oldest. The agent could see the time left on
+  its task among its features, which van Knippenberg et al.\ count down in
+  the same way, and pay a small cost for every step past it. The result
+  would then also count the orders that are late. Every task would carry a
+  deadline, which the scope leaves out (Section~\texttt{sec:pf:scope}), so
+  the problem itself would change.}
+\end{itemize}
+
+\section*{Part 4. Outside the text}
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{Code} (\texttt{slap-mapd-coupling}). \texttt{keep\_up\_threshold:
+  0.8} becomes 0.9 in the configs. The rows already written carry
+  \texttt{keeps\_up} flags at 0.8. Every number in the thesis is recounted
+  from the stored shares, so the flags are not used. The author opens the PR.
+\item \textbf{Scripts.} \texttt{served\_counts.py} gets \texttt{F\_UP = 0.9}.
+  \texttt{fleet16\_results.py} and \texttt{appendix\_results.py} follow it,
+  so Appendix L's keep-up columns are recounted.
+\item \textbf{Figure.} \texttt{scripts/images/fleet16\_seeds.py}, copied to
+  \texttt{thesis/Images/} once approved. Its empty columns fill as the
+  remaining runs are evaluated.
+\item \textbf{Queued, after every evaluation.} The order-stream replay that
+  measures the shipment range (3.6).
+\end{itemize}
+
+\section*{Part 5. GAPS entries}
+
+\textbf{[A110] The learned controllers compared on served share, seed by
+seed, and the spread shown.} \emph{Where.} \texttt{5.Experiments.tex},
+``Scoring a condition'', ``Keeping up'', new \texttt{fig:exp:seeds}.
+\emph{What.} Service time is compared only when both runs keep up on every
+seed (unchanged). Every other pair is compared on served share, with the
+paired difference over the same 20 seeds and a 95\,\% interval. The count of
+seeds that keep up is a gate and does not rank, because it follows the
+spread of the seeds. Hard seeds are shared by every controller and locks
+drop single seeds far down. Comparing only the seeds where both runs pass
+was rejected, because it keeps the easy seeds. \emph{Model change.} None.
+
+\textbf{[A111] $f_{\mathrm{up}}$ from 0.8 to 0.9.} \emph{Where.}
+\texttt{3.ProblemFormulation.tex} after eq.~(throughput), Appendices B and
+E, \texttt{5.Experiments.tex}, the configs. \emph{Why.} 0.8 came from the
+630-step pilot of [A31], where tasks under way at the end were a large part
+of the run. Under the [A96] count, tasks under way at the start and the end
+roughly cancel, and a steady fleet serves about 1.0. Token Passing's lowest
+test seed is 0.947 at 8 agents and 0.954 at 16. At 0.8 the learned seeds
+that pass still grow their queue by 38 to 101 tasks over the measured
+steps. At 0.9 they stay within $-28$ to $+14$. With the served count, 0.9
+gives back Appendix E's capacities, so the main loads stay at 0.6 of
+capacity. \emph{No rerun.} Keep-up is recounted from the stored shares, and
+every chosen checkpoint stays the same at 0.9. \emph{Model change.} The
+value only.
+
+\textbf{[A113] Orders are not seen by any controller, and deadlines on
+orders as future work.} \emph{Where.} \texttt{5.Experiments.tex},
+Discussion. \emph{What.} The assignment rule, the observation and the
+reward treat every task alike, and none knows the order a task belongs to,
+while the result is order service time. Proposed for later work, a deadline
+per order, an earlier deadline per task derived from it, assignment by the
+least time to spare, the time left as an agent feature and a cost per late
+step, after van Knippenberg et al.\ (2021). \emph{Model change.} None now.
+The scope already excludes deadlines.
+
+\textbf{[A112] Shipments created only when their order is complete, a
+known limit.} \emph{Where.} \texttt{5.Experiments.tex}, Threats to
+validity. \emph{What.} A ship task is created when the order's last unit
+reaches the workstation (\texttt{\_ship}, \texttt{multi\_agent\_env.py}), so
+a fleet that falls behind owes uncounted shipments and its served share
+reads high. Estimated at about 0.01 for the best learned runs and 0.05 for
+the weakest, measured after all evaluations by a replay of the order stream
+alone. Counting one shipment per arrived order was not applied to the
+finished runs, so all runs keep one count. It is the fix for later work.
+\emph{Model change.} None.
+
+\section*{Part 6. Questions}
+\begin{enumerate}[leftmargin=1.5em]
+\item Token Passing's 8-agent gain stays in RQ1 (\texttt{tab:exp:rq1}),
+  since no training is involved. I suggest keeping it, because it shows the
+  main result holds at two fleet sizes. Agreed?
+\item The chapter tables had columns for 32 agents. The 32-agent policies
+  were trained on the first budget too, like 8 agents. I suggest they go to
+  Appendix~L with the same reason, so the chapter tables hold 16 agents
+  only. Agreed?
+\item Should ``Orders are not seen'' also name a first step that needs no
+  deadline, an assignment rule that finishes orders already started before
+  new ones? I suggest one clause at most.
+\end{enumerate}
+
+Settled in version 2: the lower load rates are queued, the strip plot goes
+in the chapter, the paired differences stay in the text, and the
+2000-step sentences are fixed (3.11).
+
+\end{document}

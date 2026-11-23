@@ -12,7 +12,8 @@ it, by default the one of the Token Passing setting, evaluation_horizon10000_war
 
 The arm, fleet and regime come from the run's spec. It writes
 
-    results/J_training/fleet_<m>/<controller>/<regime>/  training.jsonl, spec.json, validation.jsonl
+    results/J_training/fleet_<m>/<controller>/<regime>/  training.jsonl, progress.jsonl, spec.json,
+                                                          validation.jsonl
     results/L_results/fleet_<m>/<controller>/<regime>/   test.jsonl, summary.md
 
 replacing what was there. training.jsonl is RLlib's own log (result.json), one line per training
@@ -79,6 +80,10 @@ def main():
     with open(os.path.join(training, "training.jsonl"), "w") as out:
         out.writelines(json.dumps(lines[i]) + "\n" for i in sorted(lines))
     shutil.copy(spec_path, os.path.join(training, "spec.json"))
+    # The run's own progress file holds the reward terms per iteration (return_shaping, ...),
+    # which result.json does not, for app_reward_terms.png.
+    for progress in glob.glob(os.path.join(args.run_dir, "*_training_progress.jsonl")):
+        shutil.copy(progress, os.path.join(training, "progress.jsonl"))
     # evaluate names each validation row by its checkpoint. Checkpoint k is saved after
     # iteration frequency * (k + 1), the last one at the end, so each row gets its steps.
     frequency = (spec.get("checkpoint") or {}).get("frequency") or 0

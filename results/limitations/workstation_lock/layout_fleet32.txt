@@ -1,0 +1,5 @@
+fleet 32 train: 68 of 250 seeds (27%) have a section on one-lane aisles
+fleet 32 validation: 0 of 2 seeds (0%) have a section on one-lane aisles
+fleet 32 test: 8 of 20 seeds (40%) have a section on one-lane aisles, [200000, 200005, 200006, 200008, 200009, 200012, 200016, 200017]
+fleet 32 all: 76 of 272 (28%)
+{"fleet": 32, "rule": "every neighbour of every workstation of one section has at most 3 neighbours", "groups": {"train": {"seeds": 250, "with_layout": 68, "share": 0.272, "which": [0, 2, 7, 8, 9, 13, 19, 25, 26, 32, 36, 42, 47, 51, 60, 69, 70, 73, 76, 79, 81, 83, 84, 85, 87, 90, 91, 94, 102, 111, 118, 122, 124, 128, 129, 135, 138, 151, 154, 155, 164, 167, 171, 177, 178, 182, 184, 197, 200, 205, 212, 214, 215, 217, 220, 222, 226, 227, 232, 234, 238, 240, 242, 243, 245, 246, 247, 249]}, "validation": {"seeds": 2, "with_layout": 0, "share": 0.0, "which": []}, "test": {"seeds": 20, "with_layout": 8, "share": 0.4, "which": [200000, 200005, 200006, 200008, 200009, 200012, 200016, 200017]}}}

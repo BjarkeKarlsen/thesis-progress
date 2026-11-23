@@ -79,6 +79,8 @@ try:
     state("training")
     if resume:
         cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]
+        # A run that started on a CPU continues on this machine's GPU (resume --gpu, 8478c99).
+        cmd += ["--gpu", "--env-runners", str(JOB["runners"])] if JOB.get("gpu") else []
     else:
         cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "train", "--config", config,
                "--controller", JOB["controller"], "--regime", JOB["regime"],
@@ -92,6 +94,10 @@ try:
         cmd += ["--gpu"] if JOB.get("gpu") else []
         cmd += ["--batch-on-cpu"] if JOB.get("batch_on_cpu") else []
         cmd += ["--budget-env-steps", str(JOB["budget"])] if JOB.get("budget") else []
+        cmd += ["--horizon", str(JOB["horizon"])] if JOB.get("horizon") else []
+        cmd += ["--init-checkpoint", JOB["init"]] if JOB.get("init") else []
+        cmd += [] if JOB.get("validate", True) else ["--no-validate"]
+        cmd += ["--communication"] if JOB.get("communication") else []
     print("+", " ".join(cmd), flush=True)
     with open(f"{RUN}/train.log", "a") as log:
         code = subprocess.run(["timeout", "--signal=INT", f"{JOB['hours']}h", *cmd], cwd=CODE,

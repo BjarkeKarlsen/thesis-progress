@@ -1,0 +1,523 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\cit}[1]{#1}
+\newenvironment{greenblock}{\color{newc}}{}
+\title{Proposed change, more of the model back in the Problem Formulation}
+\date{17 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+Part~1 says why the chapter should grow. Part~2 goes through
+\texttt{3.ProblemFormulation.tex} one subsection at a time and shows only the
+paragraphs that change. Black text is there now and stays, as context.
+\new{Green} is new text and \old{struck} text goes. Part~3 lists what changes
+elsewhere, and Part~4 has the questions. Nothing is changed in the thesis yet.
+
+\section*{Part 1. Why}
+
+The chapter is about a third shorter than a month ago. Words without comments:
+
+\begin{center}
+\begin{tabular}{llr}
+  \toprule
+  date & what happened & words \\
+  \midrule
+  19 October & the longest it has been & 13{,}500 \\
+  26 October & [A52] moves 25 definitions to Appendix C & 11{,}300 \\
+  2 November & the readability rewrite trims the prose & 8{,}750 \\
+  today & [A93], refills and figures added since & 9{,}330 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+[A52] made the chapter lighter, from 51 displayed equations to 20. Your rule
+of 23 October then said the formal definitions of the model never leave the
+thesis, because the Problem Formulation is what is graded, and that the
+statements in Appendix C go back when the thesis is reworked. This is that
+rework.
+
+Today the chapter uses symbols it never defines. The table of measures cites
+the runtime $\kappa_T$. The observation function uses the section-based
+policy. The gain test uses $F_{\mathrm{fix}}$ and the set of rules. The
+research questions name the communication graph. A reader meets each of them
+only in an appendix.
+
+The proposal brings back eleven definitions, each in words first, with an
+example on numbers the chapter already has. It adds a few reasons the
+rewrite cut, and it fixes the direction to the target, which no longer
+matches the code. It adds about 1{,}700 words, eleven displayed equations and
+one table. Appendix C keeps the distance-label bound, the model against its
+sources, the ties in the storage objective, the example agent's observation
+and which crowding values a controller reads.
+
+\section*{Part 2. The chapter as it would read}
+
+% ------------------------------------------------------------------
+\subsection*{2.1 The environment}
+
+After ``\dots where an edge $(v,w)\in E$ is a move from $v$ to $w$.'':
+
+\begin{greenblock}
+The model uses a general graph and not a grid, because real warehouses have
+one-way aisles, shortcuts and blocks of odd shape. A grid is one special
+case. The positions are numbered once, $V=\{v_1,\dots,v_{|V|}\}$. The numbers
+only break ties, for example between two shelves that are equally near.
+\end{greenblock}
+
+The last paragraph ends:
+
+Every generated warehouse is checked so that an agent can reach every shelf,
+workstation, dock and endpoint from wherever it stands. \new{This asks less
+than that every position can reach every other, the condition of van
+Knippenberg et al.\ (2021), and it is all the model needs.}
+
+% ------------------------------------------------------------------
+\subsection*{2.2 Agents and collisions}
+
+In the paragraph on hard rules:
+
+\dots so a deterministic conflict-resolution mechanism enforces the rules
+after the agents have chosen. \new{A penalty in the reward would not be
+enough, because a learned policy draws its actions at random and can still
+draw a forbidden one.} The same mechanism is used for every controller, so
+it is part of the environment rather than part of any policy.
+
+% ------------------------------------------------------------------
+\subsection*{2.3 Where the items are}
+
+\textbf{How much arrives.} New, after the paragraph on units on their way:
+
+\begin{greenblock}
+How much stock arrives is set by the orders alone, so it is the same under
+every storage rule. Each SKU counts the units ordered since its last refill,
+from the moment a line is released. At a storage update it gets one refill
+for every $Q$ units it has counted, and the rest carries over to the next
+update. With $Q=10$, if 23 units of tea were ordered since the last refill,
+two refills of tea arrive and 3 units carry over. This is the $(R,nQ)$
+policy of inventory control (Axs\"ater 2015), with the reorder point one
+refill below the starting stock.
+
+Write $y^{\mathrm{ord}}_t(k)$ for the units of SKU $k$ ordered since its
+last refill, with ``ord'' for ordered. Formally, the \emph{arrivals} are
+\[
+  y_t(k) = Q \left\lfloor \frac{y^{\mathrm{ord}}_t(k)}{Q} \right\rfloor ,
+  \tag{arrivals}
+\]
+and the rest, $y^{\mathrm{ord}}_t(k)-y_t(k)$, fewer than $Q$ units, carries
+over.
+
+Every storage rule starts from the same stock $x_0\in\mathcal{X}$. Each SKU
+starts alone on a shelf drawn at random for the seed, with one refill plus a
+safety stock (Implementation chapter, instances).
+\end{greenblock}
+
+\textbf{What the rule knows.} After the list of the two numbers:
+
+\begin{greenblock}
+Both numbers look back over whole storage periods. The demand counts the
+order lines for $k$ released in the last period and divides by its length
+$\Delta$. If tea was ordered 30 times in a period of 100 steps,
+$\hat\rho_t(\mathrm{tea})=0.3$. The standing still of a shelf is first
+averaged over the picks from it that finished in one period. One period
+holds only about eight picks per shelf in the 8-agent warehouse, too few for
+a steady number, so $\hat\omega_t(v)$ averages the last five such periods. A
+shelf with no finished pick yet reads 0.
+
+Formally, write $P_s(v)$ for the picks from shelf $v$ that finished in
+period $s$, and $S_t(v)$ for the last five periods up to $t$ in which any
+did. The \emph{estimates} are
+\[
+  \begin{aligned}
+  \hat\rho_t(k) &= \tfrac{1}{\Delta}\,\#\{\text{order lines for } k
+    \text{ released in the last period}\}, \\
+  \hat\omega_t(v) &= \frac{1}{|S_t(v)|}\sum_{s \in S_t(v)}
+    \frac{1}{|P_s(v)|}\sum_{j \in P_s(v)} W_j ,
+  \end{aligned}
+  \tag{estimates}
+\]
+where $W_j$ is the blocked time of pick $\tau_j$, the third part of the
+service-time split.
+\end{greenblock}
+
+\textbf{The rules compared.} New, after ``\dots and they do not search for the
+smallest value (\dots).'' and before the example of arriving tea under fixed and demand storage:
+
+\begin{greenblock}
+A storage rule is any $F$ that meets the three conditions of the storage
+update. Write $\mathcal{F}$ for all of them. The thesis compares three.
+Fixed storage $F_{\mathrm{fix}}$ gives every SKU a home shelf at the start
+and sends each refill back there, whatever the orders say. It is the
+dedicated storage of a warehouse that never re-slots. Demand storage
+$F_{\mathrm{dem}}$ and congestion-aware storage $F_{\mathrm{cng}}$ choose a
+shelf at every update, as above. How each rule ranks the shelves is in
+the storage rules of the Implementation chapter.
+\end{greenblock}
+
+% ------------------------------------------------------------------
+\subsection*{2.4 Orders and tasks}
+
+The pickup paragraph ends:
+
+\dots Had the nearer shelf held only one unit, the line would take that one
+and the other three from the second shelf, as two tasks. \old{This is the
+\emph{pickup rule}~(eq:pickuprule).}
+
+\begin{greenblock}
+Formally, sort the shelves $v_1, v_2,\dots$ that hold free units of $k$ by
+their distance $d_G(v_i,g)$ to the line's workstation $g$, and by vertex
+number when equal. A line for $q$ units then takes
+\[
+  q^{(i)} = \min\Bigl(q - \sum_{l < i} q^{(l)},\; x_t(k, v_i) - r_t(k, v_i)\Bigr)
+  \tag{pickup rule}
+\]
+units from shelf $v_i$, and every shelf with $q^{(i)}>0$ gives one task. In
+the example with one unit on the nearer shelf, $q^{(1)}=\min(4,1)=1$ and
+$q^{(2)}=\min(3,\,x_t-r_t)=3$, because the second shelf holds at least three.
+\end{greenblock}
+
+The congestion-aware paragraph ends:
+
+\dots So congestion-aware storage acts slowly on where stock goes and quickly
+on where it is taken from. \new{In the pickup rule its shelves are sorted by
+$d_G(v_i,g)+\hat\omega_t(v_i)$ instead.}
+
+% ------------------------------------------------------------------
+\subsection*{2.5 A task's life}
+
+Only a free agent can get a new task. An agent is free when it has no active
+task. \new{Formally, the \emph{free-agent condition} is}
+\begin{greenblock}
+\[
+  a_i \text{ is free at } t
+  \iff
+  \text{there is no } \tau_j \in \mathcal{B}_t \text{ with } \sigma(j)=i .
+  \tag{free agent}
+\]
+\end{greenblock}
+Agent $a_2$ is busy from the moment it gets $\tau_1$, also on its way to the
+shelf, and is free again once $\tau_1$ is delivered.
+
+% ------------------------------------------------------------------
+\subsection*{2.6 Who decides}
+
+\textbf{Zones.}
+
+A section-based controller decides for the agents in one zone, and it only
+sees that zone. The floor is cut into $p$ zones $Y_1,\dots,Y_p$ that do not
+overlap and together cover every vertex an agent can stand on. \old{These form
+the \emph{zone partition} $\mathcal{Y}$~(eq:partition).} \new{Formally, the
+\emph{zone partition} is}
+\begin{greenblock}
+\[
+  \mathcal{Y} = \{Y_1,\dots,Y_p\}, \qquad
+  \bigcup_{q=1}^{p} Y_q = V, \qquad
+  Y_q \cap Y_{q'} = \emptyset \ \text{ for } q \neq q' .
+  \tag{zone partition}
+\]
+\end{greenblock}
+When an agent crosses into a neighbouring zone, that zone takes it over.
+Tasks are not handed over, because assignment is the same rule for the whole
+warehouse.
+
+\textbf{The section-based policy.}
+
+A section-based controller does the same inside each zone. The agents in
+zone $Y_q$ choose one at a time in the same priority order, each from what
+the zone sees and the moves of the earlier agents in that zone. \old{This is
+the \emph{section-based policy}~(eq:sectionpolicy), the centralised policy
+with the whole warehouse replaced by the zone $s^{(q)}_t$, including the
+strip just past its edge.} \new{Formally, write $s^{(q)}_t$ for what zone
+$Y_q$ sees, its own part of the state and the strip just past its edge, and
+$u^{(q)}_{\prec i}(t)$ for the moves of the agents before $a_i$ in that zone.
+The \emph{section-based policy} is the centralised policy with $s_t$
+replaced by $s^{(q)}_t$,}
+\begin{greenblock}
+\[
+  u_i(t) \sim \pi^{\mathrm{sec}}_\theta\bigl(\cdot \mid s^{(q)}_t,\, u^{(q)}_{\prec i}(t),\, i\bigr),
+  \qquad \ell_i(t) \in Y_q .
+  \tag{section-based policy}
+\]
+\end{greenblock}
+The zones choose at the same time and do not see each other's choices. \dots
+
+% ------------------------------------------------------------------
+\subsection*{2.7 What a decentralised agent sees}
+
+\textbf{Direction to the target.} This part no longer matches the code. Two
+things are missing.
+
+First, the current target is defined only for an agent with a task. The code
+also gives an idle agent a target, as [A72] decided, and \texttt{idle\_parking}
+is on in every config. [A72] asked for two more cases in the current target
+and a paragraph in this section. Neither is in the thesis now, and the
+notation table still lists only the two task cases.
+
+Second, the policy does not read the distance label itself. It reads the
+difference from the agent's own vertex, capped at $\pm d_{\mathrm{obs}}$
+([A78]), and the label divided by 50 ([A82]). That belongs in the
+Implementation chapter, where it already is, but this section should say in
+one sentence that the label reaches the policy in another form.
+
+The proposed text:
+
+Seeing nearby vertices does not tell the agent which way to go, because its
+goal is usually outside its field of view. So every visible vertex gets a
+label, its distance to the agent's current target. The target is the shelf
+until the agent has picked up, and where the task delivers after that.
+\new{An agent with no task keeps its own vertex as its target, so it stays
+where it is. When it stands in another agent's way, on a shelf, workstation
+or dock of an unfinished task, or on a vertex another agent was stopped from
+moving onto, its target becomes the nearest free endpoint, until it arrives
+there or gets a task. Without this, an idle agent would stay where its last
+task ended, often on a dock or a workstation, and block the next agent that
+needs it.}
+
+Formally, \old{for agent $a_i$ serving task $\tau_j$, so $\sigma(j)=i$,} the
+\emph{current target} \new{of agent $a_i$} is
+\[
+  q_i(t) =
+  \begin{cases}
+    s_j, & \text{\old{$t < t_j^{\mathrm{pickup}}$}\new{$a_i$ serves $\tau_j$ and $t < t_j^{\mathrm{pickup}}$}}, \\
+    g_j, & \text{\old{$t \ge t_j^{\mathrm{pickup}}$}\new{$a_i$ serves $\tau_j$ and $t \ge t_j^{\mathrm{pickup}}$}}, \\
+    \new{q^{\mathrm{park}}_i(t),} & \new{\text{$a_i$ is free and in the way}}, \\
+    \new{\ell_i(t),} & \new{\text{$a_i$ is free otherwise}},
+  \end{cases}
+\]
+\new{where $q^{\mathrm{park}}_i(t)$ is the nearest free endpoint, kept until
+$a_i$ reaches it or gets a task.} The \emph{distance label} of a vertex $v$
+is the travel distance from $v$ to that target, $\eta_i(v,t)=d_G(v,q_i(t))$.
+
+The paragraph after the example ends:
+
+The distance label is the shortest-path distance feature of van Knippenberg
+et al.\ (2021). Because it is a distance and not just a ``closer or further''
+flag, a policy can take a small step back for a bigger gain later. It
+changes whenever the target changes. \new{The policy reads it in two forms,
+as a difference from the label of the agent's own vertex and as the label
+divided by a fixed number, so it stays small next to the other features
+(Implementation chapter, the network).}
+
+\textbf{How crowded the neighbourhood is.} The worked example stays and ends:
+
+\dots so $\delta_1(t)=2/5=0.4$. Two fifths of the nearby space is taken.
+\old{(eq:congestion) in Appendix~C states it formally.} \new{Formally, the
+\emph{crowding feature} counts the other agents in the field of view and
+divides by the other vertices there,}
+\begin{greenblock}
+\[
+  \delta_i(t) =
+  \frac{\bigl|\{a_j \in \mathcal{A}\setminus\{a_i\} :
+                 \ell_j(t) \in V^{(d_{\mathrm{obs}})}_i(t)\}\bigr|}
+       {\max\bigl\{1,\, |V^{(d_{\mathrm{obs}})}_i(t)| - 1\bigr\}} .
+  \tag{crowding feature}
+\]
+The 1 keeps it defined when the field of view holds only the agent's own
+vertex.
+\end{greenblock}
+
+(The sentence pointing to the appendix moves after the example, so the
+number comes first and the formula confirms it.)
+
+\textbf{Messages from nearby agents.}
+
+\dots These links form the communication graph $G^{\mathcal{A}}_t$. Its
+nodes are agents, and an edge $(a_i,a_j)$ means ``$a_i$ hears $a_j$''.
+\new{Formally, $a_i$ hears $a_j$ when $a_j$ stands in its field of view,}
+\begin{greenblock}
+\[
+  G^{\mathcal{A}}_t = (\mathcal{A}, E^{\mathcal{A}}_t), \qquad
+  (a_i, a_j) \in E^{\mathcal{A}}_t \iff
+  i \neq j \text{ and } d_G(\ell_i(t), \ell_j(t)) \le d_{\mathrm{obs}} .
+  \tag{communication graph}
+\]
+\end{greenblock}
+In the observation figure, \new{$(a_1,a_2)$ and $(a_1,a_3)$ are edges, so}
+$a_2$ and $a_3$ can message $a_1$, but $a_4$, outside the field of view,
+cannot.
+
+% ------------------------------------------------------------------
+\subsection*{2.8 The learning problem}
+
+After the definition of the game and its elements:
+
+\dots takes the state before the step, the joint action and the state after
+it. \old{Appendix~C pairs each element with the object it restates.}
+\new{Table~X pairs each element with where the chapter defined it.}
+
+\begin{greenblock}
+\begin{center}
+\small
+\begin{tabular}{llp{0.5\linewidth}}
+  \toprule
+  Element & Role & Defined as \\
+  \midrule
+  $\mathcal{A}$   & agents            & the fleet $\{a_1,\dots,a_m\}$, Agents and collisions \\
+  $\mathcal{S}$   & states            & where agents stand, the task stages, the stock $x_t$, and the priority order, drawn once per episode \\
+  $\mathcal{U}_i$ & actions           & wait plus $d_{\max}$ numbered moves, see below \\
+  $P$             & transition rule   & the move rule with conflict resolution, the shared assignment rule and the storage update. Random only through the orders \\
+  $\mathcal{O}_i$, $O_i$ & observations & the observation function below, one case per controller \\
+  $R_i$           & reward            & left open here, given in the Implementation chapter \\
+  $\gamma$        & discount          & a training value, Implementation chapter \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+A stochastic game gives every agent one fixed list of actions, but the legal
+moves depend on where the agent stands. So the list is as long as the
+busiest vertex needs, one wait plus one move for each outgoing edge of the
+vertex with the most. Move number $k$ takes the $k$-th outgoing edge of
+wherever the agent stands, in vertex-number order. At a vertex with fewer
+edges the extra moves are switched off before the policy chooses
+(Implementation chapter, the network), so what remains is exactly $\mathcal{U}(v)$. In a warehouse
+whose busiest junction has four exits, every agent has five actions, and an
+agent in a one-way aisle has two of them switched on. Formally,
+\[
+  \mathcal{U}_i = \{\mathrm{wait},\, \mathrm{move}_1, \dots, \mathrm{move}_{d_{\max}}\},
+  \qquad d_{\max} = \max_{v \in V} |N^{+}(v)| .
+  \tag{action list}
+\]
+\end{greenblock}
+
+% ------------------------------------------------------------------
+\subsection*{2.9 How a run is scored}
+
+\textbf{Reported measures.}
+
+Two measures are reported next to the result. The mean service time of
+put-aways shows what demand and congestion-aware storage cost in agent time,
+since a rule that puts stock near the workstations can lengthen the
+put-aways. \new{It is the mean of $\zeta_j$ over the put-aways finished by
+$T$. Fixed storage pays it too, because its refills also go to a shelf.} The
+mean runtime $\kappa_T$ shows how long the controller takes to decide.
+\old{Both are defined in Appendix~C.} \new{Write $\kappa(t)$ for the
+wall-clock time the controller needs to produce the joint action from $s_t$,
+assignment and routing together. Formally, the \emph{mean runtime} is}
+\begin{greenblock}
+\[
+  \kappa_T = \frac{1}{T}\sum_{t=0}^{T-1} \kappa(t) ,
+  \tag{runtime}
+\]
+measured in seconds, as Ma et al.\ (2017) report it.
+\end{greenblock}
+
+\textbf{The decision problem.} New, before ``The research question,
+formally'':
+
+\begin{greenblock}
+Put together, the problem asks which pair of storage rule and controller
+gives the shortest order service time, among the pairs whose fleet keeps up.
+The run must keep up. No shelf may hold more than its room. Every move must
+be legal and free of collisions. A pick may only take stock that is on its
+shelf and not promised. Formally, the best pair is
+\[
+  (F^{\star}, \pi^{\star}) \in
+      \arg\min_{F \in \mathcal{F},\, \pi \in \Pi} \mathbb{E}\bigl[\bar\zeta_T(F,\pi)\bigr],
+  \tag{decision problem}
+\]
+with the expectation over the order stream and the seeds, over the pairs
+that meet the four conditions. In the same order, they are
+\begin{align*}
+  &\text{the keep-up check} && \text{the run keeps up,}\\
+  &\text{the room condition} && \text{no shelf over its room,}\\
+  &\text{the move, vertex and swap rules} && \text{legal moves without collisions,}\\
+  &\text{the stock condition} && \text{stock on the shelf and free.}
+\end{align*}
+
+The conditions do different jobs. The move, vertex and swap rules hold for
+every controller, because conflict resolution enforces them, so they remove
+no controller. They are listed so that a solution describes a run that can
+happen. The room and stock conditions limit which rules and which tasks are
+allowed. The keep-up check limits which pairs count at all.
+
+The thesis does not search for the best pair. It compares three rules under
+three controllers, and the gain test below asks whether a rule beats fixed
+storage under one controller.
+\end{greenblock}
+
+% ------------------------------------------------------------------
+\subsection*{2.10 Scope and assumptions}
+
+New item in the list (see Question~4):
+
+\begin{greenblock}
+\begin{description}
+  \item[Docks without limit] A dock takes any number of finished orders and
+    refills. Only the vertex rule limits it, one agent at a time. Ma et al.\
+    (2017) put no limit on pickup or delivery locations either.
+\end{description}
+\end{greenblock}
+
+The two paragraphs after the list:
+
+Tasks carry no deadline. A late delivery only lengthens service time, and no
+single task can be said to have failed. This is narrower than
+time-constrained formulations such as van Knippenberg et al.\ (2021), where a
+missed deadline is infeasible or penalised. \new{Adding deadlines would put a
+deadline in every task, and either forbid a late task or count late tasks
+next to the result.}
+
+Assignment is also permanent once made, so an agent serving a task is not
+re-tasked before it finishes. Ma et al.\ (2017) allow re-tasking until the
+agent reaches the pickup vertex. \old{Appendix~C says what adding deadlines or
+re-tasking would change in the model.} \new{Adding it would let the
+assignment rule change the agent of an active task whose agent has not yet
+reached the shelf. Either change alters what counts as a solution, so it
+would change this chapter, not the method.}
+
+\section*{Part 3. What changes elsewhere}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Appendix C.} ``The arrivals'', ``The starting stock'', the
+    game table with the action list, the runtime, the decision problem,
+    ``Deadlines'' and ``Re-tasking'' leave it. ``Definitions in full'' keeps
+    only the Implementation definitions (trip distance, halo, features, masks,
+    one-step cost). ``Capacity at the docks'' and its TODO go. The labels
+    keep their names, so every reference still works, and
+    \texttt{tools/sync\_xrefs.py --build} is run afterwards.
+  \item \textbf{Notation.} All symbols are already in the table except
+    $q^{\mathrm{park}}_i(t)$, which is added. $q_i(t)$ gets the two idle
+    cases. $y$ is not used for the parking target, because $y_t(k)$ is the
+    arrivals.
+  \item \textbf{Code.} No change. Each new text was checked against
+    \texttt{origin/main}. The refills (\texttt{storage/arrival.py}), the last
+    five readings (\texttt{storage\_estimates.py}), the crowding denominator
+    (\texttt{observation.py}), the idle target (\texttt{reward\_function.py},
+    \texttt{current\_target}) and \texttt{idle\_parking: true} in every config.
+  \item \textbf{GAPS.} One entry, [A97], for the move back and for the idle
+    target. The idle target is a catch-up of [A72], not a new decision.
+\end{itemize}
+
+\section*{Part 4. Questions}
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item \textbf{How many equations.} [A52] cut the chapter to 20 displayed
+    equations, and it now has 34. This adds eleven. Keep all of them
+    displayed, or write the short ones (free agent, zone partition, runtime)
+    inline in a sentence?
+  \item \textbf{The estimates.} The display folds the mean per period into
+    one line with $W_j$. Keep that, or show the per-period mean $b_s(v)$ as
+    its own line, as Appendix C does now?
+  \item \textbf{The idle target.} Put the two idle cases in the current
+    target, as proposed, or give them their own short paragraph after it and
+    keep the equation to the two task cases?
+  \item \textbf{Docks without limit.} The capacity of the docks is an open
+    TODO in Appendix C. Is ``a dock takes any number, only the vertex rule
+    limits it'' right?
+  \item \textbf{Well-formed warehouses.} The three sentences on Token
+    Passing's well-formed condition are commented out in ``Agents and
+    collisions''. Bring them back in ``The environment'', or leave them in the
+    appendix, since they name a method before the Implementation chapter?
+  \item \textbf{What stays in Appendix C.} The distance-label bound, the
+    model against its sources, the ties, the example agent's observation and
+    which crowding values a controller reads. Agree?
+\end{enumerate}
+
+\end{document}

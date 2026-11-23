@@ -1,0 +1,496 @@
+{
+ "run": {
+  "fleet": 16,
+  "controller": "decentralised",
+  "arm_folder": "decentralised",
+  "communication": false,
+  "trained_under": "demand",
+  "regime_in_settings": "demand",
+  "run_dir": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand",
+  "trained": {
+   "place": "this PC",
+   "commit": "0c5427b",
+   "done_file": "pc, commit 0c5427b"
+  },
+  "budget_env_steps": 500000,
+  "iterations": 84,
+  "checkpoint_every": 3,
+  "training_load": 0.18,
+  "training_episode": {
+   "horizon": 2000,
+   "warmup": 0
+  }
+ },
+ "policy": {
+  "rule": "[A60]: of the checkpoints that keep up on every validation seed, the one with the shortest mean pick service time. If none keeps up, the highest throughput.",
+  "checkpoints_validated": 28,
+  "chosen": {
+   "checkpoint": "checkpoint_000022",
+   "training_iteration": 69,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand/decentralised_demand/PPO_warehouse_mapd_multi_agent_env_69d31_00000_0_2026-11-11_19-05-01/checkpoint_000022",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.12010000000000001,
+     "ci_low": 0.11149302017388683,
+     "ci_high": 0.12870697982611318,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 457.9900286556002,
+     "ci_low": 403.64983137332854,
+     "ci_high": 512.3302259378719,
+     "seeds": 5
+    }
+   }
+  },
+  "last": {
+   "checkpoint": "checkpoint_000027",
+   "training_iteration": 84,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand/decentralised_demand/PPO_warehouse_mapd_multi_agent_env_69d31_00000_0_2026-11-11_19-05-01/checkpoint_000027",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.1166,
+     "ci_low": 0.09685793289279818,
+     "ci_high": 0.13634206710720181,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 438.3925856135041,
+     "ci_low": 345.5152606371759,
+     "ci_high": 531.2699105898323,
+     "seeds": 5
+    }
+   }
+  },
+  "training_best": {
+   "score": "episode_tasks_completed_mean",
+   "checkpoint": "checkpoint_000023",
+   "training_iteration": 72,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand/decentralised_demand/PPO_warehouse_mapd_multi_agent_env_69d31_00000_0_2026-11-11_19-05-01/checkpoint_000023",
+   "validation": {
+    "seeds": [
+     100000,
+     100001,
+     100002,
+     100003,
+     100004
+    ],
+    "all_keep_up": false,
+    "throughput": {
+     "mean": 0.11569999999999998,
+     "ci_low": 0.07897475668942182,
+     "ci_high": 0.15242524331057816,
+     "seeds": 5
+    },
+    "mean_service_time": {
+     "mean": 502.3797914884137,
+     "ci_low": 308.0384318635089,
+     "ci_high": 696.7211511133185,
+     "seeds": 5
+    }
+   }
+  },
+  "chosen_is_training_best": false
+ },
+ "evaluation": {
+  "commit": "ecdec4994ba49ebd49a2fb8f734267f092c62589",
+  "code": "https://github.com/BjarkeKarlsen/slap-mapd-coupling",
+  "device": "cuda",
+  "command": "PYTHONPATH=src python -m slap_mapd_coupling.main evaluate /home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand --test-seeds 20 --horizon 10000 --warmup 5000 --gpu",
+  "queue": null,
+  "validation": {
+   "seeds": [
+    100000,
+    100001,
+    100002,
+    100003,
+    100004
+   ],
+   "horizon": 2000,
+   "warmup": 0,
+   "storage_mode": "demand"
+  },
+  "test": {
+   "seeds": [
+    200000,
+    200001,
+    200002,
+    200003,
+    200004,
+    200005,
+    200006,
+    200007,
+    200008,
+    200009,
+    200010,
+    200011,
+    200012,
+    200013,
+    200014,
+    200015,
+    200016,
+    200017,
+    200018,
+    200019
+   ],
+   "horizon": 10000,
+   "warmup": 5000,
+   "storage_modes": [
+    "demand"
+   ],
+   "load": 0.18,
+   "num_agents": 16
+  },
+  "finished": "2026-11-13T15:21",
+  "lock_measure": "longest_two_agent_hold per episode ([A91]). Seeds at or above 500, 1250 steps are listed. The threshold the thesis uses is chosen from how the numbers spread."
+ },
+ "results": {
+  "chosen": {
+   "demand": {
+    "throughput": {
+     "mean": 0.0066500000000000005,
+     "ci_low": -0.0026683623667297035,
+     "ci_high": 0.015968362366729705,
+     "seeds": 20
+    },
+    "keeps_up": {
+     "mean": 0.0,
+     "ci_low": 0.0,
+     "ci_high": 0.0,
+     "seeds": 20
+    },
+    "mean_service_time": {
+     "mean": 4120.493998344371,
+     "ci_low": 2554.4973739939933,
+     "ci_high": 5686.490622694749,
+     "seeds": 4
+    },
+    "mean_wait_for_agent": {
+     "mean": 4058.2039150373175,
+     "ci_low": 2448.0499797279626,
+     "ci_high": 5668.357850346672,
+     "seeds": 4
+    },
+    "mean_travel_time": {
+     "mean": 48.08403631872175,
+     "ci_low": 14.509035570254916,
+     "ci_high": 81.65903706718859,
+     "seeds": 4
+    },
+    "mean_blocked_time": {
+     "mean": 14.206046988331757,
+     "ci_low": -1.1025782509946467,
+     "ci_high": 29.51467222765816,
+     "seeds": 4
+    },
+    "mean_order_completion": null,
+    "mean_putaway_service_time": {
+     "mean": 4134.174051812506,
+     "ci_low": 2564.3330595411203,
+     "ci_high": 5704.015044083892,
+     "seeds": 4
+    },
+    "mean_crowding": {
+     "mean": 0.13514810086131382,
+     "ci_low": 0.11823647526429935,
+     "ci_high": 0.15205972645832827,
+     "seeds": 20
+    },
+    "longest_completion_gap": {
+     "mean": 142.4,
+     "ci_low": 78.61662257617601,
+     "ci_high": 206.183377423824,
+     "seeds": 20
+    },
+    "longest_two_agent_hold": {
+     "mean": 2214.75,
+     "ci_low": 1214.683160828315,
+     "ci_high": 3214.816839171685,
+     "seeds": 20
+    },
+    "mean_decision_runtime_seconds": {
+     "mean": 0.02321829706457123,
+     "ci_low": 0.020613435294724713,
+     "ci_high": 0.025823158834417746,
+     "seeds": 20
+    },
+    "seeds": [
+     200000,
+     200001,
+     200002,
+     200003,
+     200004,
+     200005,
+     200006,
+     200007,
+     200008,
+     200009,
+     200010,
+     200011,
+     200012,
+     200013,
+     200014,
+     200015,
+     200016,
+     200017,
+     200018,
+     200019
+    ],
+    "locked_seeds": {
+     "500": [
+      200000,
+      200001,
+      200002,
+      200003,
+      200004,
+      200005,
+      200006,
+      200007,
+      200008,
+      200009,
+      200010,
+      200011,
+      200012,
+      200013,
+      200014,
+      200015,
+      200016,
+      200017,
+      200018,
+      200019
+     ],
+     "1250": [
+      200001,
+      200009,
+      200010,
+      200013,
+      200014,
+      200015,
+      200016,
+      200017
+     ]
+    }
+   }
+  },
+  "last": {
+   "demand": {
+    "throughput": {
+     "mean": 0.0036699999999999997,
+     "ci_low": -0.002882995154982541,
+     "ci_high": 0.01022299515498254,
+     "seeds": 20
+    },
+    "keeps_up": {
+     "mean": 0.0,
+     "ci_low": 0.0,
+     "ci_high": 0.0,
+     "seeds": 20
+    },
+    "mean_service_time": {
+     "mean": 4009.900592768228,
+     "ci_low": -5778.044418291995,
+     "ci_high": 13797.845603828451,
+     "seeds": 2
+    },
+    "mean_wait_for_agent": {
+     "mean": 3907.656550088915,
+     "ci_low": -5612.202604701513,
+     "ci_high": 13427.515704879344,
+     "seeds": 2
+    },
+    "mean_travel_time": {
+     "mean": 67.59780675755779,
+     "ci_low": -86.35665555129829,
+     "ci_high": 221.55226906641388,
+     "seeds": 2
+    },
+    "mean_blocked_time": {
+     "mean": 34.646235921754595,
+     "ci_low": -79.48515803918363,
+     "ci_high": 148.77762988269282,
+     "seeds": 2
+    },
+    "mean_order_completion": null,
+    "mean_putaway_service_time": {
+     "mean": 3956.789473684211,
+     "ci_low": -5423.0646122735025,
+     "ci_high": 13336.643559641925,
+     "seeds": 2
+    },
+    "mean_crowding": {
+     "mean": 0.16579087368608397,
+     "ci_low": 0.14400491435558352,
+     "ci_high": 0.18757683301658443,
+     "seeds": 20
+    },
+    "longest_completion_gap": {
+     "mean": 269.0,
+     "ci_low": 45.03103531041265,
+     "ci_high": 492.9689646895873,
+     "seeds": 20
+    },
+    "longest_two_agent_hold": {
+     "mean": 3887.25,
+     "ci_low": 2873.6546487041046,
+     "ci_high": 4900.845351295896,
+     "seeds": 20
+    },
+    "mean_decision_runtime_seconds": {
+     "mean": 0.018718573219719144,
+     "ci_low": 0.017579867687569885,
+     "ci_high": 0.019857278751868403,
+     "seeds": 20
+    },
+    "seeds": [
+     200000,
+     200001,
+     200002,
+     200003,
+     200004,
+     200005,
+     200006,
+     200007,
+     200008,
+     200009,
+     200010,
+     200011,
+     200012,
+     200013,
+     200014,
+     200015,
+     200016,
+     200017,
+     200018,
+     200019
+    ],
+    "locked_seeds": {
+     "500": [
+      200000,
+      200001,
+      200002,
+      200003,
+      200004,
+      200005,
+      200006,
+      200007,
+      200008,
+      200009,
+      200010,
+      200011,
+      200012,
+      200013,
+      200014,
+      200015,
+      200016,
+      200017,
+      200018,
+      200019
+     ],
+     "1250": [
+      200000,
+      200001,
+      200002,
+      200003,
+      200004,
+      200005,
+      200006,
+      200007,
+      200008,
+      200009,
+      200010,
+      200011,
+      200012,
+      200013,
+      200015,
+      200016,
+      200017,
+      200018,
+      200019
+     ]
+    }
+   }
+  }
+ },
+ "evaluate": {
+  "run_dir": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand",
+  "controller": "decentralised",
+  "communication": false,
+  "trained_under": "demand",
+  "num_agents": 16,
+  "training_load": 0.18,
+  "budget_env_steps": 500000,
+  "checkpoint_every": 3,
+  "rule": "[A60]: of the checkpoints that keep up on every validation seed, the one with the shortest mean pick service time, else the highest throughput.",
+  "chosen": {
+   "checkpoint": "checkpoint_000022",
+   "iteration": 69,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand/decentralised_demand/PPO_warehouse_mapd_multi_agent_env_69d31_00000_0_2026-11-11_19-05-01/checkpoint_000022"
+  },
+  "last": {
+   "checkpoint": "checkpoint_000027",
+   "iteration": 84,
+   "path": "/home/bjarkek/thesis_runs/training/fleet_16/decentralised/demand/decentralised_demand/PPO_warehouse_mapd_multi_agent_env_69d31_00000_0_2026-11-11_19-05-01/checkpoint_000027"
+  },
+  "checkpoints_validated": 28,
+  "validation": {
+   "seeds": [
+    100000,
+    100001,
+    100002,
+    100003,
+    100004
+   ],
+   "horizon": 2000,
+   "warmup": 0
+  },
+  "test": {
+   "seeds": [
+    200000,
+    200001,
+    200002,
+    200003,
+    200004,
+    200005,
+    200006,
+    200007,
+    200008,
+    200009,
+    200010,
+    200011,
+    200012,
+    200013,
+    200014,
+    200015,
+    200016,
+    200017,
+    200018,
+    200019
+   ],
+   "horizon": 10000,
+   "warmup": 5000,
+   "load": 0.18,
+   "storage_modes": [
+    "demand"
+   ]
+  },
+  "device": "cuda",
+  "code_commit": "ecdec4994ba49ebd49a2fb8f734267f092c62589",
+  "finished": "2026-11-13T15:21"
+ }
+}

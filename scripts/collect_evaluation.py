@@ -376,16 +376,20 @@ def main():
             print("collected", folder)
         else:
             waiting.append(folder)
+    # Any evaluation other than the main one (Regime 1, the served-share replay) gets its own
+    # comparison file and result folders, so it never overwrites the main evaluation's.
+    default = parser.get_default("eval_name")
+    tag = "" if args.eval_name == default else "_" + args.eval_name.removeprefix("evaluation_")
     if collected:
-        (evaluation / "comparison.md").write_text(comparison(args.fleet, collected))
+        (evaluation / f"comparison{tag}.md").write_text(comparison(args.fleet, collected))
         out = RESULTS / f"fleet_{args.fleet}"
         for info, folder in collected:
-            target = out / f"{info['run']['arm_folder']}_{info['run']['trained_under']}"
+            target = out / f"{info['run']['arm_folder']}_{info['run']['trained_under']}{tag}"
             target.mkdir(parents=True, exist_ok=True)
             for name in ("evaluation.json", "summary.md", "README.md", "evaluate_summary.md"):
                 shutil.copy2(folder / name, target / name)
-        shutil.copy2(evaluation / "comparison.md", out / "comparison.md")
-        print("wrote", evaluation / "comparison.md", "and copied to", out)
+        shutil.copy2(evaluation / f"comparison{tag}.md", out / f"comparison{tag}.md")
+        print("wrote", evaluation / f"comparison{tag}.md", "and copied to", out)
     for folder in waiting:
         print("not finished yet, left alone:", folder)
 

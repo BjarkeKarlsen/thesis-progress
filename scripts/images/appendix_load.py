@@ -18,7 +18,8 @@ import os
 import statistics
 
 from appendix_data import (RESULTS, FLEETS, FLEET_STYLE, C, plt, read_jsonl, read_json, share,
-                           style, panel_title, placeholder, fleet_legend, save, sweep_figure)
+                           style, panel_title, placeholder, fleet_legend, save, sweep_figure,
+                           paired_gain, paired_ratio)
 
 LOAD = os.path.join(RESULTS, "E_load")
 SWEEP = os.path.join(RESULTS, "F_demand")
@@ -119,13 +120,60 @@ def load_validity():
 
 def demand_sweep():
     """The Zipf exponent, the drift period and the drift step, each swept with Token Passing
-    under demand storage and paired with fixed storage at the same value."""
+    under demand storage and paired with fixed storage at the same value. Rows, top to bottom:
+    (a) the order gain, the thesis result, (b) the pick gain, (c) the put-away cost, each in
+    percent of fixed storage, paired by seed (eq:relgain). The keep-up row is left out, because
+    every seed kept up at every value (author, 2026-11-23)."""
     columns = [
-        ("demand.skew", "demand", r"Zipf exponent", 1.0, None),
-        ("demand.rotation_period", "demand", "drift period (steps)", 200, None),
-        ("demand.rotation_share", "demand", "drift step (share of SKUs)", 0.05, None),
+        ("demand.skew", r"Zipf exponent", 1.0),
+        ("demand.rotation_period", "drift period (steps)", 200),
+        ("demand.rotation_share", "drift step (share of SKUs)", 0.05),
     ]
-    return sweep_figure("app_demand_sweep.png", columns, SWEEP)
+    measures = [  # (label, value per point in percent)
+        ("order gain\nover fixed (%)",
+         lambda here, fixed: paired_gain(here, fixed, "mean_order_completion")),
+        ("pick gain\nover fixed (%)", lambda here, fixed: paired_gain(here, fixed)),
+        ("put-away time\nover fixed (%)",
+         lambda here, fixed: (lambda m: (m[0] - 1.0, m[1]))(paired_ratio(here, fixed))),
+    ]
+    n, k = len(measures), len(columns)
+    fig, axes = plt.subplots(n, k, figsize=(4.2 * k + 1.0, 1.7 * n + 1.2), sharex="col",
+                             sharey="row", squeeze=False, gridspec_kw=dict(hspace=0.35))
+    for j, (parameter, xlabel, default) in enumerate(columns):
+        found = False
+        for fleet in FLEETS:
+            rows = read_jsonl(os.path.join(SWEEP, f"fleet_{fleet}", parameter,
+                                           "load_sweep.jsonl"))
+            values = sorted({r["value"] for r in rows if r.get("varied") == parameter})
+            if not values:
+                continue
+            found = True
+            colour, marker = FLEET_STYLE[fleet]
+            for i, (_, measure) in enumerate(measures):
+                ys, hs = [], []
+                for x in values:
+                    here = [r for r in rows if r.get("varied") == parameter
+                            and r["storage_mode"] == "demand" and r["value"] == x]
+                    fixed = [r for r in rows if r.get("varied") == parameter
+                             and r["storage_mode"] == "fixed" and r["value"] == x]
+                    mean, half = measure(here, fixed)
+                    ys.append(100 * mean)
+                    hs.append(100 * half)
+                axes[i][j].errorbar(values, ys, yerr=hs, color=colour, marker=marker, ms=5,
+                                    lw=2, capsize=3, elinewidth=1)
+        for i, (label, _) in enumerate(measures):
+            ax = axes[i][j]
+            if j == 0:
+                ax.set_ylabel(label)
+            panel_title(ax, f"({'abcdefghi'[i * k + j]})")
+            ax.axvline(default, color=C["node"], ls=":", lw=1)
+            ax.axhline(0, color=C["text"], lw=0.8)
+            style(ax)
+        axes[-1][j].set_xlabel(xlabel)
+        if not found:
+            placeholder(axes[0][j], os.path.join(SWEEP, "fleet_<m>", parameter))
+    fleet_legend(fig)
+    return save(fig, "app_demand_sweep.png")
 
 
 def appendix_load():

@@ -103,9 +103,9 @@ which are waiting for a robot, travelling, and being blocked by other robots.
 
 The main result is one comparison. How much shorter is service time with
 demand storage than with fixed storage, and does that gain differ between the
-centralised, section-based and decentralised routers? The gain is read as a
-share of route time, so a router that routes badly is not rewarded for having
-more to save.
+centralised, section-based and decentralised routers? Between routers the
+gain is read as a percentage of the service time under fixed storage, so a
+router that routes badly is not rewarded for having more to save.
 
 The research questions build on that.
 - **RQ1 and RQ2.** The main result above.

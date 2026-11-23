@@ -1,0 +1,503 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newenvironment{greenblock}{\color{newc}}{}
+\newcommand{\lref}[1]{{\small\texttt{#1}}}
+\newcommand{\moved}[1]{{\small\textcolor{gray}{\emph{[moved from #1]}}}}
+\title{Proposed rewrite, Appendix F, Demand drift}
+\date{23 November 2026, version 2}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This proposal settles the open points of
+\texttt{appendix\_F\_demand\_comments.md} (A1, A5 to A9, B1 to B3, C2 to C4,
+D1 to D3, E1) and its three changes that would help the reader most. It
+follows the decisions you have already made. The SKU group is a
+\emph{category} ([A115]). The order gain stands beside the pick gain, from
+the existing rows, with no rerun. The pilot, the initial run and the updated
+run are told once each, in that order.
+
+Part~1 is the whole appendix as it would read. Black text stays,
+\new{green} is new and \old{struck} text goes. Text that only moves is black,
+with a grey note saying where it came from. References are printed as their
+labels, such as \lref{app:load:runs}. Every label of the appendix stays
+(\lref{app:demand:*}, \lref{app:cal:drift}, \lref{fig:app:demandsweep}).
+\lref{app:demand:sweep} now sits on the updated run, which is the run that
+tests the values. One label is new, \lref{app:demand:first}, for the initial
+run, and so is \lref{tab:app:demandgain}. Part~2 says where every number comes
+from, and Part~3 holds the questions. Nothing below is in the thesis yet, and
+Figure~F.1 is not redrawn.
+
+Three things changed in the numbers, not only in the words.
+\begin{itemize}[nosep]
+  \item Every gain and cost is now the mean over seeds of the per-seed share,
+        as \lref{eq:relgain} defines it. The old text used the ratio of the
+        means for the initial run and for the put-away cost. So the initial
+        run's pick gain at 32 agents reads 6 percent, not 5, its range 4 to
+        12, not 3 to 13, and the put-away cost reads 9, 12, 13 and 14
+        percent, not 10, 12, 13 and 15.
+  \item The pilot now gives its numbers per starting layout. The old ``almost
+        nothing'' and ``most of it back'' hold for 20 SKUs but not for every
+        case (A6).
+  \item The rows were written before [A96] and use $f_{\mathrm{up}} = 0.8$.
+        They hold no served counts, so the keep-up check cannot be recounted.
+        The lowest finished share of any row is 0.92 (Question~6).
+\end{itemize}
+
+\section*{Part 1. The appendix as it would read}
+
+\subsection*{F.1 Summary \hfill\lref{app:demand:summary}}
+
+Demand storage can only gain if demand gives it something to adapt to.
+\old{The question is what demand that is, and whether the gain holds when
+the demand settings change. Under uniform demand no placement beats another,
+and under demand that never changes a placement computed once is hard to
+beat. So demand in the experiments is skewed by a Zipf law over the SKUs, and
+its ranking drifts by 5 percent of the SKUs every 200 steps. A pilot with
+Token Passing showed that the drift is what made storage matter. The values
+this sets in the thesis are the Zipf exponent of 1, the drift period of 200
+steps and the drift step of 5 percent of the SKUs. The updated Token Passing
+run shows that the gain holds over the whole range of each value at every
+fleet size.}
+\new{So the orders in the experiments follow demand that is skewed and
+drifts. A few SKUs are ordered far more often than the rest, and which SKUs
+these are changes over time. Two questions follow. Is the drift needed? And
+how much does the gain of demand storage over fixed storage depend on the
+values that set the demand?}
+
+\begin{greenblock}
+A pilot with Token Passing answers the first. A layout built once from
+demand was hard to beat while demand held still. Once the ranking drifted,
+that layout lost up to 15 percent of its throughput, and demand storage won
+much of it back.
+
+Two sweeps under Token Passing answer the second. Each varies the skew, the
+drift period and the drift step one at a time. In the updated sweep demand
+storage shortens an order by 14 to 18 percent against fixed storage at the
+thesis values, and a pick by 10 to 14 percent. The gain holds at every swept
+value and every fleet size.
+
+The thesis uses a Zipf exponent of 1, a drift every 200 steps and a drift
+step of 5 percent of the SKUs. These are the thesis's own values, taken from
+the pilot. The sweeps test them and do not choose them.
+\end{greenblock}
+
+\subsection*{F.2 Setting \hfill\lref{app:demand:setting}}
+
+An order asks for several SKUs, each on its own order line, and every line
+becomes one pick or more (Section~\lref{sec:pf:tasks}, Orders and tasks).
+\new{An order has 5 lines on average. Once all its lines have reached the
+workstation, a shipment carries the order to a dock.}
+
+\begin{greenblock}
+The SKUs are grouped into categories of 20. Each category is served by four
+workstations on neighbouring rack faces.
+\end{greenblock}
+Each seed splits the SKUs at random over the categories, and the split holds
+for the whole run. \moved{the Conclusion}
+\new{The warehouse grows with the fleet, by 2.5 SKUs and half a workstation
+per agent (Section~\lref{sec:impl:instances}). So there are 1, 2, 4 and 8
+categories at 8, 16, 32 and 64 agents.}
+
+\new{A few SKUs are ordered far more often than the rest.} The SKUs are
+ranked by popularity, and the SKU in rank $r$, counting from $0$, gets the
+weight $1/(r+1)$, a Zipf law with exponent 1
+(Section~\lref{sec:impl:instances}). A larger exponent, the skew, lets the
+popular SKUs take a larger share of the orders. \moved{below}
+\new{With another skew the weight is $1/(r+1)$ raised to the power of the
+skew.}
+
+\begin{greenblock}
+Storage studies often skew demand by classes. Silva et al.\ (2020), for
+example, let a small group of the SKUs take 80 percent of the orders, a middle
+group 15 percent and the rest 5 percent. The Zipf law instead gives every rank
+a weight of its own, so a single value, the skew, sets how uneven demand is.
+The Zipf law is the thesis's own choice, and so is its exponent of 1, taken
+from the pilot.
+\end{greenblock}
+
+An order first picks a workstation at random. It then draws its lines from
+that workstation's category, each line a different SKU, by the weights of the
+category's SKUs scaled to sum to one. So every category gets the same share
+of orders, and a SKU's share of all lines is only roughly in proportion to
+$1/(r+1)$. \old{A larger exponent, the skew, lets the popular SKUs take a
+larger share of the orders.}
+
+\begin{greenblock}
+At 8 agents all 20 SKUs sit in one category, and all four workstations serve
+it. An order then goes to any of the four, whatever SKUs it asks for. So
+demand storage has no single place to aim a SKU at, and the best it can do is
+a shelf close to all four on average. From 16 agents on, the lines of a SKU
+only go to the four workstations of its category.
+\end{greenblock}
+
+Every 200 steps the ranking moves by 5 percent of the SKUs. Every SKU climbs
+that many places, and the most popular ones drop to the bottom. With 20 SKUs
+that is one place, and with 160 SKUs eight. This is the drift, with a period
+of 200 steps and a step of 5 percent. The ranking then goes round once every
+4000 steps at every fleet size.
+
+No storage rule knows the demand law. A rule only sees the orders that have
+already come in. Demand storage places arriving stock by the popularity it
+estimates over the last storage period, and fixed storage sends each SKU back
+to its home shelf (Section~\lref{sec:method:storage}). \new{Demand storage
+aims a SKU at the four workstations of its category, which it learns from the
+SKU's first order line.}
+
+\old{The gain is how much demand storage shortens the mean service time of a
+pick against fixed storage, paired by seed, as a share of fixed. It is
+(\lref{eq:relgain}) with the pick in place of the order.}
+\begin{greenblock}
+Under one seed both rules receive the same orders, because the orders do not
+depend on where the stock is. So the two rules are compared seed by seed. The
+gain under a seed is how much demand storage shortens the mean service time
+against fixed storage, as a share of fixed storage's time. The gain reported
+is its mean over the seeds (\lref{eq:relgain}).
+
+The gain is read for two times. The order time runs from an order's release
+until its shipment reaches the dock. It is the result of the thesis
+(\lref{eq:meanservice}). The pick time runs from a pick's release until its
+units reach the workstation. Storage acts on it directly, because a pick
+starts at a shelf.
+\end{greenblock}
+
+The demand model decides whether the main result can say anything about
+storage. \old{Under uniform demand the gain is zero whatever the controller,
+so a result would only show that the demand model gave storage nothing to
+do.}
+\new{Under uniform demand every SKU is ordered equally often, so demand
+storage has no SKU to put ahead of another, and it is expected to gain little.
+A result would then mostly show that the demand model gave storage little to
+do. Uniform demand was not run.}
+
+\subsection*{F.3 Method \hfill\lref{app:demand:method}}
+
+\old{Two runs test the demand model. A pilot asks whether the drift is
+needed, and a sweep asks how much the gain depends on the three values.}
+\new{Three runs test the demand model, all with Token Passing. A pilot asks
+whether the drift is needed. Two sweeps, an initial run and an updated run,
+ask how much the gain depends on the three values.}
+Token Passing is used because it needs no training, so the demand model is
+judged before any controller learns on it. \moved{the sweep paragraph}
+
+The pilot ran Token Passing on an earlier 8-agent warehouse of 94 vertices,
+before the warehouses of Appendix~\lref{app:instances}, with a horizon of 2000
+steps and 4 to 6 seeds\new{, at 0.6 tasks per step and with 20 and with 100
+SKUs}. It compared fixed and demand storage with the ranking held fixed and
+with the ranking moving \new{by 5 places} every 200 steps, and read the
+throughput. \new{Five places is 25 percent of 20 SKUs and 5 percent of 100,
+and the drift step of 5 percent comes from the 100 SKUs.} It ran under an
+earlier storage model, in which the demand rule moved stock already on the
+shelves, up to a cap per period.
+\new{Each SKU count started from two layouts. The grouped layout put the
+popular SKUs together on the shelves nearest the workstations, which is what
+classic slotting builds once from demand (Heskett, 1963). The spread layout
+spread them over all the shelves.}
+
+The \old{sweep varies}\new{sweeps vary} one value at a time and \old{holds}\new{hold} the other two at the values of
+the thesis. The skew takes 0.5, 1 and 1.5, the drift period 100, 200 and 400
+steps, and the drift step 2.5, 5 and 10 percent of the SKUs. Each point runs
+Token Passing under fixed and demand storage on the same seeds, each seed on
+its own warehouse of the fleet's size, at the fleet's main load
+(Appendix~\lref{app:load}). \old{Both rules see the same orders under a seed,
+so the gain is paired by seed.} The put-away service time of demand storage
+over that of fixed storage is read as the cost\new{, paired by seed in the
+same way}, and the keep-up check of picks and put-aways as the check.
+\old{Token Passing is used because it needs no training, so the demand model
+is judged before any controller learns on it.} Both Token Passing runs used
+20 seeds per value.
+
+\begin{greenblock}
+Each run lasts 10000 steps, and the first 5000 are not read. The measures
+then start once the random starting stock has been replaced by the rules' own
+pallets (Appendix~\lref{app:load:first}). At the thesis values the 5000 steps
+that are read hold one and a quarter turns of the ranking. A drift period of
+400 steps makes one turn 8000 steps, and so does a drift step of 2.5 percent
+from 16 agents on. Those points see five eighths of a turn. The ranking still
+moves every period, so demand storage still has to follow it, but not every
+SKU reaches the top while the run is read.
+\end{greenblock}
+
+The sweep does not choose the values. A demand model tuned for the largest
+gain would favour demand storage. The sweep shows instead how much the result
+depends on the values.
+
+\subsection*{F.4 Results \hfill\lref{app:demand:results}}
+
+\old{The sweeps below come from two runs of Token Passing, an initial
+validation run and an updated run after the model changes it led to. What
+changed between them is in Appendix~\lref{app:load:runs}.}
+
+\subsubsection*{F.4.1 Pilot: demand drift \hfill\lref{app:cal:drift}}
+
+\old{In a pilot with Token Passing, the drift is what made storage matter.
+With the ranking fixed, the demand rule gained almost nothing over fixed
+storage. With the drift, fixed storage lost about 15\% of its throughput and
+the demand rule won most of it back.}
+
+\begin{greenblock}
+A layout built once from demand is hard to beat while demand holds still.
+From the grouped layout, demand storage gained 0.002 to 0.022 tasks per step
+over fixed storage without the drift, 0 to 5 percent of a throughput near
+0.43. From the spread layout it gained 0.040 to 0.045, about 10 percent,
+because fixed storage kept that poorer layout and demand storage rearranged
+it.
+
+The drift puts the grouped layout out of date. With the drift, fixed storage
+lost 15 percent of its throughput from the grouped layout and 8 to 10 percent
+from the spread one. With 20 SKUs demand storage kept its throughput and
+gained 0.078 over fixed storage from either layout, more than the whole loss.
+With 100 SKUs it gained back 0.034 of the 0.069 lost from the grouped layout,
+and 0.029 of the 0.033 lost from the spread one.
+\end{greenblock}
+
+\subsubsection*{\new{F.4.2 The initial run} \hfill\new{\lref{app:demand:first}}}
+
+% model revision 12, sweep of 2026-10-27 (rows in git history of thesis-progress, 524ef5a)
+The initial Token Passing run swept the demand settings at its own main loads
+(Appendix~\lref{app:load:first})\old{, with 20 seeds per value. The drift
+step was set as a share of the SKUs, 2.5, 5 and 10 percent}. At the thesis
+values, demand storage shortens a pick by \old{9, 9, 5 and 10}\new{9, 9, 6
+and 10} percent against fixed storage at 8, 16, 32 and 64 agents, and 16 to
+19 of the 20 seeds agree.
+\new{An order gains less, 7, 6, 2 and 4 percent. Every order then had a
+single line, so its time was one pick and a shipment, and the shipment starts
+at the workstation, not at a shelf.}
+
+The gain holds at every value of every setting. It stays between \old{3 and
+13}\new{4 and 12} percent at every fleet, and every seed keeps up. The skew
+matters most. At a skew of 1.5 the few popular SKUs run out of stock. At 64
+agents 28 percent of the orders then wait for stock, against 7 percent at a
+skew of 1. The drift period and the drift step change the gain by a few
+percent, with no pattern shared by the fleets.
+
+Two settings did not do what the thesis says. With 30 and 50 SKUs, 5 percent
+of the SKUs rounds to 2, so the ranking went round in 3000 and 5000 steps
+instead of 4000. At 8 agents, with 20 SKUs, a step of 2.5 and of 5 percent
+both rounded to one SKU and gave the same run.
+
+In the initial run every order also had a single line, because the runs left
+the number of lines per order unset. \moved{F.4.3}
+
+\subsubsection*{F.4.3 Where an order \old{goes}\new{went} \hfill\lref{app:demand:workstation}}
+
+% model revision 12, D29
+The \old{same sweep}\new{initial run} showed that demand storage had no clear
+place to aim for. Each order went to a workstation drawn at random, and the
+workstations stand on rack faces all over the warehouse. Demand storage still
+put a popular SKU next to the nearest workstation, but the order then went to
+any of them. Over five warehouses per fleet, the shelves the rule ranked best
+were about 3 steps from their nearest workstation. From the workstation an
+order actually used they were 11, 16, 24 and 34 steps away, at 8, 16, 32 and
+64 agents. An average shelf was 12.5, 17, 25 and 35 steps away. So the best
+shelves were only 3 to 10 percent closer in practice.
+
+\old{In the initial run every order also had a single line, because the runs
+left the number of lines per order unset.}
+
+\subsubsection*{\new{F.4.4 What changed before the updated run}}
+
+\new{The initial run showed two faults in the demand and one setting that was
+missing. Each led to a change. The full list of changes between the runs is
+in Appendix~\lref{app:load:runs}.} \moved{the Conclusion}
+\old{Three things change, each for a reason the sweep showed.}
+\begin{itemize}
+  \item The number of SKUs is a multiple of 20. Then 5 percent of the SKUs is
+  a whole number, and the ranking goes round in exactly 4000 steps at every
+  fleet size, as the thesis says.
+  \item Each SKU belongs to a category of 20 SKUs, served by four
+  workstations on neighbouring rack faces, and an order takes all its lines
+  from the category of its workstation. \old{A SKU then has one place where
+  it is needed, so storing it close to that place means something.}
+  \new{From 16 agents on, a SKU's lines then go to one group of four
+  workstations, so storing it close to them means something. Demand storage
+  now scores a shelf by its mean distance to the four workstations of the
+  SKU's category, not by the nearest workstation.} \old{Each seed splits the
+  SKUs at random over the categories, and the split holds for the whole run.
+  An order picks its workstation at random.}
+  \item \new{The missing setting.} Orders have 5 lines on average, as the
+  thesis says, instead of the single line of the \old{sweep}\new{initial
+  run}.
+\end{itemize}
+\new{The stock that ran out at a skew of 1.5 led to a larger safety stock,
+the one of the most popular rank for every SKU
+(Appendix~\lref{app:cal:safety}).}
+
+\subsubsection*{F.4.5 \old{Demand skew and drift}\new{The updated run} \hfill\lref{app:demand:sweep}}
+
+% step 12 second sweep, 2026-10-31 (thesis-progress results/F_demand/README.md)
+The updated Token Passing run repeated the sweep with the categories of
+Appendix~\lref{app:load:next}, at the new main loads. At the thesis values
+demand storage now shortens \new{an order by 14, 18, 18 and 15 percent and}
+a pick by 11, 14, 13 and 10 percent at 8, 16, 32 and 64 agents\old{, and the
+gain stays between 9 and 15 percent over the whole range}\new{, as
+Table~F.1 shows. Over the whole range the order gain stays between 12 and 22
+percent and the pick gain between 9 and 15}. Every seed keeps up. \new{These
+rows were counted before the served share of Appendix~E. The earlier count
+took only the work released in the measured steps, so it is never above the
+served share, apart from the few lines that wait for stock (at most 0.35
+percent). The lowest share of any seed is 0.92, so every seed also keeps up at
+the threshold of 0.9.}
+
+\begin{greenblock}
+
+\begin{center}
+\small
+Table F.1: Demand against fixed storage at the thesis values, updated run.
+Mean over 20 paired seeds, with its standard error.
+\hfill\lref{tab:app:demandgain}\\[0.4em]
+\begin{tabular}{rrrrrrr}
+\toprule
+$m$ & SKUs & categories & order gain (\%) & pick gain (\%) & put-away cost (\%) & travel per pick \\
+\midrule
+8  & 20  & 1 & $14.1 \pm 2.8$ & $10.9 \pm 2.7$ & $9.1 \pm 2.6$  & 17.0 to 13.2 \\
+16 & 40  & 2 & $17.5 \pm 2.9$ & $13.9 \pm 2.6$ & $11.6 \pm 1.7$ & 19.5 to 15.0 \\
+32 & 80  & 4 & $17.7 \pm 1.4$ & $13.2 \pm 1.5$ & $12.5 \pm 1.5$ & 22.2 to 17.3 \\
+64 & 160 & 8 & $14.6 \pm 1.3$ & $10.2 \pm 1.3$ & $14.3 \pm 1.0$ & 25.1 to 20.3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{greenblock}
+
+\new{Demand storage cuts the travel of a pick by 19 to 23 percent at the
+thesis values,} for example from 17 to 13 steps at 8 agents. In the initial
+run it cut the \old{driving}\new{travel} by 9 to 11 percent. The service time
+gains less\old{, 10 to 14 percent,} because under Token Passing a pick mostly
+waits for its workstation and \old{driving}\new{travel} is a small part of
+its time (Appendix~\lref{app:load:next}). \moved{F.4.3}
+\old{In the updated run every SKU belongs to a category served by four
+neighbouring workstations, so storage has a place to aim for.}
+
+\begin{greenblock}
+The categories cannot explain the larger travel cut at 8 agents. There all
+SKUs share one category, and an order may still go to any workstation. Yet
+the travel cut is 22 percent, as large as at 16 and 32 agents. Other things
+changed between the runs at the same time, the score by the mean distance to
+the category's workstations, 5 lines per order and pallets of 10 units. The
+runs do not separate them. So they show that storage gains more after the
+changes, not how much of it the categories give.
+
+At 8 agents the gain is among the smallest, with 64 agents. The travel cut at
+8 agents is as large as at the larger fleets, so the single category does not
+show in the travel, and these runs do not say why the gain there is smaller.
+\end{greenblock}
+
+The cost is in the put-aways. Demand storage sends stock to the shelves near
+the workstations, so its put-aways take \old{10, 12, 13 and 15}\new{9, 12, 13
+and 14} percent longer than those of fixed storage at the thesis values, and
+\old{9 to 16}\new{7 to 16} percent longer over the whole range. The cost
+grows with the fleet.
+
+The skew no longer matters much. It moves the \new{pick} gain by at most 3.5
+points\new{ and the order gain by at most 3}, because the stock no longer
+runs out. \old{Between 0.1 and 0.3 percent of the lines wait for stock at
+every value.}\new{Fewer than 0.4 percent of the lines wait for stock at any
+value.} The drift period and the drift step again change the gain by only a
+few points\new{, at most 3 for a pick and 5 for an order, with no pattern
+shared by the fleets}. At 8 agents a step of 2.5 and of 5 percent still round
+to the same single SKU.
+
+% Figure: thesis-progress/scripts/images/appendix_load.py, demand_sweep()
+Figure F.1 \lref{fig:app:demandsweep}, caption: \old{The gain of demand over
+fixed storage, its put-away cost and the keep-up check as the demand model
+changes, under Token Passing.}
+\new{The order and pick gain of demand over fixed storage and its put-away
+cost as the demand model changes, under Token Passing.} (22 words. The
+figure is redrawn, order gain, pick gain and put-away cost in percent, no
+keep-up row.)
+
+\subsection*{F.5 Conclusion \hfill\lref{app:demand:conclusion}}
+
+\old{The need for drift is settled. Without it the demand rule gained almost
+nothing over fixed storage, so the experiments use demand that is skewed and
+drifts.}
+\new{The drift is needed. A layout built once from demand is hard to beat
+while demand holds still, and the drift puts it out of date. So the
+experiments use demand that is skewed and drifts.}
+
+\old{The values themselves, an exponent of 1 and a drift every 200 steps,
+have no source. They are the values of the pilot, and the sweep shows how
+much the gain depends on them rather than choosing them.}
+\begin{greenblock}
+The three values are the thesis's own. Skewed demand is usual in storage
+studies (Silva et al., 2020), but none of the sources the thesis uses gives a
+Zipf exponent or a drift for this setting. The exponent of 1 and the drift
+every 200 steps are the values of the pilot. The drift step of 5 percent is
+the pilot's step of 5 places with 100 SKUs. The drift period is tied to the
+storage period of 100 steps, which is half of it, so demand storage sees every
+move of the ranking within one period (Appendix~\lref{app:cal:period}).
+\end{greenblock}
+
+\old{The initial run shows that the gain holds over the whole range at every
+fleet size, so the exponent of 1, a drift period of 200 steps and a drift
+step of 5 percent are kept.}
+
+\old{Three things change, each for a reason the sweep showed.} \moved{here to F.4.4, list not repeated}
+
+The \new{two sweeps keep the values.} \old{updated run, with these changes,
+confirms the values.} The gain holds over the whole range at every fleet
+size\old{, between 9 and 15 percent,}\new{. In the updated run an order gains
+12 to 22 percent and a pick 9 to 15 percent,} and the skew no longer matters
+much because the stock no longer runs out.
+
+\new{At 8 agents all SKUs share one category, so demand storage has no single
+place to aim for. Its travel cut is still as large as at the larger fleets.}
+
+\section*{Part 2. Where the numbers come from}
+All gains and costs are the mean over seeds of the per-seed share, as
+\lref{eq:relgain}. Fields \texttt{mean\_order\_completion} (order),
+\texttt{mean\_service\_time} (pick), \texttt{mean\_putaway\_service\_time},
+\texttt{mean\_travel\_time}, \texttt{num\_lines\_waited}.
+\begin{itemize}[nosep]
+  \item Updated run. \texttt{thesis-progress/results/F\_demand/fleet\_<m>/demand.*/load\_sweep.jsonl}.
+        At the thesis values the order gain is 14.1, 17.5, 17.7, 14.6 and the pick gain
+        10.9, 13.9, 13.2, 10.2 (matching the comments file and the README). Seeds that
+        agree, order 18, 19, 20, 20, pick 17, 19, 20, 20. Over every swept value, order
+        12.5 to 21.9, pick 8.8 to 14.5, put-away cost 7.0 to 15.9, travel cut 17.4 to
+        23.6. Lines waiting for stock 0.02 to 0.35 percent. Lowest finished share 0.92.
+  \item Initial run. The same files at \texttt{524ef5a}. Pick 9.0, 9.3, 5.8, 9.7 (the
+        ratio of means gives 9.2, 9.5, 5.5, 9.8, the old text). Order 6.8, 5.9, 2.4, 3.6.
+        Travel cut 11.0, 10.5, 9.0, 9.1. Pick range 3.8 to 12.3. At 64 agents 28.4 and
+        7.0 lines waited per 100 orders at skews 1.5 and 1.
+  \item Pilot. \texttt{decisions/done/demand\_probe\_2026-10-17.md} and its rows
+        \texttt{quick/summary.md}, restored to
+        \texttt{thesis-progress/results/F\_demand/pilot\_2026-10-17/}.
+  \item Categories and the order draw. \texttt{multi\_agent\_env.py},
+        \texttt{\_draw\_order\_lines}, \texttt{popularity\_ranking},
+        \texttt{zipf\_weights}. The drift step is
+        \texttt{max(1, round(share * SKUs))} in \texttt{experiment\_config.py}.
+  \item Skewed demand by classes. Silva et al.\ 2020
+        (\texttt{silva2020integrating\_slap\_opp}), ``Random, Skewed 50/30/20,
+        Skewed 80/15/5''. No paper in \texttt{papers/} uses a Zipf law.
+\end{itemize}
+
+\section*{Part 3. Answered by the author (23 November)}
+\begin{enumerate}
+  \item Figure F.1 is redrawn as proposed.
+  \item Uniform demand is not run. The text says what is expected and that
+        it was not run.
+  \item The sentence on why an order gains more than a pick is dropped. It
+        was not measured, and an order's lines are separate tasks that
+        different agents can serve at the same time.
+  \item Keep-up is fixed by the argument above, without a rerun.
+  \item The pilot rows are restored from the Trash.
+\end{enumerate}
+
+\section*{Part 4. Question left}
+\begin{enumerate}
+  \item \textbf{The 8-agent argument.} The rows do not show the single
+        category hurting at 8 agents. The travel cut there is 21.8 percent,
+        as large as at 16 (22.7) and 32 (22.0), and the gain is just as small
+        at 64 agents. The draft says the runs do not explain the smaller
+        gain at 8 agents. Agree?
+        \\ \hspace*{1em}$\square$ agree \quad $\square$ other \quad Note:
+\end{enumerate}
+
+\end{document}

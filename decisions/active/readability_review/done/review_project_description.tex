@@ -1,0 +1,246 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\definecolor{notec}{HTML}{6a6a6a}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\why}[1]{\textcolor{notec}{\small\emph{Why.} #1}\par}
+\sloppy
+\title{Proposed change, Project Description and the research gap}
+\date{17 November 2026, version 2 (checked against the chapters)}
+\begin{document}
+\maketitle
+
+\section*{How to read this}
+Part~1 lists what changes and why. Part~2 is Section~II (Project Description) as it would read.
+Part~3 is the last paragraph of ``Research gap and positioning of this thesis''. Green text is
+proposed, struck grey text is removed, black text stays. A grey \emph{Why} line under a paragraph
+gives the reason. Part~4 has the questions. Nothing is changed in the thesis yet.
+
+\textbf{Version 2.} Checked against \texttt{2.Introduction.tex}, \texttt{3.ProblemFormulation.tex}, \texttt{4.Implementation.tex}, \texttt{3.Background.tex} and \texttt{5.Experiments.tex}. Four fixes. (1) The scope paragraph repeated the introduction's reason for the higher load almost word for word, so it now names the higher load without the reason. (2) The measures paragraph said the served share is read only where a fleet falls behind. The results use it whenever order times cannot be compared, which is every learned controller, since a pair is compared on time only when both runs keep up on every seed. (3) The reason for the percentage now matches the Problem Formulation. The gain in steps alone would favour the controller that routes worst. (4) Question~5 names every place RQ4 is still called conditional.
+
+\section*{Part 1. What changes}
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{The load is explained.} The sentence ``the load tests when the gain stops'' read as if
+  ``load tests'' were a noun, and it named only one of the two jobs of the load. The new text says
+  congestion-aware storage runs at the main load and at a higher load, and a sweep of rising loads
+  shows how busy the warehouse can get before the gain disappears. The reason for the higher load
+  stays in the introduction only.
+\item \textbf{Every research question has its measure.} RQ4 had none. The served share is now named,
+  with the reason order times are compared only when both runs keep up.
+\item \textbf{The main question loses ``graph-based warehouse''.} The graph is how the warehouse is
+  modelled, not part of what is asked.
+\item \textbf{RQ2 asks about the net effect.} Blocked time and extra travel explain the answer, so
+  they move to the measures. Where a learned fleet falls behind, the results already read the served
+  share, so RQ2 asks about it too.
+\item \textbf{RQ3 asks which way the gain goes.} The gain can grow with load, or shrink early if
+  crowding eats the shorter trips. The Problem Formulation already expects growth near the limit, since
+  a fleet close to its limit turns the same saving in travel into a larger cut in the wait. The old
+  wording assumed the gain only stops.
+\item \textbf{RQ4 loses its second part.} Nothing in the thesis measures whether close agents are
+  the ones whose routes cross, so that part cannot be answered.
+\item \textbf{Repetition cut.} The main-result paragraph after the questions retold the scope
+  paragraph and said RQ2 shows where RQ1 holds, which it does not. Only the percentage stays. The
+  communication paragraph is cut, and its reason moves to the list of factors.
+\item \textbf{Expected outcome lists the deliverables, the research gap does the positioning.} Both
+  said ``not a new solver'' and ``both layers share the graph and the traffic''. The positioning stays
+  in the research gap, where it can point at the cited work. The predictions stay, because the
+  Conclusion checks them one by one.
+\item \textbf{The research gap names two results.} It said the contribution is closing the loop, then
+  argued for the controlled comparison of fixed and demand storage, which is the main result and does
+  not close the loop. It now names both, and says plainly that congestion-aware storage is the
+  thesis's own rule. It no longer says the controllers are shared by both layers, since they belong
+  to routing.
+\item \textbf{One word.} ``where the robots drive'' becomes ``where the robots go'', following the
+  rule ``move to, not drive''.
+\end{itemize}
+
+\section*{Part 2. Project Description}
+
+\subsection*{A. Aim and scope}
+
+The project aims to find out how feedback between storage and the control of the robots affects how
+well a warehouse works. The warehouse is a finite graph. Customers keep sending orders. An order is a
+short list of items. Each item becomes a pick task, where a robot fetches it from its shelf and brings
+it to a workstation. So where the stock sits decides where the robots \old{drive}\new{go}. New stock
+also arrives at the warehouse. Each delivery becomes a put-away task, where a robot carries it to a
+shelf chosen by the storage rule.
+
+Four things are varied in the experiments:
+\begin{enumerate}[leftmargin=2em]
+  \item the storage rule: fixed, demand or congestion-aware
+  \item the controller: centralised, section-based or decentralised, each a learned policy that
+    decides for the whole fleet, one zone or one robot
+  \item communication: off or local, for the decentralised controller only\new{, because the other
+    two already see more than one robot} Nope since the other is a centralised controller either from the point of view of a section or from the whole graph, so this is bad to add here... 
+  \item the load: the number of robots and how fast orders arrive, as a share of what the fleet can
+    serve
+\end{enumerate}
+
+The main result compares demand storage with fixed storage under each controller, at \old{one load
+where every controller keeps up}\new{a main load where every controller should keep up}. The other
+factors test how far that result reaches. \old{Congestion-aware storage tests whether closing the
+loop helps, and the load tests when the gain stops.} \new{Congestion-aware storage tests whether
+closing the loop helps. It is run at the main load and at a higher load, where the aisles fill. A
+sweep of rising loads then shows how busy the warehouse can get before the gain of demand storage
+disappears.}
+
+\why{The load has two jobs, and the old sentence named one of them in words that were hard to parse.
+Why the higher load is needed is already in the introduction, so it is not repeated here.
+``Should keep up'' because the main load was set before any learned controller was trained, and at
+16 agents they did not keep up.}
+
+\old{Each measure answers one research question.} The mean order service time gives the main result.
+It is split into the wait for a robot, travel and blocked time, which shows which part the storage
+rule changes. Blocked time and how crowded the aisles get show whether closing the loop helps.
+Whether the fleet keeps up, meaning it finishes tasks as fast as they arrive, shows where the gain
+stops. \new{Order times are compared only when both runs keep up, because a fleet that falls behind
+has a queue that grows for as long as the run lasts. Where they cannot be compared, the share of
+the arriving work each fleet serves is compared instead. That share also shows whether messages help
+the decentralised controller.}
+
+\why{The old opening claimed one measure per question, and RQ4 had none. The served share is what the
+results use for the learned controllers and for messages.}
+
+\subsection*{B. Research question}
+
+The main research question is:
+
+\textbf{RQ:} How much does demand storage shorten the service time of orders\old{ in a graph-based
+warehouse}, how does that gain differ between controllers that decide for the whole fleet, one zone
+or one robot, and does closing the loop add to it?
+
+It is split into four questions:
+\begin{description}[leftmargin=2.4em,style=nextline]
+  \item[RQ1:] Does demand storage shorten order service time compared with fixed storage, at a load
+    where the fleet keeps up, and how does that gain differ between controllers that decide for the
+    whole fleet, one zone or one robot?
+  \item[RQ2:] Does closing the loop, so that storage also avoids shelves where robots get blocked,
+    \old{reduce blocked time beyond demand storage}\new{make orders faster than demand storage does},
+    at the main load and at a higher load where the aisles are crowded? \old{And does the extra travel
+    it causes cost more time than it saves?} \new{Where a fleet falls behind, does it let the fleet
+    serve more?}
+  \item[RQ3:] As orders arrive faster, \old{at what rate does the gain of RQ1 stop}\new{does the gain
+    of RQ1 grow, shrink or disappear}, and at what rate does each trained controller stop keeping up?
+  \item[RQ4:] Does local communication make the decentralised controller route better than what a
+    robot sees on its own\old{, and does that depend on whether robots that are close on the graph
+    are the ones whose routes cross}?
+\end{description}
+
+\why{RQ2 asks about the net effect, and the split into blocked time and travel explains the answer.
+RQ3 no longer assumes the gain can only stop. The second part of RQ4 has no measure behind it.}
+
+\old{The main result answers RQ1. It is the gain of demand storage over fixed storage under each
+controller, given as a percentage of the time orders take under fixed storage. RQ2 and RQ3 show where
+this result holds.}
+
+\new{The gain of RQ1 is given as a percentage of the time orders take under fixed storage. A
+controller that is slow under fixed storage has more to save, so the gain in steps alone would favour
+the controller that routes worst.}
+
+\why{The rest retold the scope paragraph, and RQ2 does not show where RQ1 holds. The percentage is the
+one new fact, and it now carries its reason.}
+
+\old{Communication is tested only for the decentralised controller, because the other two already see
+more than one robot. It stays outside the main comparison, so the focus remains on how storage and
+routing affect each other.}
+
+\why{The list of factors and RQ4 already say ``decentralised only''. The reason moved to the list.}
+
+\subsection*{C. Expected outcome}
+
+\old{The thesis does not build a new algorithm for routing or storage. It delivers a coupling of three
+problems that are usually solved apart. These are storage assignment, task assignment and path
+finding. The coupling comes as three things. The first is one mathematical model in which the three
+share the same warehouse graph and the same stock. The second is a simulator built on that model,
+where the storage rule and the controllers read the same measured traffic. The third is a set of
+measured answers, one per research question. For each controller it gives the gain of demand storage
+over fixed storage, with its interval. It shows whether closing the loop cuts blocked time and pays
+for the extra travel, at what order rate the gain stops and each controller stops keeping up, and
+whether messages help the decentralised controller. The results hold for the warehouse, demand and
+controllers used in the experiments.}
+
+\new{The thesis delivers three things. The first is one mathematical model of storage assignment,
+task assignment and path finding, three problems that are usually solved apart. In it they share the
+same warehouse graph and the same stock. The second is a simulator built on that model. The storage
+rule and the controllers see the same warehouse, so each can react to what the other does. The third
+is the experimental results, one for each research question. They hold for the warehouse, demand and
+controllers used in the experiments.}
+
+\why{``Not a new algorithm'' and the shared graph and traffic are said again in the research gap, where
+the cited work is. ``The three share'' was unclear, and the list of answers repeated the research
+questions.}
+
+Before the experiments, the expectations are as follows. For RQ1, demand storage should shorten order
+time under every controller, mostly because popular stock sits closer to the workstations and trips
+get shorter. The gain should be largest for the centralised controller, because it sees where every
+agent is going and can keep them out of each other's way when storage pulls traffic towards the same
+shelves. The learned controllers should keep up at the main load and come close to Token Passing.
+
+For RQ2, closing the loop should change little at the main load, where the aisles are rarely full. At
+the higher load it should cut blocked time, but the extra travel to shelves further away may eat part
+of that saving. For RQ3, the gain should hold as orders arrive faster and stop near the rate where the
+fleet no longer keeps up. The decentralised controller should stop keeping up first, because each
+agent decides alone and runs into more conflicts. For RQ4, messages should help most where agents
+close on the graph are also the ones whose routes cross, as in narrow aisles.
+
+\why{Unchanged. The predictions are not repetition, because they add the reasons, and the Conclusion
+checks them one by one. The RQ4 prediction is left as it was written, see Question~4.}
+
+\section*{Part 3. Research gap and positioning of this thesis, last paragraph}
+
+The first two paragraphs stay as they are.
+
+\old{So the contribution of this thesis is not a new SLAP solver or a new MAPD solver on its own. It is
+closing that loop while keeping everything else the same. The warehouse graph, the three controllers
+of Table~I and the measured traffic are shared by both layers. A difference between fixed and demand
+storage can then be traced to storage itself, not to a chance difference between the setup of one
+SLAP paper and that of another MAPD paper.}
+
+\new{So the contribution of this thesis is not a new SLAP solver or a new MAPD solver. It is one
+setting in which storage and routing are studied together, with everything else kept the same. Both
+layers share the warehouse graph, the stock and the measured traffic, and each of the three
+controllers runs in it under every storage rule.}
+
+\new{This gives two results. The first is a controlled comparison. A difference between fixed and
+demand storage can be traced to storage itself, not to a chance difference between the setup of one
+SLAP paper and that of another MAPD paper. The second closes the loop. Congestion-aware storage, the
+thesis's own rule, adds the time picks stand still at a shelf to the trip in the classic slotting
+score. So where
+new stock goes, and which shelf a pick is taken from, react to the traffic the controllers produce.}
+
+\why{The old paragraph named one contribution and argued for another. Demand storage, the main
+result, does not close the loop. The controllers belong to routing, so they are not shared by both
+layers. The new rule is the thesis's own and is now said to be.}
+
+\section*{Part 4. Questions}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{The main question.} Keep it, shortened as above, or drop it and keep only the four
+  questions? It is close to RQ1 and RQ2 together. I suggest keeping it, because a reader looks for one
+  main question.
+\item \textbf{RQ2 and the served share.} RQ2 now asks whether the fleet serves more where it falls
+  behind. This matches what the results report at 16 agents. Is that the question you want, or should
+  RQ2 stay about order time only?
+\item \textbf{RQ3 wording.} ``Grow, shrink or disappear'' leaves the direction open. Fine, or keep
+  ``at what rate does the gain stop''?
+\item \textbf{RQ4 second part.} \emph{Decided 2026-11-17, dropped and applied ([A100]).} Still open: if it goes, the Conclusion sentence ``Messages helped only under fixed
+  storage, not where routes cross in general'' must lose its last part too. The RQ4 prediction in the
+  Expected outcome can stay as a prediction, and the Conclusion says it was not tested. Or should the
+  prediction go as well?
+\item \textbf{RQ4 conditional.} [A83] made RQ4 a full question, but three places still call it
+  conditional. The Problem Formulation (``If RQ4 is reached ... This comparison is conditional and not
+  part of the main factorial design''), the Factors paragraph of the Experiments chapter (``only if
+  RQ4 is reached'') and its factor table (``RQ4, conditional''). Results for RQ4 are in, so fix all
+  three in the same change?
+\item \textbf{Two results in the research gap.} The gap now says the main result is the controlled
+  comparison and closing the loop is the second result. This touches [A84]. Do you agree with that
+  order?
+\end{enumerate}
+
+\end{document}

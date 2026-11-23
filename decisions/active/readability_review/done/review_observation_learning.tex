@@ -1,0 +1,374 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newenvironment{greenblock}{\color{newc}}{}
+\newcommand{\dobs}{d_{\mathrm{obs}}}
+\title{Proposed change, what a decentralised agent sees and the learning problem}
+\date{18 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+Part~1 checks what I told you in chat and corrects two points. Part~2
+settles the credit sentence. Part~3 goes through Section V-G and Part~4
+through Section V-H of \texttt{3.ProblemFormulation.tex}, showing only the
+paragraphs that change. Black text stays, as context. \new{Green} is new
+and \old{struck} text goes. Part~5 is the addition to Implementation, Part~6
+what else changes, and Part~7 the questions. Nothing is changed in the
+thesis yet.
+
+The changes are the three we agreed on.
+\begin{enumerate}[nosep]
+  \item The decentralised observation matches the code. It also holds the
+        role of each vertex in view and where other agents stand.
+  \item The credit paragraph leaves the Problem Formulation, and its point
+        goes to Implementation at \texttt{eq:credit}.
+  \item The learning problem states the game once, drops what repeats
+        ``Who decides'', and stops saying that only the observation differs.
+\end{enumerate}
+
+\section*{Part 1. What I checked}
+
+\textbf{The credit, confirmed.} In \texttt{training/env.py} the reward of
+every agent is replaced by the mean reward of its group
+(\texttt{team\_mean}, line 427). The groups are fixed at the start of the
+timestep (\texttt{\_groups}, line 470). The centralised controller has one
+group, the section-based one a group per zone, and the decentralised
+controller is not averaged at all, so each agent keeps its own reward. Every
+agent is in exactly one group. So the credits of all agents add up to the
+fleet's reward at every timestep, and the fleet average in
+\texttt{eq:objective} is the same number under all three controllers.
+
+\textbf{What the credit changes, confirmed.} An agent's choice is judged by
+the rewards of its group. With the fleet mean, a choice that holds up
+another agent lowers the number it is judged by. With its own reward, it
+does not. So in principle centralised training follows the objective's own
+direction of improvement, up to PPO's approximations, and decentralised
+training leaves out the cost an agent puts on others.
+
+\textbf{Correction 1, the reason for the credit.} I said the credit was set
+this way because it is the effect the comparison should show, citing [A9]
+and [A32]. That is not their reason. [A9] says credit follows the agents
+that choose together ``because they act as one decision-maker'', and that
+the commons question is no longer part of the study. The phrase ``the effect
+the comparison is meant to show'' is from the critic paragraph in
+Implementation, which is about the critic, not the credit.
+
+\textbf{Correction 2, the decentralised agent is not blind to crowding.} I
+said a decentralised agent ``never pays for blocking'' another. It does pay
+a little. Its own reward has a crowding term, $-n_{\mathrm{cng}}\,\delta_i(t)$
+(\texttt{reward\_function.py}, line 8), so a crowd around it costs it
+something. What it does not pay for is the time the agents it holds up
+lose.
+
+\textbf{Other claims from the margin comments.}
+\begin{itemize}[nosep]
+  \item The observation in the code holds, for each vertex in view, its role,
+        the distance label, whether another agent stands there and whether an
+        earlier agent claimed it (\texttt{observation.py}, lines 36 to 50).
+        The claim flag is always empty for a decentralised agent. Confirmed.
+  \item The dock of a put-away and of a shipment is drawn at random in every
+        fleet config (\texttt{dock\_choice: random}). The Problem
+        Formulation already says so in ``Orders and tasks'', so it now
+        contradicts itself, in V-H and in Scope (``the only randomness is
+        which orders arrive''). Confirmed.
+  \item One priority order, drawn once per episode, is used by the
+        centralised turns, conflict resolution and assignment
+        (\texttt{multi\_agent\_env.py}, lines 517, 614, 1009). So the
+        ``priority order'' in V-H is the one of ``Who decides''.
+  \item Figure~9. The script says $a_1$ ``is also heading for W1'' on
+        purpose. The text never says why, so the comment stands.
+  \item Figure~10 uses a field of view of one step (\texttt{crowding.py}).
+        Confirmed.
+  \item Two of my margin comments were too strong. Every generated warehouse
+        sets each edge cost to 1, so ``fewest steps'' and ``travel distance''
+        are the same number, and only the wording differs. The code also
+        checks every window against a fixed largest size, so ``a small field
+        of view keeps the input the same size'' is close to true. ``Never
+        larger than a fixed size'' would be exact.
+\end{itemize}
+
+\section*{Part 2. Keep the credit sentence or not}
+
+\textbf{Drop it, with nothing left in its place.} There are three reasons.
+\begin{enumerate}[nosep]
+  \item How a choice is credited is part of how the policy is trained. That
+        is method, and the formula it needs, \texttt{eq:credit}, is in
+        Implementation. In the Problem Formulation the claim stands without
+        the formula, and the reader cannot check it.
+  \item The short form I offered, ``a decentralised agent sees only its own
+        view, so it cannot see the delay it causes others'', is not true. The
+        agent sees the agents near it, and with change~1 the text says so. It
+        also pays for crowding through its reward.
+  \item The problem itself does not depend on the credit. The objective is
+        the same fleet average for every controller, so the Problem
+        Formulation is complete without it.
+\end{enumerate}
+Its point does matter for the results, so it moves to Implementation
+(Part~5), next to the formula it follows from.
+
+\section*{Part 3. Section V-G, what a decentralised agent sees}
+
+\subsection*{Opening}
+A decentralised agent does not see the whole warehouse. At every timestep it
+sees \old{three}\new{four} things\old{:}\new{.} \new{These are} what is near
+it, \new{where the other agents near it stand,} which way its target is, and
+how crowded it is around it. Together these form its observation $o_i(t)$. It
+may also hear messages from nearby agents.
+
+\subsection*{The field of view}
+The agent sees every vertex it can reach within a travel cost of $\dobs$, and
+the edges between them. So it knows which moves \old{are open}\new{it can make}
+nearby, not only which vertices exist. \new{It also sees the role of each of
+these vertices, whether it is a shelf, a workstation, a dock, an endpoint or
+an aisle position.} It sees nothing further away. Formally, the \emph{field of
+view} of agent $a_i$ is the subgraph of $G$ on those vertices,
+\[
+  V^{(\dobs)}_i(t) = \{ v \in V : d_G(\ell_i(t), v) \le \dobs \}, \qquad
+  \mathcal{G}^{(\dobs)}_i(t) = G\bigl[V^{(\dobs)}_i(t)\bigr]. \tag{18}
+\]
+
+\begin{greenblock}
+Knowing where the aisles go is not enough to avoid other agents. So the agent
+also sees which vertices in its field of view hold another agent. It sees
+that a vertex is taken, not which agent stands there or where that agent is
+heading. Formally, the \emph{occupied vertices} in view are
+\[
+  L_i(t) = \{ \ell_j(t) : a_j \in \mathcal{A}\setminus\{a_i\} \}
+           \cap V^{(\dobs)}_i(t) .
+\]
+\end{greenblock}
+
+Figure~9 shows it for agent $a_1$ with $\dobs=2$, in the warehouse of the tea
+task $\tau_1$ at $t=12$, after $a_2$ has picked up $\tau_1$ at $A$. \new{Agent
+$a_1$ carries another task to the same workstation $W_1$.} The rest of this
+section uses this agent $a_1$ as its example. \new{Two of the five vertices
+around it are occupied, those of $a_2$ and $a_3$.} \old{Communication uses the
+same range, so the field of view is also how far $a_1$ can hear.}
+
+\subsection*{Direction to the target, the example paragraph}
+A smaller $\eta_i(v,t)$ means $v$ is closer to the target. In Figure~9, agent
+$a_1$ can step left to $v$ or right to $w$, with $\eta_1(v,t)=3$ and
+$\eta_1(w,t)=5$. $v$ leaves less distance to cover, but $a_2$ stands on the
+short route just past $v$\new{, and $a_1$ sees that this vertex is occupied}.
+A trained policy may therefore still send $a_1$ to $w$, or make it wait, if it
+expects the route through $v$ to be congested.
+
+\subsection*{How crowded the neighbourhood is}
+No text changes, apart from one sentence after the formula.
+
+\new{The crowding feature is the share of the field of view that $L_i(t)$
+covers. The agent could count it itself, and it is given as one number
+because it is also used outside the observation.}
+
+(See Question~3. If you prefer, this sentence is left out.)
+
+\subsection*{Putting the pieces together}
+The \old{three}\new{four} pieces together form the \emph{decentralised
+observation} of agent $a_i$,
+\[
+  o_i(t) = \bigl( \mathcal{G}^{(\dobs)}_i(t),\; \new{L_i(t),}\; \eta_i(\cdot,
+  t),\; \delta_i(t) \bigr). \tag{23}
+\]
+
+The messages subsection says ``$o_i(t)$ keeps its three pieces'', which
+becomes ``\new{four}''.
+
+\section*{Part 4. Section V-H, the learning problem}
+
+\subsection*{The cycle}
+Every timestep follows the same cycle. Each agent looks at what its
+controller's window shows, all agents act at the same time, the warehouse
+moves to its next state, and each agent receives a number saying how good
+that step was. Except under the centralised controller, an agent neither sees
+the whole warehouse nor knows what every other agent will do. A partially
+observable stochastic game is the standard model of this situation
+(Hansen et al.), so the learning problem is written as one.
+
+\subsection*{The game, stated once}
+\old{Every part of the game is something the reader has already met. The
+agents are the fleet. The state $s_t$ is the one of Section V-F, Who decides.
+It also holds the priority order that conflict resolution uses. The actions
+are wait and move. The transition rule turns a state and the agents' actions
+into the next state. The observation is what each agent sees. The reward
+scores one step for one agent, and the discount sets how much a later reward
+counts against one now.}
+
+\new{The state $s_t$ is the one of ``Who decides'', together with the
+priority order drawn there, which conflict resolution and assignment also
+use.} Formally, the learning problem is
+\[
+  \mathcal{M} = \bigl( \mathcal{A},\, \mathcal{S},\, \{\mathcal{U}_i\},\, P,\,
+  \{\mathcal{O}_i\},\, \{O_i\},\, \{R_i\},\, \gamma \bigr), \tag{24}
+\]
+\old{with the agents $\mathcal{A}$, the state space $\mathcal{S}$, the action
+sets $\mathcal{U}_i$, the transition rule $P$, the observation spaces
+$\mathcal{O}_i$ and functions $O_i$, the rewards $R_i$ and the discount
+$\gamma$. The reward of agent $a_i$, $R_i : \mathcal{S} \times \mathcal{U}_1
+\times \dots \times \mathcal{U}_m \times \mathcal{S} \to \mathbb{R}$, takes the
+state before the step, the joint action and the state after it.}
+\new{where Table~V gives each element and where it was defined.}
+
+Table~V stays as it is.
+
+\subsection*{The action list}
+A stochastic game gives every agent one fixed list of actions, but the legal
+moves depend on where the agent stands. So the list is as long as the busiest
+vertex needs, one wait and one move per outgoing edge. Move number $k$ takes
+the $k$-th outgoing edge of the vertex the agent stands on, in vertex-number
+order. Moves that lead nowhere are switched off before the policy chooses
+\old{(Section VI-C)}\new{, so the ones left are the legal actions
+$\mathcal{U}(\ell_i(t))$ of ``Who decides''}. If the busiest junction has four
+exits, every agent has five actions, and in a one-way aisle two of them are
+switched on. Formally, with $d_{\max}$ the largest number of outgoing edges at
+any vertex, the action list is $\mathcal{U}_i = \{\mathrm{wait},
+\mathrm{move}_1, \dots, \mathrm{move}_{d_{\max}}\}$.
+
+\subsection*{The policy}
+The policy and the transition \old{kernel}\new{rule} answer two different
+questions. The policy answers what each agent tries to do. From what the agent
+observes it gives a probability to each legal action, for example
+\old{move north}\new{$\mathrm{move}_1$} with probability $0.7$ and wait with
+probability $0.3$, and one action is drawn. The drawn actions of all agents,
+side by side, form the joint action $u_t$, the whole fleet's decision for this
+timestep. \old{Under the centralised controller the agents draw their actions
+one after another, each seeing the earlier draws, and the result is the same
+kind of joint action. The section-based controller does the same inside each
+zone.}
+
+\subsection*{The transition rule}
+The transition \old{kernel}\new{rule} answers what then happens to the
+warehouse. It takes the current state and the joint action and applies
+everything that is not a choice of any agent. Conflicts are resolved, the
+shared assignment rule pairs free agents with waiting tasks, the storage
+update is applied, and newly arrived orders are added. The result is the next
+state $s_{t+1}$. \old{The kernel is therefore not a state but the rule that
+produces one. Its only randomness is the arrival of orders,}\new{It is random
+in two places only, which orders arrive and which dock a put-away or a
+shipment is drawn to,} so the same state and joint action always move the
+agents in the same way. Formally, $P(s' \mid s_t, u_t)$ is the probability
+that the next state is $s'$. \old{The assignment rule and conflict resolution
+are the same for every controller, so they are part of $P$, not of any
+policy.}
+
+\subsection*{The observation function}
+\old{Only the observation changes between the controllers. Everything else in
+the game is the same.}\new{The controllers differ in two things, what an agent
+observes and which agents choose together. Which agents choose together is
+part of the policy, as set out in ``Who decides''. What an agent observes is
+the observation function.} A centralised agent sees the whole state, a
+section-based agent sees its zone, and a decentralised agent sees its own
+view. Formally, the \emph{observation function} is
+\[
+  O_i(s_t) =
+  \begin{cases}
+    (s_t,\, i) & \text{centralised},\\
+    (s^{(q)}_t,\, i) \text{ with } \ell_i(t) \in Y_q & \text{section-based},\\
+    o_i(t) & \text{decentralised}.
+  \end{cases} \tag{25}
+\]
+\old{It is deterministic, so the same state always gives the same
+observation.}
+
+The three views fit inside each other. The centralised controller sees
+everything the section-based one sees, and that one sees everything a
+decentralised agent sees. \old{Messages and the moves of earlier agents are
+not part of what an agent sees, so they do not change this.}\new{The moves of
+earlier agents and the messages are inputs to the policy and not part of
+$O_i$, so they are left out of this comparison.}
+
+\subsection*{The objective}
+All agents are alike, work toward the same goal and share one set of
+parameters $\theta$. \new{For the decentralised controller these are the
+weights every agent uses. For the centralised and section-based controllers
+they are the weights of the network over the whole graph or over a zone.} The
+learning objective is therefore stated for the whole team. It is the average
+reward the fleet earns per timestep, added up over the horizon, with rewards
+further in the future counting less. The discount factor $\gamma \in [0,1)$
+sets how much less,
+\[
+  \max_{\theta} J(\theta) = \max_{\theta} \mathbb{E}_{\pi_\theta}
+  \Bigl[ \sum_{t=0}^{T-1} \gamma^{t}\, \frac{1}{m} \sum_{i=1}^{m} R_i(t)
+  \Bigr]. \tag{26}
+\]
+Here $\pi_\theta$ stands for the policy being trained,
+$\pi^{\mathrm{cen}}_\theta$, $\pi^{\mathrm{sec}}_\theta$ or
+$\pi^{\mathrm{dec}}_\theta$, by the controller. $R_i(t)$ is short for
+$R_i(s_t, u_t, s_{t+1})$, the reward agent $a_i$ earns on the step from $s_t$
+to $s_{t+1}$.
+
+\old{The same objective is used for all three learned controllers. Only what
+$\theta$ stands for changes. For the decentralised controller it is the
+weights shared by all agents. For the centralised and section-based
+controllers it is the weights of the network over the whole graph or over a
+zone, as in (14) and (16).}
+
+\old{Sharing one objective does not mean the three controllers learn the same
+thing. An action is judged by the average reward of the agents that chose
+together with it. So a decentralised agent is not charged for the delay it
+causes others, but a centralised agent is.}
+
+The reward $R_i$ itself is left open here. It is only a tool for getting a
+policy that does well on the system-level measures of Section V-J, so it can
+be redesigned without changing the problem. It is given in Section VI-F.
+
+\section*{Part 5. Implementation, after \texttt{eq:credit}}
+
+The paragraph that ends with \texttt{eq:credit} gets two new paragraphs after
+the formula.
+
+\begin{greenblock}
+The groups split the fleet, so the credits of all agents add up to the
+fleet's reward at every timestep. Every controller therefore works toward the
+same objective, the fleet average of eq.~(26). The credit only changes which
+rewards an agent's choice is judged by.
+
+A centralised agent's choice is judged by the reward of the whole fleet, so
+it pays when it holds up any other agent. A section-based agent pays only
+when the agent it holds up is in its own zone. A decentralised agent is
+judged by its own reward. It pays for the crowd around it through the
+crowding term, but not for the time it costs the agents it holds up. Credit
+follows the agents that choose together because they act as one
+decision-maker.
+\end{greenblock}
+
+\section*{Part 6. What changes elsewhere}
+\begin{itemize}[nosep]
+  \item \texttt{A.Notation.tex} and \texttt{2.Notation.tex}, a new row for
+        $L_i(t)$, ``vertices in agent $i$'s field of view where another agent
+        stands''. The letter $L$ is free.
+  \item Scope and assumptions, ``Deterministic execution'': ``the only
+        randomness is which orders arrive'' becomes ``the only randomness is
+        which orders arrive and which dock a put-away or shipment uses''.
+  \item \texttt{GAPS.md}, a new entry [A107] with the three changes, the two
+        tags \texttt{\% [A107]} in the chapters, and a note that it revises
+        the randomness sentence of [A12]/[A32].
+  \item Figure~9 is not redrawn. It already shows where the agents stand.
+\end{itemize}
+
+\section*{Part 7. Questions}
+\begin{enumerate}
+  \item Is $L_i(t)$ worth a symbol, or should the occupied vertices stay in
+        words and the tuple read ``the field of view with its occupied
+        vertices''? I added it because the tuple in eq.~(23) needs something to
+        list.
+  \item The code also gives a decentralised agent the role of each vertex. I
+        put that in words inside the field of view, since the roles are
+        part of $G$ already. Is that enough, or should the role show in the
+        tuple too?
+  \item With $L_i(t)$ in the observation, $\delta_i(t)$ can be counted from it.
+        Keep the sentence in Part~3 that says so, or leave it out?
+  \item The other margin comments are not in this proposal. These are the
+        messages placed before ``Putting the pieces together'', the idle
+        target paragraph's place, the forward references to Section VI, the
+        names in Figure~10, and the reasons for $\dobs=2$ and for hearing
+        along the aisles. Take them in a second round, or add them here?
+\end{enumerate}
+
+\end{document}
