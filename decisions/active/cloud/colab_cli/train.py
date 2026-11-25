@@ -81,6 +81,8 @@ try:
         cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "resume", RUN]
         # A run that started on a CPU continues on this machine's GPU (resume --gpu, 8478c99).
         cmd += ["--gpu", "--env-runners", str(JOB["runners"])] if JOB.get("gpu") else []
+        # A run that started on a GPU continues on this CPU machine (RESUME_CPU=1, resume --cpu).
+        cmd += ["--cpu", "--env-runners", str(JOB["runners"])] if JOB.get("resume_cpu") else []
     else:
         cmd = [sys.executable, "-m", "slap_mapd_coupling.main", "train", "--config", config,
                "--controller", JOB["controller"], "--regime", JOB["regime"],

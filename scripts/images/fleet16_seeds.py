@@ -8,9 +8,13 @@ Out:  thesis-progress/scripts/Images/fleet16_seeds.png
       thesis-progress/scripts/Images/fleet16_seeds_short.png   the same for the short runs
 
 Reads the rows `slap-mapd evaluate` wrote under ~/thesis_runs/evaluation/fleet_16, counted with
-served_counts.recount ([A96]). A seed locks when two agents hold the same task for 500 steps or
-more (`longest_two_agent_hold`, as in tab:exp:locks).
+served_counts.recount ([A96]). A seed locks when two agents on neighbouring vertices both stand
+still, each holding its task, for 200 steps in a row ([A136], `longest_pair_stand_still`, as in
+tab:exp:locks). The test rows predate that measure, so it is read from the lock replays in
+~/thesis_runs/locks_replay/rows. A seed without a replay cannot reach 200 steps. The short runs
+were not replayed, so their figure marks no lock.
 """
+import json
 import os
 import random
 import statistics
@@ -41,7 +45,8 @@ def save(fig, name):
     return path
 
 SOURCE = os.path.expanduser("~/thesis_runs/evaluation/fleet_16")
-LOCK = 500
+LOCK = 200
+REPLAYS = Path.home() / "thesis_runs/locks_replay/rows"
 ARMS = {"centralised": "centralised", "section": "section-\nbased",
         "decentralised": "decentralised", "decentralised_comm": "with\nmessages"}
 ARM_COLOUR = {"centralised": C["accent"], "section": C["ep_e"],
@@ -58,13 +63,16 @@ def seeds(arm, rule, long=True):
         path = os.path.join(SOURCE, arm, name.format(rule=rule), SERVED, "test.jsonl")
         if os.path.exists(path):
             found = rows(Path(path), rule)
-            if found:
+            if len(found) == 20:  # a run still being tested is left out, not drawn half done
                 out = []
                 for r in found:
                     c = recount(r)
                     up = all(share is None or share >= F_UP
                              for share in (c["served_share_picks"], c["served_share_putaways"]))
-                    out.append((c["served_share"], up, r["longest_two_agent_hold"] >= LOCK))
+                    replay = REPLAYS / f"16_{arm}_{name.format(rule=rule)}_{r['seed']}.jsonl"
+                    pair = (json.loads(replay.read_text().splitlines()[0])["longest_pair_stand_still"]
+                            if long and replay.exists() else 0)
+                    out.append((c["served_share"], up, pair >= LOCK))
                 return out
     return None
 

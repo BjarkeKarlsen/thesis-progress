@@ -1,6 +1,6 @@
 controller | rule | share lost | seeds with loss | folder
 centralised | fixed | 0.0% | 0/20 | centralised/fixed_long_part2
-centralised | demand | not evaluated yet | | 
+centralised | demand | 0.4% | 4/20 | centralised/demand_long_part2
 centralised | congestion | 0.0% | 0/20 | centralised/congestion_long
 section-based | fixed | 0.7% | 3/20 | section/fixed_long_part2
 section-based | demand | 0.3% | 2/20 | section/demand_long_part2

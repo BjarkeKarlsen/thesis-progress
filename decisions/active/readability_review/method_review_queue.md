@@ -21,8 +21,9 @@ At the end, all readability points go into one review PDF for the chapter.
 | When moves still clash | `sec:method:resolution` | **done 24 Nov** ([A126]) | `done/review_method_resolution.pdf` |
 | What an agent is rewarded for | `sec:method:rl` | **done 24 Nov** ([A127]) | `done/review_method_reward.pdf` |
 | How the controllers learn | `sec:method:training` | **done 24 Nov** ([A128]) | `done/review_method_training.pdf` |
-| A reference point | `sec:method:reference` | reviewed 20 Nov | `method_reference_comments.md` |
-| Implementation (simulator, logging, cost, checks) | `sec:implementation` | reviewed 20 Nov | `implementation_comments.md` |
+| Token Passing (was A reference point) | `sec:method:reference` | **done 25 Nov** ([A137]) | `done/review_method_reference.pdf` |
+| Moves out of the Method (lock example, fleet 32, training, logging, cost, put-away) | several | **done 25 Nov** ([A138], part 1 as [A140]) | `done/review_method_moves.pdf` |
+| Implementation (simulator, logging, cost, checks) | `sec:implementation` | **done 25 Nov** ([A139]) | `done/review_implementation.pdf` |
 | Appendices A to L | `app:*` | reviewed 20 Nov | `appendix_<X>_<name>_comments.md` |
 
 ## Decisions waiting for the author (20 Nov, most important first)
@@ -76,14 +77,14 @@ These are choices, not facts, so no agent fixed them.
    **Appendix E capacities.** Found with the old keep-up check. The [A96]
    check gives 0.175, 0.35, 0.6, 1.2, so the main loads are about 0.5 of
    capacity, not 0.6 (`appendix_E_load_comments.md` A1).
-5. **Names and symbols.** Zone or section, w, message, h(k), B and Q, q
+5. **Settled (author 2026-11-25, notation table checked).** **Names and symbols.** Zone or section, w, message, h(k), B and Q, q
    (`appendix_A_notation_comments.md` C2 to C9, `method_controllers_comments.md` C1).
-6. **Report the order gain beside the pick gain** in Appendix F (order gain
+6. **Settled by [A116] (2026-11-23).** **Report the order gain beside the pick gain** in Appendix F (order gain
    14 to 18 percent) (`appendix_F_demand_comments.md` A1).
-7. **Trip legs** (`review_trip_legs.pdf`, now also Appendix G).
-8. **The stall length** and whether a fleet-level gap is fair across loads
+7. **Settled by [A122] (2026-11-23).** **Trip legs** (`review_trip_legs.pdf`, now also Appendix G).
+8. **Settled by [A118] (2026-11-23).** **The stall length** and whether a fleet-level gap is fair across loads
    (`appendix_H_horizon_comments.md` A2).
-9. **Merge the 32 and 64 congestion rows** of the tp-a93 rerun into Appendix G
+9. **Settled by [A117] (2026-11-23).** **Merge the 32 and 64 congestion rows** of the tp-a93 rerun into Appendix G
    (`appendix_G_storagevalues_comments.md` A1).
 10. **Figures to redraw.** H.1 to H.3, D.2, D.3, L.1, L.2, Fig. 15 in viewer
     colours, J.1 (data exists), K.1.

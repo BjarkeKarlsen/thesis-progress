@@ -1,0 +1,384 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{(\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\mockup}[1]{\fbox{\small mockup: #1}}
+\title{Proposed change, ``Locks, larger fleets and a fleet reward test''}
+\date{25 November 2026, version 4}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This follows the discussion of 25 November on the performance test at 8, 32
+and 64 agents. Agreed so far:
+\begin{itemize}[nosep]
+  \item Why the decentralised controllers lock is a result and a discussion
+    point, not part of the Method. The Method keeps the design facts with
+    their reasons and loses the sentences that predict behaviour.
+  \item The Discussion may not bring new information. So the run that tests
+    the explanation is described in the Setup, reported in the Results and
+    only read in the Discussion.
+  \item The test gives both decentralised controllers a fleet
+    reward like CRAMP's. It is a test of the explanation, not a new
+    controller, and the main results do not change.
+  \item New in version 4: the five questions are answered (see the end). A
+    lock is now two agents on neighbouring vertices that both stand still,
+    each holding its task, for 200 steps in a row. The threshold is high on
+    purpose and the text says why. The weight gets its reason. The lock
+    counts wait for the replays on the Lenovo, so they are shown as
+    \mockup{waiting}. Both fleet reward runs are training and neither has
+    collapsed.
+  \item New in version 3: both decentralised controllers get the fleet
+    reward, and the new runs are trained exactly as the long 16-agent runs,
+    from the same starting policies for the same 2\,000\,000 steps. The long
+    runs are then the comparison, and no separate control is trained. The new
+    policies are played at 32 and 64 agents. Locks are described as part of
+    every larger fleet, with shared credit making them shorter.
+  \item New in version 2: why tasks and not orders, the noise of rewards
+    from agents far away, the weight fixed before the run, the test added after
+    the results but designed before it ran, one training run per arm, task
+    against order in the Discussion, and what happens if run A collapses.
+  \item COMA and Wolpert and Tumer are not cited. COMA's critic sees the whole
+    warehouse, which the Method rejects. CRAMP and van Knippenberg et al.\
+    are the precedent, and both are already cited.
+\end{itemize}
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet. The
+run has not been made, so its results are mockups. The questions are at the
+end.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \textbf{Performance test} (\texttt{results/L\_results/scaling/perf/},
+    240 of 240 episodes exit 0). The congestion-aware 16-agent policies at
+    their [A111] checkpoints, 20 test seeds, 10\,000 steps, 5000 warm-up, at
+    8, 32 and 64 agents. Main loads 0.09, 0.3, 0.6.
+  \item \textbf{Token Passing at 32 and 64} was run in the Appendix~E load
+    sweep (fixed storage, 20 seeds). Capacity 0.5 and 1.0, so the main load
+    is 0.6 of capacity at every fleet size. At 32 agents it keeps up on 20 of
+    20 seeds even at 0.6. The load is not too heavy. The learned controllers'
+    full fleets (busy share 1.00) and backlogs of 1700 to 2100 are their own.
+  \item \textbf{The 32-agent trained policies are old.} Trained on commit
+    \texttt{0c5427b}, before [A93], [A96], [A111] and the observation change of
+    \#212. Only decentralised fixed and demand and section-based fixed
+    finished, none under congestion-aware storage and none with messages. They
+    are left out and not mentioned. Every result at 8, 32 and 64 agents comes
+    from the 16-agent policies. A backup with their settings, commits and
+    training curves is in \texttt{thesis-progress/results/training/fleet\_32/}.
+  \item \textbf{Credit} (\texttt{training/env.py}, \lab{eq:credit}). The
+    credit group is the whole fleet for the centralised controller, the zone
+    for the section-based one and the agent alone for the decentralised one.
+    So only the decentralised controllers have no shared reward.
+  \item \textbf{Reward in a lock} (\lab{eq:reward}, Appendix~B). A chosen
+    wait costs $c_{\mathrm{wait}} = 0.2$. A refused move costs $0.2 +
+    n_{\mathrm{override}} = 0.7$. Backing out costs a move and loses
+    progress. van Knippenberg et al.\ set waiting above moving for the same
+    reason, to keep agents moving.
+  \item \textbf{CRAMP} (Pham and Bera, \texttt{papers/2309.10275v3.pdf},
+    Section~III-D). Decentralised, GNN messages. ``To foster teamwork, agents
+    receive a significant reward when all complete an episode together but
+    face penalties for hindering others.'' $R_e = +20$ to all agents when all
+    reach their goals. Their limitation: deadlocks when two robots enter one
+    corridor from opposite ends, ``like prioritizing one robot's passage''.
+  \item \textbf{Locks with the new definition} (two agents on neighbouring
+    vertices both stand still, each holding its task, 200 steps in a row),
+    seeds out of 20, congestion-aware storage. The old count (any two agents
+    holding tasks 500 steps) grew with the fleet without a jam and did not
+    match the text. The new counts come from \texttt{longest\_pair\_stand\_still}
+    (PR \#216) in the replays on the Lenovo, 18 of 70 done. Only episodes
+    where one agent stood still for 200 steps or more can lock, and those are
+    the ones replayed. Token Passing's longest single stand-still is 23, 30,
+    55 and 64 steps at 8, 16, 32 and 64 agents.
+\end{itemize}
+
+\begin{center}\small
+\begin{tabular}{l cccc c cccc}
+\toprule
+& \multicolumn{4}{c}{served share (seeds that keep up)} && \multicolumn{4}{c}{seeds that lock} \\
+\cmidrule(lr){2-5}\cmidrule(lr){7-10}
+controller & 8 & 16 & 32 & 64 && 8 & 16 & 32 & 64 \\
+\midrule
+centralised   & 1.00 (18) & 0.81 (5) & 0.84 (2) & 0.94 (18) && ? & ? & ? & ? \\
+section-based & 0.99 (18) & 0.79 (6) & 0.87 (7) & 0.94 (17) && ? & ? & ? & ? \\
+decentralised & 0.97 (17) & 0.80 (6) & 0.79 (2) & 0.70 (3) && ? & ? & ? & ? \\
+with messages & 0.99 (19) & 0.34 (0) & 0.51 (1) & 0.69 (10) && ? & ? & ? & ? \\
+\bottomrule
+\end{tabular}
+\end{center}
+\note{The lock columns wait for the replays. With the old count, nearly every
+seed at 64 agents ``locked'' while the centralised and section-based
+controllers still served 0.94, which is why the definition changed.}
+
+\section*{Part 2. Method, \lab{sec:method:resolution} (4.Implementation)}
+\note{Design facts stay, each with its reason. The sentences that say what an
+agent will learn go to the Results and the Discussion.}
+
+No rule is added to break the lock. A cap on the open tasks of a
+workstation was rejected, because it would change the assignment rule that
+every controller shares and works against orders whose lines all go to the
+same workstation. Conflict resolution gets no rule for it either, such as
+making the agent at the workstation back out, so that whether the learned
+controllers learn to back out is part of what is measured. A decentralised
+agent's credit is its own reward only (Section~\ref{sec:method:training})\old{,
+so it gains nothing when it backs out for another agent}\new{.} The
+section-based and centralised controllers share the credit of their
+group\old{, so they have a reason to learn it}\new{.} The crowding
+term is the same whether an agent waits or backs out. An agent whose move
+is refused pays the wait cost and the override term of
+\nref{eq:reward}, and an agent that chooses to wait pays the wait cost
+alone. \old{So in front of a workstation, choosing to wait is cheaper than
+asking for a vertex that stays taken.} In a circle every agent in it asks to
+move and is refused, so all of them pay. \old{A message can tell a decentralised
+agent that another agent is stuck, but it does not change the agent's
+reward, so backing out still gains it nothing. Whether messages make the
+lock rarer is part of RQ4.} Token Passing does not lock this way, for the
+reason given in Section~\ref{sec:method:reference}.
+
+\section*{Part 3. Setup, a new paragraph after ``Training'' (5.Experiments)}
+\note{The test is part of the experiment, not of the method, so it is
+described where the other runs are. The full design and the training curves
+go to a new section of Appendix~L, \lab{app:results:fleetreward}.}
+
+\new{\textbf{The fleet reward test.} The two decentralised controllers hold
+tasks longest, and they are the only ones whose credit is their own reward
+alone. One reading is that their reward gives an agent no reason to back
+out. The test checks that reading under congestion-aware storage. Each
+decentralised controller, with and without messages, is trained once more
+exactly as its long 16-agent run, from the same starting policy and for the
+same 2\,000\,000 steps, with a fleet reward added. The long runs are the
+comparison, so the reward is the only difference. If the new runs lock less,
+the shared reward was the missing piece. If they lock as often, it was not,
+and the cause lies in training or elsewhere. The test was added after the main results showed the locks. Its design, its
+measures and what each outcome means were written down before it ran
+(Appendix~\ref{app:results:fleetreward}).}
+
+\new{The fleet reward follows CRAMP \citep{pham2024optimizingcrowdawaremultiagentpath},
+which gives every agent a bonus when the whole fleet reaches its goals.
+Tasks here keep arriving, so there is no moment when all are done. Instead,
+each time any agent finishes a task, every agent gets a share of its
+delivery bonus. An agent then gains when another agent finishes, also when
+it backed out to let it pass. The share is the mean over the fleet, so on
+average an agent earns as much from the fleet's deliveries as from its own.
+The test asks whether shared credit changes what the agents do, not which
+weight works best, so the weight was set to this one value before the run
+and not tuned.}
+
+\new{The bonus follows finished tasks, not finished orders, for three reasons.
+The agent's own reward already pays per task, so sharing the same bonus
+changes only who is credited and nothing else. No controller sees which
+order a task belongs to, so an order bonus would pay for something the agent
+cannot see. A task also finishes every few steps, while an order waits for
+its last line, and a frequent reward is easier to learn from. The same
+problem remains in a smaller form. An agent is also paid when an agent far
+away finishes a task, which it neither sees nor helped. Taking the mean over
+the fleet keeps that share small, but it adds noise to what the agent learns
+from, and the test shows whether the noise outweighs the gain.}
+
+\new{Formally, with $m$ agents and weight $n_{\mathrm{fleet}}$, the reward of
+agent $a_i$ in the test run is}
+\new{\begin{equation}
+  R^{\mathrm{fleet}}_i(t) = R_i(t) + n_{\mathrm{fleet}}\,\frac{1}{m}
+  \sum_{j=1}^{m} n_{\mathrm{deliver}}\,\mathbb{1}[a_j \text{ completes a task at } t],
+  \qquad n_{\mathrm{fleet}} = 1 .
+  \label{eq:fleetreward}
+\end{equation}}
+\new{The agent still acts on its own window and its messages. Only its
+reward reports on the whole fleet, so the test steps past the rule that a
+controller learns only from what it decides for
+(Section~\ref{sec:method:training}). It does so on purpose, to test the
+explanation, and it is not a fourth controller. Both runs are evaluated as
+the other 16-agent runs and then played at 32 and 64 agents. Each
+controller is one training run. The 20 test seeds show how much a result varies between
+warehouses, not between training runs, so a small difference between the two
+runs is not taken as an effect.}
+
+\note{$n_{\mathrm{fleet}}$ is new, add it to \lab{tab:notation}. The sum
+includes $a_i$ itself, as CRAMP's team reward does.}
+
+\section*{Part 4. Results (5.Experiments)}
+
+\subsection*{4.0. ``RQ1'', where a lock is defined (before \lab{tab:exp:locks})}
+\note{The text and the code now agree. The 16-agent counts in
+\lab{tab:exp:locks} change with the replays.}
+
+Locks explain most of the decentralised controller's failure at 16 agents
+(Table~\ref{tab:exp:locks}). \old{A seed locks when two agents hold the same
+task for 500 steps or more.} \new{A seed locks when two agents on
+neighbouring vertices both stand still, each holding its task, for 200 steps
+in a row. The threshold is set high on purpose. The measure only watches and
+never stops a run, so two agents that wait and then clear the way themselves
+do not count as a lock. A lock is a pair that stays stuck long after the
+controller should have resolved it.} The decentralised controller locks on
+\mockup{waiting} seeds\ldots
+
+\subsection*{4a. A new paragraph after ``RQ3, load'', larger fleets}
+\note{The step time paragraphs already say the 32 and 64 policies are the
+16-agent ones. This reports how well they serve.}
+
+\new{\textbf{Larger fleets.} The policies trained at 16 agents serve well at
+8 agents, where every learned controller keeps up on 17 to 19 of 20 seeds
+(Table~\ref{tab:exp:fleets}). At 32 agents all of them fall behind, and at 64
+agents the centralised and section-based controllers recover to a served
+share of 0.94 while the two decentralised ones stay near 0.7. Token Passing
+keeps up at 32 and 64 agents at the same share of its capacity
+(Appendix~\ref{app:load}), so the larger warehouses are not too heavy.}
+
+\new{\mockup{Locks at each fleet size, from the replays. One sentence on how
+the counts change with the fleet and one on how they follow the served
+share. The version 3 sentences used the old count and are dropped.}}
+
+\note{Table \lab{tab:exp:fleets}: the table of Part 1, served share with the
+seeds that keep up, and the seeds that lock. Caption: ``Served share at each
+fleet size of the policies trained at 16 agents, and the test seeds that
+lock, out of 20.''}
+
+\subsection*{4b. ``RQ4, communication'', the end}
+The decentralised controller with messages still locks on 15 to 20 seeds,
+so messages do not let two agents back out of a lock. \new{The same holds at
+32 and 64 agents (Table~\ref{tab:exp:fleets}).}
+
+\subsection*{4c. A new paragraph after RQ4, the fleet reward test}
+\new{\textbf{The fleet reward test.} \mockup{seeds that lock and served share
+and holds of 1000 steps at 16, 32 and 64 agents, each decentralised
+controller with the fleet reward against its long run, paired by seed. One sentence per outcome, no reading.}}
+
+\section*{Part 5. Discussion (5.Experiments)}
+
+\subsection*{5a. A new paragraph after ``Why the learned controllers fall
+behind''}
+\note{This reads the results of Part 4 and adds nothing new. It points back
+to the tragedy of the commons in the Background.}
+
+\new{\textbf{Why the decentralised controllers lock.} Every learned
+controller locks more as the fleet grows, because agents meet more often.
+How long a lock lasts follows how the reward is shared. The more of the fleet
+an agent's credit covers, the sooner its locks end. The centralised controller
+shares the whole fleet's reward and its locks end soonest, the section-based
+controller shares its zone's, and the decentralised controller has only its
+own. A decentralised agent in a lock
+pays to back out, by a move and lost progress, while the agent it lets pass
+gains. Waiting is also cheaper than asking for a vertex that stays taken. So
+for each agent alone, waiting is the better choice, and when both wait,
+neither moves. This is the pattern of the tragedy of the commons from the
+Background, choices that are sensible for each agent and bad for the fleet.}
+
+\new{Messages were the local signal meant to solve this, and they did not.
+A message can carry that another agent is stuck, but it does not change what
+an agent is paid for. The messages are learned, so what they carry is not
+known, and the runs cannot tell why the controller with messages locks more
+often than the one without. Part of it may be the fleet size, since at 32
+agents an agent receives more messages than in training.}
+
+\new{The fleet reward pays for tasks because the controllers do not see
+orders. A task bonus fits that, but it also pays an agent for tasks far away
+that it neither saw nor helped, so part of what it learns from is noise. An
+order bonus is closer to what the warehouse wants, since the customer waits
+for the whole order. It only makes sense once the agent can see its order.
+With deadlines on orders, as proposed below, the agent's features would
+carry which order its task belongs to and the time left, and the fleet
+reward could then follow finished orders, or orders finished in time.}
+
+\new{\mockup{The fleet reward test, read. If the runs with the fleet reward
+lock less than their long runs, the missing piece was the shared reward. If
+they lock as often, it was not, and training or the lock itself is the
+better explanation.}}
+
+\subsection*{5b. ``What could have been done differently'', the item on locks}
+\old{\emph{A way out of locks.} Most of the decentralised controller's loss is
+locks. A shared credit, or a rule that makes one of two locked agents
+give way, would let them back out.}
+
+\new{\emph{A way out of locks.} \mockup{Depends on the test.} Three ways
+follow from the reading above. A penalty for holding a vertex that another
+agent's move is refused onto, as CRAMP penalises hindering others, keeps the
+signal local. A credit group of the agents within an agent's own window, as
+PRIMAL tried \citep{sartoretti2019primal}, shares the reward without reaching
+past what the agent sees. A rule in conflict resolution that gives one of the
+two agents priority, as CRAMP proposes for its own head-on locks, ends the
+lock without learning. Training at the fleet size the controller will run at
+would let it meet the locks of that fleet.}
+
+\note{COMA is left out. Its critic sees the whole warehouse, which
+\lab{sec:method:training} rejects with a reason, and offering it here would
+contradict that choice. If wanted, one clause in ``Threats to validity''
+can say that the decentralised controllers learn from less than the usual
+centralised critic gives, and may be held back by it.}
+
+\section*{Part 6. The runs}
+\begin{itemize}[nosep]
+  \item \textbf{Two runs, one per decentralised controller,} under
+    congestion-aware storage. Each starts from the same policy as its long
+    run (the Kaggle dataset \texttt{slap-init-f16-decentralised}):
+    without messages \texttt{decentralised/congestion}
+    \texttt{checkpoint\_000027}, with messages
+    \texttt{decentralised\_comm/congestion} \texttt{checkpoint\_000013}.
+  \item \textbf{Same settings as the long runs.} 16 agents, arrival rate 0.18,
+    16\,000-step episodes, 3 runners, 2\,000\,000 steps (about 42
+    iterations), checkpoints every 3 iterations. Only \eqref{eq:fleetreward}
+    is added. The comparison is the long run of the same controller
+    (\texttt{decentralised/congestion\_long} and
+    \texttt{decentralised\_comm/congestion\_long\_part2}), already evaluated.
+    The text says all runs were trained the same way (author).
+  \item \textbf{Code.} One option in the training config, off by default. A
+    small PR from main. Before launch, one iteration with the option off is
+    checked to match commit \texttt{6dbe094}, which trained the long runs.
+  \item \textbf{Where (as running).} Without messages on Kaggle's GPU to
+    about iteration 7, then continued on the PC once the centralised demand
+    evaluation ends. With messages on Colab (L4) to about iteration 24, then
+    continued on the PC after the run without messages. At iteration 4 both
+    are at or above their long runs (tasks per step 0.215 against 0.210
+    without messages, 0.127 against 0.086 with messages), so neither has
+    collapsed.
+  \item \textbf{Evaluation.} As every 16-agent run: 5 validation seeds choose
+    the checkpoint at $f_{\mathrm{up}} = 0.9$, then 20 test seeds, 10\,000
+    steps, 5000 warm-up. Then the chosen checkpoint at 32 and 64 agents on the
+    20 performance test seeds.
+  \item \textbf{Measures.} Seeds that lock (200 steps, new definition),
+    longest pair stand-still, served share, seeds that keep up, the override count, paired by seed
+    against the long run.
+  \item \textbf{If a run collapses.} The training log is checked now and then.
+    If tasks per step fall well below the long run's at the same iteration
+    and keep falling for four iterations, the run is stopped and the test is
+    dropped from the chapters (author). See Question 5.
+\end{itemize}
+
+\section*{Questions, answered 25 November}
+\begin{enumerate}
+  \item \textbf{Lock threshold.} 200 steps under the new definition, kept
+    high on purpose because the measure only watches and should count pairs
+    that stay stuck, not pairs the controller resolves itself (author). The
+    reason is in 4.0.
+  \item \textbf{Weight.} $n_{\mathrm{fleet}} = 1$, agreed. The text gives the
+    reason, the test is about shared credit, not about tuning a weight
+    (Part 3).
+  \item \textbf{Placement.} Agreed. Setup paragraph, Results table and
+    paragraph, Discussion reading, details in a new Appendix~L section.
+  \item \textbf{The old 32-agent runs.} Left out and not mentioned. A backup
+    is kept in thesis-progress (Part 1).
+  \item \textbf{A collapse.} Neither run has collapsed so far, so the test
+    goes in. If one collapses later, the one sentence in Appendix~L stays as
+    proposed.
+\end{enumerate}
+
+\section*{Still to do before applying}
+\begin{itemize}[nosep]
+  \item Fill the lock columns and 4.0, 4a from the replays (18 of 70 done).
+  \item Fill 4c and the Discussion mockup from the fleet reward runs once
+    they are evaluated.
+  \item Apply to the thesis as [A143] with a GAPS.md entry, and add
+    $n_{\mathrm{fleet}}$ to \lab{tab:notation}.
+\end{itemize}
+
+\end{document}

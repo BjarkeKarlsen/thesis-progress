@@ -1,0 +1,391 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\newcommand{\nref}[1]{(\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\mockup}[1]{\fbox{\small mockup: #1}}
+\title{Proposed change, the lock test}
+\date{25 November 2026, version 3}
+\begin{document}\sloppy
+\maketitle
+
+\section*{What changed in version 3}
+\begin{itemize}[nosep]
+  \item New part 3, how an episode ends. The code cuts a training episode
+    and lets the critic's value stand in for the rest, and no run is ever
+    stopped on a jam. The thesis says neither. Three sentences, one in the
+    Method, one in the Setup and one in the threats.
+\end{itemize}
+
+\section*{What changed in version 2}
+\begin{itemize}[nosep]
+  \item No new runs. The text says plainly what the lock measure can and
+    cannot show, instead of testing more thresholds (2a, 2h).
+  \item The threshold gets its reason. Token Passing never deadlocks, so its
+    longest wait is normal waiting, at most 74 steps. 200 is almost three
+    times that, and it was fixed before the learned runs were counted.
+  \item Question 1 is answered as option (a). The text says only what the
+    data shows, that locks are rare and that decentralised agents stand
+    still alone for long. The cause stays open (2e, 2f, 2g).
+  \item Appendix L gives the counts at 200 and at 500 steps, both from the
+    replays (2i).
+  \item The served table at 16 agents is left to its own review (question 4).
+\end{itemize}
+
+\section*{How to read this}
+The lock is now measured as agreed on 25 November. Two agents on
+neighbouring vertices both stand still, each holding its task, for 200 steps
+in a row. All 70 episodes that could reach 200 steps were replayed, and every
+replay gave its original row back. This review puts the new counts in the
+thesis and changes every sentence that leans on the old count.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say where a number comes from. Nothing below is in
+the thesis yet. The questions are at the end.
+
+\textbf{Overlap.} \lab{review_locks_fleet_reward} (version 4) already holds
+the new lock definition (its part 4.0) and leaves the lock counts as
+mockups. This review fills them. Once both are agreed they are applied
+together, the lock test as [A136] and the fleet reward test as [A143].
+
+\textbf{The main finding changes the argument.} Locks are much rarer than
+the old count said. Where they do happen, the seeds that lock serve no less
+than the seeds that do not. So locks do not explain why the learned
+controllers fall behind, and the text says they do in five places (parts 2c,
+2e, 2f, 2g and 2h). Question 1 asks what to say instead.
+
+\section*{Part 1. What the replays show}
+
+\textbf{16 agents.} Seeds that lock, out of 20, each rule played by the
+policy trained under it. In brackets the old count (two agents hold a task
+for 500 steps), as \lab{tab:exp:locks} has it now.
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+  \toprule
+  controller & fixed & demand & congestion-aware \\
+  \midrule
+  Token Passing & 0 (0) & 0 (0) & 0 (0) \\
+  centralised   & 0 (5) & \mockup{eval-pc} (3) & 0 (0) \\
+  section-based & 0 (5) & 0 (8) & 0 (3) \\
+  decentralised & 9 (20) & 1 (13) & 0 (3) \\
+  with messages & 2 (15) & 0 (20) & 1 (18) \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\note{Token Passing's longest stand-still of a single agent is 30 steps at 16
+agents, so no pair can reach 200. Centralised demand is still being tested
+on the PC. Its test rows are empty, so its count follows.}
+
+\textbf{Locked seeds serve no less.} Decentralised under fixed storage locks
+on 9 seeds. They serve 0.19 to 0.56, mean 0.34. The 11 seeds that do not lock
+serve 0.06 to 0.41, mean 0.24. With messages, the two locked seeds under fixed
+storage serve 0.51 and 0.68 against a mean of 0.63. Only one locked seed is
+far below the rest (with messages, congestion-aware, 0.08).
+
+\textbf{What the shortfall goes with instead.} The longest time a single
+agent stands still, median over the 20 seeds, is 9 to 16 steps for the
+centralised controller and 16 to 78 for the section-based one. For the
+decentralised controller it is 80 to 321 steps, and with messages 47 to 118.
+So decentralised agents stand still alone for a long time, without a
+neighbour that stands still too. \note{From the test rows,
+\lab{longest_stand_still}. Not yet checked where these agents stand.}
+
+\textbf{8, 32 and 64 agents} (the 16-agent congestion-aware policies, test
+seeds). Seeds that lock, out of 20.
+
+\begin{center}\small
+\begin{tabular}{l cccc}
+  \toprule
+  controller & 8 & 16 & 32 & 64 \\
+  \midrule
+  centralised   & 0 & 0 & 0 & 0 \\
+  section-based & 0 & 0 & 1 & 3 \\
+  decentralised & 0 & 0 & 3 & 7 \\
+  with messages & 0 & 1 & 7 & 7 \\
+  Token Passing & 0 & 0 & 0 & 0 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\note{Token Passing at 32 and 64 from its test-seed rows, which carry the new
+measure. Its longest pair stand-still is 31 and 66 steps, its longest single
+stand-still 43 and 74.}
+
+\textbf{The layout.} Under congestion-aware storage, up to 32 agents every lock of the section-based and
+decentralised controllers sits on a seed where one category has all its
+workstations on one-lane aisles. With messages also locks on 1 other seed at
+32 agents, and at 64 agents decentralised locks on 4 other seeds and with
+messages on 2. At 16 agents decentralised under fixed storage locks mostly
+off these seeds (8 of its 9 locks). \note{\lab{locks_README.md}, steps 2 and
+2b. Where the locks sit, from the position trace, follows in a mockup
+below.}
+
+\section*{Part 2. Proposed text}
+
+\subsection*{2a. Setup, where a lock is defined (5.Experiments, before
+\lab{tab:exp:locks})}
+\note{The definition is part 4.0 of the fleet reward review. Repeated here
+with the numbers filled.}
+
+\old{Locks explain most of the decentralised controller's failure at 16
+agents (Table~\ref{tab:exp:locks}). A seed locks when two agents hold the
+same task for 500 steps or more. The decentralised controller locks on 13 to
+20 seeds under fixed and demand storage, and with messages on 15 under fixed
+storage. Token Passing never locks.}
+
+\new{A seed locks when two agents on neighbouring vertices both stand still,
+each holding its task, for 200 steps in a row. The threshold is set high on
+purpose. The measure only watches and never stops a run, so two agents that
+wait and then clear the way themselves do not count as a lock. It is set from
+Token Passing, which never deadlocks in these warehouses. Its agents wait at
+most 74 steps, at any fleet size, so that is how long normal waiting lasts. The
+threshold is almost three times as long and was fixed before the learned runs
+were counted.}
+
+\new{A lock is a symptom with several causes. The layout, a controller's choice
+to wait and the queue behind the two agents all add to it, and the count
+cannot tell them apart. Stops shorter than 200 steps are not counted as locks
+and show up in the blocked time instead.}
+
+\new{Locks are rare at 16 agents (Table~\ref{tab:exp:locks}). The centralised
+and section-based controllers never lock. The decentralised controller locks
+on 9 seeds under fixed storage and on 1 under demand storage. With messages it
+locks on at most 2 seeds. Token Passing never locks.}
+
+\new{Locks do not explain why a controller falls behind. Under fixed storage
+the 9 seeds where the decentralised controller locks serve 0.34 on average,
+and the 11 where it does not serve 0.24.}
+
+\note{\lab{tab:exp:locks} takes the counts of part 1. The two TODO comments
+above it go. Caption unchanged.}
+
+\subsection*{2b. ``Why the count does not follow the mean'' and
+\lab{fig:exp:seeds}}
+
+\old{Locks spread the seeds further. When two agents hold one task for
+hundreds of steps, the work behind them waits, and the seed falls far below
+the rest. The section-based controller under fixed storage locks on five
+seeds, and four of them serve only 0.39 to 0.53.}
+
+\note{The paragraph goes. Section-based under fixed storage locks on no seed
+under the new measure.}
+
+Caption: Served share of each test seed at 16 agents. \old{A seed that locks
+can fall far below the rest.}
+
+\note{\lab{fleet16_seeds.py} marks a locked seed with a cross by the old
+count. Redraw with the replay counts, or drop the crosses. With 13 locked
+seeds in all, the crosses would show that locked seeds are not the low
+ones.}
+
+\subsection*{2c. ``RQ4, communication'', the end}
+\old{The decentralised controller with messages still locks on 15 to 20 seeds,
+so messages do not let two agents back out of a lock.}
+\new{Messages make locks rarer. Under fixed storage the decentralised
+controller locks on 9 seeds, and with messages on 2.}
+
+\note{Fixed storage is the only rule where the plain decentralised controller
+locks often, so it is the only fair comparison. Part 4b of the fleet reward
+review (``the same holds at 32 and 64'') no longer holds. At 32 agents with
+messages locks more (7 against 3).}
+
+\subsection*{2d. ``RQ3, scale'', after ``none keeps up on any seed''}
+\new{Locks appear as the fleet grows. At 8 and 16 agents the
+congestion-aware policies do not lock. At 64 agents the decentralised
+controller locks on 7 seeds, with messages on 7 and the section-based
+controller on 3. The centralised controller never locks. Token Passing locks
+on no seed at 32 or 64 agents.}
+
+\new{\mockup{One sentence on where the locks sit, from the position trace
+(step 3, running on the Lenovo).}}
+
+\note{This fills the lock mockup of part 4a of the fleet reward review. Its
+table \lab{tab:exp:fleets} gets the lock column of part 1.}
+
+\subsection*{2e. Discussion, ``Why the learned controllers fall behind''}
+\old{The learned controllers fall behind mostly through locks. Two agents that
+each wait for the other hold one task for the rest of the run, and the agents
+behind them queue. \citet{krnjaic2022warehouse_marl} saw the same with
+agents that share one policy, and a manager that spread the goals over the
+warehouse avoided it. The section-based controller does much the same and
+locks less.}
+
+\new{The learned controllers do not fall behind through locks. Locks are rare,
+and the seeds that lock serve no less than the others. What sets the
+decentralised controllers apart is that a single agent stands still for a
+long time while it holds a task, with no stuck agent beside it. Its longest
+stand-still is 80 to 321 steps on a typical seed, against 9 to 16 for the
+centralised controller. These waits add to the blocked time, which is 13 to
+26 steps per pick for the learned controllers and under 2 for Token Passing.
+Why the agents wait this long was not traced.}
+
+\note{The second sentence of the old text (\citet{krnjaic2022warehouse_marl})
+goes with it, since it explained locks. The rest of the paragraph (episode length, the long runs) stays.}
+
+\subsection*{2f. ``What could have been done differently'', the item on locks}
+\old{\emph{A way out of locks.} Most of the decentralised controller's loss is
+locks. A shared credit, or a rule that makes one of two locked agents give
+way, would let them back out.}
+
+\new{\emph{Where agents wait.} The decentralised agents stand still alone for
+long stretches. A trace of where they stand and what their goal is would show
+whether they wait before goals that cost them, or for another reason.}
+
+\note{The fleet reward test still asks whether shared credit helps, but no
+longer as a cure for locks.}
+
+\subsection*{2g. Related work, the end of the van Knippenberg sentence}
+Here waiting is the cheaper choice\old{, which helps explain the locks}.
+\new{, which may be why decentralised agents stand still for so long}.
+
+\subsection*{2h. Threats to validity, the item on one-lane aisles}
+Agents can lock at a workstation on an aisle one lane wide
+(Section~\ref{sec:method:resolution}). A category with all its workstations
+on such aisles occurs in 14\,\% of the warehouses at 8 agents and 27\,\% at
+32 agents, and in 5 of the 20 test warehouses at 8 agents. \old{At 16 agents
+the decentralised controller locks on every test seed under fixed and demand
+storage. Token Passing does not lock, so in these warehouses the gap between
+it and the learned controllers is partly the layout.} \new{Locks are rare,
+and under congestion-aware storage up to 32 agents those of the
+section-based and decentralised controllers sit on such warehouses. Locked seeds serve no less than the rest, so the
+layout explains little of the gap to Token Passing. The lock measure itself
+is limited. It sees two neighbouring agents that stand still for 200 steps,
+not why they stand still, and a jam of three agents or a stop of 150 steps
+does not count.} A shared reward for the
+decentralised controller, which would give it a reason to back out, is left
+to future work.
+
+\note{The last sentence changes once the fleet reward test is in.}
+
+\subsection*{2i. Appendix L, the lock paragraph and \lab{tab:app:locks}}
+\old{A seed locks when two agents each hold their own task for 500 steps or
+more at the same time. Table~\ref{tab:app:locks} counts these seeds at both
+fleets, with the stricter threshold of 1250 steps beside it. Fewer seeds lock
+at 8 agents, at most 10 of 20. At 16 agents the decentralised controller locks
+on every seed under fixed storage, and on all 20 even at 1250 steps.}
+
+\new{Table~\ref{tab:app:locks} counts the seeds that lock, as defined in
+Section~\ref{sec:exp:results}, with the longest lock of each run beside it.
+At 8 agents no policy comes near 200 steps. At 16 agents only the two
+decentralised controllers lock. Under fixed storage the decentralised
+controller locks on 9 seeds at 200 steps and on 2 at 500, and its longest lock
+lasts 1859 steps.}
+
+\note{Table: one row per controller, 8 agents congestion-aware only (all 0), 16
+agents each rule, cells ``200 / 500''. From the replays. 16 agents: decentralised
+fixed 9 / 2, demand 1 / 1, congestion-aware 0 / 0. With messages fixed 2 / 0,
+demand 0 / 0, congestion-aware 1 / 0. Centralised and section-based 0 / 0,
+centralised demand to follow.}
+
+\note{Caption: ``Test seeds that lock, out of 20, at 200 and at 500 steps.
+Token Passing locks on no seed.''}
+
+\subsection*{2j. Method, \lab{sec:method:resolution}}
+\note{No change proposed. It describes how two agents can lock at a
+one-lane workstation and why no rule breaks it, which the counts confirm
+for the section-based controller. It predicts no rates. Its sentence ``A
+decentralised agent \ldots gains nothing when it backs out'' fits the
+counts, since the decentralised controller is the one that locks.}
+
+\section*{Part 3. How an episode ends}
+
+\note{Checked in the code. RLlib marks the end of a training episode as
+truncated, not terminated (\lab{multi_agent_env.py}, \lab{training/env.py}),
+so PPO bootstraps the value of the last state. No run is stopped when agents
+jam, the reason is in GAPS.md, the stall rule that was not adopted.}
+
+\subsection*{3a. Method, \lab{sec:method:training}, a new paragraph after the
+first (``\ldots are in Appendix~\ref{app:training}.'')}
+
+\new{A training episode is cut at its length, not ended. The value estimate of
+the last state stands in for everything after the cut. So the policy is not
+taught that the warehouse stops there, and work it leaves open still costs
+what the value estimate expects it to cost later.}
+
+\subsection*{3b. Setup, ``Training'', after ``\ldots so a policy cannot learn
+one map by heart.''}
+
+\new{No run is stopped when agents jam. In an early run a policy recovered
+from stops of 94 and 223 steps, so a stop would have cut runs that recover. A
+stop would also make a jam cheaper, because the penalty for a refused move ends
+with the run. A jam is therefore seen in full, in training and in the test.}
+
+\note{The 94 and 223 steps are in GAPS.md with the stall rule. This is a reason
+for a design choice, so it stays in the Setup and not in the Results.}
+
+\subsection*{3c. Threats to validity, a new item after the one on checkpoints}
+
+\begin{itemize}\item \new{No cost is put on work left open when a training episode is cut.
+The policy only sees it through its value estimate, so a policy whose estimate
+is poor may care too little about work it leaves late in an episode. Training
+episodes of 16\,000 steps, longer than a test run, make this smaller. In the
+test, work left open counts as not served.}
+\end{itemize}
+
+\section*{Questions}
+\begin{enumerate}
+  \item \textbf{What replaces ``fall behind mostly through locks''?} Two
+    options.
+    (a) Say only what the data shows. Locks are rare and do not explain
+    the shortfall, and the decentralised agents stand still alone for long
+    stretches. The cause is left open.
+    (b) First check where those lone agents stand and why, with the same
+    position trace as step 3, for a few decentralised seeds at 16 agents
+    (about 1 hour on the Lenovo). The RL review found that agents stop
+    before goals that bring a penalty, which may be the same thing.
+    I recommend (b), since the Discussion needs a reason and (a) leaves a
+    gap where the old one was.
+  \item \textbf{8 agents in \lab{tab:app:locks}.} The 8-agent column comes
+    from the runs trained at 8 agents. Seven of their episodes can reach 200
+    steps (decentralised fixed 3 and congestion-aware 2, with messages
+    demand 2), and they would need a replay on the code that evaluated
+    them. Or the column takes the scale test at 8 agents, where nothing
+    locks, as Appendix L already does for its other 8-agent tables
+    ([A142]). I recommend the scale test.
+  \item \textbf{The old measure.} Drop it everywhere, including the 1250
+    column and the cross in \lab{fig:exp:seeds}? I recommend yes. It counts
+    any two slow tasks anywhere and grows with the fleet without a jam.
+  \item \textbf{The served table.} \lab{tab:exp:served} still has first-run
+    numbers under its TODO (for example centralised fixed 0.54, now 0.78
+    from the long run). Not part of this review, but 2a quotes served
+    shares, so the two should be updated together.
+\end{enumerate}
+
+\section*{Answers so far (25 November)}
+\begin{itemize}[nosep]
+  \item 2. The scale test at 8 agents, checked true. Appendix L plays only
+    the congestion-aware policies there, and none of their 20 seeds comes
+    near 200 steps. The 8-agent part of \lab{tab:app:locks} keeps the
+    congestion-aware column only, all 0.
+  \item 3. The old measure is dropped everywhere.
+  \item 1. Option (a), no extra trace. The text states the limits of the
+    measure instead of testing more thresholds (author: no time for more
+    runs).
+  \item 4. Left to its own review. The long runs change more than numbers.
+    With messages serves 0.69 under demand storage (was 0.28) and 0.78 under
+    congestion-aware storage (was 0.34), so the RQ4 sentence ``under demand
+    storage messages lower the share'' turns around. That review follows
+    when centralised demand is tested.
+\end{itemize}
+
+\section*{Still to do before applying}
+\begin{itemize}[nosep]
+  \item Centralised demand at 16 agents, once eval-pc writes its test rows.
+  \item Where the locks sit (step 3, Lenovo, after Token Passing).
+  \item Apply with the fleet reward review, [A136] in GAPS.md (lock test and
+    part 3).
+\end{itemize}
+
+\end{document}

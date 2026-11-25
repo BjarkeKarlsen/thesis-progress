@@ -1,0 +1,255 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\mockup}[1]{\fbox{\small mockup: #1}}
+\title{Proposed change, Method parts that belong elsewhere}
+\date{25 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+The Token Passing review is applied as [A137]. This review moves the other
+parts of the Method and the Implementation chapter that are not method. Each
+part either is a result, a value, or experiment design, or it is said twice.
+Nothing in the model changes.
+
+\begin{enumerate}[nosep]
+  \item The lock example from an earlier run moves to the Results.
+  \item The fleet 32 story in the reward moves to Appendix~I.
+  \item Training: design stays in the Method, seeds and step counts go to
+    the Experiments.
+  \item ``What is logged'': the two sentences on scoring values go.
+  \item ``Computational cost'': why and how runtime is reported goes to the
+    Experiments.
+  \item Assignment: the put-away guess goes, the Discussion already has it.
+  \item Small: ``never overridden'' said once less, the Ma et al.\ match in
+    numbers.
+\end{enumerate}
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+% ------------------------------------------------------------------
+\section*{1. The lock example moves to the Results}
+
+\textbf{Method, \lab{sec:method:resolution}.} The paragraph on how a lock
+happens in a one-lane aisle and the paragraph on why no rule breaks it stay
+as they are. The figure and the paragraph that tells the earlier run go.
+
+\old{[Figure \lab{fig:workstationlock}: A lock at workstation $W_1$ with eight
+agents, under the decentralised controller without messages in an earlier
+run.]}
+
+\old{Figure~\ref{fig:workstationlock} shows such a lock in a test warehouse
+with eight agents. All four workstations of one category hang off the outer
+aisle, \ldots\ so the whole fleet finishes only two more tasks in the last
+843 steps of the episode.} \note{An observed run is a result. The Method keeps
+the mechanism.}
+
+\textbf{Method, Token Passing.} \ldots so Token Passing never meets the lock
+at a workstation \old{of Figure~\ref{fig:workstationlock}}\new{described in
+Section~\ref{sec:method:resolution}}. \note{The figure is now in the Results,
+so the Method points back, not forward.}
+
+\textbf{Experiments, Results, after ``Token Passing never locks.''}
+
+\new{Figure~\ref{fig:workstationlock} shows such a lock in an earlier run, in a
+test warehouse with eight agents.} All four workstations of one category hang
+off the outer aisle, which is one lane wide. At $t = 900$ the work still
+flows, \ldots\ so the whole fleet finishes only two more tasks in the last
+843 steps of the episode. \note{Text and figure unchanged, only the first
+sentence. The lock definition just above changes with [A136], so this move
+goes in together with it.}
+
+% ------------------------------------------------------------------
+\section*{2. The fleet 32 story moves to Appendix I}
+
+\textbf{Method, \lab{sec:method:rl}.}
+
+The reason is that an agent avoids a charge on finishing by never finishing.
+\old{When a new task's distance was charged on the step it was handed out,
+delivering cost $30$ to $60$ at once against a bonus of $10$, and agents in a
+fleet of $32$ learned to stop just before the workstation.}
+\new{If a new task's distance were charged on the step it is handed out,
+delivering would cost about the length of the next task at once, more than
+the delivery bonus (Appendix~\ref{app:reward:method}).} \note{The reason stays
+in words. The run that showed it is a result.}
+
+\textbf{Appendix I, \lab{app:reward:method}, a new paragraph before the step
+costs.}
+
+\new{The progress term restarts with every task. An earlier version charged
+a new task's distance on the step it was handed out. Delivering then cost
+$30$ to $60$ at once against a bonus of $10$, and in training runs at $32$
+agents the agents learned to stop just before the workstation. Counting each
+task from its own start removed that charge
+(Section~\ref{sec:method:rl}).}
+
+% ------------------------------------------------------------------
+\section*{3. Training: design in the Method, numbers in the Experiments}
+
+Both places now say the PPO budget, one policy per storage rule and the
+seeds. The Method keeps the choices and their reasons. The Experiments keeps
+the seeds, the step counts and how a checkpoint is chosen.
+
+\textbf{Method, \lab{sec:method:training}, second paragraph.}
+
+\old{Each seed is its own warehouse. Before any run starts the seeds are split
+three ways. Training seeds are played in training, validation seeds choose the
+checkpoint and test seeds give the results. Training plays a new warehouse in
+every episode, so a policy cannot learn one map by heart.}
+\new{Each seed is its own warehouse, and training plays a new one in every
+episode, so a policy cannot learn one map by heart.}
+\old{At 16 agents, the fleet of the main results, training}\new{Training} has two
+stages, the same for every controller and storage rule. \old{A first run plays
+500\,000 steps on episodes of 2000. A second run starts from the weights of
+the first and plays 2\,000\,000 steps on episodes of 16\,000. Starting there
+saves training time. The episodes of the second run are longer than an
+evaluation run, 10\,000 steps, so}\new{A first run plays short episodes. A
+second run starts from its weights, which saves training time, and plays
+episodes longer than a test run. So} a fleet that falls behind over \old{an
+evaluation}\new{a test} run also falls behind in training and in the
+validation that chooses the checkpoint. \new{The step counts are in
+Section~\ref{sec:exp:setup}, and} how the two stages were chosen is in
+Appendix~\ref{app:training}. \note{The reasons stay, the numbers go.}
+
+\textbf{Experiments, ``Training''.}
+
+\old{Each learned controller is trained with PPO under the same budget of
+environment steps, using the values in Table~\ref{tab:trainparams}. Each
+storage rule has its own policy, trained under the rule it is tested with
+(Section~\ref{sec:method:training}).}
+\new{The PPO values and the budget of environment steps are in
+Table~\ref{tab:trainparams}. At 16 agents, the fleet of the main results, the
+first stage of training plays 500\,000 steps on episodes of 2000 and the
+second 2\,000\,000 steps on episodes of 16\,000, against a test run of
+10\,000 steps. The seeds are split three ways before any run starts. Training
+seeds are played in training, validation seeds choose the checkpoint and test
+seeds give the results.} \old{Training seeds and evaluation seeds are counted
+apart.} The spread over training seeds shows \ldots\ [rest unchanged: the
+mockups and how a checkpoint is chosen]. \note{The PPO method and one policy
+per rule are said in the Method. The split of seeds sits beside the
+checkpoint rule that uses it.}
+
+% ------------------------------------------------------------------
+\section*{4. ``What is logged''}
+
+\ldots Appendix~\ref{app:repro} lists what is logged and which measure each
+record gives. \old{Table~\ref{tab:evalparams} lists the values used to score a
+run. The load levels and $f_{\mathrm{up}}$ come from a pilot of Token Passing
+(Appendix~\ref{app:cal:load}).} \note{Scoring values are experiment design.
+``Scoring a condition'' already cites the table, and ``Factors'' now says the
+load comes from Token Passing.}
+
+\textbf{Experiments, ``Scoring a condition''.} \ldots The keep-up check of
+\nref{eq:throughput} comes first\new{, with the share $f_{\mathrm{up}}$ set in
+Appendix~\ref{app:cal:load}}. \ldots \note{Where $f_{\mathrm{up}}$ comes from
+was said only in the sentence that goes.}
+
+% ------------------------------------------------------------------
+\section*{5. ``Computational cost''}
+
+\textbf{Implementation, \lab{sec:impl:cost}.}
+
+\old{Runtime is one of the measured results.} \new{Runtime $\kappa_T$ is timed
+in the simulator.} The time per decision is logged separately for
+\nref{eq:assignmentrule} and for routing, on the same machine for every
+controller. The learned controllers run their policy on \old{its}\new{the} GPU.
+Token Passing runs on the CPU, the hardware it is built for, so each method is
+timed on its own hardware. \old{For the learned controllers, training time and
+decision time are reported separately, because the practical case for a
+learned router rests on fast decisions, not on fast training. Token Passing
+needs no training, and its planning time per decision is what the learned
+routers' decision time is compared with.} \note{How runtime is timed stays.
+What is reported and why moves.}
+
+\textbf{Experiments, ``Scoring a condition'', after ``\ldots crowding, the
+mean service time of put-aways and runtime are reported next to it.''}
+
+\new{Runtime is reported because a learned controller is only of practical use
+if it decides fast enough. So for the learned controllers training time and
+runtime are reported apart. Token Passing needs no training, and its runtime
+is what theirs is compared with.} \note{One name, ``runtime'', instead of
+decision time and planning time (implementation comment C1). ``Learned
+controllers'', not ``learned routers''.}
+
+\textbf{Experiments, ``Compute environment''.}
+
+All training and evaluation ran on the machine in
+Table~\ref{tab:exp:compute}. Runtime $\kappa_T$ is measured on \old{the same
+machine for every controller, the learned controllers with their policy on the
+GPU and Token Passing on the CPU}\new{this machine}
+(Section~\ref{sec:impl:cost}). \note{The hardware was told in both places
+(implementation comment D2).}
+
+% ------------------------------------------------------------------
+\section*{6. Assignment, the put-away guess}
+
+\textbf{Method, \lab{sec:method:assignment}.}
+
+Picks and put-aways wait in the same queue and are taken alike. A put-away
+gets no priority of its own, because oldest first is the simplest rule and
+adds no parameter. \old{A put-away that waits keeps its units from being
+picked, so at a high load a priority for put-aways might shorten the wait for
+stock. Section~\ref{sec:exp:discussion} returns to this.} Tasks released in
+the same timestep go in order of task index. \ldots \note{The Discussion item
+``Priority for put-aways'' already says this in full. The Method keeps the
+reason for the choice.}
+
+% ------------------------------------------------------------------
+\section*{7. Small}
+
+\textbf{``Never overridden'' said once less.} It is in Choosing together
+(``Conflict resolution therefore never overrides a centralised agent''), in
+When moves still clash, and in the reward (who pays the override term). The
+reward sentence stays, because it says who pays. The second goes.
+
+When moves still clash, last sentences: The claim mask of the centralised and
+section-based controllers is stricter, because an agent choosing there does
+not yet know whether a later agent will leave. \old{So a centralised joint
+action is always accepted whole, and a section-based one is changed only at
+the border between two zones.} \note{Said in Choosing together, both for the
+centralised agent and at the border.}
+
+\textbf{The Ma et al.\ match.} Correctness and reproducibility: Token Passing
+in this simulator also \old{reproduces the published results of
+\citet{ma2017lifelong_mapf} to within about 10\%}\new{gives service times
+close to those published by \citet{ma2017lifelong_mapf}, $8\%$ shorter on
+average} (Appendix~\ref{app:repro:ma}). Appendix~K, first sentence of
+\lab{app:repro:ma}, the same change. \note{Appendix~K gives $8\%$ shorter on
+average, from $34\%$ shorter to $3\%$ longer. ``Within about $10\%$'' reads as
+every setting (implementation comment A7).}
+
+% ------------------------------------------------------------------
+\section*{Not in this review}
+The rest of \texttt{implementation\_comments.md} (A2, A3, A5, A6, A8, B1, C2,
+E1) changes wording inside the Implementation chapter, not where text sits.
+A4 there (the load levels in \lab{tab:evalparams} against Appendix~E) is a
+question about values.
+
+\section*{Questions}
+\begin{enumerate}[nosep]
+  \item Part 1. With the figure gone, the Method explains the lock in words
+    only. Should it get a small drawing in the viewer style (one-lane aisle,
+    $a_1$ on the workstation, $a_2$ in front, two agents behind), or are the
+    words enough?
+  \item Part 1 waits for the new lock definition ([A136]). Apply parts 2 to 7
+    now and part 1 with [A136], or all together?
+  \item Should the rest of the implementation comments (see above) come in a
+    second version of this review?
+\end{enumerate}
+
+\end{document}

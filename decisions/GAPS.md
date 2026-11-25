@@ -3039,3 +3039,101 @@ Training told as it was done, at 16 agents: a first run of 500,000 steps on 2000
 **What.** S1: the storage update now says what a valid placement is, and $\mathcal{F}$ is defined once, in Orders and tasks (placement and ranking, [A133] P4a). S2: `eq:estimates` moved up beside the words on $\hat\rho$. S3: the field of view's limit joined its paragraph (the one-line paragraph under `fig:observation` removed). S4: "so $a_2$ can take its next task once $\tau_1$ is delivered" replaces a "So" that did not follow. S5: the Method's crowding sentences ([A134] R6) get their own paragraph "Crowding" after the vertex features. S6: the reason for smoothing $\hat\omega$ comes before the choice of five readings. G1 to G9: figure widths only (instance 0.6, observation 0.7, storage update 0.6, pickup rule 0.6, crowding 0.45, loop 0.8, arriving tea 0.7, lifecycle 0.85, conflicts 0.85). The chapter ends one page earlier (PDF pages 20 to 42). G10 (removing a figure) declined.
 
 **Model change.** None, text and figure sizes only.
+
+### [A137] Token Passing section: how it works stays in the Method, its role moves to the Experiments (author approved 2026-11-25, review_method_reference.pdf v2)
+
+**Where.** `4.Implementation.tex` (Method opening, `sec:method:reference` renamed "Token Passing", label kept), `5.Experiments.tex` ("Factors", the #84 mockup filled). Tagged `% [A137]`.
+
+**What.** A3: the loop says a learned agent chooses a move and a Token Passing agent takes the next step of its path. A4: the role told by design in Factors (measured against, runs under every storage rule at the main load, sets the load in Appendix E and the storage period and pallet size in Appendix G, gain read with the workstation wait in mind). B1: Token Passing rather than TPTS, because with task swaps an agent can lose its task while a learned agent keeps its task (the "less computation" clause dropped as the weaker reason). B3: index order, which Ma et al. leave open. B4: the A*, ICBS, ICTS sentence dropped. C1: $s_j$, $g_j$. C2: "planner". C3: space-time A* in plain words. C4: well-formed is enough, not needed. C5: no "drives". D1: the token pointed back to the Background. D2: split into a task paragraph and a path paragraph. D4: the workstation wait in one sentence, pointing back to the scope item. Review tweaks: "chooses its own tasks" said once in the section, "no shelf or delivery point" cut (the endpoint definition covers it). E1: no figure.
+
+**Open.** "What is logged" still says the load comes from a Token Passing pilot, which Factors now says too. Handled in the next Method review.
+
+**Model change.** None, text only.
+
+### [A138] Method parts that are not method moved out (author approved 2026-11-25, review_method_moves.pdf parts 2 to 7)
+
+**Where.** `4.Implementation.tex` (`sec:method:assignment`, `sec:method:resolution`, `sec:method:rl`, `sec:method:training`, `sec:impl:logging`, `sec:impl:cost`, `sec:impl:validation`), `5.Experiments.tex` ("Training", "Scoring a condition", "Compute environment"), `I.Reward.tex` (`app:reward:method`), `K.Checks.tex` (`app:repro:ma`). Tagged `% [A138]`.
+
+**What.** Part 2: the fleet 32 story (charge of a new task's distance, agents stop before the workstation) moved to Appendix I; the reward keeps the reason in words. Part 3 (author's correction): the Method's training paragraph on seeds and the two stages moved **unchanged** to the Experiments "Training", because the reasons make the numbers understandable; the proposed condensed rewrite was rejected. Part 4: `tab:evalparams` and the load source left "What is logged"; $f_{\mathrm{up}}$ now pointed to in "Scoring a condition". Part 5: "Computational cost" keeps how runtime is timed; why it is reported and what it is compared with moved to "Scoring a condition"; "Compute environment" points back for the hardware. Part 6: the put-away priority guess left the assignment section (the Discussion has it). Part 7: "accepted whole" dropped from `sec:method:resolution`; Ma et al. match now "8% shorter on average" in the Method and Appendix K.
+
+**Open.** Part 1 (lock example to the Results) goes in with [A136].
+
+**Model change.** None, text only.
+
+### [A139] Implementation chapter matches the code; kappa_T named "decision time" everywhere (author approved 2026-11-25, review_implementation.pdf)
+
+**Where.** `4.Implementation.tex` (`sec:impl:simulator`, `sec:impl:logging`, `sec:impl:cost`, `sec:impl:validation`), `5.Experiments.tex` ("Scoring a condition", "Compute environment"), `3.ProblemFormulation.tex` (reported measures), `styles/eqnames.tex`, both notation tables, `K.Checks.tex` (`app:repro`), `L.Results.tex` (two table headers). Tagged `% [A139]`.
+
+**What.** A6: agents move at the same time but choose in turns under the centralised and section-based controllers; PettingZoo dropped (not used in code). A2: what each measure needs is logged while the run goes. A3: blocked is a count per task plus its longest stretch. C2: "trace" replaced by "log" or plain words. A5: kappa_T is the sum of assignment and routing; routing holds building each agent's input for a learned controller; the reported value comes from the separate timing runs. A8: the checks show the hard rules hold. C1: one name, "decision time" (eq:runtime is now "mean decision time"), matching the Results. Settled earlier: A4 ([A111]), A7, B2, D1, D2 ([A138]); E1 dropped; B1 kept in "Choosing together".
+
+**Model change.** None, text only.
+
+### [A140] The workstation lock figure leaves the Method (author approved 2026-11-25)
+
+**Where.** `4.Implementation.tex` (`sec:method:resolution`, `sec:method:reference`). Tagged `% [A140]`.
+
+**What.** `fig:workstationlock` (an 8-agent earlier run under the old hold measure) and the paragraph telling that run removed. The Method explains the lock in words. Replaces part 1 of review_method_moves.pdf (move to the Results). With [A136] the Results show locks per controller at each fleet size, as the RQ3 scaling does; a new picture, if any, is drawn from a seed that locks in the current replays.
+
+**Model change.** None, text only.
+
+### [A141] Halo instead of "boundary protocol" (author approved 2026-11-25)
+
+**Where.** Both notation tables (`2.Notation.tex`, `A.Notation.tex`, rows $H_q$ and $s^{(q)}_t$), `C.ModelDetails.tex` (the paragraph on the section-based field of view). Tagged `% [A141]`.
+
+**What.** The chapters call the strip outside a zone its halo ([A119]), so the tables and Appendix C now say halo, not "boundary protocol". The Appendix C paragraph is also shortened ("One detail needs stating explicitly" cut).
+
+**Model change.** None, text only.
+
+### [A142] RQ3 asks about scale, the red text of the Experiments chapter written, appendix TODOs closed (author approved 2026-11-25, review_results_red_text.pdf v1 to v3)
+
+**Where.** `2.Introduction.tex` (fourth factor, RQ3, expected outcome of RQ3), `5.Experiments.tex` (factors, gain test, mapping, training, warm-up and pairs, run plan, compute, Results opening, training figure, RQ1, RQ3, costs, Discussion, earlier work, threats), Appendices B, D, E, G, H, I, K, L. Tagged `% [A142]`.
+
+**What.**
+- RQ3 asks about scale, not load: as the warehouse and its fleet grow, does the gain of RQ1 hold, and does a controller trained on 16 robots still keep up in a larger warehouse? The arrival rate was never varied, and training at every size did not fit the time and compute. The 16-agent policies played at 8, 32 and 64 agents (128 for decision time) are the test of scale. The old prediction that the decentralised controller stops keeping up first is kept.
+- Token Passing is compared on the test seeds at every fleet. At 8 agents its gain becomes 18.4 % [13.1, 23.7] (was 14.1 % on seeds 0 to 19). 32 and 64 agents are queued on the Lenovo (`~/thesis_runs/tp_testseeds3264_2026-11-25`), red TBD until then. Filled 2026-11-25: 32 agents 18.0 % [14.3, 21.6] demand, 16.8 % [13.4, 20.2] congestion-aware, fixed 305.2; 64 agents 14.4 % [11.5, 17.4], 13.4 % [10.3, 16.6], fixed 382.0. Every seed faster under both rules.
+- The served share at 32 and 64 agents is recounted with `served_counts.py` (the perf rows on bdfda94 left out lines waiting for stock). No learned policy keeps up there (0.28 to 0.63).
+- Appendix L at 8 agents comes from the test of scale (16-agent congestion-aware policies, Token Passing all rules), per the decision of 2026-11-23, not from the earlier runs trained at 8 agents.
+- Removed: the mapping-table mock-up, the multiple-tests mock-up (no correction named), the backlog trace and crowding scatter figures, the split figure (now panel (b) of the RQ3 figure), the reward sweeps of Appendix I (never run; the fleet reward test is separate), the size test of Appendix D, the check table and timing figure of Appendix K, the full congestion test TODO of Appendix G (first test stands).
+- Added: training curves as tasks per step (`fleet16_training.py`), training time, compute table per machine, threats on stock that never moves, the two effects of congestion-aware storage, one generator, features without vertex identity, training budget, untested weights, the two ratios, training at 16 only.
+
+**Model change.** None. RQ3 is reworded, the design is what was run.
+
+### [A136] The lock test: two neighbouring agents stand still for 200 steps, and how an episode ends (author approved 2026-11-25, review_lock_test.pdf v1 to v3)
+
+**Where.** `5.Experiments.tex` (Setup "Training", RQ1 lock definition and `tab:exp:locks`, the paragraph on locks spreading the seeds removed, `fig:exp:seeds` caption, RQ3 scale, RQ4 communication, Discussion "Why the learned controllers fall behind", "What could have been done differently", earlier work, threats), `4.Implementation.tex` (`sec:method:training`, how an episode ends), Appendix L (lock paragraph, `tab:app:locks`). Figure `fleet16_seeds.png` redrawn. Tagged `% [A136]`.
+
+**What.**
+- A lock is two agents on neighbouring vertices that both stand still, each holding its task, for 200 steps in a row (`longest_pair_stand_still`, slap-mapd-coupling PR #216). The old count (`longest_two_agent_hold` >= 500) took any two slow tasks anywhere and grew with the fleet without a jam. The threshold is set from Token Passing, whose longest single wait is at most 74 steps on the test seeds, and was fixed before the learned runs were counted. No other threshold was run (author: no time). The text states the limits instead: a lock is a symptom with several causes, and shorter stops go to the blocked time.
+- Counts from replays of every episode that could reach 200 steps (70 episodes, each matched its original row), `~/thesis_runs/locks_replay/`, `thesis-progress/results/L_results/scaling/perf/locks_README.md`. At 16 agents only the decentralised controllers lock (fixed 9, demand 1; with messages fixed 2, congestion-aware 1). Locked seeds serve no less (0.34 against 0.24 under fixed storage), so the claim that the learned controllers fall behind through locks is dropped. Decentralised agents stand still alone for long (median longest stand-still 80 to 321 steps against 9 to 16 for centralised). Why was not traced (option (a), author).
+- RQ4 turns around on locks: messages make them rarer (9 to 2 under fixed storage).
+- Scale: the congestion-aware policies lock on no seed at 8 and 16 agents. At 64 agents decentralised 7, with messages 7, section-based 3, centralised 0. Token Passing 0 at 32 and 64.
+- How an episode ends (code: truncated, not terminated, so PPO bootstraps the last value). Method gets one sentence, Setup gets the reason no run is stopped on a jam (from the stall rule, recoveries from 94 and 223 steps), threats get the missing cost on work left open at the cut.
+- Appendix L: 8 agents congestion-aware only (test of scale, [A142]), counts at 200 and 500 steps, the 1250 column dropped.
+
+**Still red.** Centralised demand at 16 agents (eval-pc still testing; check its candidates, hold >= 200 and stand-still >= 200, through `locks_replay/one.sh`). Where the locks sit (position trace, `~/thesis_runs/locks_trace/`, analyse.py).
+
+**Model change.** None. A measure and its reading change.
+
+### [A143] Appendix C keeps only what the thesis points to (author approved 2026-11-25, review_appendix_C.pdf v1)
+
+**Where.** `C.ModelDetails.tex` (rewritten), `4.Implementation.tex` (ties paragraph of `sec:method:storage`, opening of `sec:method:model`, mask paragraph "Only moves that exist"), `A.Notation.tex` (row $\hat c$ removed), `styles/eqnames.tex`, `Appendices/overview.tex` (row C). Tagged `% [A143]`.
+
+**What.** From `readability_review/appendix_C_modeldetails_comments.md`. Cut because nothing pointed to them or they repeated the chapters: the opening sentences, C.1 storage and its ties subsection (the tie order is in the Method), the example state of C.2.1, the first paragraph of the congestion subsection (the Method's "Crowding" paragraph says it), the example table, the distance-label bound and its equation (every edge costs 1), the C.3 opening, the blocked time against the shelf estimate, the one-step cost (the reward table gives c_move and c_wait), and Figure C.1 (the same blocks as the Method's architecture figure, in symbols). The overflow shares under the trip legs (run results, 8 percent Token Passing, 40 to 60 percent learned, no rows found) are removed; Token Passing's share stays in `app:load:validity`. Fixed: Kipf's layer is "the same shape", not a special case, and van Knippenberg's layer also reads edge costs (their Section 2.3); crowding is used in three places (input, reward, reported mean), not only averaged; the mask is credited to PRIMAL (their III-B), also in the Method. Order: sources, keep-up count, formal statements in the Method's order, the halo paragraph under the halo. The keep-up count stays in C (author). Labels the chapters use are kept; `app:measures` now sits on the CRAMP paragraph and `app:controllers` on the controllers definitions.
+
+**Model change.** None, text only.
+
+### [A144] Centralised demand at 16 agents in, the served table rebuilt on the long runs (author approved 2026-11-25, in chat, no review PDF)
+
+**Where.** `5.Experiments.tex` ("Keeping up", `tab:exp:served`, RQ1 the controller, RQ4 communication, `tab:exp:locks`), Appendix L (`tab:app:locks`). Figure `fleet16_seeds.png` redrawn. Tagged `% [A144]` (the lock cells keep their `% [A136]` tag).
+
+**What.**
+- Centralised demand (`demand_long_part2`) evaluated on the PC 2026-11-25 15:36: checkpoint_000011 (iteration 36), the same at f_up 0.9 (no checkpoint keeps up on every validation seed, so the highest throughput wins). Test, recounted with `served_counts.py`: served 0.68, 0.193 tasks per step, 0 of 20 keep up. Locks 0: the longest stand-still is 32 steps, so no seed is a candidate and nothing was replayed.
+- `tab:exp:served` holds every long run now (the TODO [A110] first-run numbers are gone): centralised 0.78 (4), 0.68 (0), 0.81 (5); section-based 0.76 (6), 0.74 (1), 0.79 (6); decentralised unchanged; with messages 0.63 (3), 0.69 (5), 0.78 (7). The author asked for an overview: one single-column table, share with the seeds that keep up in brackets, the best learned share per rule in bold, instead of eight columns side by side.
+- RQ4 turns around: messages raise the share under fixed (0.29 to 0.63) and demand storage (0.53 to 0.69), and leave it about the same under congestion-aware storage (0.80 against 0.78). It said messages lower it under both.
+- RQ1 the controller: the red text is replaced by the fixed and demand numbers. The centralised controller is never clearly first, so "deciding for the whole fleet at once did not pay" stands.
+- "Keeping up": all four learned controllers serve about 0.8 under congestion-aware storage and keep up on 5 to 7 seeds.
+
+- Lost stock: centralised demand loses 0.4 percent of the arriving units (4 of 20 seeds). The chapter's "the centralised one none" is corrected, `tab:app:lost:16` filled (TODO [A123] closed).
+- Appendix L at 16 agents rebuilt on the long runs (author: "do both", then "yes do the appendix text and figures"). The learned rows of `tab:app:check:16`, `tab:app:result:16`, `tab:app:cost:16`, `tab:app:backlog:16`, `tab:app:stock:16` come from `thesis-progress/results/L_results/long_runs_16/tables.py`. The stall column is counted for the first time ([A118], no task finished for over 36 / 0.18 = 200 steps): Token Passing and centralised 0, section-based 3, 2, 1, decentralised 9, 3, 0, with messages 5, 7, 3. Learned decision times are n/a in the cost table (8 episodes at once on the CPU), pointing to `app:results:scaling`. The opening text is rewritten on the long runs. The figures `fleet16_served.png` (same as `fig:exp:seeds`), `fleet16_val_vs_test.png` (validation is no longer shorter than the test) and `fleet16_runtime.png` (first-run times, 110 and 73 ms) are dropped with their paragraphs.
+
+**Model change.** None, results only.

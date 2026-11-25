@@ -1,0 +1,400 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newenvironment{greenblock}{\color{newc}}{}
+\newenvironment{oldblock}{\color{gray}}{}
+\newcommand{\lref}[1]{{\small\texttt{#1}}}
+\newcommand{\moved}[1]{{\small\textcolor{gray}{\emph{[moved from #1]}}}}
+\newcommand{\cmt}[1]{{\small\textcolor{gray}{\emph{[comment #1]}}}}
+\newcommand{\cut}[1]{{\small\textcolor{gray}{\emph{[cut: #1]}}}}
+\title{Proposed rewrite, Appendix C, Model details}
+\date{25 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This proposal settles the open points of
+\texttt{appendix\_C\_modeldetails\_comments.md}. Four of them are already
+done in the thesis. A1 was settled by [A109], C1 by [A141] and A4 by
+[A122]. The tie order of D3 now stands in the Method
+(\texttt{4.Implementation.tex}, the ties paragraph of
+\lref{sec:method:storage}).
+
+The appendix keeps only what the thesis points to. The thesis points to six
+things in it. These are the sources of the model, the CRAMP comparison, the
+keep-up count, the field of view at a zone edge, the formal statements and
+the tie pointer. Everything else repeats the main text or is referred to
+nowhere, so it goes. The appendix shrinks from four sections to three and
+from about 350 lines to about 170.
+
+Part~1 is the whole appendix as it would read. Black text stays,
+\new{green} is new and \old{struck} text goes. Long cut blocks are shown as
+a grey note with the reason, not printed in full. Text that only moves is
+black, with a grey note saying where it came from. References are printed as
+their labels. Part~2 lists the small changes outside Appendix~C. Part~3 says
+what was checked and where. Part~4 holds the questions. Nothing below is in
+the thesis yet.
+
+\textbf{Labels.} Every label the chapters use stays, so no reference in the
+chapters breaks. \lref{app:controllers} moves to the halo paragraph, which is
+what the Method points to it for. \lref{app:measures} moves to the CRAMP
+paragraph, which is what the Problem Formulation points to it for. These
+labels go, and nothing in the chapters or the other appendices uses them:
+\lref{app:storage}, \lref{app:storage:ties} (its one pointer is removed, see
+Part~2), \lref{app:game}, \lref{app:controllers:congestion},
+\lref{app:controllers:example}, \lref{tab:observationexample},
+\lref{app:controllers:bound}, \lref{eq:potentialbound},
+\lref{app:measures:blocked}, \lref{fig:architecturecompact} and
+\lref{eq:onestepcost} (used only by the two notation tables).
+
+% =================================================================
+\section*{Part 1. The appendix as it would read}
+
+\subsection*{C \quad Model details \hfill\lref{app:details}}
+
+\old{The worked examples, derivations and formal statements behind the design
+of the thesis, in the order of the thesis. Each keeps its number, so a
+reference from the main text leads straight to it.}
+\new{This appendix sets the network beside the papers it comes from, says how
+the keep-up check counts, and gives the formal statements the Method gives
+in words.} \hfill\cmt{D4}
+
+\old{\textbf{C.1 Storage and inventory.}} \cut{the section opening retells
+\lref{sec:pf:storage}, and C.1.1 ``Ties in the slotting costs'' only sends
+the reader back to \lref{sec:method:storage}, which now holds the tie order
+itself (D3)}
+
+\old{\textbf{C.2 Controllers and the learning problem.}} \cut{the opening
+retells \lref{sec:pf:controllers} and \lref{sec:pf:observations}}
+
+\old{\textbf{C.2.1 The learning problem in full.}} \cut{the example state
+repeats \lref{sec:pf:game}, the ``second reason'' has no first, and the
+crowding paragraph repeats the Method (D1, D2)}
+
+\old{\textbf{C.2.2 Which congestion values a controller reads}, first
+paragraph.} \cut{says what the Method's ``Crowding'' paragraph already says,
+that every controller reads only the agent's own value. The second paragraph,
+on the halo, moves to C.3.3}
+
+\old{\textbf{C.2.3 The observation of the example agent}, and Table~C.1.}
+\cut{repeats the example of \lref{sec:pf:observations} ($\eta_1(v,t)=3$,
+$\eta_1(w,t)=5$) and its figure (D1)}
+
+\old{\textbf{C.2.4 The distance-label bound}, and (C.1).} \cut{nothing points
+to it. Every edge costs 1, so it says only that one step shortens the
+distance by at most one. Its first sentence repeats
+\lref{sec:pf:observations} (B3)}
+
+% -----------------------------------------------------------------
+\subsection*{C.1 \quad The model against its sources \hfill\lref{app:controllers:sources}}
+
+The network of \lref{sec:method:model} takes its parts from three sources.
+\old{This subsection writes each in its own form and in the notation of the
+thesis, so the reader can check what is the same and what differs.}
+\new{Each is written below in its own form and then in the notation of the
+thesis.}
+
+\textbf{Message passing.} Gilmer et al.\ (2017) write one round of a message
+passing network as
+\begin{equation*}
+  m_v^{(r)} = \sum_{w \in N(v)} M_r\bigl(h_v^{(r-1)}, h_w^{(r-1)}, e_{vw}\bigr),
+  \qquad
+  h_v^{(r)} = U_r\bigl(h_v^{(r-1)}, m_v^{(r)}\bigr),
+\end{equation*}
+with a message function $M_r$, an update function $U_r$ and edge features
+$e_{vw}$. The message-passing step (\lref{eq:msgpass}) has the same form,
+with $\phi_r$ in the role of $M_r$ and the sum, and $\psi_r$ in the role of
+$U_r$. It differs in three ways. It takes the mean over the neighbours where
+they take the sum. It has no edge features, which loses nothing here,
+because every edge of the generated warehouses costs 1
+(\lref{sec:impl:instances}). And a vertex hears its neighbours along edges in
+both directions, so information also flows against one-way edges.
+
+\textbf{Graph convolution.} Van Knippenberg et al.\ (2021) use the graph
+convolution of Kipf and Welling (2017),
+\begin{equation*}
+  h_v^{(r)} = \sigma\Bigl( W_r \sum_{w \in N(v) \cup \{v\}}
+    \frac{h_w^{(r-1)}}{\sqrt{\deg(v)\,\deg(w)}} \Bigr),
+\end{equation*}
+with one weight matrix $W_r$ per layer and degrees counted with the vertex
+itself. \new{Their layer also reads the cost of each edge.} \old{This is a
+special case of (\lref{eq:msgpass}), with fixed weights for the neighbours
+and a single linear map with an activation $\sigma$ as the update.}
+\new{The message-passing step has the same shape, a weight for each
+neighbour and then an update. It does not hold Kipf's layer exactly, because
+$\phi_r$ does not see the degrees.} The model of this thesis learns $\phi_r$
+and $\psi_r$ instead, so it can weigh a neighbour by its features, for
+example by whether an agent stands on it. \hfill\cmt{A2}
+
+\old{Figure~C.1 draws the model in the form of Figure~3 of van Knippenberg et
+al.\ (2021). The move score and the value head are what this model adds.
+Their environment already applies the actions in an order that avoids
+collisions where it can, and conflict resolution here also turns every
+remaining clash into a wait.} \old{[Figure C.1, ``The model drawn as Figure~3
+of (ibid.)'']} \cut{the figure shows the same blocks as the Method's
+architecture figure, in symbols instead of words (E1). The value head is
+named in the next paragraph's list of differences, and conflict resolution
+there too. See Question~1}
+
+\textbf{Messages between agents.} Pham et al.\ (2024) run a GNN over the
+agents in an agent's field of view, with $L$ layers of graph filters,
+\begin{equation*}
+  h^{(l+1)}_f = \sigma_{l+1}\bigl( \textstyle\sum_{g} H_l(A)\, h^{(l)}_g \bigr),
+\end{equation*}
+where $f$ and $g$ number the features of a layer, not the agents. $A$ holds
+the distances between the visible agents and each agent's starting state
+comes from an image network over its grid window. The final states are
+averaged and joined with the agent's own features. The readout
+(\lref{eq:readout}) does the same with one round only. Each agent's message
+$\xi_j(t)$ is its own final vertex state, the messages of the agents it hears
+are averaged, and the mean is joined with its own state. One round keeps the
+decentralised window at $d_{\mathrm{obs}}$ (\lref{sec:method:model}). The
+communication graph (\lref{eq:commgraph}) is unweighted and directed, where
+theirs weighs agents by distance.
+
+\textbf{Crowding.} \hfill\lref{app:measures}\ \moved{C.3, second paragraph}\\
+The crowding value (\lref{eq:crowding}) follows the crowd density of CRAMP
+(Pham et al.\ 2024), which counts the agents in an agent's field of view and
+divides by the free space there. CRAMP uses the density only in its reward,
+with a threshold above which an area counts as crowded, and over a region
+smaller than its field of view. Here it covers the field of view
+$d_{\mathrm{obs}}$ and has no threshold. \new{It is used in three places, not
+one. Every controller reads it as an input, the reward charges for it, and
+its mean over the run is a reported outcome.} \old{and is averaged into a
+reported outcome. That averaging is this thesis's own.} \new{The input and the
+reported mean are the thesis's own.} \hfill\cmt{B2}
+
+\textbf{Other differences from van Knippenberg et al.\ (2021).} Their agents
+learn a value for each action with a deep Q-network, and here the policy is
+trained with PPO. They turn an invalid move into a penalised wait, and here
+the mask removes it (\lref{sec:method:model}). \new{The mask follows PRIMAL
+(Sartoretti et al.\ 2019), which samples only valid moves in training
+because that trained more stably than a penalty.} Their output layer gives
+all move values at once, and here each move is scored by the vertex it leads
+to, by the move score (\lref{eq:edgescore}). A collision ends their episode
+with a penalty, and here conflict resolution turns it into a wait
+(\lref{sec:method:resolution}). The step costs, $0.1$ for a move and $0.2$
+for a wait, are theirs. \hfill\cmt{B1}
+
+% -----------------------------------------------------------------
+\subsection*{C.2 \quad How the keep-up check counts \hfill\lref{app:measures:keepup}}
+
+\old{\textbf{C.3 Measures and evaluation.} The result of the thesis is the
+service time gain of demand storage over fixed storage for each controller,
+read as a percentage of the service time under fixed storage. A run counts
+only if the fleet keeps up with the released tasks. The service time is that
+of orders, from an order's release until it leaves at a dock. The service
+time of put-aways and the time a controller takes to decide are reported next
+to it.} \cut{retells \lref{sec:pf:measures}, and nothing below uses it (D6)}
+
+The check (\lref{eq:throughput}) counts every task the fleet finishes in the
+measured steps, also one released before them. A fleet that fell behind
+earlier still works through its older tasks, and that work is what shows
+whether the queue grows or holds. With 900 tasks released in the measured
+steps and 600 tasks finished in them, the share is two thirds and the queue
+grows by 300.
+
+A pick counts as released when its order arrives, also while its stock is
+not yet on a shelf. The order is work the fleet owes, and the backlog already
+counts it. Left out, a fleet whose put-aways fail would release almost no
+picks and seem to keep up. Such a fleet with 800 orders waiting for stock and
+10 picks finished serves about one pick in eighty.
+
+\old{\textbf{C.3.2 Blocked time against the shelf estimate.} The mean blocked
+time $W_T$ is not the shelf estimate $\hat\omega_t(v)$. \ldots\ Neither is
+derived from the other.} \cut{nothing points to it. Both are defined in the
+chapters, and the difference shows in their definitions. See Question~3}
+
+% -----------------------------------------------------------------
+\subsection*{C.3 \quad Definitions in full \hfill\lref{app:defs}}
+
+The main text states these definitions in words \new{and points here for the
+formal version.} \old{and points here for the formal version. Each keeps its
+number, so a reference from the main text leads straight to it.}
+\hfill\cmt{D4, the same sentence as in the opening}
+
+\textbf{C.3.1 From \lref{sec:method:storage}.} The two legs of a shelf's
+trip,
+\begin{equation}
+  d^{\mathrm{dock}}(v) = \frac{1}{|V_{\mathrm{dock}}|} \sum_{g \in V_{\mathrm{dock}}} d_G(g, v),
+  \qquad
+  d^{\mathrm{work}}(k,v) = \frac{1}{|h(k)|} \sum_{w \in h(k)} d_G(v, w),
+  \tag{C.1}
+\end{equation}
+where $h(k)$ is the category of SKU $k$, the four workstations its lines go
+to. Every storage rule uses $h(k)$. The demand rules learn it from the SKU's
+first order line, which always goes to a workstation of that category.
+\old{A pallet that misses its home shelf under fixed storage is placed by
+these legs. At 16 agents this is about 8 percent of the arriving units under
+Token Passing and 40 to 60 percent under the learned controllers, whose
+fleets fall behind and leave the shelves full.} \cut{run results in a
+definition. The Token Passing share is already in Appendix~E
+(\lref{app:load:validity}, 6 to 10 percent). See Question~2}
+
+\textbf{C.3.2 From \lref{sec:method:model}.} \moved{after the halo, D5} The
+vertex features,
+\begin{equation}
+  \begin{aligned}
+  f(v,t) = \bigl(\, &\mathrm{onehot}(\mathrm{role}(v)),\;\; \tilde\eta_i(v,t),\;\;
+                    \mathbb{1}[v \text{ occupied by another agent}],\\
+                    &
+                    \mathbb{1}[v \in \mathcal{V}_{\prec i}(t)],\;\; \eta_i(v,t)/50 \,\bigr) .
+  \end{aligned}
+  \tag{C.2}
+\end{equation}
+
+The action mask,
+\begin{equation}
+  \begin{aligned}
+  \Pr[u_i(t) = \cdot] &= \mathrm{softmax}\bigl(\, \mathrm{logit}(\cdot) + M(v,\cdot) + M^{\prec}_i(t,\cdot) \,\bigr), \\
+  M(v,\cdot) &= \begin{cases} 0 & \cdot \in \mathcal{U}(v), \\
+                               -\infty & \cdot \in \mathcal{U}_i\setminus\mathcal{U}(v), \end{cases}
+  \end{aligned}
+  \tag{C.3}
+\end{equation}
+where $v = \ell_i(t)$ is the vertex agent $a_i$ stands on.
+
+\textbf{C.3.3 From \lref{sec:method:controllers}.} \hfill\lref{app:controllers}\\
+The claim mask,
+\begin{equation}
+  M^{\prec}_i(t,\mathrm{move\ to\ }w) =
+  \begin{cases}
+    -\infty & w \in \mathcal{V}_{\prec i}(t), \text{ or } w = \ell_j(t) \text{ with } j \not\prec i,\ j \neq i, \\
+            & \text{or } w = \ell_j(t) \text{ with } j \prec i \text{ and } a_j \text{ has chosen } v, \\
+    0       & \text{otherwise},
+  \end{cases}
+  \tag{C.4}
+\end{equation}
+with the same $v = \ell_i(t)$, so the last case is a swap.
+
+The halo,
+\begin{equation}
+  H_q = \{\, v \notin Y_q : d_G(w,v) \le d_{\mathrm{obs}}
+          \text{ for some } w \in Y_q \,\}.
+  \tag{C.5}
+\end{equation}
+\moved{C.2.2, second paragraph} A section-based agent's field of view is not
+cut at the edge of its zone. A reading that reaches a short way into the next
+zone is still there, because the zone's window includes its halo $H_q$. The
+halo exists so that the edge of a zone is not a blind spot, and cutting every
+reading at the edge would undo it.
+
+\old{\textbf{From \lref{sec:method:rl}.} The one-step cost,
+$\hat{c}(v,w) = c_{\mathrm{wait}}$ if $v = w$ and $c(v,w)$ if $(v,w) \in E$.}
+\cut{nothing uses it. The reward table and the reward equation of
+\lref{sec:method:rl} already give $c_{\mathrm{move}} = 0.1$ and
+$c_{\mathrm{wait}} = 0.2$ in words and values. Kept, it suggests a move
+costs $c(v,w) = 1$ (A3)}
+
+The order of C.3 now follows the Method. Storage comes first, then the
+network (features and action mask), then choosing together (claim mask and
+halo). The comment D5 asked for the halo after the features and masks.
+
+% =================================================================
+\section*{Part 2. Changes outside Appendix C}
+\begin{enumerate}
+  \item \texttt{4.Implementation.tex}, ties paragraph of
+        \lref{sec:method:storage}. ``So each rule gives exactly one placement
+        \old{(Appendix~\lref{app:storage:ties})}.'' The pointer goes with
+        C.1.1, since the sentence before it already gives the tie order.
+  \item \texttt{4.Implementation.tex}, the mask paragraph ``Only moves that
+        exist''. ``\ldots\ So an agent can never choose a move that does not
+        exist\new{, as in PRIMAL (Sartoretti et al.\ 2019) during
+        training}. Van Knippenberg et al.\ instead turn such a move into a
+        penalised wait, and their policy has to learn not to choose it.''
+        (B1)
+  \item \texttt{4.Implementation.tex}, opening of \lref{sec:method:model}.
+        ``Appendix~\lref{app:controllers:sources} sets the three side by
+        side\old{ and draws the model in the form of their figure}.'' Only
+        if Figure~C.1 goes (Question~1).
+  \item \texttt{A.Notation.tex}. The row $\hat c(v,w)$ goes (A3). The
+        row $c_{\mathrm{move}}$ and $c_{\mathrm{wait}}$ stay.
+  \item \texttt{styles/eqnames.tex}. The names of \lref{eq:potentialbound} and
+        \lref{eq:onestepcost} go. Then \texttt{tools/sync\_xrefs.py --build}.
+  \item \texttt{GAPS.md}. One entry, [A143], text only, no model change.
+        Every changed line tagged \texttt{\% [A143]}.
+\end{enumerate}
+
+% =================================================================
+\section*{Part 3. What was checked}
+\begin{itemize}[nosep]
+  \item \textbf{Which labels the thesis uses.} A search of every
+        \texttt{\textbackslash ref}, \texttt{\textbackslash eqref} and
+        \texttt{\textbackslash nref} in \texttt{Chapters/} and
+        \texttt{Appendices/}. The chapters point to
+        \lref{app:storage:ties}, \lref{app:controllers},
+        \lref{app:controllers:sources}, \lref{app:measures},
+        \lref{app:measures:keepup}, and to the equations
+        \lref{eq:tripdistance}, \lref{eq:halo}, \lref{eq:features},
+        \lref{eq:mask} and \lref{eq:claimmask}. Nothing else in
+        Appendix~C is referred to.
+  \item \textbf{PRIMAL and the mask.} Sartoretti et al.\ (2019), Section
+        III-B: ``During training, actions are sampled only from valid
+        actions \ldots\ this approach enables more stable training, compared
+        to giving negative rewards''. At test time an invalid move becomes a
+        wait (\texttt{papers/1809.03531v3.pdf}).
+  \item \textbf{Edge attributes of van Knippenberg et al.} Their Section 2.3:
+        a GCN embeds the graph ``including any node and edge attributes'',
+        and their graphs have both (\texttt{papers/knippenberg21a.pdf}).
+  \item \textbf{Crowding in three places.} The Method's ``Crowding''
+        paragraph (input of every controller) and the reward table, row
+        crowding, weight $n_{\mathrm{crowd}} = 0.1$
+        (\texttt{4.Implementation.tex}).
+  \item \textbf{The step costs.} The reward table gives $c_{\mathrm{move}}
+        = 0.1$ and $c_{\mathrm{wait}} = 0.2$ from van Knippenberg et al.,
+        Table~1. The code charges the same (\texttt{reward\_function.py},
+        \texttt{c\_move}). No code uses a one-step cost $\hat c$.
+  \item \textbf{The two figures.} \texttt{Images/architecture.pdf} (Method)
+        and \texttt{Images/architecture\_compact.pdf} (Figure~C.1) hold the
+        same blocks. The Method's figure has one agent's network, the agents,
+        conflict resolution and the warehouse, in words. Figure~C.1 has the
+        same in symbols ($L$, $u_i$, $R_i$).
+  \item \textbf{The overflow numbers.} ``About 8 percent under Token Passing,
+        40 to 60 percent under the learned controllers'' come from [A122]
+        (23 November). I found no rows for the learned share in
+        \texttt{results/}. Appendix~E gives 6 to 10 percent for Token
+        Passing from the updated load run.
+\end{itemize}
+
+% =================================================================
+\section*{Part 4. Questions}
+\begin{enumerate}
+  \item \textbf{Figure C.1.} It shows the same network as the Method's
+        figure, in symbols. The draft drops it. The other choice is to keep
+        it with the caption ``The model drawn as in Figure~3 of van
+        Knippenberg et al.\ (2021).''
+        \\ \hspace*{1em}$\square$ drop \quad $\square$ keep, new caption \quad Note:
+  \item \textbf{The learned overflow share.} The draft takes it out of
+        Appendix~C. Should the share of arriving stock that misses its home
+        shelf under the learned controllers go into Appendix~L (``Stock in
+        the test runs''), recounted from the long 16-agent runs? Or is it
+        left out?
+        \\ \hspace*{1em}$\square$ recount, add to L \quad $\square$ leave out \quad Note:
+  \item \textbf{Blocked time against the shelf estimate.} Nothing points
+        to it, so the draft cuts it. The other choice is one sentence where
+        $W_T$ is defined in \lref{sec:pf:measures}: ``$W_T$ looks back over a
+        run, and the shelf estimate is a forecast that steers storage.'' That
+        would touch the Problem Formulation.
+        \\ \hspace*{1em}$\square$ cut \quad $\square$ one sentence in the PF \quad Note:
+  \item \textbf{Where the keep-up count sits.} The draft keeps it in C.2.
+        It could move to Appendix~E, next to ``The keep-up threshold''
+        (\lref{app:cal:load}), where the threshold is set. The label stays,
+        so the Problem Formulation's pointer still works.
+        \\ \hspace*{1em}$\square$ keep in C \quad $\square$ move to E \quad Note:
+  \item \textbf{Files nothing includes.} \texttt{Chapters/2.Notation.tex} is
+        an older copy of \texttt{A.Notation.tex}, and no file includes it.
+        The same goes for \texttt{tmp1.tex}, \texttt{5.Experiments.before.*},
+        \texttt{Project.tex}, \texttt{Thesis\_idea.tex},
+        \texttt{Timeplan.tex} and \texttt{Helper.tex}. Delete them from the
+        Overleaf project (they stay in its history)? This is separate from
+        Appendix~C.
+        \\ \hspace*{1em}$\square$ delete \quad $\square$ keep \quad Note:
+\end{enumerate}
+
+\end{document}

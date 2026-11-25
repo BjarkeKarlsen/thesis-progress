@@ -1,0 +1,482 @@
+{
+"8_200000": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"8_200001": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200002": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"8_200003": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200004": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200005": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"8_200006": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200007": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200008": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200009": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 3,
+"cats_all_lane": 0
+},
+"8_200010": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200011": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200012": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"8_200013": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200014": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200015": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"8_200016": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"8_200017": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"8_200018": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"8_200019": {
+"categories": 1,
+"workstations": 4,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200000": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200001": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"16_200002": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200003": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200004": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"16_200005": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200006": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200007": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200008": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200009": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200010": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"16_200011": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"16_200012": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200013": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200014": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200015": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200016": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200017": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"16_200018": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"16_200019": {
+"categories": 2,
+"workstations": 8,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"32_200000": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 7,
+"cats_all_lane": 1
+},
+"32_200001": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"32_200002": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"32_200003": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 2,
+"cats_all_lane": 0
+},
+"32_200004": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 2,
+"cats_all_lane": 0
+},
+"32_200005": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 5,
+"cats_all_lane": 1
+},
+"32_200006": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"32_200007": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 4,
+"cats_all_lane": 0
+},
+"32_200008": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"32_200009": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 8,
+"cats_all_lane": 2
+},
+"32_200010": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"32_200011": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"32_200012": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 5,
+"cats_all_lane": 1
+},
+"32_200013": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"32_200014": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 3,
+"cats_all_lane": 0
+},
+"32_200015": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"32_200016": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"32_200017": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"32_200018": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 3,
+"cats_all_lane": 0
+},
+"32_200019": {
+"categories": 4,
+"workstations": 16,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"64_200000": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 13,
+"cats_all_lane": 2
+},
+"64_200001": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 2,
+"cats_all_lane": 0
+},
+"64_200002": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"64_200003": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 4,
+"cats_all_lane": 0
+},
+"64_200004": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 4,
+"cats_all_lane": 0
+},
+"64_200005": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 8,
+"cats_all_lane": 1
+},
+"64_200006": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"64_200007": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 3,
+"cats_all_lane": 0
+},
+"64_200008": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 8,
+"cats_all_lane": 2
+},
+"64_200009": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 14,
+"cats_all_lane": 2
+},
+"64_200010": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"64_200011": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"64_200012": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 8,
+"cats_all_lane": 1
+},
+"64_200013": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 2,
+"cats_all_lane": 0
+},
+"64_200014": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 2,
+"cats_all_lane": 0
+},
+"64_200015": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 1,
+"cats_all_lane": 0
+},
+"64_200016": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 8,
+"cats_all_lane": 1
+},
+"64_200017": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 4,
+"cats_all_lane": 1
+},
+"64_200018": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 0,
+"cats_all_lane": 0
+},
+"64_200019": {
+"categories": 8,
+"workstations": 32,
+"lane_ws": 2,
+"cats_all_lane": 0
+}
+}

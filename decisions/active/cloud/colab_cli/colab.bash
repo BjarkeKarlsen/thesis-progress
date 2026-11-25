@@ -34,6 +34,7 @@
 #   INIT      a checkpoint folder at home to warm start from (train --init-checkpoint)
 #   NO_VALIDATE  1 trains with --no-validate, validation afterwards with evaluate
 #   COMMUNICATION  1 trains decentralised with messages
+#   RESUME_CPU  1 continues a run that started on a GPU on a CPU machine (resume --cpu); with GPU unset
 #   INTERVAL  seconds between fetches of `watch` (1800)
 #   STOP      1 stops the session when `watch` ends (1)
 #   RESTARTS  times `watch` continues a stopped run on a fresh machine (6)
@@ -66,6 +67,7 @@ HORIZON=${HORIZON:-}
 INIT=${INIT:-}
 NO_VALIDATE=${NO_VALIDATE:-}
 COMMUNICATION=${COMMUNICATION:-}
+RESUME_CPU=${RESUME_CPU:-}
 
 log() { echo "$(date '+%Y-%m-%d %H:%M') $*"; }
 
@@ -137,16 +139,16 @@ start() {
     fi
     "$PYTHON" -c 'import json, sys
 (fleet, arm, regime, commit, hours, runners, budget, learner, gpu, on_cpu, horizon, init,
- no_validate, communication, out) = sys.argv[1:]
+ no_validate, communication, resume_cpu, out) = sys.argv[1:]
 json.dump(dict(fleet=int(fleet), controller=arm, regime=regime, commit=commit,
                hours=float(hours), runners=int(runners), budget=int(budget) if budget else None,
                learner_cpus=int(learner) if learner else None, gpu=bool(gpu),
                batch_on_cpu=on_cpu == "1", horizon=int(horizon) if horizon else None,
                init=f"/content/init/{init}" if init else None, validate=no_validate != "1",
-               communication=communication == "1"),
+               communication=communication == "1", resume_cpu=resume_cpu == "1"),
           open(out, "w"))' "$fleet" "$arm" "$regime" "$commit" "$HOURS" "$RUNNERS" "$BUDGET" \
         "$LEARNER_CPUS" "$GPU" "$BATCH_ON_CPU" "$HORIZON" "$init_name" "$NO_VALIDATE" \
-        "$COMMUNICATION" "$tmp/job.json"
+        "$COMMUNICATION" "$RESUME_CPU" "$tmp/job.json"
     colab upload -s "$session" "$tmp/job.json" /content/job.json || return 1
     if [ -n "$PATCH" ]; then
         log "sending the patch $PATCH"

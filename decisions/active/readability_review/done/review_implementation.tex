@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\mockup}[1]{\fbox{\small mockup: #1}}
+\title{Proposed change, the Implementation chapter}
+\date{25 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers what is left of \texttt{implementation\_comments.md}. Each point
+was checked again against \texttt{slap-mapd-coupling} on \texttt{main}
+(\texttt{365ccc2}), because the comments are from 20 November.
+
+\textbf{Already settled, not in this review.} A4, the load levels in
+\lab{tab:evalparams} now match Appendix~E (0.09, 0.18, 0.3, 0.6, [A111]).
+A7, B2, D1 and D2 were applied in [A138]. E1, the timing figure
+\lab{app:timing} was never written, and the Results already point to
+Appendix~L for where the time goes. B1, the single-agent setup of van
+Knippenberg et al.\ stays in ``Choosing together'' only, where it already
+is.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \texttt{evaluation/evaluator.py:663}: $\kappa_T$ is worked out at the
+    end, from the assignment and routing times in the log, added together.
+    The service times also come from the task times at the end. The log
+    itself is filled while the run goes.
+  \item \texttt{environment/multi\_agent\_env.py:227--232}: the backlog is a
+    list with one entry per timestep. Blocked is checked every timestep but
+    kept as a count per task, plus the longest stretch blocked in a row.
+  \item \texttt{training/env.py:537}: for a learned controller the routing
+    time includes building each agent's input. \texttt{planners/driver.py:42}:
+    for Token Passing it is the planning only.
+  \item The timing runs (\texttt{results/L\_results/scaling/step\_time\_main})
+    run the network on the GPU, one CPU thread, and Token Passing on the CPU,
+    one thread, on the same PC. The Results take runtime from these runs.
+  \item \texttt{training/env.py}, docstring: under the centralised and
+    section-based controllers a timestep is split into turns. Only the agents
+    of a turn are passed in it. The core moves everyone once, after the last
+    turn. PettingZoo is not used in the code.
+  \item \texttt{training/callbacks.py}: during training the no-conflict check
+    and the capacity check run every step and raise an error. The task
+    stages hold by how the code is built, and replay is a test-suite check.
+    So the four checks cover the hard rules, not the storage rules, the
+    inputs or the reward.
+  \item ``Trace'' is used in the chapter and in Appendix~K but is never said
+    to mean anything.
+\end{itemize}
+
+\section*{Part 2. The chapter as it would read}
+
+\subsection*{Simulator}
+\ldots\ and \nref{eq:storagegreedy} at every storage update.
+
+All agents \old{act}\new{move} at the same time. \new{Under the centralised
+and section-based controllers the agents of a timestep choose in turns
+(Section~\ref{sec:method:controllers}), and everyone moves after the last
+turn.} Observations, rewards and actions are passed as one entry per agent,
+which matches \nref{eq:posg} and the multi-agent \old{interfaces}\new{interface}
+of RLlib \old{and PettingZoo} \citep{rllibmultiagent\old{,pettingzooparallel}}.
+\note{A6. ``At the same time'' is true for the moves, not the choices, and the
+reader has just read about turns. PettingZoo is not used.}
+
+\subsection*{What is logged}
+\old{Every measure is added up while the run goes, not computed again at the
+end.}\new{What each measure needs is logged while the run goes, so nothing is
+worked out again from a replay.} Each task records its release, assignment,
+pickup and finish times, whether it is a pick, a put-away or a shipment, and
+the order and line it belongs to. The backlog \old{and whether each active
+task is blocked are}\new{is} logged every timestep, so a growing queue shows in
+the \old{trace}\new{log}. \new{Each task counts the timesteps it is blocked, and
+its longest stretch blocked in a row.} Appendix~\ref{app:repro} lists what is
+logged and which measure each record gives. \note{A2, the measures are worked
+out at the end from what is logged. A3, blocked is a count per task. C2, no
+``trace''.}
+
+\subsection*{Computational cost}
+Runtime $\kappa_T$ is timed in the simulator. \old{The time per decision is
+logged separately for \nref{eq:assignmentrule} and for routing, on the same
+machine for every controller.}\new{Assignment and routing are timed apart in
+the log, and $\kappa_T$ is their sum, as \nref{eq:runtime} defines it. For a
+learned controller routing also holds building each agent's input, because
+that is part of producing the joint action. For Token Passing it is the
+planning. Runtime is taken from separate timing runs on one machine
+(Section~\ref{sec:exp:results}).} The learned controllers run their policy on
+the GPU. Token Passing runs on the CPU, the hardware it is built for, so each
+method is timed on its own hardware. \note{A5 and C1. One name,
+``runtime''. Say that the number is the sum, what routing holds, and which
+runs it comes from.}
+
+\subsection*{Correctness and reproducibility}
+Four checks test the simulator. \old{The trace has no vertex or swap
+conflict}\new{No two agents ever stand on one vertex or swap}, every storage
+configuration is within capacity, every task is in exactly one stage at every
+timestep, and a run replays exactly under the same seeds. A test suite runs
+all four on small warehouses. The first two also run at every timestep of
+every training episode, and a run stops if one fails. A task's stage is read
+from its times, so it can only have one. These checks show that \old{the
+simulator implements the model of Chapter~\ref{sec:problem}}\new{the hard rules
+of the model hold}. They are listed in full in Appendix~\ref{app:repro}. Token
+Passing in this simulator also gives service times close to those published
+by \citet{ma2017lifelong_mapf}, $8\%$ shorter on average
+(Appendix~\ref{app:repro:ma}). \note{A8. The checks say nothing about the
+storage rules, the inputs or the reward. C2, no ``trace''.}
+
+\section*{Part 3. Appendix K, the same facts}
+
+\lab{app:repro}, first paragraph: \old{Every metric is accumulated online, not
+recomputed at the horizon.}\new{What each measure needs is logged while the run
+goes, so nothing is worked out again from a replay.} \ldots\ The blocked
+indicator of \nref{eq:waiting} is \old{logged as one bit per timestep}\new{checked
+every timestep} for the agent serving each active task. \old{The bit}\new{It} is
+$1$ when the agent chose $\mathrm{wait}$ or was overridden by the
+conflict-resolution operator (Section~\ref{sec:method:resolution}), and
+\old{summing it per task gives $W_T$}\new{each task counts these timesteps, which
+gives $W_T$}. Backlog $N_t$ is logged every timestep, not only at the horizon,
+so a diverging queue is visible in the \old{trace}\new{log}. \note{A2, A3, C2,
+so the appendix says what the code does.}
+
+\section*{Questions}
+\begin{enumerate}[nosep]
+  \item C1. The Results (``Costs'' and the caption of \lab{fig:exp:time}) say
+    ``decision time''. Use ``runtime'' there too, so the measure has one name
+    from the Problem Formulation to the Results?
+  \item A6. PettingZoo is cited only for the shape of the interface. Drop the
+    citation, as proposed, or keep it with ``the same shape as''?
+\end{enumerate}
+
+\end{document}
