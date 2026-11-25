@@ -1,0 +1,144 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize #1}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, ``Choosing together''}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers \texttt{method\_controllers\_comments.md} for
+\lab{sec:method:controllers} in \texttt{4.Implementation.tex}. B2, B3, B4, C1
+and E1 were already handled in [A119] and [A120] and stay as they are. This
+change does D1, D2 and D4, and, as agreed on 24 November, B1 (one sentence
+in the Discussion, the controller table kept) and D3 (the closing paragraph
+dropped). Nothing in the model, the code or the figures changes.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What the Problem Formulation already says}
+\lab{sec:pf:controllers}, checked today:
+\begin{itemize}[nosep]
+  \item ``Centralised'': one network run per agent in priority order
+    (``One decision runs the network only once per agent''), and the rule
+    that an agent keeps the vertex and swap rules with the agents before
+    it and may not move onto an agent that has not chosen yet.
+  \item ``Section-based'': the zone takes over an agent that crosses into it,
+    and ``with a single zone, the section-based controller is the
+    centralised one''.
+  \item ``What the controllers share'': they differ in how many agents one
+    decision covers, and three things follow, what one decision sees,
+    whether an agent knows the moves chosen before it, and whose reward an
+    action is judged by.
+\end{itemize}
+
+\section*{Part 2. The section as it would read}
+
+The centralised and section-based controllers use the same network, but
+on a larger window and for one agent after another. The Problem Formulation
+gives the order and the rule that keeps the agents of one decision apart
+(Section~\ref{sec:pf:controllers}).
+
+\textbf{Centralised.} The network runs on every vertex an agent can stand
+on, once for each agent in priority order. Each run uses the agent's own
+distance label and the vertices the earlier agents have chosen, and the move
+it draws becomes part of what the next agent sees. \old{A timestep therefore
+takes $m$ runs, one after another, so runtime grows with the size of the
+fleet.} \new{The runs follow one another, so runtime grows with the size of
+the fleet.} One pass shared by all agents, as in the single-agent setup of
+\citet{vanKnippenberg2021}, would be cheaper, but then no agent would see
+another's choice. \note{D4. One run per agent is in the Problem Formulation.}
+
+\textbf{The claim mask.} The rule that keeps the agents of one decision
+apart enters as a second mask\old{. It switches off a move to $w$ when an
+earlier agent has chosen $w$, when $w$ holds an agent that has not chosen
+yet, or when the earlier agent standing on $w$ has chosen to move to $v$,
+which would be a swap.}\new{, the \emph{claim mask}
+$M^{\prec}_i$~\eqref{eq:claimmask}. It is zero for a decentralised agent.}
+A swap never arises inside one decision, because the earlier agent could not
+move onto an agent that had not chosen yet. The swap rule does its work in
+conflict resolution, where decentralised agents choose at the same time
+(Figure~\ref{fig:claimmask}). Waiting is never switched off, so an agent
+always has an action left. \old{This is the \emph{claim mask}
+$M^{\prec}_i$~\eqref{eq:claimmask}, and it is zero for a decentralised
+agent.} Conflict resolution therefore never overrides a centralised agent.
+\note{D1. The three cases are the rule of the Problem Formulation. The mask
+is named where it is introduced, and the vertex $v$ no longer appears
+unnamed.}
+
+\textbf{What the larger window adds.} \emph{[Unchanged, with its pooled
+readout \lab{eq:pooledreadout}. It already says what a centralised agent
+sees in detail and what only as an average (B1).]}
+
+\textbf{Section-based.} Each zone does the same on its own part of the
+warehouse. The zones are blocks of neighbouring aisles, as equal in size as
+the aisles allow. A zone is not a category of SKUs, and the two are drawn
+apart. Zone $Y_q$ runs the network for each of its agents in priority order,
+on its own vertices together with a \emph{halo} $H_q$~\eqref{eq:halo}. The
+halo is the strip of vertices outside the zone within field-of-view range of
+it. The idea comes from distributed training of graph neural networks, where
+each part of a split graph keeps copies of the neighbouring vertices it
+needs, its halo vertices \citep{zheng2020distdgl}. Here the halo is as wide
+as the field of view. After $L$ rounds of message passing a vertex has only
+taken in the vertices within $L$ edges \citep{gilmer2017mpnn}, and the halo
+is wider than the $L = 2$ rounds. So the network of a zone never reads past
+its halo. Its vertices carry the same facts as any other vertex. No agent on
+them chooses in this zone, and they are left out of the mean, because they
+are only context. So an agent at the zone edge still sees its whole field of
+view, and its features, crowding among them, mean the same as under the
+other controllers.
+
+\new{\textbf{At the border.}} A zone does not know the choices made in other
+zones, so an agent treats every occupied halo vertex as holding an agent that
+has not chosen yet, and does not move onto it. The weights are shared, so
+moving into the next zone changes the agent's context but not its policy. The
+zones run in parallel, and two zones may still send agents onto the same
+empty vertex at the border. Conflict resolution removes these clashes as it
+does everywhere else. \old{With $p=1$ the halo is empty and the
+section-based controller is the centralised one.} So, unlike a centralised
+agent, a section-based agent can be overridden at a zone border. This is
+part of what deciding in zones costs, and the comparison keeps it.
+\note{D2. The paragraph splits in two, the zone and its halo, then the
+border. The $p=1$ sentence repeats the Problem Formulation. It was added
+back in [A123] from the reviewer's green sentence, which missed that.}
+
+[Figure \lab{fig:claimmask}, unchanged.]
+
+\old{The three learned controllers share the network, the masks, the reward
+of each agent and the training. They differ only in which agents choose
+together, and so in the window the network runs on, in which earlier choices
+an agent sees, and in the credit each agent gets. This is the contrast RQ1
+asks about.} \note{D3. The Problem Formulation's ``What the controllers
+share'' says the same, with the same three differences.}
+
+\section*{Part 3. The Discussion}
+\texttt{5.Experiments.tex}, ``What was expected'':
+
+\dots\ The centralised controller did not gain the most. At 16 agents it
+serves about as much as the others under congestion-aware storage. \new{A
+possible reason is that its network sees the agents near it in detail and
+the rest of the warehouse only as an average. It then differs from the
+others mainly through the claim mask and the shared credit
+(Section~\ref{sec:method:controllers}), not through seeing more.} Closing
+the loop changed little for Token Passing, \dots
+
+\note{B1. The controller table of the Problem Formulation keeps ``the whole
+warehouse'', since it states what the controller may see. How much of it the
+network uses is method.}
+
+\section*{Questions}
+None. Approved in chat on 24 November, apart from reading this page.
+
+\end{document}

@@ -1,0 +1,174 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\mockup}[1]{\fbox{\small mockup: #1}}
+\title{Proposed change, ``A reference point''}
+\date{24 November 2026, version 2}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers what is left of \texttt{method\_reference\_comments.md} for
+\lab{sec:method:reference} in \texttt{4.Implementation.tex}. The lock (B2) was
+done in [A109]. Agreed on 24 November: the role told by design, not by
+results (A4); the sentence on A$^\star$, ICBS and ICTS dropped (B4); no figure
+(E1). The rest (A3, B3, C1 to C5, D1, D2, D4) is fixed as the comments say.
+
+New in version 2 (agreed): the section is split. How Token Passing works in
+the loop stays in the Method, under the plain name ``Token Passing''. Its role
+in the experiment (what it is measured against, the values it sets, how its
+gain is read) moves to the Experiments, ``Factors'', where a mockup held its
+place. The label \lab{sec:method:reference} stays, so no reference breaks.
+B1, why Token Passing and not its variant with task swaps, is a proposal (see
+the question). No behaviour of Token Passing changes.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \texttt{planners/token\_passing.py}: agents ask in agent id order
+    (``Ma et al.\ leave the order open''); the nearest available task by hop
+    distance; a task is available if no other path ends at its pickup or
+    delivery; with no task an agent stays, unless a waiting task delivers
+    where it stands, then it goes to the nearest free endpoint that is no
+    shelf or delivery point; each path is a space-time A$^\star$ path
+    against the token; a vertex is taken one step before arrival until one
+    step after leaving.
+  \item Ma et al.\ (2017) give two solvers, Token Passing and Token Passing
+    with Task Swaps, where an agent may take over a task from another agent
+    that would reach it later. Van Knippenberg et al.\ do not use Token
+    Passing. A$^\star$ is not in \texttt{references.bib}.
+  \item Appendix~E: a load sweep of Token Passing under fixed storage sets
+    the main load of each fleet, chosen ``because it needs no training''.
+    Appendix~G: sweeps of Token Passing set the storage period and the
+    pallet size. The Results run it under every storage rule at the main
+    load.
+  \item The Discussion opens with ``only for Token Passing can the gain be
+    measured''. That is a result, so it stays there.
+  \item The Problem Formulation already has the scope item ``One agent per
+    workstation at a time'' (\lab{sec:pf:scope}).
+\end{itemize}
+
+\section*{Part 2. The Method opening}
+
+\ldots Free learned agents are paired with waiting tasks by the assignment
+rule, and Token Passing instead selects its own tasks. Each \new{learned}
+agent then chooses one move from what it sees
+(Table~\ref{tab:information})\new{, and a Token Passing agent takes the next
+step of its planned path}. \ldots \note{A3, step 3 did not fit Token
+Passing.}
+
+\ldots They end with the reward, the training and \old{a reference point
+outside the main comparison}\new{Token Passing}. \note{The section's new
+name.}
+
+\section*{Part 3. The Method section as it would read}
+
+\subsection*{\old{A reference point}\new{Token Passing}}
+
+\old{Token Passing is run next to the learned controllers but is not part of
+the comparison the research questions make. It checks that the learned
+controllers can compete with a classic planner. It is run at the main loads,
+not across the full design. Token Passing runs under every storage rule, so
+its gain can be set next to the learned controllers'.}
+\note{A4. The role moves to the Experiments, Part 4.}
+
+\new{Token Passing \citep{ma2017lifelong_mapf} is a classic planner that does
+not learn. It runs in the same loop as the learned controllers, but it
+chooses its own tasks and follows paths it plans ahead.
+\citet{ma2017lifelong_mapf} give two solvers (Section~\ref{sec:rw:mapf}).
+Token Passing is used rather than Token Passing with Task Swaps, because with
+task swaps an agent can lose its task to another, while a learned agent keeps
+its task once it has one. Token Passing also needs less computation.}
+\note{B1, a proposal, see the question.}
+
+\old{\textbf{Token Passing} \citep{ma2017lifelong_mapf} is the only router
+that does not learn. The agents share one token that holds every agent's
+planned path.} \new{The agents share one token that holds every planned path,
+as in Section~\ref{sec:rw:mapf}.} An agent whose path has ended asks for the
+token, and the agents ask one at a time in order of index\new{, an order
+\citet{ma2017lifelong_mapf} leave open}. The agent takes the waiting task
+closest to it in number of moves, among the tasks whose pickup \old{and end
+vertices are}\new{$s_j$ and delivery $g_j$ are} not where another agent's path
+ends. \old{It then plans a path to the pickup and on to the end vertex by
+space-time A$^\star$, around the paths already in the token. Every other agent
+is taken to stand where its path ends from then on.} An agent that finds no
+such task stays where it is\old{, or moves to the nearest free endpoint if it
+stands on the end vertex of a waiting task}\new{. If a waiting task delivers
+where it stands, it moves instead to the nearest free endpoint that is no
+shelf or delivery point}. \new{Token Passing chooses its own tasks in this way,
+so it does not use the assignment rule.} \note{D1, the token is the
+Background's, only what is added here stays. B3, the order is ours. C1, the
+PF's names. D2, the first of two paragraphs, how a task is chosen.}
+
+\new{The agent then plans the shortest path, in steps, to $s_j$ and on to
+$g_j$, keeping clear of the paths already in the token. Every other agent is
+taken to stand where its path ends from then on.} Unlike in
+\citet{ma2017lifelong_mapf}, where an agent may follow another into the vertex
+it is leaving, a path keeps a vertex from one step before an agent arrives
+until one step after it leaves. So conflict resolution never has to change a
+plan. Two agents therefore never ask for each other's vertex, so Token Passing
+never meets the lock at a workstation of Figure~\ref{fig:workstationlock}.
+\old{Token Passing chooses its own tasks, so it does not use the assignment
+rule.} \old{Its guarantee holds only on well-formed warehouses}\new{It
+promises to finish every task when the warehouse is well-formed}, and every
+warehouse is built to be one (Appendix~\ref{app:wellformed}). \old{It plays the
+role that A$^\star$, ICBS and ICTS play in \citet{vanKnippenberg2021}.}
+\note{D2, the second paragraph, how a path is planned. C3, plain words for
+space-time A$^\star$, which the thesis does not cite. C4, well-formed is
+enough, not needed. B4, dropped.}
+
+\old{Token Passing lets only one agent head for a workstation at a time.}
+\new{Only one Token Passing agent heads for a workstation at a time, because
+its path ends there and no other task may then deliver to it.} All lines of
+an order go to the same workstation, so they are brought one after another,
+and a line can wait longer for its turn than its \old{agent drives}\new{trip
+takes. The Problem Formulation keeps this wait as a limit of the scope
+(Section~\ref{sec:pf:scope})}. Appendix~\ref{app:load:next} measures \old{this}
+\new{the} wait. Token Passing's task rule is kept as published, because the
+\old{router}\new{planner} is not what this thesis tests. \old{, so its gain
+from demand storage is read with this wait in mind.} The learned controllers
+take their tasks by the assignment rule and do not have this wait, but they
+can lock at a workstation instead (Section~\ref{sec:method:resolution}).
+\note{D4, the mechanism in one sentence, then a point back to the scope item.
+C2, ``planner''. C5, no ``drive''. How the gain is read moves to the
+Experiments.}
+
+\section*{Part 4. Experiments, ``Factors''}
+
+\ldots Communication is varied only for the decentralised controller.
+\old{The reference planner of Section~\ref{sec:method:reference} runs under
+\mockup{the conditions of issue \#84} as a point of comparison, not as a fourth
+controller.}
+\new{Token Passing (Section~\ref{sec:method:reference}) is the classic planner
+the learned controllers are measured against, not a fourth controller. It runs
+under every storage rule at the main load, so its gain can be set next to
+theirs. Because it needs no training, it also sets values the design needs. A
+load sweep of Token Passing under fixed storage sets the main load of each
+fleet (Appendix~\ref{app:load}), and sweeps of it set the storage period and
+the pallet size (Appendix~\ref{app:storagecal}). Its gain from demand storage
+is read with its workstation wait in mind.} \note{A4. The role by design.
+The mockup is filled from Appendices~E and~G.}
+
+\section*{Question}
+\begin{enumerate}[nosep]
+  \item B1. Token Passing came from the paper that defines lifelong MAPD.
+    Is this reason fine: with task swaps an agent can lose its task, while a
+    learned agent keeps its task once it has one, and Token Passing needs
+    less computation? Or only ``the simpler of the two solvers of Ma et al.''?
+\end{enumerate}
+
+\end{document}

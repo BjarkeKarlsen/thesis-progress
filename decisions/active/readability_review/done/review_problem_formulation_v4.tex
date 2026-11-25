@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx,array}
+\usepackage[normalem]{ulem}
+\graphicspath{{../../../../thesis/Images/}}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\where}[1]{\par\textbf{#1}\par}
+\title{Proposed change, Problem Formulation, round 3\\ Seams after the cuts, and figure sizes}
+\date{25 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+I read the compiled chapter after [A133] and [A134], and the Method
+paragraphs that received text. Part~1 fixes six seams the cuts left. Part~2
+proposes smaller figures. Black text stays, \new{green} is new and
+\old{struck} text goes. \note{Notes in brackets} say why. Answer by number.
+Nothing below is in the thesis yet.
+
+\textbf{What it saves, honestly.} Part~1 saves a few lines and is about
+reading, not length. Part~2 saves about 9\,cm of figure height, a little
+under half a page, because the chapter is mostly text. Its main gain is that
+the pages look lighter. To save a full page more, a figure would have to go
+(G10).
+
+% ================================================================
+\section*{Part 1. Seams}
+
+\subsection*{S1. $\mathcal{F}$ defined once (Fix)}
+\where{Where the items are, after the three conditions}
+\dots\ so a line that waited for them waits for a later one. \old{A storage
+rule is any $F$ that meets these three conditions, and $\mathcal{F}$ is the
+set of them.} \new{A placement that meets these three conditions is a valid
+one.}
+
+\where{Orders and tasks, unchanged}
+A storage rule therefore does two things. It places arriving stock at a
+storage update, and it ranks the shelves a line takes from. From here on $F$
+means both parts, and $\mathcal{F}$ holds every rule that places stock under
+the three conditions of a storage update and ranks the shelves for every
+line.
+
+\note{The reader met two definitions of $\mathcal{F}$, four pages apart.
+Now the storage update says what a valid placement is, and $\mathcal{F}$ is
+defined once, where both parts are known.}
+
+\subsection*{S2. The order estimate next to its words (Fix)}
+\where{What the rule reads}
+The first is how often each SKU was ordered. Write $\hat\rho_t(k)$ for the
+order lines of SKU $k$ per step in the last storage period. If tea was
+ordered 30 times in a period of 100 steps, $\hat\rho_t(\mathrm{tea})=0.3$.
+\new{Formally, the order estimate is}
+\[ \new{\hat\rho_t(k) = \frac{\#\{\text{order lines for } k \text{ in the last period}\}}{\Delta} .} \]
+
+The second is how long agents stood still at each shelf. \dots\ so the time
+its detour takes is not counted.
+
+Demand storage reads only the first number. Congestion-aware storage reads
+both. \old{Formally, the order estimate is \dots\ \eqref{eq:estimates}}
+
+\note{After R7 the formula hung after a two-sentence paragraph about both
+numbers, and it only defines the first. It moves to where $\hat\rho$ is
+explained. The label stays.}
+
+\subsection*{S3. The field of view's limit in one place (Fix)}
+\where{The field of view}
+The agent sees every vertex it can reach within a travel cost of
+$d_{\mathrm{obs}}$, and the edges between them. So it knows which moves are
+open nearby, not only which vertices exist. It sees nothing further away\new{,
+so it cannot see a conflict coming from further than $d_{\mathrm{obs}}$}.
+
+\where{After \lab{fig:observation}}
+\old{The agent cannot see a conflict coming from further away than
+$d_{\mathrm{obs}}$.}
+
+\note{After R3 this was a one-sentence paragraph under the figure.}
+
+\subsection*{S4. ``So'' that does not follow (Fix)}
+\where{A task's life}
+Only a free agent, one with no active task, can get a new task\old{. So
+agent $a_2$ is free again once $\tau_1$ is delivered.}\new{, so $a_2$ can take
+its next task once $\tau_1$ is delivered.}
+
+\note{Being free does not follow from the first sentence. Taking the next
+task does.}
+
+\subsection*{S5. Method, crowding in its own paragraph (Fix)}
+\where{How an agent chooses its move, ``What the network reads''}
+After R6 one paragraph runs vertex features, then crowding, then the
+earlier agents' vertices, which are vertex features again. The crowding
+sentences move to a paragraph of their own after it:
+
+\dots\ Together they are the \emph{vertex features} $f(v,t)$. \old{The
+crowding feature \dots\ zone edge.} The vertices chosen by earlier agents
+\dots\ so every controller reads the same list of features.
+
+\new{\textbf{Crowding.} The crowding feature $\delta_i(t)$ is added once for
+the agent, not for each vertex. With it a controller can route around a
+crowd before an agent gets stuck in it, the argument
+\citet{pham2024optimizingcrowdawaremultiagentpath} make for their
+crowd-density feature. Every controller gets it, so it is measured the same
+way for every agent. A zone or the centralised controller sees more agents,
+so their values could be worked out, but no controller reads them.
+Appendix~\ref{app:controllers} explains why a section-based agent's field of
+view is not cut at the zone edge.}
+
+\subsection*{S6. Method, the smoothing in order (Fix)}
+\where{Where arriving stock goes, before \lab{eq:standstill}}
+\new{A shelf sees only a few picks in one period, so one reading jumps up and
+down by chance.} $\hat\omega_t(v)$ is the plain average of the shelf's last
+five readings. Five is a practical smoothing choice. \old{A shelf sees only a
+few picks in one period, so one reading jumps up and down by chance.} It
+evens out one noisy period and still follows recent congestion, and the
+number was not tuned. \dots
+
+\note{The reason now comes before the choice, as your style asks.}
+
+% ================================================================
+\section*{Part 2. Figure sizes}
+The thesis text is 15\,cm wide. Each figure below is printed at the size it
+would have in the thesis, so you can judge whether it still reads. Heights
+are of the image alone. Nothing is redrawn, only the width changes.
+
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+Item & Figure & Width now $\to$ proposed & Height now & Saved \\
+\midrule
+G1 & \lab{fig:instance} & 0.8 $\to$ 0.6 & 8.9\,cm & 2.2\,cm \\
+G2 & \lab{fig:observation} & 0.9 $\to$ 0.7 & 8.8\,cm & 2.0\,cm \\
+G3 & \lab{fig:storageupdate} & 0.8 $\to$ 0.6 & 6.1\,cm & 1.5\,cm \\
+G4 & \lab{fig:pickuprule} & 0.75 $\to$ 0.6 & 5.6\,cm & 1.1\,cm \\
+G5 & \lab{fig:crowding} & 0.55 $\to$ 0.45 & 5.1\,cm & 0.9\,cm \\
+G6 & \lab{fig:loop} & 0.9 $\to$ 0.8 & 6.8\,cm & 0.8\,cm \\
+G7 & \lab{fig:storageexample} & 0.8 $\to$ 0.7 & 6.0\,cm & 0.7\,cm \\
+G8 & \lab{fig:lifecycle} & 1.0 $\to$ 0.85 & 4.7\,cm & 0.7\,cm \\
+G9 & \lab{fig:conflicts} & 1.0 $\to$ 0.85 & 3.9\,cm & 0.6\,cm \\
+\midrule
+ & & & total & 10.5\,cm \\
+\bottomrule
+\end{tabular}
+
+Kept as they are: \lab{fig:controllers-example} (three panels, already
+flat), \lab{fig:taskroute} (already wrapped beside the text).
+
+\newcommand{\gfig}[3]{\par\textbf{#1}\par\centering\includegraphics[width=#3]{#2}\par\raggedright\vspace{0.5em}}
+
+\gfig{G1, the warehouse instance, at 9\,cm}{instance_simple.png}{9cm}
+\note{The first picture of the chapter, and it has a legend. At 9\,cm the
+legend is still readable. 0.65 if you want it a little larger.}
+
+\gfig{G2, the observation, at 10.5\,cm}{observation.png}{10.5cm}
+\note{The distance labels are small. Check that the blue numbers still read.}
+
+\gfig{G3, one storage update, at 9\,cm}{storage_update.png}{9cm}
+
+\gfig{G4, one line split into two picks, at 9\,cm}{pickup_rule.png}{9cm}
+
+\gfig{G5, the crowding feature, at 6.75\,cm}{crowding.png}{6.75cm}
+
+\gfig{G6, the loop a period later, at 12\,cm}{shelf_loop.png}{12cm}
+
+\gfig{G7, arriving tea under fixed and demand storage, at 10.5\,cm}{arrival_storage.png}{10.5cm}
+
+\gfig{G8, the life of the tea task, at 12.75\,cm}{lifecycle.png}{12.75cm}
+
+\gfig{G9, the two conflicts, at 12.75\,cm}{conflicts.png}{12.75cm}
+
+\subsection*{G10. If you want a page more (Choice, not recommended)}
+Only removing a figure saves much more. The two candidates are the ones
+whose text now says what they show.
+\begin{itemize}[nosep]
+  \item \lab{fig:storageupdate}. Its sentence (N4) says the whole update. It
+    is the only picture of a lost pallet.
+  \item \lab{fig:crowding}. \lab{fig:observation} already shows a field of
+    view with agents in it. The loop section and the mean crowding refer to
+    \lab{fig:crowding}, so both would need a new example.
+\end{itemize}
+I would keep both, since each shows something the reader otherwise only
+reads about.
+
+% ================================================================
+\section*{When approved}
+Applied under [A135], with a GAPS.md entry. Only widths change in the
+\texttt{\textbackslash myfig} calls, so the figure scripts are not rerun. The
+chapter is rebuilt, each changed page is looked at for a figure that drifted
+from its text, and the tags go at the end of a line.
+
+\end{document}

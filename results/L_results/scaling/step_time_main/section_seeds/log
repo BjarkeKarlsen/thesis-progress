@@ -1,0 +1,10 @@
+2026-11-24 15:18:32 start: main bdfda94, fleets 32 64, seeds 200001 200002, checkpoint_000011
+2026-11-24 15:18:32 fleet 32 section seed 200001
+2026-11-24 15:21:04 fleet 32 seed 200001 exit 0: window 0.0367 s (all steps 0.0436), first/last 100 0.0388/0.0261, calls 1000/26918 of 3000, RAM peak 1.24 GB, CPU 0.04407000000000002 s/step, 1.0074301733191457 cores, GPU 15.28048780487805 % busy, own GPU 154.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 15:21:04 fleet 64 section seed 200001
+2026-11-24 15:24:33 fleet 64 seed 200001 exit 0: window 0.0601 s (all steps 0.0523), first/last 100 0.0526/0.0713, calls 1000/32662 of 3000, RAM peak 1.27 GB, CPU 0.08200999999999999 s/step, 1.0043710479430206 cores, GPU 15.912751677852349 % busy, own GPU 176.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 15:24:33 fleet 32 section seed 200002
+2026-11-24 15:26:38 fleet 32 seed 200002 exit 0: window 0.0426 s (all steps 0.0339), first/last 100 0.0384/0.0485, calls 1000/30510 of 3000, RAM peak 1.23 GB, CPU 0.05070999999999999 s/step, 1.0061578803362805 cores, GPU 17.52127659574468 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 15:26:38 fleet 64 section seed 200002
+2026-11-24 15:30:45 fleet 64 seed 200002 exit 0: window 0.0788 s (all steps 0.0640), first/last 100 0.0688/0.0852, calls 1000/37420 of 3000, RAM peak 1.26 GB, CPU 0.1026 s/step, 1.0044308253264151 cores, GPU 32.026881720430104 % busy, own GPU 176.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 15:30:45 finished

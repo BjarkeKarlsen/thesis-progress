@@ -1,0 +1,246 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, Introduction and Project Description,\\ second pass}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers the red comments on the Introduction and Project Description
+(\texttt{intro\_comments.pdf}, 24 November). Agreed: the storage wording on
+p.~1 must follow the arrival model of the code, and Token Passing needs a
+reason for being the reference. Part~4 lists the values the chapter leans on,
+where each is set and the reason the thesis gives, and asks where a reason is
+missing.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \textbf{Storage, [A38] (2026-10-18).} The code changed from moving
+    stock to placing arriving stock (\texttt{storage/arrival.py}: ``Nothing
+    already on a shelf moves''). GAPS [A38] logs it, and
+    \lab{sec:pf:scope} says ``Stored stock never moves''. The Background had
+    the same leftover wording (``updates storage dynamically as demand
+    shifts'') and lost it in [A48]. The Introduction still says ``move stock
+    as demand changes''. It is a leftover, not a model change.
+  \item \textbf{The three rules in the code.} Fixed storage sends a SKU's
+    arriving units to its home shelf. Demand storage places the SKUs ordered
+    most lately first, each on the free shelves nearest the workstations.
+    Congestion-aware storage orders the shelves by a score that also counts
+    how long picks stand blocked there.
+  \item \textbf{Token Passing.} Appendix~E uses it for the load sweep
+    ``because it needs no training, so the load does not depend on the
+    training of a learned controller''. The Method section ``A reference
+    point'' has a pending review (\texttt{review\_method\_reference.pdf} v2)
+    that gives the same role. The sentence below matches it.
+  \item \textbf{Results.} At the main load the learned controllers fall
+    behind on most seeds. Only Token Passing keeps up on every seed.
+\end{itemize}
+
+% ================================================================
+\section*{Part 2. Introduction}
+
+An automated warehouse makes two kinds of decision that depend on each
+other. \ldots The first is studied as the Storage Location Assignment
+Problem (SLAP)\new{~\citep{reyes2019slap_review}}, including dynamic
+versions where the placement changes over time. \ldots
+\note{SLAP gets the same backing as MAPD. See question~1 on a sentence of
+motivation before this paragraph.}
+
+Storage and routing affect each other. \ldots So neither layer can be
+planned well on its own.
+
+This thesis measures how much it helps to \old{move stock as demand
+changes}\new{place arriving stock by demand}, and whether that gain depends
+on how the robots are controlled. \new{The gain is measured in service time,
+the mean time from when an order is placed until it leaves the warehouse.}
+A storage rule decides from time to time where arriving stock
+goes\old{, based on the orders it has seen}. \new{Stock already on a shelf
+stays there. Fixed storage sends every SKU to one home shelf. Demand storage
+puts the SKUs ordered most lately on the free shelves nearest the
+workstations.} Between these updates, a controller gives tasks to the
+robots and routes them. Demand storage is compared with fixed storage under
+three controllers. The centralised controller decides for the whole fleet,
+the section-based one for one zone and the decentralised one for a single
+robot. All three are graph neural networks trained the same way with
+reinforcement learning, so they differ \old{only} in how much one decision
+covers\new{. What each robot sees and whose reward judges its move follow
+from that}. Token Passing, a classic planner that does not learn, is shown
+next to them as a reference. \new{It comes from the paper that defines MAPD,
+so it shows what a known planner reaches in the same warehouse. Because it
+needs no training, it also sets the main load, the rate of orders at which
+the comparison is made.}
+\note{``move stock'' was a leftover from before [A38]. The two rules are
+defined where they are first compared. The measure moves here from its own
+one-line paragraph. ``only'' was not the whole story, since view and credit
+differ too ([A128]), but both follow from the scope of the decision. The
+Token Passing reason matches Appendix~E and the pending Method review, and
+it defines ``main load'' before the next paragraph uses it.}
+
+The coupling is tested in two ways. The first runs one way. \ldots If it
+does, what storage is worth depends on how the robots are routed.
+
+The second runs both ways. \new{A third rule, congestion-aware storage,}
+\old{The storage rule} can also read where robots \old{get stuck}\new{are
+blocked, standing still because the way ahead is taken}, and steer both new
+stock and picks away from those shelves. Then the robots' movement feeds
+back into where the stock goes and where it is taken from, and the loop
+between the two layers is closed. Avoiding crowded aisles can only help
+when the aisles are crowded. So the loop is tested at the main load and
+again at a higher load.
+\note{Congestion-aware storage is named before Aim and scope lists it.
+``Blocked'' is the one name for the signal, also used by RQ2 and Expected
+outcome.}
+
+The decentralised robots may also send \old{short}\new{learned} messages to
+the robots near them. A robot that decides alone sees only what is around
+it, and a message can tell it about crowding further away.
+
+\old{The main measure is the mean time an order takes, from when it is placed
+until it leaves the warehouse.}
+\note{Moved into the paragraph on what the thesis does.}
+
+% ================================================================
+\section*{Part 3. Project Description}
+
+\subsection*{Aim and scope}
+
+The project aims to find out how \old{feedback}\new{the coupling} between
+storage and the control of the robots affects how \old{well a warehouse
+works}\new{fast orders are served}.
+\note{One name for the coupling, and the aim says what is measured.}
+
+Four things are varied in the experiments: \ldots
+\note{List unchanged.}
+
+The main result compares demand storage with fixed storage under each
+controller, at a main load where every controller should keep up. \new{The
+main load is 0.6 of the highest rate at which Token Passing keeps up under
+fixed storage. Near that limit a small saving in travel turns into a large
+saving in waiting, and the gain would show how close the fleet runs to its
+limit, not what storage adds.} The other factors test how far that result
+reaches.
+\note{The reason is the one Appendix~E gives. Where 0.6 comes from goes in
+Appendix~E, see question~2.}
+
+A fleet keeps up when it finishes tasks as fast as they arrive. Order times
+are compared only when both runs keep up, because a fleet that falls behind
+has a queue that grows for as long as the run lasts. \new{When a fleet falls
+behind, it is judged by its served share, the part of the arriving work it
+finishes.}
+\note{RQ2 and RQ4 ask whether a fleet serves more. The served share was lost
+when [A129] cut the measures paragraph.}
+
+\subsection*{Research question}
+\ldots
+\begin{description}[nosep]
+  \item[RQ3:] As orders arrive faster, does the gain of RQ1 grow, shrink or
+  disappear, and at what rate does each \old{trained}\new{learned}
+  controller stop keeping up?
+\end{description}
+\note{One name, ``learned'', as in the Introduction. Token Passing's limit
+is already the capacity of Appendix~E, so leaving it out of RQ3 is right.}
+
+\subsection*{Contributions}
+\begin{enumerate}[nosep]
+\item One model in which \old{the three problems}\new{storage assignment,
+  task assignment and path finding} share the same warehouse graph and the
+  same stock, so each changes what the others face.
+\item Congestion-aware storage, the thesis's own rule. It adds the time
+  \old{picks stand still}\new{robots stand blocked} at a shelf to the classic
+  \old{slotting score}\new{score that puts the most ordered SKUs nearest the
+  workstations~\citep{heskett1963coi}}, so where new stock goes reacts to
+  the traffic of the \old{agents}\new{robots}.
+\item A simulator built on that model. Between two runs \new{of one fleet
+  size} only the storage rule or only the controller changes. \ldots
+\end{enumerate}
+\note{The three problems lost their names in [A129]. ``Slotting score'' was
+used before the Background explains it. ``Robots'' in this chapter. The
+warehouse grows with the fleet, so the pairing holds within one fleet size.}
+
+\subsection*{Expected outcome}
+
+\old{Before the experiments, the expectations are as follows.} For RQ1,
+demand storage should shorten \old{order}\new{service} time under every
+controller, mostly because popular stock sits closer to the workstations and
+trips get shorter. The gain should be largest for the centralised
+controller, because it sees where every \old{agent}\new{robot} is going
+\ldots
+\note{No sentence about the text. One name for the measure and for robots.
+The RQ4 expectation is left as it is, see question~4.}
+
+% ================================================================
+\section*{Part 4. The values and their reasons}
+
+\begin{tabularx}{\linewidth}{@{}p{2.6cm}p{2.2cm}X@{}}
+\toprule
+Value & Set in & Reason the thesis gives, and what is missing \\
+\midrule
+Token Passing as reference & App.~E, Method & Needs no training, so the
+load does not depend on a learned controller. From the paper that defines
+MAPD. Missing in the Introduction until now (Part~2). \\
+Capacity & App.~E, [A58] & Highest tested rate at which all 20 seeds keep
+up, and every lower rate too, so one odd seed is not read as the capacity.
+Complete. \\
+Main load, 0.6 of capacity & App.~E, [A58] & Kept below capacity, because
+near the limit the gain would show the waiting, not storage. \textbf{Why 0.6}
+is not in the thesis. Author, 24 November: it comes from an early Token
+Passing run that found where the fleet falls behind ([A31] pilot, 2026-10-14,
+3 agents, 6 seeds). The old appendix notes call 0.6 the point where the fleet
+``keeps up, but agents don't wait for tasks''. Proposed text below. \\
+Keep-up threshold, 0.9 & App.~E, [A111] & Token Passing serves 1.00 at the
+main load and no seed under 0.94, so 0.9 does not fail by chance. 0.8 let
+growing queues pass. Complete. \\
+Higher load & [A84], TBD & Rule in [A84]: the highest load where every
+\emph{trained} controller still keeps up. \textbf{It cannot be met.} The
+learned controllers fall behind already at the main load. \\
+\bottomrule
+\end{tabularx}
+
+% ================================================================
+\section*{Questions}
+\begin{enumerate}[nosep]
+  \item Motivation. The Introduction opens on the two decisions and never
+    says why warehouses or robot fleets matter. Add one or two sentences
+    with a source (for example the survey of de Koster et al., 2007, which
+    is in the bibliography), or leave it as it is?
+  \item Why 0.6 (answered, please check the wording). Proposed for
+    Appendix~E, after $\lambda_{\mathrm{main}} = 0.6\,\lambda_{\mathrm{capacity}}$:
+    \new{The share 0.6 comes from an early Token Passing run on a small
+    warehouse with three agents, made to find where the fleet falls behind.
+    At about 0.6 of that point it still kept up with room to spare, and its
+    agents seldom waited for a task. The share was kept when the warehouses
+    grew, and the capacity of each fleet was measured again.} In Aim and
+    scope only the clause ``so the fleet is busy but not at its limit''.
+    Is ``seldom waited for a task'' true to what you saw? The [A31] entry
+    does not record idle time, only where the fleet stopped keeping up.
+  \item The higher load. The [A84] rule has no answer. Options:
+    (a)~set it from Token Passing too, at a share between 0.6 and 1.0 of
+    capacity, for example 0.9, and run all controllers there, judging the
+    learned ones by served share; (b)~drop the higher load, since the
+    learned controllers already meet crowded aisles at the main load, and
+    RQ2 reads the main load only; (c)~keep it for Token Passing only, where
+    a higher load still keeps up. I lean to (a), because RQ2 already asks
+    what a fleet that falls behind serves. It changes [A84], the
+    Introduction, RQ2 and the Experiments table, so it gets its own tag.
+  \item RQ4 now asks whether the effect of messages changes with the storage
+    rule, but Expected outcome predicts only that messages help. What did
+    you expect for the storage rule before the experiments? I do not write
+    an expectation after the result is known.
+\end{enumerate}
+
+\end{document}

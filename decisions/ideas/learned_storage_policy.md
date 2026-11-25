@@ -262,3 +262,150 @@ resident memory. Script: `learned_storage_gcn_size.py` next to this file.
 `learned_storage_pilot_plan.md`, next to this file. It also records that under
 Token Passing a pick is blocked for only 0.6 to 2.7 steps at every fleet size,
 so the pilot runs in two stages.
+
+# Variant: embedding feedback between storage and routers (2026-11-24)
+
+**Status.** A sketch only, to show what the idea would look like. The author
+does not plan to build it, and it is not in the thesis. It came from a
+conversation with another chat, kept in `slap_mapd_embedding_feedback_handoff.md`
+next to this file. This section models it on top of the learned storage policy
+above, in the thesis's notation.
+
+## The idea in one paragraph
+
+Today traffic reaches storage through one number per shelf, the blocked time
+of the picks taken from it ([A93]). In this variant the storage policy also
+reads what the routers have learned. Each agent already sends a vector, its
+own final-layer embedding $\xi_i(t)$ (`eq:message`). Storage collects these
+vectors over one storage period and uses them as extra shelf features. Going
+the other way, storage hands the routers a short vector per shelf that says
+what it has just decided, such as stock on its way and room reserved. The
+physical coupling through stock and tasks stays as it is. The vectors are a
+second, learned channel next to it.
+
+## Three clocks
+
+| Clock | When | What changes |
+|---|---|---|
+| Routing | every timestep | the agents' moves |
+| Storage | every storage period $\Delta$ | shelf choices and the vector handed to the routers |
+| Learning | after a batch of episodes | network weights |
+
+Storage with fixed weights still decides differently each period, because its
+inputs change.
+
+## Upward: from the routers to storage
+
+**What is sent.** At each timestep agent $a_i$ has $\xi_i(t)$. The code
+returns it already (`own_embeddings` in `models/rl_module.py`, `z` and
+`node_embeddings` in the encoder output). Beside it, the simulator records
+plain facts the vector cannot be trusted to carry. These are where the agent
+stands, its task and the shelf of that task, the task phase (to a pick,
+loaded, idle) and whether it was blocked.
+
+**Two pools, kept apart.** A vector can be filed by where the agent is or by
+the shelf it serves. These mean different things, so both are kept.
+
+- *Where it is.* Mean of $\xi_i(t)$ over the agents standing in zone $Y_q$.
+  This says what traffic in that zone looks like now.
+- *Which shelf it serves.* Mean of $\xi_i(t)$ over the agents whose current
+  pick comes from shelf $v$. This says what serving that shelf costs, even
+  when the queue is far away at a workstation. It is the learned version of
+  the [A93] signal.
+
+Each pool also keeps a count of the vectors in it and the plain blocked count.
+An empty pool is marked empty, not filled with zeros, so "no data" is not read
+as "no traffic".
+
+**Over a period.** At the storage update ending period $n$, the pools of every
+timestep in it are averaged. Call the results $\bar e_q[n]$ per zone and
+$\bar e_v[n]$ per shelf.
+
+**Into the storage policy.** The shelf features of the learned storage policy
+above (fill, units of the SKU, traffic, trip distance) get two more blocks,
+$\bar e_v[n]$ and $\bar e_q[n]$ of the shelf's zone. A small layer first
+shrinks each block to a few numbers. The rest of the policy is unchanged. It
+still makes one choice per put-away, masked to shelves with room, and is
+rewarded with the loaded time of what it placed.
+
+## Downward: from storage to the routers
+
+After the choices of period $n$ are made, storage builds one short vector
+$b_v[n+1]$ per shelf from its own shelf embedding, the units on their way to
+the shelf and the room reserved there. Over period $n+1$ this vector is added
+to the vertex features the routers see. Vertices that are not shelves get a
+marked empty block.
+
+The routers then have new inputs, so every router must be trained again to
+use them. A frozen router cannot read inputs it never saw.
+
+**Fairness between controllers.** The decentralised agent sees only its own
+window. If $b_v$ is built from the whole warehouse, a vector at a visible
+shelf still carries far-away information. Either build $b_v$ only from what
+that controller may see, or call it an extra channel and test it on its own.
+
+## Order within an episode
+
+During period $n$, every timestep:
+
+1. Each controller builds its window and adds the shelf vectors $b[n]$.
+2. The router chooses moves, clashes are resolved, the moves are carried out.
+3. The agents' vectors and plain facts go into the two pools.
+
+At the storage update that ends period $n$:
+
+1. The pools are averaged into $\bar e[n]$.
+2. Storage reads stock, demand estimates, room and $\bar e[n]$.
+3. It chooses a shelf for each arriving SKU, one put-away at a time, and
+   reserves the room.
+4. It builds $b[n+1]$ and empties the pools.
+
+Period $n+1$ then uses $b[n+1]$. Nothing depends on itself at the same moment,
+and stock still only becomes pickable when its put-away is delivered.
+
+## Training in turns
+
+1. **Upward only.** Freeze the router. Train the storage policy with the
+   pooled vectors as inputs. The router's vectors keep their meaning because
+   its weights do not move.
+2. **Downward.** Freeze storage. Fine-tune the router with $b_v$ as extra
+   input.
+3. **Turns.** Repeat 1 and 2 a few times, then test with both frozen.
+
+Each time the router changes, its vectors mean something new, so the storage
+side must be trained again on vectors from the new router. Mixing data from
+old router versions would teach storage the wrong meaning.
+
+How often storage updates (every 100 episodes was one guess) is set by how many
+placements have been collected, not by an episode count. With $\Delta = 100$
+and a horizon of 2000 there are 20 periods per episode, and one period holds
+several placements that are far from independent.
+
+## How it would be tested
+
+Against the learned storage policy without embeddings, same seeds, orders,
+arrivals and budgets:
+
+1. The [A93] scalar only.
+2. Upward vectors only.
+3. Downward vectors only.
+4. Both.
+5. Controls with the vectors set to zero or shuffled between shelves, to see
+   whether the vectors themselves carry anything.
+
+Measures as in the thesis: mean service time and its split, served share,
+put-away cost.
+
+## Where it is weak
+
+- **It mixes up the main result.** Each controller's encoder learns its own
+  vectors, so storage sees something different under each controller. A
+  change in the gain between controllers could then come from storage.
+- **The vectors may add little.** They are trained to choose moves, not to
+  predict what a shelf will cost. The plain blocked time may already hold
+  what storage needs.
+- **The downward channel retrains every router.**
+- **Only chosen shelves give feedback.** The shelves the policy never picks
+  give no data, so its view of them stays poor.
+- **Deadlines** came up in the same conversation. They are a separate model
+  change and not part of this variant.

@@ -1,0 +1,11 @@
+{
+  "num_agents": 128,
+  "f_up": 0.8,
+  "by_mode": {
+    "congestion": {
+      "capacity": null,
+      "first_failing_rate": 1.2,
+      "main_load": null
+    }
+  }
+}

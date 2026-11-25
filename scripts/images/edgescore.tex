@@ -1,79 +1,57 @@
-% The per-edge policy head (fig:edgescore, eq:edgescore in 4.Implementation.tex).
-% Build:  latexmk -pdf edgescore.tex  -> edgescore.pdf, copy to Images/.
-% Fonts match the thesis (lmodern + T1).
+% fig:edgescore (sec:method:model). [A124] greys, viewer colours for agents (2026-11-24).
+% style for the warehouse: aisle positions as small white circles, agents and their
+% moves in the colour of what they do (orange, on the way to a pick).
 \documentclass[border=3pt]{standalone}
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,decorations.pathreplacing,fit,backgrounds}
-
-% Palette shared with base.py (C dict).
-\definecolor{storeF}{HTML}{CFE3F7}
-\definecolor{ctrlF}{HTML}{D7F0D8}
-\definecolor{estF}{HTML}{F7D6D6}
-\definecolor{taskF}{HTML}{F6E7C1}
+\usetikzlibrary{positioning,arrows.meta,calc,decorations.pathreplacing}
 \definecolor{ink}{HTML}{43505C}
-\definecolor{accent}{HTML}{2F6FAE}
-\definecolor{agent}{HTML}{C0392B}
 \definecolor{muted}{HTML}{5A6673}
-
+\definecolor{shareF}{HTML}{F3F5F7}
+\definecolor{edgeC}{HTML}{9AA5B1}
+\definecolor{pick}{HTML}{E08A1E}
+\definecolor{deliver}{HTML}{C0392B}
 \tikzset{
-  v/.style={circle, draw=ink, fill=white, minimum size=8mm, inner sep=0pt, line width=0.8pt},
-  ag/.style={circle, fill=agent, minimum size=4.2mm, inner sep=0pt},
-  edge/.style={-{Stealth[length=2.4mm]}, line width=1.1pt, draw=accent},
+  v/.style={circle, draw=edgeC, fill=white, minimum size=6mm, inner sep=0pt, line width=0.9pt},
+  ag/.style={circle, fill=pick, minimum size=4.2mm, inner sep=0pt},
+  aisle/.style={line width=1.4pt, draw=edgeC},
+  mv/.style={-{Stealth[length=2.4mm]}, line width=1.2pt, draw=pick, shorten <=3.2mm, shorten >=3.4mm},
   box/.style={draw=ink, line width=0.8pt, rounded corners=3pt, align=center,
-              font=\small, inner sep=4pt, minimum height=9mm},
+              font=\small, inner sep=4pt, minimum height=9mm, fill=shareF},
   flow/.style={-{Stealth[length=2.2mm]}, line width=0.8pt, draw=ink},
   lbl/.style={font=\footnotesize, text=muted},
 }
-
 \begin{document}
 \begin{tikzpicture}
-  % ------------------------------------------------ the agent's neighbourhood
+  % the warehouse around a_1: aisle positions joined along the aisles
   \node[v] (v) at (0,0) {};
+  \node[v] (w1) at (0,1.6) {};
+  \node[v] (w2) at (1.6,0) {};
+  \node[v] (w3) at (0,-1.6) {};
+  \draw[aisle] (v) -- (w1); \draw[aisle] (v) -- (w2); \draw[aisle] (v) -- (w3);
   \node[ag] at (v) {};
-  \node[font=\small, text=agent, left=3pt of v] {$a_i$};
-  \node[lbl, below=1pt of v] {$v$};
+  \node[font=\small, left=4pt of v] {$a_1$};
+  \node[ag, fill=deliver] at (w2) {};
+  \node[font=\small, above=4pt of w2] {$a_2$};
+  \draw[mv] (v) -- (w1); \draw[mv] (v) -- (w2); \draw[mv] (v) -- (w3);
+  \node[lbl, right=4pt of w1, align=left] {$w_1$, closer to the target};
+  \node[lbl, right=4pt of w2, align=left] {$w_2$, $a_2$ stands here\\ and sends its message};
+  \node[lbl, right=4pt of w3, align=left] {$w_3$, further from the target};
 
-  \node[v] (w1) at (1.9, 1.5) {};
-  \node[v] (w2) at (2.3, 0) {};
-  \node[v] (w3) at (1.9,-1.5) {};
-  \node[ag] at (w2) {};
-  \node[font=\small, text=agent, above=3pt of w2] {$a_j$};
-
-  \draw[edge] (v) -- (w1);
-  \draw[edge] (v) -- (w2);
-  \draw[edge] (v) -- (w3);
-
-  \node[lbl, right=2pt of w1, align=left] {$w_1$, closer to\\ the target};
-  \node[lbl, below right=0pt and 2pt of w2, align=left] {$w_2$, occupied,\\ $a_j$ sends $\xi_j$};
-  \node[lbl, right=2pt of w3, align=left] {$w_3$, further\\ from the target};
-
-  % ------------------------------------------------ one score per edge
-  \node[box, fill=storeF, minimum width=5.2cm] (s1) at (9.6, 1.9)
-    {$\mathrm{SCORE}_\theta\bigl(z_i \Vert h_{w_1} \Vert 0\bigr)$};
-  \node[box, fill=storeF, minimum width=5.2cm, below=0.35cm of s1] (s2)
-    {$\mathrm{SCORE}_\theta\bigl(z_i \Vert h_{w_2} \Vert \xi_j\bigr)$};
-  \node[box, fill=storeF, minimum width=5.2cm, below=0.35cm of s2] (s3)
-    {$\mathrm{SCORE}_\theta\bigl(z_i \Vert h_{w_3} \Vert 0\bigr)$};
-  \node[box, fill=taskF, minimum width=5.2cm, below=0.35cm of s3] (sw)
-    {$\mathrm{SCORE}^{\mathrm{wait}}_\theta(z_i)$};
-
+  % one score per move
+  \node[box, minimum width=4.6cm] (s1) at (10.2, 1.9) {move to $w_1$};
+  \node[box, minimum width=4.6cm, below=0.35cm of s1] (s2) {move to $w_2$, with $a_2$'s message};
+  \node[box, minimum width=4.6cm, below=0.35cm of s2] (s3) {move to $w_3$};
+  \node[box, minimum width=4.6cm, below=0.35cm of s3] (sw) {wait};
   \draw[decorate, decoration={brace, amplitude=5pt, mirror}, line width=0.8pt, draw=muted]
     ($(s1.north west)+(-0.15,0)$) -- ($(s3.south west)+(-0.15,0)$)
-    node[midway, left=7pt, lbl, align=right] {one network,\\ shared by\\ every edge};
-
-  % ------------------------------------------------ softmax and choice
-  \node[box, fill=ctrlF, right=0.9cm of $(s2.east)!0.5!(s3.east)$, minimum width=2.3cm] (sm)
-    {masked\\ softmax};
-  \node[font=\small, right=0.6cm of sm] (pi) {$\pi_\theta(u_i(t))$};
-
-  \foreach \s/\l in {s1/{move to $w_1$}, s2/{move to $w_2$}, s3/{move to $w_3$}, sw/{wait}} {
-    \draw[flow] (\s.east) -- (sm.west);
-  }
+    node[midway, left=7pt, lbl, align=right] {one small network\\ scores every move};
+  \node[box, right=0.8cm of $(s2.east)!0.5!(s3.east)$, minimum width=2.4cm] (sm)
+    {chance of\\ each move};
+  \node[font=\small, right=0.5cm of sm] (pi) {the move};
+  \foreach \s in {s1,s2,s3,sw} { \draw[flow] (\s.east) -- (sm.west); }
   \draw[flow] (sm) -- (pi);
-
-  \node[lbl, above=1pt of s1] {logit of each move, from the vertex it leads to};
 \end{tikzpicture}
 \end{document}

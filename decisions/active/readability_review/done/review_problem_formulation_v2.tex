@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx,array}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\pitem}[2]{\subsection*{#1. #2}}
+\title{Proposed change, Problem Formulation, version 2\\ (open points after your answers)}
+\date{25 November 2026}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+Version 1 (\texttt{review\_problem\_formulation.pdf}) holds P1 to P16. This
+version answers your two questions and adds the points of the second list
+you pasted. Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Answer by number, for example ``N3 yes,
+N5 keep''.
+
+\textbf{Approved, to apply as in version 1:} P1, P2, P3, P4 option a, P5,
+P6, P8, P9, P10, P11, P12, P13, P14. They go in under one tag, [A133]
+(another session used [A132] yesterday for the RQ4 sentence in the scope).
+
+\textbf{Still open from version 1:} P7 (answered below, Q1), P15 and P16.
+P15 is smaller now. The RQ4 sentence is already cut under [A132], so only
+the deadline and re-tasking sentences remain.
+
+\textbf{Already in the thesis.} Two pointer cuts of P1 (after
+well-formedness and after Stern et al.) went in before you stopped me. Keep
+them, or I undo them until everything goes in together.
+
+% ================================================================
+\section*{Your questions}
+
+\pitem{Q1}{P7. Should some of the forward pointers move to the Method?}
+No. What the pointers lead to is already in the Method. The two forms of
+the distance label moved there in [A124]. The crowding weight is in the
+reward table of [A127]. The masked moves are explained in ``How an agent
+chooses its move''. So nothing needs to move, only the pointers go.
+
+Since a few forward pointers are allowed, here is every one in the chapter,
+with what I propose.
+
+\begin{tabular}{@{}p{0.42\linewidth}p{0.1\linewidth}p{0.4\linewidth}@{}}
+\toprule
+Pointer & Proposal & Why \\
+\midrule
+distance label in two forms (\lab{sec:method:model}) & cut & sentence and pointer go, Method has it \\
+crowding weight in the reward (\lab{sec:method:rl}) & cut & paragraph goes, reward table has it \\
+masked moves (\lab{sec:method:model}) & cut & pointer only, the fact stays \\
+\lab{tab:posg}, $R_i$ left open (\lab{sec:method:rl}) & keep & marks something left open on purpose \\
+\lab{tab:posg}, $\gamma$ a training value (\lab{sec:method:training}) & keep & same \\
+``It is given in Section'' reward (\lab{sec:method:rl}) & keep & same, the one place the text says so \\
+scoring opening, ``the reward of Section'' (\lab{sec:method:rl}) & cut & pointer only, the reward is named above \\
+the $\Delta$ sweep table & cut & done by P11 \\
+\bottomrule
+\end{tabular}
+
+That leaves three forward pointers, all to the reward and the discount,
+which the chapter leaves open by design. The pointers into the appendices
+(stall length, reproduction of Ma et al., crowding comparison, section
+field of view) stay. They point to evidence, not to the next step of the
+argument.
+
+\pitem{Q2}{P10. Does any of the learning problem need to move to the Method?}
+No. What P10 cuts explains a standard game (what a policy is, what a
+transition rule is, a probability example), and the chapter needs none of it
+again. The one new fact, that the state holds the priority order, stays.
+The sequential draw that P10 cuts is told in Who decides and, for the
+mask, in the Method's ``Choosing together''. The sentence P10 adds (the
+learned policy is the routing rule) belongs here, because it ties the
+controller of Who decides to the game.
+
+% ================================================================
+\section*{From the second list}
+Points of that list that version 1 already covers: 5.3, 5.4 to 5.8, 5.13,
+items 1 to 6 and 9, A (P14), B (P10), D (P2) and E (P5). Below are the ones
+that are new, or where the list differs from version 1.
+
+\pitem{N1}{``Storage epochs'' (Fix)}
+In \emph{How the two layers close the loop}:
+
+Only every $\Delta$ timesteps, at the storage \old{epochs}\new{updates}, does
+new stock arrive and the storage rule place it.
+
+\note{``Epoch'' is the old word. [A123] renamed it to update everywhere
+else.}
+
+\pitem{N2}{``Queue split'' in the measures table (Fix)}
+In \lab{tab:measures}, the source column of the split:
+
+\old{queue split}\new{service-time split}, this thesis
+
+\note{One name per idea. The text calls it the service-time split.}
+
+\pitem{N3}{The Introduction on demand storage (Fix)}
+Demand storage puts the SKUs ordered most lately on the free shelves
+\old{nearest the workstations}\new{with the shortest trips}.
+
+\note{The code and the Method rank a shelf by the trip from a dock, through
+the shelf, to a workstation, with the pick leg weighted by how often it is
+walked [A122]. ``Nearest the workstations'' leaves the dock out. This is in
+the Introduction, which another session worked on yesterday ([A130],
+[A132]). It is one phrase and does not touch their changes.}
+
+\pitem{N4}{The storage update example in one sentence (Choice)}
+\old{Take the stock of Table~\ref{tab:storagematrix} just before an update,
+with nothing on its way, and say three pallets of tea arrive. For the
+example a pallet holds 3 units. Shelf $A$ is full, and $B$ and $C$ each have
+room for one more pallet. The rule puts the first pallet on $B$ and the
+second on $C$, and both shelves stay within their room. Nothing was on its
+way, so no earlier pallet had to keep its shelf. The third pallet fits
+nowhere and is left unplaced, so the rule places 6 of the 9 units that
+arrived. Figure~\ref{fig:storageupdate} shows the update.}
+\new{Figure~\ref{fig:storageupdate} shows an update on the stock of
+Table~\ref{tab:storagematrix}, when three pallets of 3 tea arrive. Shelf $A$
+is full, so two pallets go to $B$ and $C$, and the third fits nowhere and is
+lost.}
+
+\note{The figure and its caption already show each step. The paragraph
+named all three conditions one by one. Two of them (nothing on its way,
+only arriving pallets) do nothing in this example. Recommended.}
+
+\pitem{N5}{The subtraction $\zeta_1 = 14-5 = 9$ (Choice)}
+The second list says drop it. Version 1 kept it, since your style asks for
+a worked number after a formula and it is one line. My recommendation is
+still to keep it. If you want it gone:
+
+The service time of task $\tau_j$ is the time from its release until its
+delivery, as in \citet{ma2017lifelong_mapf}. Formally, $\zeta_j =
+t_j^{\mathrm{finish}} - t_j^{\mathrm{released}}$. \old{For $\tau_1$, the
+service time is $\zeta_1=14-5=9$.}
+
+\pitem{N6}{The $2/5$ crowding example (Choice)}
+You approved P8, which keeps it as one sentence. The second list says
+drop it entirely, since \lab{fig:crowding} gives an example right after.
+The one sentence ties the feature to the figure the section already uses,
+so I recommend P8 as approved. If you want it gone:
+
+\old{For agent $a_1$ in Figure~\ref{fig:observation}, two of the five other
+vertices in view hold an agent, so $\delta_1(t) = 0.4$.}
+
+\pitem{N7}{The crowding feature under Who decides (Choice)}
+Every controller reads the crowding feature, but it is defined under
+\emph{What a decentralised agent sees}. The second list asks whether it
+should move to Who decides.
+
+\textbf{Recommended: keep it where it is.} The feature is a share of the
+field of view, so it needs the field of view first, which is defined in
+the same section. Moving it would pull the field of view into Who decides
+too. The section already says that every controller reads it. The only
+change is a clearer heading for the subsection:
+
+\old{How crowded the neighbourhood is}\new{How crowded the neighbourhood is,
+for every controller}
+
+\note{Option b: move the subsection and the field of view to the end of Who
+decides, and keep only the target, messages and the observation equation
+in ``What a decentralised agent sees''. More moving for little gain.}
+
+% ================================================================
+\section*{Still open from version 1}
+
+\pitem{P15}{Scope, the boundary only}
+Version 1 as before, without the RQ4 part, which [A132] already cut. The
+second list (item 9) proposes the same.
+
+\old{Adding deadlines would put a deadline in every task, and either forbid
+a late task or count late tasks next to the result.}
+
+\old{Adding it would let the assignment rule change the agent of a task
+whose agent has not yet reached the shelf. Either change alters what counts
+as a solution, so it would change this chapter and not the method.}
+\new{Either change would alter what counts as a solution.}
+
+\pitem{P16}{Old text in comments}
+About 200 lines of commented-out old text in the chapter, not in the PDF,
+kept in git. Delete them?
+
+% ================================================================
+\section*{When approved}
+Everything goes in under [A133] with one GAPS.md entry. P4a changes the
+row of $\mathcal{F}$ in both notation tables. P14 moves
+\lab{eq:rqformal} and \lab{eq:relgain} to the Experiments. Their labels stay,
+so the references in the Experiments and Appendices B, F and K still work
+after \texttt{tools/sync\_xrefs.py --build}. Every tag goes at the end of a
+line. The chapter is rebuilt and read back with pdftotext.
+
+\end{document}

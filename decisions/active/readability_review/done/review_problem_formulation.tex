@@ -1,0 +1,517 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx,array}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\pitem}[2]{\subsection*{P#1. #2}}
+\newcommand{\kind}[1]{\textbf{#1.}}
+\title{Proposed change, Problem Formulation\\ (Checklist sections 5 and 6)}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers sections 5 and 6 of \texttt{Checklist.md}, checked against the
+current \texttt{3.ProblemFormulation.tex}, GAPS.md and the Method. Black text
+stays, \new{green} is new and \old{struck} text goes. \note{Notes in
+brackets} say why. Only the paragraphs that change are shown, in chapter
+order. Nothing below is in the thesis yet.
+
+Each item is marked \textbf{Fix} (a plain mistake or repeat) or
+\textbf{Choice} (yours to decide, my recommendation is the green text).
+Answer by number, for example ``P3 yes, P14 option b, P17 no''.
+
+\section*{What the checklist asked that is already done or should not happen}
+\begin{itemize}[nosep]
+  \item \textbf{5.2 The environment.} Done. Generator details are not in
+    the chapter, and ``a position is where an agent stands'' is said once.
+    Only the repeated pointers to the Background are left (P1).
+  \item \textbf{5.3 Collisions.} Done. The chapter states the two rules and
+    one sentence on enforcement. Who yields, priority and chains of waiting
+    are in the Method since [A126].
+  \item \textbf{5.4 The three rules.} Each is one bullet. Scores, weights and
+    the formula of $\hat\omega_t$ are in the Method.
+  \item \textbf{5.5 Figures.} \lab{fig:storageexample} already sits beside the
+    rules. \lab{fig:taskroute} stays. It holds the tea task $\tau_1$, which the
+    life of a task, the stock condition, the observation at $t=12$ and
+    \lab{fig:loop} all use. \lab{fig:storageupdate} stays, it is the only
+    place a lost pallet is shown, and the checklist itself says lost pallets
+    matter.
+  \item \textbf{5.6 and 5.8 Pickup rule and controllers to the Method.} Not
+    proposed. [A123] keeps the pickup rule in the Problem Formulation and out
+    of the Method, and [A125] cut ``Choosing together'' to what the Problem
+    Formulation does not say. Moving them back would undo both.
+  \item \textbf{5.7 The subtraction $\zeta_1 = 14-5 = 9$.} Kept. It is one
+    line, and your style asks for a worked number after a formula.
+  \item \textbf{5.12 Count examples} (900 and 600 tasks, 800 orders and 10
+    picks). Kept. Each makes one argument of the keep-up check concrete.
+\end{itemize}
+
+\section*{Summary}
+\begin{tabular}{@{}llp{0.62\linewidth}@{}}
+\toprule
+Item & Kind & What \\
+\midrule
+P1 & Fix & Background named in full once per section, not five times \\
+P2 & Choice & Pilot numbers out of the chapter, DSLAP named first \\
+P3 & Choice & Capacity example in words, matrix product dropped \\
+P4 & Choice & Checklist 6.3, a storage rule places stock \emph{and} ranks shelves \\
+P5 & Choice & Idle agents move to ``A task's life'', busy and free said once \\
+P6 & Fix & Lost text before \lab{eq:centralisedpolicy} \\
+P7 & Fix & Forward pointers into the Method cut (distance label, crowding weight) \\
+P8 & Choice & Crowding example on \lab{fig:observation} in one sentence \\
+P9 & Fix & Subsection ``Putting the pieces together'' dropped, equation kept \\
+P10 & Fix & Learning problem shorter, checklist 6.1 and 6.2 resolved \\
+P11 & Choice & $\Delta$ paragraph trimmed to the trade-off \\
+P12 & Fix & Lost text in the stall paragraph \\
+P13 & Fix & Full stop after \lab{eq:split} \\
+P14 & Choice & Gain test, \lab{eq:relgain} and the reporting line move to the Experiments, factor paragraph cut \\
+P15 & Fix & Scope says the boundary only, ``If RQ4 is not reached'' cut \\
+P16 & Choice & Delete about 200 lines of commented-out old text \\
+\bottomrule
+\end{tabular}
+
+% ================================================================
+\section*{The environment and Agents and collisions}
+
+\pitem{1}{Back pointers to the Background (Fix)}
+The chapter says ``described in Section~\ref{sec:bg:mapf}, Multi-Agent Path
+Finding'' five times. The opening keeps both full pointers. Later mentions
+lose them.
+
+Every generated warehouse is well-formed in the sense of
+\citet{ma2017lifelong_mapf}\old{, described in Section~\ref{sec:bg:mapf},
+Multi-Agent Path Finding}.
+
+This is the classical action model of multi-agent path finding
+\citep{stern2019mapf}\old{, described in Section~\ref{sec:bg:mapf}, Multi-Agent
+Path Finding}.
+
+These are the vertex and swap conflicts \old{of Section~\ref{sec:bg:mapf}}
+\new{described in the Background}.
+
+This is the task of multi-agent pickup and delivery of
+\citet{ma2017lifelong_mapf}\old{, described in Section~\ref{sec:bg:mapf},
+Multi-Agent Path Finding}.
+
+This is the dedicated storage \old{of Section~\ref{sec:bg:storage}}
+\new{described in the Background}.
+
+\note{The storage pointer in P2 moves with its sentence. Words, not
+``Section III-B'', as you asked on 18 November.}
+
+% ================================================================
+\section*{Where the items are}
+
+\pitem{2}{The storage rule paragraph (Choice)}
+\textbf{The storage rule.}
+A storage rule decides where arriving stock goes\old{, and nothing else}.
+\new{This is the dynamic storage location assignment problem
+\citep{WaubertdePuiseau2022DynamicSL}, described under Storage assignment in
+the Background.}
+Stock already on a shelf stays where it is until it is picked. This was
+chosen over also moving stored stock, because every arriving pallet is a new
+choice of shelf that needs no extra trip. Moving stored stock would need
+trips of its own, or would have to assume they cost nothing. \old{A pilot
+with Token Passing supports the choice. Demand storage that placed arriving
+stock cut service time by about $43\%$ against fixed storage, and moving up
+to a fixed number of stored units per period by $25\%$
+(Appendix~\ref{app:cal:arrival}).} \old{This is the dynamic storage location
+assignment problem \citep{WaubertdePuiseau2022DynamicSL}, described in
+Section~\ref{sec:bg:storage}, Storage assignment.} Write $F$ for a storage
+rule. The thesis compares three.
+
+\note{Three things. (1) The problem is named first, then the choice. It came
+after the pilot before. (2) ``and nothing else'' goes, see P4. (3) The pilot
+numbers are a run result in the problem chapter, and the appendix pointer
+points forward. [A123] moved them here today, so this undoes part of it.
+Appendix G keeps the numbers. \textbf{Option b}: keep the pilot sentence but
+drop the two percentages.}
+
+\pitem{3}{The capacity example (Choice)}
+\textbf{Example.}
+Table~\ref{tab:storagematrix} shows a small storage state. Tea and mugs
+take one unit of room each, and coffee takes two. Shelves $A$, $B$ and $C$
+have room for 20, 15 and 10. \new{Shelf $A$ holds 12 tea and 4 coffee,
+which take $12 + 8 = 20$, so it is exactly full. Shelf $B$ uses 12 of its 15
+and $C$ uses 7 of its 10.} \old{Shelf $A$ is then exactly full, and $B$ and
+$C$ have room left:}
+\old{$(1\;2\;1)\cdot x = (20\;12\;7) \le (20\;15\;10)$} \note{the displayed matrix product}
+Room also ties SKUs together. Tea and coffee share the room on shelf $A$,
+so more tea there leaves less room for coffee.
+
+\note{The checklist wanted the table and example in an appendix. Table I is
+the base of your worked examples and of P4's storage update, so it stays.
+Only the matrix product goes. The sum on one shelf shows the condition as
+well and reads in words.}
+
+\pitem{4}{What a storage rule is, checklist 6.3 (Choice)}
+The text says a rule decides where arriving stock goes ``and nothing else''.
+But congestion-aware storage also ranks the shelves an order line takes
+from, and $F$ in \lab{eq:storageupdate} returns only a shelf per pallet. So
+the decision problem \lab{eq:decisionproblem}, which ranges over
+$\mathcal{F}$, does not cover the ranking that is compared.
+
+\textbf{Option a (recommended).} A storage rule has two parts.
+
+In \emph{The storage update}:
+A storage rule is any $F$ that meets these three conditions, and
+$\mathcal{F}$ is the set of them. \new{\note{unchanged for now, completed in
+Orders and tasks below}}
+
+In \emph{Under congestion-aware storage}, after ``its shelves are then listed
+by $d_G(v_i,g)+\hat\omega_t(v_i)$ instead'':
+
+\new{So a storage rule does two things. It places arriving stock at a
+storage update, and it ranks the shelves a line takes from. Fixed and
+demand storage rank by distance alone. From here on $F$ means both parts,
+and $\mathcal{F}$ holds every rule that places stock under the three
+conditions of a storage update and ranks the shelves for every line.}
+
+\note{The notation table row for $\mathcal{F}$ then reads ``storage rules,
+placement and shelf ranking''. The table of rules already has the column
+``where a line takes stock from''. Nothing in the code changes.}
+
+\textbf{Option b.} Keep $F$ as placement only, and say once that the
+compared condition is a storage rule together with its shelf ranking. Then
+\lab{eq:decisionproblem} ranges over those pairs and not over $\mathcal{F}$
+alone.
+
+% ================================================================
+\section*{A task's life}
+
+\pitem{5}{Busy and free said once, the idle agent moves here (Choice)}
+\old{Only a free agent can get a new task. An agent is free when it has no
+active task. Agent $a_2$ is busy from the moment it gets $\tau_1$, also on
+its way to the shelf, and is free again once $\tau_1$ is delivered.}
+\new{Only a free agent, one with no active task, can get a new task. So
+agent $a_2$ is free again once $\tau_1$ is delivered.}
+
+\new{A free agent stays where it is. When it stands in another agent's way,
+it moves to the nearest free endpoint, until it gets there or gets a task.
+In the way means on a shelf, workstation or dock of an unfinished task, or
+on a vertex another agent was stopped from moving onto. Without this, an
+idle agent would stay where its last task ended, often on a dock or a
+workstation, and block the next agent that needs it.}
+
+Then in \emph{Direction to the target}:
+
+\old{An agent with no task also has a target. Usually it is the vertex it
+stands on, so it stays put. When it stands in another agent's way, its
+target becomes the nearest free endpoint until it gets there or gets a task.
+In the way means on a shelf, workstation or dock of an unfinished task, or
+on a vertex another agent was stopped from moving onto. Without this, an
+idle agent would stay where its last task ended, often on a dock or a
+workstation, and block the next agent that needs it.}
+\new{An agent with no task has a target too, the vertex it stands on or,
+when it is in the way, the nearest free endpoint, as in A task's life.}
+
+\note{The first part is the repeat the checklist named in 5.7: ``busy from
+assignment'' is already said two paragraphs up. The second part is what an
+idle agent does, which is behaviour of the warehouse, not a feature of the
+observation. [A97] put it in the Problem Formulation on purpose, and it
+stays there, one section earlier. The checklist wanted it in the Method,
+which would leave the model without it.}
+
+% ================================================================
+\section*{Who decides}
+
+\pitem{6}{Lost text before the centralised policy (Fix)}
+Formally, write $u_{\prec i}(t)$ for the moves already chosen by the agents
+before $a_i$ in the priority order, where $\prec$ reads ``comes before''.
+\new{The \emph{centralised policy} is}
+
+\note{In the source the words follow a \texttt{\%~[A119]} tag on the same
+line, so LaTeX drops them. The PDF reads ``comes before''. and then the
+equation. The tag moves to the end of the line.}
+
+% ================================================================
+\section*{What a decentralised agent sees}
+
+\pitem{7}{Pointers into the Method (Fix)}
+In \emph{Direction to the target}:
+
+The distance label is the shortest-path distance feature of
+\citet{vanKnippenberg2021}. Because it is a distance and not just a
+``closer or further'' flag, a policy can take a small step back for a bigger
+gain later. It changes whenever the target changes. \old{The policy reads it
+in two forms, as the difference from the label of the agent's own vertex
+and as the label divided by a fixed number, so that it stays small
+(Section~\ref{sec:method:model}).}
+
+At the end of \emph{How crowded the neighbourhood is}:
+
+\old{How strongly a learned policy reacts to $\delta_i(t)$ is set by its
+weight in the reward. The weight is the same for every controller and is
+not varied between runs (Section~\ref{sec:method:rl}).}
+
+In \emph{The learning problem}:
+
+Moves that lead nowhere are switched off before the policy chooses\old{
+(Section~\ref{sec:method:model})}.
+
+\note{The chapter points back only (your rule of 18 November). The two forms
+of the label were moved to the Method in [A124], and the crowding weight is
+in the reward table of [A127]. The pointer ``reward left open here'' in
+\lab{tab:posg} stays, since it marks something left open on purpose.}
+
+\pitem{8}{One crowding example on the observation figure (Choice)}
+\old{For example, the field of view of $a_1$ in
+Figure~\ref{fig:observation} covers $5$ other vertices besides its own, and
+$2$ of them hold another agent ($a_2$ and $a_3$), so $\delta_1(t) = 2/5 =
+0.4$. Two fifths of the nearby space is taken.}
+\new{For agent $a_1$ in Figure~\ref{fig:observation}, two of the five other
+vertices in view hold an agent, so $\delta_1(t) = 0.4$.}
+
+\note{There are three crowding examples, this one, \lab{fig:crowding} and the
+mean crowding in How a run is scored. \lab{fig:crowding} stays, because the
+loop section and the mean crowding reuse it. This one becomes one sentence.}
+
+\pitem{9}{``Putting the pieces together'' (Fix)}
+\old{\textbf{Putting the pieces together} \note{subsection heading}}
+
+The equation moves to the end of \emph{How crowded the neighbourhood is},
+before Messages:
+
+\new{The three pieces together form the \emph{decentralised observation} of
+agent $a_i$,}
+\[ o_i(t) = \bigl( \mathcal{G}^{(d_{\mathrm{obs}})}_i(t),\; \eta_i(\cdot, t),\; \delta_i(t) \bigr). \]
+
+\note{A subsection of one equation. Messages then reads naturally, since it
+says ``$o_i(t)$ keeps its three pieces''.}
+
+% ================================================================
+\section*{The learning problem}
+
+\pitem{10}{Shorter, and the two contradictions resolved (Fix)}
+\textbf{Inventory.}
+\old{Every part of the game is something the reader has already met. The
+agents are the fleet. The state $s_t$ is the one of
+Section~\ref{sec:pf:controllers}, Who decides. It also holds the priority
+order that conflict resolution uses. The actions are wait and move. The
+transition rule turns a state and the agents' actions into the next state.
+The observation is what each agent sees. The reward scores one step for one
+agent, and the discount sets how much a later reward counts against one
+now.} \new{The state $s_t$ is the one of Who decides, together with the
+priority order that conflict resolution uses.} Formally, the learning problem
+is \dots
+
+\note{The equation, the sentence that names each symbol and
+\lab{tab:posg} already list the parts. Only the priority order was new, so
+it stays.}
+
+\textbf{Policy and kernel.}
+\old{The policy and the transition kernel answer two different questions.
+The policy answers what each agent tries to do. From what the agent observes
+it gives a probability to each legal action, for example move north with
+probability $0.7$ and wait with probability $0.3$, and one action is drawn.
+The drawn actions of all agents, side by side, form the joint action $u_t$,
+the whole fleet's decision for this timestep. Under the centralised
+controller the agents draw their actions one after another, each seeing the
+earlier draws, and the result is the same kind of joint action. The
+section-based controller does the same inside each zone.}
+\new{The policy says what each agent tries to do. From what the agent sees it
+gives a probability to each legal action, and one action is drawn. The drawn
+actions of all agents form the joint action $u_t$.}
+
+\old{The transition kernel answers what then happens to the warehouse. It
+takes the current state and the joint action and applies everything that is
+not a choice of any agent.} \new{The transition rule $P$ says what then
+happens to the warehouse. It applies everything that is not an agent's
+choice.} Conflicts are resolved, the shared assignment rule pairs free agents
+with waiting tasks, the storage update is applied, and newly arrived orders
+are added. The result is the next state $s_{t+1}$. \old{The kernel is
+therefore not a state but the rule that produces one.} Its randomness is the
+arrival of orders and the dock drawn for each shipment and put-away. Moves
+have no randomness, so the same state and joint action always move the
+agents in the same way. Formally, $P(s' \mid s_t, u_t)$ is the probability
+that the next state is $s'$. The assignment rule and conflict resolution are
+the same for every controller, so they are part of $P$, not of any policy.
+\new{The learned policy $\pi_\theta$ is therefore only the routing rule
+$\pi^{\mathrm{route}}$ of a controller.}
+
+\note{Checklist 6.2. Who decides defines a controller as the pair of
+assignment and routing, and this section puts assignment in $P$. The new
+sentence ties the two. The pair stays, because Token Passing assigns its own
+tasks. The sequential draw is already told in Who decides.}
+
+\textbf{What changes between the controllers.}
+\old{Only the observation changes between the controllers. Everything else in
+the game is the same. A centralised agent sees the whole state, a
+section-based agent sees its zone, and a decentralised agent sees its own
+view.} \new{The controllers share the rest of the game. As Who decides set
+out, they differ in three ways. They differ in what an agent sees, in
+whether it knows the moves chosen before it, and in whose reward judges its
+action. What an agent sees is the observation function.} Formally, the
+\emph{observation function} is \dots
+
+\note{Checklist 6.1. ``Only the observation changes'' contradicted Who
+decides and the paragraph ``Sharing one objective'' further down, which
+says the credit differs. The three views are in the equation, so the
+sentence that lists them goes. ``The three views fit inside each other''
+stays, it is the only place that says so.}
+
+% ================================================================
+\section*{How the two layers close the loop}
+
+\pitem{11}{The storage period (Choice)}
+\old{Separating the two clocks has one consequence that constrains the
+study. Between two storage updates the routing traffic settles into a steady
+pattern, and the storage rule only sees its average per step over the period
+just ended. If $\Delta$ is too small, the traffic has not settled before the
+next update, so $F$ reacts to noise, and the shelves the agents pick from
+keep changing while they are still learning. If $\Delta$ is too large, the
+numbers $\hat\rho$ and $\hat\omega$ are out of date by the time they are
+used. The choice of $\Delta$ is therefore a parameter of the study, set by
+a sweep (Table~\ref{tab:storageparams}), not a constant fixed in advance.}
+\new{The two clocks make the storage period $\Delta$ a parameter of the
+study. The storage rule sees only the average traffic of the period just
+ended. If $\Delta$ is too short, the traffic has not settled before the next
+update, so $F$ reacts to noise. If $\Delta$ is too long, $\hat\rho$ and
+$\hat\omega$ are out of date by the time they are used.}
+
+\note{The trade-off is part of the problem and stays. ``While they are still
+learning'' is about training, and the sweep table points forward, so both
+go. The Method's storage section already says the storage period is set in
+Appendix G. \textbf{Option b}: move the whole paragraph to the end of the
+Method's storage section and keep only the first new sentence here.}
+
+% ================================================================
+\section*{How a run is scored}
+
+\pitem{12}{Lost text in the stall paragraph (Fix)}
+A light load leaves longer quiet stretches, so the length grows with the
+time between tasks. \new{It looks at the whole fleet and not at one} agent,
+because one agent often waits by plan, as under Token Passing, while a
+healthy fleet finishes tasks all the time.
+
+\note{Same cause as P6, a \texttt{\%~[A118]} tag mid-line. The PDF reads
+``\dots time between tasks. agent, because one agent \dots''.}
+
+\pitem{13}{Full stop after the split (Fix)}
+\lab{eq:split} ends with a comma and the next sentence starts ``The split is
+taken over the picks''. The comma becomes a full stop.
+
+\pitem{14}{The gain test to the Experiments (Choice)}
+The checklist (5.12) asks to keep the objective here and move the evaluation
+procedure. Most of it already is in the Experiments. ``Factors'' and
+\lab{tab:expfactors} give the factors, ``Mapping questions to comparisons''
+gives the RQs, $\Lambda_T/m$ and the percentage, and ``Scoring a condition''
+gives the paired $t$-test. Three passages here repeat them.
+
+\textbf{Stays in the Problem Formulation.} Keeping up \lab{eq:throughput},
+the order service time \lab{eq:meanservice}, the split, crowding, the
+reported measures, \lab{tab:measures} and the decision problem
+\lab{eq:decisionproblem}. That is what the problem asks and what it costs.
+
+At the end of the decision problem:
+
+The thesis does not search for the best pair. It compares three rules under
+three controllers\old{, and the gain test below asks whether a rule beats
+fixed storage under one controller}\new{, each rule against fixed storage
+under the same controller}.
+
+Before \lab{tab:measures}:
+
+\old{Every quantity is reported as a mean over evaluation seeds with a 95\%
+confidence interval, as \citet{krnjaic2022warehouse_marl} report their pick
+rates.}
+
+The paragraphs \emph{The research question, formally} (\lab{eq:rqformal} and
+\lab{eq:relgain} with their text) move to the Experiments, as a paragraph
+\emph{The gain test} right before ``Mapping questions to comparisons''. The
+text is unchanged, apart from the first sentence and the reporting line,
+which joins it:
+
+\new{\textbf{The gain test.} The comparison is paired. Under one seed, fixed
+storage and the rule $F$ receive the same customer orders.} The tasks can
+still differ, because where a line is picked and how many tasks it splits
+into depend on where the stock is. \dots\ \note{rest as now, with both
+equations and their labels} \new{Every quantity is reported as a mean over
+evaluation seeds with a 95\% confidence interval, as
+\citet{krnjaic2022warehouse_marl} report their pick rates.}
+
+The last paragraph of the section goes:
+
+\old{The study then asks how the gain depends on three factors. The first is
+the controller, how many agents one decision of $\pi$ covers. The gain is
+read together with its split, because a fleet that runs close to its limit
+turns the same saving in travel into a larger cut in the wait before
+assignment. The second is whether the storage rule is congestion-aware,
+congestion-aware storage against demand storage. The third is the load, set
+by the fleet size $m$ and the expected number of order lines released per
+timestep $\lambda_{\mathrm{task}}$. On the same sweep, throughput per agent,
+$\Lambda_T / m$, shows whether each agent finishes fewer tasks as the fleet
+grows, and whether that loss is faster when one decision covers fewer
+agents. For RQ4, the decentralised controller is also run with
+communication over \nref{eq:commgraph} and without it. Only that controller
+has messages, so this comparison sits outside the main factorial design.}
+
+\note{After [A129] the factors are told in Aim and scope, and again in the
+Experiments' factor table and mapping paragraph. This was the third copy.
+One sentence in it is not said elsewhere: a fleet close to its limit turns a
+saving in travel into a larger cut in waiting. Aim and scope says nearly
+the same (``Near that limit a small saving in travel turns into a large
+saving in waiting''), so nothing is lost. The labels \lab{eq:rqformal} and
+\lab{eq:relgain} keep their names, so the Experiments' references still
+work, and the Problem Formulation no longer points to them. \textbf{Option
+b}: leave the gain test here and only cut the factor paragraph and the
+reporting line.}
+
+% ================================================================
+\section*{Scope and assumptions}
+
+\pitem{15}{The boundary, not how to extend it (Fix)}
+Tasks carry no deadline. A late delivery only lengthens service time, and no
+single task can be said to have failed. This is narrower than
+time-constrained formulations such as \citet{vanKnippenberg2021}, where a
+missed deadline is infeasible or penalised. \old{Adding deadlines would put a
+deadline in every task, and either forbid a late task or count late tasks
+next to the result.}
+
+Assignment is also permanent once made, so an agent serving a task is not
+re-tasked before it finishes. \citet{ma2017lifelong_mapf} allow re-tasking
+until the agent reaches where the task picks up. \old{Adding it would let the
+assignment rule change the agent of a task whose agent has not yet reached
+the shelf. Either change alters what counts as a solution, so it would
+change this chapter and not the method.} \new{Either change would alter what
+counts as a solution.}
+
+Communication is built in and can be switched on or off\old{, but RQ1 to RQ3
+do not depend on it. If RQ4 (Section~\ref{sec:pd-rq}) is not reached, the
+results say nothing about communication.}\new{. Only RQ4 uses it.}
+
+\note{Checklist 5.13 and the open item of [A129]. RQ4 is run, so the
+conditional goes. How to add a deadline or re-tasking belongs to future
+work, if anywhere.}
+
+% ================================================================
+\section*{Housekeeping}
+
+\pitem{16}{Old text in comments (Choice)}
+About 200 lines of commented-out old text sit in the chapter, lines 132 to
+184 (old collisions and well-formedness) and 409 to 575 (old storage
+section with $D+\beta K$). They do not appear in the PDF. The old text is in
+git. Delete them?
+
+% ================================================================
+\section*{When approved}
+Applied under a new tag (next free is [A132]), with a GAPS.md entry. If P4a
+is chosen, the notation table row of $\mathcal{F}$ changes in both notation
+tables. If P14 is chosen, the moved paragraph is checked against the
+Experiments' own text so the gain is not explained twice there. Every tag
+goes at the end of a line. The chapter is rebuilt and read back with
+pdftotext.
+
+\end{document}

@@ -1,0 +1,318 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx,array}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{\lab{#1}}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\newcommand{\where}[1]{\par\textbf{#1}\par}
+\title{Proposed change, Problem Formulation, round 2\\ What else moves out of the chapter}
+\date{25 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+[A133] is in the thesis. This round takes the ten further points you chose,
+1 to 10. Each one either cuts a design reason that the Method already gives,
+moves it there, or moves reporting detail to the Experiments or Appendix C.
+Black text stays, \new{green} is new and \old{struck} text goes. \note{Notes
+in brackets} say why. Answer by number. Nothing below is in the thesis yet.
+
+\begin{tabular}{@{}llp{0.6\linewidth}@{}}
+\toprule
+Item & To & What \\
+\midrule
+R1 & Method (already there) & how the moves are numbered \\
+R2 & Method & why messages are learned \\
+R3 & Method & why the field of view is small \\
+R4 & Method (already there) & why one policy is shared \\
+R5 & Method & what $\theta$ stands for per controller \\
+R6 & Method & why every controller reads the crowding feature \\
+R7 & Method & smoothing of $\hat\omega$ \\
+R8 & Experiments & stalls \\
+R9 & Experiments & the backlog shown over the run \\
+R10 & Appendix C & how the keep-up check counts, with the two count examples \\
+\bottomrule
+\end{tabular}
+
+The chapter shrinks by about a page. The Method grows by about a third of a
+page, since most of what goes there is already in it.
+
+% ================================================================
+\section*{Where the items are}
+
+\subsection*{R7. Smoothing of $\hat\omega$}
+\where{Problem Formulation, ``What the rule reads''}
+Demand storage reads only the first number. Congestion-aware storage reads
+both. \old{A shelf sees only a few picks in one storage period, so a single
+period gives a number that jumps up and down by chance. $\hat\omega_t(v)$
+therefore looks back over several of the shelf's recent periods. A shelf
+with no pick yet reads 0.} Formally, the order estimate is \dots
+
+\where{Method, ``Where arriving stock goes'', the paragraph before \lab{eq:standstill}}
+$\hat\omega_t(v)$ is the plain average of the shelf's last five readings.
+Five is a practical smoothing choice. \new{A shelf sees only a few picks in
+one period, so one reading jumps up and down by chance.} It evens out one
+noisy period and still follows recent congestion, and the number was not
+tuned. A shelf with no pick in a period keeps its average\new{, and a shelf
+with no pick yet reads 0}.
+
+\note{What $\hat\omega$ means stays in the Problem Formulation. How it is
+smoothed is a choice the Method already makes and defends.}
+
+% ================================================================
+\section*{Who decides}
+
+\subsection*{R4. Why one policy is shared}
+\where{Problem Formulation, ``Decentralised''}
+A decentralised controller decides for one agent, from what that agent sees
+around it, its \emph{observation} $o_i(t)$. Every agent uses the same
+policy. When communication is switched on, an agent also gets learned
+messages from the agents near it. \old{Sharing one policy suits agents that
+are all alike. It does not make the decisions central, because each agent
+still acts only on what it sees and what nearby agents send it.} \new{The
+shared policy does not make the decisions central, because each agent still
+acts only on what it sees and what nearby agents send it.} Each agent
+chooses on its own, \dots
+
+\note{Why a policy is shared is a training choice. ``How the controllers
+learn'' gives it, citing the Background. Nothing is added to the Method.}
+
+% ================================================================
+\section*{What a decentralised agent sees}
+
+\subsection*{R3. Why the field of view is small}
+\where{Problem Formulation, after \lab{fig:observation}}
+\old{A small field of view keeps the policy's input the same size in any
+warehouse, so a policy trained on one warehouse can run on a bigger one.
+But the}\new{The} agent cannot see a conflict coming from further away than
+$d_{\mathrm{obs}}$.
+
+\where{Method, ``How an agent chooses its move'', second paragraph}
+The network follows \citet{vanKnippenberg2021}, who built on PRIMAL
+\citep{sartoretti2019primal}. It keeps their local view and their distance
+label. \new{A local view keeps the input the same size in any warehouse, so
+a policy trained on one warehouse can run on a bigger one.} It replaces
+their graph convolution \dots
+
+\note{The limit stays in the problem. The reason for a small view is a
+network design reason.}
+
+\subsection*{R6. Why every controller reads the crowding feature}
+\where{Problem Formulation, after the crowding equation}
+\old{A controller that can tell how crowded its area is can route around the
+crowd before an agent gets stuck in it, the same argument
+\citet{pham2024optimizingcrowdawaremultiagentpath} make for their
+crowd-density feature. Here every controller gets the number, not only the
+decentralised one, so it is measured the same way for every agent. Every
+controller reads only the agent's own value. A zone or the centralised
+controller sees more agents, so their values could be worked out, but no
+controller reads them. Appendix~\ref{app:controllers} explains why a
+section-based agent's field of view is not cut at the zone edge.}
+\new{Every controller reads the crowding feature, not only the decentralised
+one, and each reads only the agent's own value.}
+Figure~\ref{fig:crowding} gives each agent's reading on the small graph.
+
+\where{Method, ``What the network reads''}
+The crowding feature $\delta_i(t)$ is added once for the agent, not for each
+vertex. \new{With it a controller can route around a crowd before an agent
+gets stuck in it, the argument
+\citet{pham2024optimizingcrowdawaremultiagentpath} make for their
+crowd-density feature. Every controller gets it, so it is measured the same
+way for every agent. A zone or the centralised controller sees more agents,
+so their values could be worked out, but no controller reads them.
+Appendix~\ref{app:controllers} explains why a section-based agent's field of
+view is not cut at the zone edge.} The vertices chosen by earlier agents
+\dots
+
+\note{The problem keeps the fact that every controller reads it, which the
+heading also says. The why and the source go to where the network reads
+it.}
+
+\subsection*{R2. Why messages are learned}
+\where{Problem Formulation, ``Messages from nearby agents''}
+\old{The content of a message is learned, not chosen by hand. Each sender
+computes its message from its own observation with the same network that
+chooses its action, and training decides what is worth sending, as in
+\citet{pham2024optimizingcrowdawaremultiagentpath} and \citet{li2022pico}. A
+hand-picked message, such as the sender's distance to its target, cannot say
+which way the sender is heading. Because a learned message depends on the
+network, it is part of the policy and not of the observation, so $o_i(t)$
+keeps its three pieces.} \new{What a message says is learned, so it is part
+of the policy and not of the observation, and $o_i(t)$ keeps its three
+pieces.} Whether messages help at all is the question RQ4
+(Section~\ref{sec:pd-rq}). With communication switched off, the agent acts
+on $o_i(t)$ alone.
+
+\where{Method, ``Messages'', after the first sentence}
+\textbf{Messages.} A message has no layer of its own, and this is the
+thesis's own choice. \new{What a message says is learned, not chosen by
+hand. A hand-picked message, such as the sender's distance to its target,
+cannot say which way the sender is heading.} In
+\citet{pham2024optimizingcrowdawaremultiagentpath} an agent's state comes
+from an image network \dots
+
+\note{Who can hear whom (the communication graph) and why only the
+decentralised controller has messages stay, because those are limits of the
+problem. That messages are trained through the policy loss, as in Pham et
+al.\ and Li et al., the Method already says at the end of the same
+paragraph.}
+
+% ================================================================
+\section*{The learning problem}
+
+\subsection*{R1. How the moves are numbered}
+\where{Problem Formulation}
+A stochastic game gives every agent one fixed list of actions, but the
+legal moves depend on where the agent stands. So the list is as long as the
+busiest vertex needs, one wait and one move per outgoing edge\new{, and
+moves that lead nowhere are switched off}. \old{Move number $k$ takes the
+$k$-th outgoing edge of the vertex the agent stands on, in vertex-number
+order. Moves that lead nowhere are switched off before the policy chooses.
+If the busiest junction has four exits, every agent has five actions, and in
+a one-way aisle two of them are switched on.} Formally, with $d_{\max}$ the
+largest number of outgoing edges at any vertex, the action list is
+$\mathcal{U}_i = \{\mathrm{wait},\, \mathrm{move}_1, \dots,
+\mathrm{move}_{d_{\max}}\}$.
+
+\where{Method, ``Only moves that exist''}
+With $d_{\max} = \max_{v\in V} |N^{+}(v)|$ there are $d_{\max}+1$ slots.
+\new{If the busiest junction has four exits, every agent has five slots,
+and in a one-way aisle two of them are open.} At a vertex with fewer edges,
+the empty slots get $-\infty$ before the softmax \dots
+
+\note{The numbering in vertex order is already in the Method (``one for each
+outgoing edge in increasing vertex number''). Only the example moves.}
+
+\subsection*{R5. What $\theta$ stands for}
+\where{Problem Formulation, after the objective}
+\old{The same objective is used for all three learned controllers. Only what
+$\theta$ stands for changes. For the decentralised controller it is the
+weights shared by all agents. For the centralised and section-based
+controllers it is the weights of the network over the whole graph or over a
+zone, as in \nref{eq:centralisedpolicy} and \nref{eq:sectionpolicy}.}
+
+\old{Sharing one objective does not mean the three controllers learn the
+same thing.} \new{The objective is the same for the three controllers, but
+they do not learn the same thing.} An action is judged by the average reward
+of the agents that chose together with it. So a decentralised agent is not
+charged for the delay it causes others, but a centralised agent is.
+
+\where{Method, ``How the controllers learn'', after ``share one policy''}
+All agents of a controller share one policy, the common recipe of
+Section~\ref{sec:bg:marl}. \new{Its weights $\theta$ are the network run by
+every agent of the decentralised controller, or the network over the whole
+graph or a zone for the other two. Every controller is trained on the same
+objective \eqref{eq:objective}.} Each controller is trained separately
+\dots
+
+\note{The line above the cut paragraph already says $\pi_\theta$ stands for
+$\pi^{\mathrm{cen}}_\theta$, $\pi^{\mathrm{sec}}_\theta$ or
+$\pi^{\mathrm{dec}}_\theta$. What the weights are is a training fact. The
+difference in credit stays, because it is part of what the comparison
+compares.}
+
+% ================================================================
+\section*{How a run is scored}
+
+\subsection*{R10. How the keep-up check counts}
+\where{Problem Formulation}
+The check counts every task the fleet finishes in the measured steps, also
+one released before them\old{. A fleet that fell behind earlier still works
+through its older tasks, and that work is what shows whether the queue grows
+or holds. So}\new{, so} the measure is the share of the arriving work the
+fleet serves. \old{With 900 tasks released in the measured steps and 600
+tasks finished in them, the share is two thirds and the queue grows by
+300.}
+
+A pick counts as released when its order arrives, also while its stock is
+not yet on a shelf\new{, because the order is work the fleet owes
+(Appendix~\ref{app:measures:keepup})}. \old{The order is work the fleet
+owes, and the backlog already counts it. Left out, a fleet whose put-aways
+fail would release almost no picks and seem to keep up. Such a fleet with
+800 orders waiting for stock and 10 picks finished serves about one pick in
+eighty.}
+
+\where{Appendix C, new subsection after the crowd density paragraph of \lab{app:measures}}
+\new{\textbf{How the keep-up check counts} \note{label
+\lab{app:measures:keepup}}}
+
+\new{The check \eqref{eq:throughput} counts every task the fleet finishes in
+the measured steps, also one released before them. A fleet that fell behind
+earlier still works through its older tasks, and that work is what shows
+whether the queue grows or holds. With 900 tasks released in the measured
+steps and 600 tasks finished in them, the share is two thirds and the queue
+grows by 300.}
+
+\new{A pick counts as released when its order arrives, also while its stock
+is not yet on a shelf. The order is work the fleet owes, and the backlog
+already counts it. Left out, a fleet whose put-aways fail would release
+almost no picks and seem to keep up. Such a fleet with 800 orders waiting
+for stock and 10 picks finished serves about one pick in eighty.}
+
+\note{The chapter keeps both rules in one sentence each and the formal
+definition. The reasons and the two count examples move together, so the
+appendix reads on its own. The one pointer goes to an appendix, which you
+allow.}
+
+\subsection*{R9. The backlog shown over the run}
+\where{Problem Formulation}
+The check looks at one finite horizon, so passing it does not prove that
+the backlog stays bounded. A run can finish most of its tasks while the
+backlog still grows slowly. \old{The backlog over the run is therefore shown
+for the conditions in the main result, so a growing backlog is visible.}
+
+\where{Experiments, ``Scoring a condition'', after ``reported next to it''}
+\new{The check looks at one horizon, so the backlog over the run is shown for
+the conditions in the main result, and a backlog that still grows is
+visible.}
+
+\note{The limit belongs to the measure and stays. What the Results show is
+reporting.}
+
+\subsection*{R8. Stalls}
+\where{Problem Formulation}
+\old{A fleet can also jam for a stretch and then catch up. Its throughput
+recovers, so it passes the check, and its service time carries the jam.
+The jam is counted on its own as a stall. A stall is a stretch after the
+warm-up in which no agent finishes a task for longer than a set length
+(Appendix~\ref{app:cal:stall}). A light load leaves longer quiet stretches,
+so the length grows with the time between tasks. It looks at the whole fleet
+and not at one agent, because one agent often waits by plan, as under Token
+Passing, while a healthy fleet finishes tasks all the time. It is counted
+because it says something about the controller rather than about the
+load.}
+
+\where{Experiments, new paragraph after ``Scoring a condition''}
+\new{\textbf{Stalls.} A fleet can also jam for a stretch and then catch up.
+Its throughput recovers, so it passes the check, and its service time
+carries the jam. The jam is counted on its own as a stall. A stall is a
+stretch after the warm-up in which no agent finishes a task for longer than
+a set length (Appendix~\ref{app:cal:stall}). A light load leaves longer
+quiet stretches, so the length grows with the time between tasks. It looks
+at the whole fleet and not at one agent, because one agent often waits by
+plan, as under Token Passing, while a healthy fleet finishes tasks all the
+time. It is counted because it says something about the controller rather
+than about the load.}
+
+\note{Unchanged text, moved. The stall is not in \lab{tab:measures} and is
+not part of the decision problem. It is a count the Results report, set in
+Appendix H, so it sits with how a condition is scored.}
+
+% ================================================================
+\section*{When approved}
+Applied under [A134], with a GAPS.md entry. R10 adds the label
+\lab{app:measures:keepup} to Appendix C, so \texttt{tools/sync\_xrefs.py
+--build} is run. Every tag goes at the end of a line, and I grep every new
+tag line for text after the \texttt{\%} before building.
+
+\end{document}

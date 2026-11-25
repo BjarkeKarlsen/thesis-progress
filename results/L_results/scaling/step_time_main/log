@@ -1,0 +1,92 @@
+2026-11-24 12:47:42 start: main bdfda94, fleets 8 16 32 64 128, arms decentralised decentralised_comm section centralised
+2026-11-24 12:47:42 waiting: a game runs, load 14.88
+2026-11-24 12:48:42 waiting: a game runs, load 13.52
+2026-11-24 12:49:42 waiting: a game runs, load 14.00
+2026-11-24 12:50:42 waiting: a game runs, load 13.37
+2026-11-24 12:51:42 waiting: a game runs, load 15.22
+2026-11-24 12:52:42 waiting: a game runs, load 13.33
+2026-11-24 12:53:42 waiting: a game runs, load 10.17
+2026-11-24 12:54:42 waiting: a game runs, load 12.52
+2026-11-24 12:55:42 waiting: a game runs, load 13.70
+2026-11-24 12:56:42 waiting: a game runs, load 14.65
+2026-11-24 12:57:42 waiting: a game runs, load 12.94
+2026-11-24 12:58:42 waiting: a game runs, load 13.40
+2026-11-24 12:59:42 waiting: a game runs, load 11.11
+2026-11-24 13:00:42 waiting: a game runs, load 11.05
+2026-11-24 13:01:42 waiting: a game runs, load 11.56
+2026-11-24 13:02:42 waiting: a game runs, load 12.66
+2026-11-24 13:03:42 waiting: a game runs, load 11.72
+2026-11-24 13:04:42 waiting: a game runs, load 13.10
+2026-11-24 13:05:42 waiting: a game runs, load 11.34
+2026-11-24 13:06:42 waiting: a game runs, load 9.67
+2026-11-24 13:07:42 waiting: a game runs, load 10.22
+2026-11-24 13:08:42 waiting: a game runs, load 10.38
+2026-11-24 13:09:42 waiting: a game runs, load 9.91
+2026-11-24 13:10:42 waiting: a game runs, load 7.91
+2026-11-24 13:11:42 waiting: load 6.30
+2026-11-24 13:12:42 waiting: load 5.14
+2026-11-24 13:13:43 waiting: load 4.16
+2026-11-24 13:14:43 waiting: load 2.93
+2026-11-24 13:15:43 waiting: load 2.67
+2026-11-24 13:16:43 waiting: load 2.51
+2026-11-24 13:17:43 fleet 8 decentralised (checkpoint_000010)
+2026-11-24 13:18:00 fleet 8 decentralised exit 0: window 0.0032 s (all steps 0.0031), first/last 100 0.0030/0.0034, calls 1000/2000 of 3000, RAM peak 1.19 GB, CPU 0.004297269969666329 s/step, 1.0070260026283118 cores, GPU 27.444444444444443 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:18:00 fleet 8 decentralised_comm (checkpoint_000002)
+2026-11-24 13:18:21 fleet 8 decentralised_comm exit 0: window 0.0045 s (all steps 0.0044), first/last 100 0.0044/0.0046, calls 1000/2000 of 3000, RAM peak 1.34 GB, CPU 0.005599194360523665 s/step, 0.9921490669734284 cores, GPU 27.333333333333332 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:18:21 fleet 8 section (checkpoint_000011)
+2026-11-24 13:19:13 fleet 8 section exit 0: window 0.0155 s (all steps 0.0143), first/last 100 0.0141/0.0176, calls 1000/12062 of 3000, RAM peak 1.22 GB, CPU 0.016930792377131396 s/step, 1.0093514200812175 cores, GPU 31.848484848484848 % busy, own GPU 150.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:19:13 fleet 8 centralised (checkpoint_000013)
+2026-11-24 13:20:18 fleet 8 centralised exit 0: window 0.0195 s (all steps 0.0189), first/last 100 0.0192/0.0197, calls 1000/16000 of 3000, RAM peak 1.22 GB, CPU 0.020990990990990988 s/step, 1.0080803885347716 cores, GPU 33.1 % busy, own GPU 150.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:20:18 fleet 16 decentralised (checkpoint_000010)
+2026-11-24 13:20:42 fleet 16 decentralised exit 0: window 0.0045 s (all steps 0.0044), first/last 100 0.0048/0.0044, calls 1000/2000 of 3000, RAM peak 1.19 GB, CPU 0.007187500000000003 s/step, 1.0117175700065828 cores, GPU 25.5 % busy, own GPU 154.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:20:42 fleet 16 decentralised_comm (checkpoint_000002)
+2026-11-24 13:21:10 fleet 16 decentralised_comm exit 0: window 0.0055 s (all steps 0.0055), first/last 100 0.0054/0.0057, calls 1000/2000 of 3000, RAM peak 1.35 GB, CPU 0.008150753768844225 s/step, 1.0123472287754056 cores, GPU 25.125 % busy, own GPU 154.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:21:10 fleet 16 section (checkpoint_000011)
+2026-11-24 13:22:27 fleet 16 section exit 0: window 0.0235 s (all steps 0.0216), first/last 100 0.0223/0.0209, calls 1000/16986 of 3000, RAM peak 1.22 GB, CPU 0.026706706706706707 s/step, 1.0101062882553549 cores, GPU 31.2 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:22:27 fleet 16 centralised (checkpoint_000013)
+2026-11-24 13:24:39 fleet 16 centralised exit 0: window 0.0418 s (all steps 0.0396), first/last 100 0.0410/0.0415, calls 1000/32000 of 3000, RAM peak 1.23 GB, CPU 0.0454 s/step, 1.0084426453993232 cores, GPU 33.51764705882353 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:24:39 fleet 32 decentralised (checkpoint_000010)
+2026-11-24 13:25:16 fleet 32 decentralised exit 0: window 0.0071 s (all steps 0.0066), first/last 100 0.0068/0.0070, calls 1000/2000 of 3000, RAM peak 1.22 GB, CPU 0.013296482412060306 s/step, 1.0112684262594749 cores, GPU 22.166666666666668 % busy, own GPU 154.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:25:16 fleet 32 decentralised_comm (checkpoint_000002)
+2026-11-24 13:25:59 fleet 32 decentralised_comm exit 0: window 0.0086 s (all steps 0.0083), first/last 100 0.0089/0.0086, calls 1000/2000 of 3000, RAM peak 1.37 GB, CPU 0.01453815261044177 s/step, 1.0113892425212123 cores, GPU 22.14814814814815 % busy, own GPU 154.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:25:59 fleet 32 section (checkpoint_000011)
+2026-11-24 13:28:53 fleet 32 section exit 0: window 0.0633 s (all steps 0.0514), first/last 100 0.0587/0.0668, calls 1000/44222 of 3000, RAM peak 1.27 GB, CPU 0.07029000000000002 s/step, 1.0066237414348722 cores, GPU 31.72519083969466 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:28:53 fleet 32 centralised (checkpoint_000013)
+2026-11-24 13:33:22 fleet 32 centralised exit 0: window 0.0902 s (all steps 0.0826), first/last 100 0.0868/0.0921, calls 1000/64000 of 3000, RAM peak 1.24 GB, CPU 0.09847 s/step, 1.0101838077171352 cores, GPU 33.95054945054945 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:33:22 fleet 64 decentralised (checkpoint_000010)
+2026-11-24 13:34:36 fleet 64 decentralised exit 0: window 0.0109 s (all steps 0.0105), first/last 100 0.0108/0.0112, calls 1000/2000 of 3000, RAM peak 1.23 GB, CPU 0.029206827309236936 s/step, 1.0127293095804084 cores, GPU 20.127659574468087 % busy, own GPU 194.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:34:36 fleet 64 decentralised_comm (checkpoint_000002)
+2026-11-24 13:36:05 fleet 64 decentralised_comm exit 0: window 0.0158 s (all steps 0.0152), first/last 100 0.0153/0.0160, calls 1000/2000 of 3000, RAM peak 1.38 GB, CPU 0.03424698795180723 s/step, 1.013186444994691 cores, GPU 20.0 % busy, own GPU 194.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:36:06 fleet 64 section (checkpoint_000011)
+2026-11-24 13:39:31 fleet 64 section exit 0: window 0.0596 s (all steps 0.0528), first/last 100 0.0544/0.0577, calls 1000/32232 of 3000, RAM peak 1.26 GB, CPU 0.07920000000000002 s/step, 1.0089823347931866 cores, GPU 30.819444444444443 % busy, own GPU 176.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:39:31 fleet 64 centralised (checkpoint_000013)
+2026-11-24 13:50:02 fleet 64 centralised exit 0: window 0.2170 s (all steps 0.1926), first/last 100 0.2064/0.2222, calls 1000/128000 of 3000, RAM peak 1.29 GB, CPU 0.24151000000000006 s/step, 1.0082536044430312 cores, GPU 34.959276018099544 % busy, own GPU 152.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:50:02 fleet 128 decentralised (checkpoint_000010)
+2026-11-24 13:53:13 fleet 128 decentralised exit 0: window 0.0211 s (all steps 0.0199), first/last 100 0.0210/0.0220, calls 1000/2000 of 3000, RAM peak 1.30 GB, CPU 0.08264794383149447 s/step, 1.0124055666161682 cores, GPU 18.528301886792452 % busy, own GPU 232.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:53:13 fleet 128 decentralised_comm (checkpoint_000002)
+2026-11-24 13:57:08 fleet 128 decentralised_comm exit 0: window 0.0355 s (all steps 0.0337), first/last 100 0.0342/0.0372, calls 1000/2000 of 3000, RAM peak 1.45 GB, CPU 0.0980561122244489 s/step, 1.0049373670923796 cores, GPU 18.466165413533833 % busy, own GPU 232.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 13:57:08 fleet 128 section (checkpoint_000011)
+2026-11-24 14:05:42 fleet 128 section exit 0: window 0.1557 s (all steps 0.1223), first/last 100 0.1489/0.1656, calls 1000/68670 of 3000, RAM peak 1.32 GB, CPU 0.22085000000000002 s/step, 1.00707306967424 cores, GPU 29.77061855670103 % busy, own GPU 226.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 14:05:42 fleet 128 centralised (checkpoint_000013)
+2026-11-24 14:29:25 fleet 128 centralised exit 0: window 0.4691 s (all steps 0.4246), first/last 100 0.4461/0.5262, calls 1000/256000 of 3000, RAM peak 1.37 GB, CPU 0.5397900000000001 s/step, 1.0079561620399329 cores, GPU 36.904713114754095 % busy, own GPU 174.0 MB, others ['Code - OSS --gpu-preferences=UAAAAAAAAAA', 'kwin_wayland']
+2026-11-24 14:29:25 fleet 8 token_passing 2000 steps
+2026-11-24 14:29:31 fleet 8 token_passing 2000 exit 0
+2026-11-24 14:29:32 fleet 8 token_passing 3000 steps
+2026-11-24 14:29:38 fleet 8 token_passing 3000 exit 0
+2026-11-24 14:29:39 fleet 16 token_passing 2000 steps
+2026-11-24 14:29:46 fleet 16 token_passing 2000 exit 0
+2026-11-24 14:29:46 fleet 16 token_passing 3000 steps
+2026-11-24 14:29:56 fleet 16 token_passing 3000 exit 0
+2026-11-24 14:29:56 fleet 32 token_passing 2000 steps
+2026-11-24 14:30:09 fleet 32 token_passing 2000 exit 0
+2026-11-24 14:30:09 fleet 32 token_passing 3000 steps
+2026-11-24 14:30:26 fleet 32 token_passing 3000 exit 0
+2026-11-24 14:30:26 fleet 64 token_passing 2000 steps
+2026-11-24 14:31:01 fleet 64 token_passing 2000 exit 0
+2026-11-24 14:31:01 fleet 64 token_passing 3000 steps
+2026-11-24 14:31:55 fleet 64 token_passing 3000 exit 0
+2026-11-24 14:31:55 fleet 128 token_passing 2000 steps
+2026-11-24 14:34:21 fleet 128 token_passing 2000 exit 0
+2026-11-24 14:34:21 fleet 128 token_passing 3000 steps
+2026-11-24 14:38:11 fleet 128 token_passing 3000 exit 0
+2026-11-24 14:38:11 finished

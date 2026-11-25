@@ -1,0 +1,479 @@
+2026-11-23 20:05:16 1. waiting for the step time test
+2026-11-23 20:05:32 perf.sh restarted inside scaling-chain (after a redo of two fleet 8 timings)
+2026-11-23 23:26:40 1. waiting for the step time test
+2026-11-23 23:26:40 decentralised: training/fleet_16/decentralised/congestion_long/decentralised_congestion/PPO_warehouse_mapd_multi_agent_env_bd668_00000_0_2026-11-19_07-35-07/checkpoint_000010
+2026-11-23 23:26:40 decentralised_comm: training/fleet_16/decentralised_comm/congestion_long_part2/decentralised_congestion_comm/PPO_warehouse_mapd_multi_agent_env_df658_00000_0_2026-11-22_12-33-09/checkpoint_000002
+2026-11-23 23:26:40 section: training/fleet_16/section/congestion_long_part2/section_congestion/PPO_warehouse_mapd_multi_agent_env_04018_00000_0_2026-11-20_09-37-35/checkpoint_000011
+2026-11-23 23:26:40 centralised: training/fleet_16/centralised/congestion_long/centralised_congestion/PPO_warehouse_mapd_multi_agent_env_8087c_00000_0_2026-11-19_09-23-30/checkpoint_000013
+2026-11-23 23:26:40 2. building the warehouses of the 20 test seeds
+8 decentralised /home/bjarkek/thesis_runs/warehouses/fleet8_decentralised_f681777fff13 {'max_local_nodes': 49, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+8 decentralised_comm /home/bjarkek/thesis_runs/warehouses/fleet8_decentralised_f681777fff13 {'max_local_nodes': 49, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+8 section /home/bjarkek/thesis_runs/warehouses/fleet8_section_a635428f3694 {'max_local_nodes': 139, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+8 centralised /home/bjarkek/thesis_runs/warehouses/fleet8_centralised_4a3c2930f74c {'max_local_nodes': 184, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+32 decentralised /home/bjarkek/thesis_runs/warehouses/fleet32_decentralised_ee64b5672299 {'max_local_nodes': 55, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+32 decentralised_comm /home/bjarkek/thesis_runs/warehouses/fleet32_decentralised_ee64b5672299 {'max_local_nodes': 55, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+32 section /home/bjarkek/thesis_runs/warehouses/fleet32_section_fed248d627ba {'max_local_nodes': 355, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+32 centralised /home/bjarkek/thesis_runs/warehouses/fleet32_centralised_8d27c1d6cd3c {'max_local_nodes': 736, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+64 decentralised /home/bjarkek/thesis_runs/warehouses/fleet64_decentralised_2f0a11c2850e {'max_local_nodes': 55, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+64 decentralised_comm /home/bjarkek/thesis_runs/warehouses/fleet64_decentralised_2f0a11c2850e {'max_local_nodes': 55, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+64 section /home/bjarkek/thesis_runs/warehouses/fleet64_section_a311b58cfa35 {'max_local_nodes': 471, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+64 centralised /home/bjarkek/thesis_runs/warehouses/fleet64_centralised_8dffc0eee63e {'max_local_nodes': 1472, 'd_max': 4, 'seeds': [200000, 200001, 200002, 200003, 200004, 200005, 200006, 200007, 200008, 200009, 200010, 200011, 200012, 200013, 200014, 200015, 200016, 200017, 200018, 200019]}
+2026-11-23 23:31:11 3. copying code, runs and warehouses to thesis-eval
+2026-11-23 23:34:14 4. 7 lanes on the PC, 4 on thesis-eval
+2026-11-23 23:34:14 PC lane 8: 8 decentralised 200000
+2026-11-23 23:34:16 PC lane 8: 8 decentralised 200001
+2026-11-23 23:34:18 PC lane 8: 8 decentralised 200002
+2026-11-23 23:34:20 PC lane 8: 8 decentralised 200003
+2026-11-23 23:34:22 PC lane 8: 8 decentralised 200004
+2026-11-23 23:34:24 PC lane 8: 8 decentralised 200005
+2026-11-23 23:34:26 PC lane 8: 8 decentralised 200006
+2026-11-23 23:36:07 PC lane 8: 8 decentralised 200001 exit 0
+2026-11-23 23:36:07 PC lane 8: 8 decentralised 200007
+2026-11-23 23:36:15 PC lane 8: 8 decentralised 200000 exit 0
+2026-11-23 23:36:15 PC lane 8: 8 decentralised 200008
+2026-11-23 23:36:18 PC lane 8: 8 decentralised 200002 exit 0
+2026-11-23 23:36:18 PC lane 8: 8 decentralised 200009
+2026-11-23 23:36:19 PC lane 8: 8 decentralised 200005 exit 0
+2026-11-23 23:36:19 PC lane 8: 8 decentralised 200010
+2026-11-23 23:36:29 PC lane 8: 8 decentralised 200004 exit 0
+2026-11-23 23:36:29 PC lane 8: 8 decentralised 200011
+2026-11-23 23:36:30 PC lane 8: 8 decentralised 200003 exit 0
+2026-11-23 23:36:30 PC lane 8: 8 decentralised 200012
+2026-11-23 23:36:35 PC lane 8: 8 decentralised 200006 exit 0
+2026-11-23 23:36:35 PC lane 8: 8 decentralised 200013
+2026-11-23 23:38:19 PC lane 8: 8 decentralised 200009 exit 0
+2026-11-23 23:38:19 PC lane 8: 8 decentralised 200014
+2026-11-23 23:38:25 PC lane 8: 8 decentralised 200012 exit 0
+2026-11-23 23:38:25 PC lane 8: 8 decentralised 200015
+2026-11-23 23:38:29 PC lane 8: 8 decentralised 200007 exit 0
+2026-11-23 23:38:29 PC lane 8: 8 decentralised 200016
+2026-11-23 23:38:33 PC lane 8: 8 decentralised 200013 exit 0
+2026-11-23 23:38:33 PC lane 8: 8 decentralised 200017
+2026-11-23 23:38:33 PC lane 8: 8 decentralised 200010 exit 0
+2026-11-23 23:38:33 PC lane 8: 8 decentralised 200018
+2026-11-23 23:38:34 PC lane 8: 8 decentralised 200011 exit 0
+2026-11-23 23:38:34 PC lane 8: 8 decentralised 200019
+2026-11-23 23:38:35 PC lane 8: 8 decentralised 200008 exit 0
+2026-11-23 23:38:35 PC lane 8: 8 decentralised_comm 200000
+2026-11-23 23:40:31 PC lane 8: 8 decentralised 200014 exit 0
+2026-11-23 23:40:31 PC lane 8: 8 decentralised_comm 200001
+2026-11-23 23:40:37 PC lane 8: 8 decentralised 200019 exit 0
+2026-11-23 23:40:37 PC lane 8: 8 decentralised_comm 200002
+2026-11-23 23:40:41 PC lane 8: 8 decentralised_comm 200000 exit 0
+2026-11-23 23:40:41 PC lane 8: 8 decentralised_comm 200003
+2026-11-23 23:40:43 PC lane 8: 8 decentralised 200018 exit 0
+2026-11-23 23:40:43 PC lane 8: 8 decentralised_comm 200004
+2026-11-23 23:40:44 PC lane 8: 8 decentralised 200015 exit 0
+2026-11-23 23:40:44 PC lane 8: 8 decentralised_comm 200005
+2026-11-23 23:40:46 PC lane 8: 8 decentralised 200016 exit 0
+2026-11-23 23:40:46 PC lane 8: 8 decentralised_comm 200006
+2026-11-23 23:40:48 PC lane 8: 8 decentralised 200017 exit 0
+2026-11-23 23:40:48 PC lane 8: 8 decentralised_comm 200007
+2026-11-23 23:42:28 PC lane 8: 8 decentralised_comm 200001 exit 0
+2026-11-23 23:42:28 PC lane 8: 8 decentralised_comm 200008
+2026-11-23 23:42:45 PC lane 8: 8 decentralised_comm 200005 exit 0
+2026-11-23 23:42:45 PC lane 8: 8 decentralised_comm 200009
+2026-11-23 23:42:47 PC lane 8: 8 decentralised_comm 200002 exit 0
+2026-11-23 23:42:48 PC lane 8: 8 decentralised_comm 200010
+2026-11-23 23:42:51 PC lane 8: 8 decentralised_comm 200004 exit 0
+2026-11-23 23:42:51 PC lane 8: 8 decentralised_comm 200011
+2026-11-23 23:42:58 PC lane 8: 8 decentralised_comm 200003 exit 0
+2026-11-23 23:42:58 PC lane 8: 8 decentralised_comm 200012
+2026-11-23 23:43:05 PC lane 8: 8 decentralised_comm 200006 exit 0
+2026-11-23 23:43:05 PC lane 8: 8 decentralised_comm 200013
+2026-11-23 23:43:16 PC lane 8: 8 decentralised_comm 200007 exit 0
+2026-11-23 23:43:16 PC lane 8: 8 decentralised_comm 200014
+2026-11-23 23:44:52 PC lane 8: 8 decentralised_comm 200009 exit 0
+2026-11-23 23:44:52 PC lane 8: 8 decentralised_comm 200015
+2026-11-23 23:44:52 PC lane 8: 8 decentralised_comm 200008 exit 0
+2026-11-23 23:44:52 PC lane 8: 8 decentralised_comm 200016
+2026-11-23 23:44:57 PC lane 8: 8 decentralised_comm 200012 exit 0
+2026-11-23 23:44:57 PC lane 8: 8 decentralised_comm 200017
+2026-11-23 23:45:04 PC lane 8: 8 decentralised_comm 200010 exit 0
+2026-11-23 23:45:04 PC lane 8: 8 decentralised_comm 200018
+2026-11-23 23:45:06 PC lane 8: 8 decentralised_comm 200011 exit 0
+2026-11-23 23:45:06 PC lane 8: 8 decentralised_comm 200019
+2026-11-23 23:45:08 PC lane 8: 8 decentralised_comm 200013 exit 0
+2026-11-23 23:45:08 PC lane 8: 8 section 200000
+2026-11-23 23:45:34 PC lane 8: 8 decentralised_comm 200014 exit 0
+2026-11-23 23:45:34 PC lane 8: 8 section 200001
+2026-11-23 23:47:10 PC lane 8: 8 decentralised_comm 200019 exit 0
+2026-11-23 23:47:10 PC lane 8: 8 section 200002
+2026-11-23 23:47:14 PC lane 8: 8 decentralised_comm 200015 exit 0
+2026-11-23 23:47:14 PC lane 8: 8 section 200003
+2026-11-23 23:47:17 PC lane 8: 8 decentralised_comm 200016 exit 0
+2026-11-23 23:47:17 PC lane 8: 8 section 200004
+2026-11-23 23:47:24 PC lane 8: 8 decentralised_comm 200018 exit 0
+2026-11-23 23:47:25 PC lane 8: 8 section 200005
+2026-11-23 23:47:25 PC lane 8: 8 decentralised_comm 200017 exit 0
+2026-11-23 23:47:25 PC lane 8: 8 section 200006
+2026-11-23 23:50:04 PC lane 8: 8 section 200000 exit 0
+2026-11-23 23:50:04 PC lane 8: 8 section 200007
+2026-11-23 23:50:41 PC lane 8: 8 section 200001 exit 0
+2026-11-23 23:50:41 PC lane 8: 8 section 200008
+2026-11-23 23:52:00 PC lane 8: 8 section 200002 exit 0
+2026-11-23 23:52:00 PC lane 8: 8 section 200009
+2026-11-23 23:52:09 PC lane 8: 8 section 200005 exit 0
+2026-11-23 23:52:09 PC lane 8: 8 section 200010
+2026-11-23 23:52:13 PC lane 8: 8 section 200003 exit 0
+2026-11-23 23:52:13 PC lane 8: 8 section 200011
+2026-11-23 23:52:14 PC lane 8: 8 section 200004 exit 0
+2026-11-23 23:52:14 PC lane 8: 8 section 200012
+2026-11-23 23:52:22 PC lane 8: 8 section 200006 exit 0
+2026-11-23 23:52:22 PC lane 8: 8 section 200013
+2026-11-23 23:55:08 PC lane 8: 8 section 200007 exit 0
+2026-11-23 23:55:08 PC lane 8: 8 section 200014
+2026-11-23 23:55:46 PC lane 8: 8 section 200008 exit 0
+2026-11-23 23:55:46 PC lane 8: 8 section 200015
+2026-11-23 23:56:58 PC lane 8: 8 section 200013 exit 0
+2026-11-23 23:56:58 PC lane 8: 8 section 200016
+2026-11-23 23:57:03 PC lane 8: 8 section 200011 exit 0
+2026-11-23 23:57:03 PC lane 8: 8 section 200017
+2026-11-23 23:57:07 PC lane 8: 8 section 200010 exit 0
+2026-11-23 23:57:07 PC lane 8: 8 section 200018
+2026-11-23 23:57:11 PC lane 8: 8 section 200012 exit 0
+2026-11-23 23:57:11 PC lane 8: 8 section 200019
+2026-11-23 23:57:12 PC lane 8: 8 section 200009 exit 0
+2026-11-23 23:57:12 PC lane 8: 8 centralised 200000
+2026-11-23 23:59:58 PC lane 8: 8 section 200014 exit 0
+2026-11-23 23:59:58 PC lane 8: 8 centralised 200001
+2026-11-24 00:01:08 PC lane 8: 8 section 200015 exit 0
+2026-11-24 00:01:08 PC lane 8: 8 centralised 200002
+2026-11-24 00:01:48 PC lane 8: 8 section 200019 exit 0
+2026-11-24 00:01:48 PC lane 8: 8 centralised 200003
+2026-11-24 00:02:01 PC lane 8: 8 section 200017 exit 0
+2026-11-24 00:02:01 PC lane 8: 8 centralised 200004
+2026-11-24 00:02:04 PC lane 8: 8 section 200016 exit 0
+2026-11-24 00:02:04 PC lane 8: 8 centralised 200005
+2026-11-24 00:02:17 PC lane 8: 8 section 200018 exit 0
+2026-11-24 00:02:17 PC lane 8: 8 centralised 200006
+2026-11-24 00:03:20 PC lane 8: 8 centralised 200000 exit 0
+2026-11-24 00:03:20 PC lane 8: 8 centralised 200007
+2026-11-24 00:05:45 PC lane 8: 8 centralised 200001 exit 0
+2026-11-24 00:05:45 PC lane 8: 8 centralised 200008
+2026-11-24 00:07:16 PC lane 8: 8 centralised 200002 exit 0
+2026-11-24 00:07:16 PC lane 8: 8 centralised 200009
+2026-11-24 00:08:04 PC lane 8: 8 centralised 200003 exit 0
+2026-11-24 00:08:04 PC lane 8: 8 centralised 200010
+2026-11-24 00:08:06 PC lane 8: 8 centralised 200005 exit 0
+2026-11-24 00:08:06 PC lane 8: 8 centralised 200011
+2026-11-24 00:08:15 PC lane 8: 8 centralised 200004 exit 0
+2026-11-24 00:08:15 PC lane 8: 8 centralised 200012
+2026-11-24 00:08:38 PC lane 8: 8 centralised 200006 exit 0
+2026-11-24 00:08:38 PC lane 8: 8 centralised 200013
+2026-11-24 00:09:43 PC lane 8: 8 centralised 200007 exit 0
+2026-11-24 00:09:43 PC lane 8: 8 centralised 200014
+2026-11-24 00:11:59 PC lane 8: 8 centralised 200008 exit 0
+2026-11-24 00:11:59 PC lane 8: 8 centralised 200015
+2026-11-24 00:13:20 PC lane 8: 8 centralised 200009 exit 0
+2026-11-24 00:13:20 PC lane 8: 8 centralised 200016
+2026-11-24 00:14:11 PC lane 8: 8 centralised 200012 exit 0
+2026-11-24 00:14:11 PC lane 8: 8 centralised 200017
+2026-11-24 00:14:14 PC lane 8: 8 centralised 200011 exit 0
+2026-11-24 00:14:14 PC lane 8: 8 centralised 200018
+2026-11-24 00:14:16 PC lane 8: 8 centralised 200010 exit 0
+2026-11-24 00:14:16 PC lane 8: 8 centralised 200019
+2026-11-24 00:14:37 PC lane 8: 8 centralised 200013 exit 0
+2026-11-24 00:14:37 PC lane 32: 32 decentralised 200000
+2026-11-24 00:15:54 PC lane 8: 8 centralised 200014 exit 0
+2026-11-24 00:15:54 PC lane 32: 32 decentralised 200001
+2026-11-24 00:18:18 PC lane 8: 8 centralised 200015 exit 0
+2026-11-24 00:18:18 PC lane 32: 32 decentralised 200002
+2026-11-24 00:19:52 PC lane 8: 8 centralised 200016 exit 0
+2026-11-24 00:19:52 PC lane 32: 32 decentralised 200003
+2026-11-24 00:20:28 PC lane 8: 8 centralised 200019 exit 0
+2026-11-24 00:20:28 PC lane 32: 32 decentralised 200004
+2026-11-24 00:20:32 PC lane 8: 8 centralised 200018 exit 0
+2026-11-24 00:20:32 PC lane 32: 32 decentralised 200005
+2026-11-24 00:20:55 PC lane 8: 8 centralised 200017 exit 0
+2026-11-24 00:20:55 PC lane 32: 32 decentralised 200006
+2026-11-24 00:24:48 PC lane 32: 32 decentralised 200000 exit 0
+2026-11-24 00:24:48 PC lane 32: 32 decentralised 200007
+2026-11-24 00:29:47 PC lane 32: 32 decentralised 200006 exit 0
+2026-11-24 00:29:47 PC lane 32: 32 decentralised 200008
+2026-11-24 00:30:20 PC lane 32: 32 decentralised 200001 exit 0
+2026-11-24 00:30:21 PC lane 32: 32 decentralised 200009
+2026-11-24 00:33:26 PC lane 32: 32 decentralised 200003 exit 0
+2026-11-24 00:33:26 PC lane 32: 32 decentralised 200010
+2026-11-24 00:33:43 PC lane 32: 32 decentralised 200005 exit 0
+2026-11-24 00:33:43 PC lane 32: 32 decentralised 200011
+2026-11-24 00:33:44 PC lane 32: 32 decentralised 200002 exit 0
+2026-11-24 00:33:44 PC lane 32: 32 decentralised 200012
+2026-11-24 00:35:03 PC lane 32: 32 decentralised 200004 exit 0
+2026-11-24 00:35:03 PC lane 32: 32 decentralised 200013
+2026-11-24 00:38:07 PC lane 32: 32 decentralised 200007 exit 0
+2026-11-24 00:38:07 PC lane 32: 32 decentralised 200014
+2026-11-24 00:44:46 PC lane 32: 32 decentralised 200008 exit 0
+2026-11-24 00:44:46 PC lane 32: 32 decentralised 200015
+2026-11-24 00:45:18 PC lane 32: 32 decentralised 200009 exit 0
+2026-11-24 00:45:18 PC lane 32: 32 decentralised 200016
+2026-11-24 00:45:33 PC lane 32: 32 decentralised 200012 exit 0
+2026-11-24 00:45:33 PC lane 32: 32 decentralised 200017
+2026-11-24 00:46:46 PC lane 32: 32 decentralised 200013 exit 0
+2026-11-24 00:46:46 PC lane 32: 32 decentralised 200018
+2026-11-24 00:47:23 PC lane 32: 32 decentralised 200010 exit 0
+2026-11-24 00:47:23 PC lane 32: 32 decentralised 200019
+2026-11-24 00:50:18 PC lane 32: 32 decentralised 200011 exit 0
+2026-11-24 00:50:18 PC lane 32: 32 decentralised_comm 200000
+2026-11-24 00:52:05 PC lane 32: 32 decentralised 200014 exit 0
+2026-11-24 00:52:05 PC lane 32: 32 decentralised_comm 200001
+2026-11-24 00:53:53 PC lane 32: 32 decentralised 200017 exit 0
+2026-11-24 00:53:53 PC lane 32: 32 decentralised_comm 200002
+2026-11-24 00:58:26 PC lane 32: 32 decentralised_comm 200000 exit 0
+2026-11-24 00:58:26 PC lane 32: 32 decentralised_comm 200003
+2026-11-24 00:59:04 PC lane 32: 32 decentralised 200015 exit 0
+2026-11-24 00:59:04 PC lane 32: 32 decentralised_comm 200004
+2026-11-24 00:59:49 PC lane 32: 32 decentralised 200016 exit 0
+2026-11-24 00:59:49 PC lane 32: 32 decentralised_comm 200005
+2026-11-24 01:01:12 PC lane 32: 32 decentralised 200019 exit 0
+2026-11-24 01:01:12 PC lane 32: 32 decentralised_comm 200006
+2026-11-24 01:02:56 PC lane 32: 32 decentralised 200018 exit 0
+2026-11-24 01:02:56 PC lane 32: 32 decentralised_comm 200007
+2026-11-24 01:08:02 PC lane 32: 32 decentralised_comm 200001 exit 0
+2026-11-24 01:08:02 PC lane 32: 32 decentralised_comm 200008
+2026-11-24 01:08:45 PC lane 32: 32 decentralised_comm 200006 exit 0
+2026-11-24 01:08:45 PC lane 32: 32 decentralised_comm 200009
+2026-11-24 01:09:31 PC lane 32: 32 decentralised_comm 200002 exit 0
+2026-11-24 01:09:31 PC lane 32: 32 decentralised_comm 200010
+2026-11-24 01:10:27 PC lane 32: 32 decentralised_comm 200005 exit 0
+2026-11-24 01:10:27 PC lane 32: 32 decentralised_comm 200011
+2026-11-24 01:13:01 PC lane 32: 32 decentralised_comm 200003 exit 0
+2026-11-24 01:13:01 PC lane 32: 32 decentralised_comm 200012
+2026-11-24 01:14:50 PC lane 32: 32 decentralised_comm 200004 exit 0
+2026-11-24 01:14:50 PC lane 32: 32 decentralised_comm 200013
+2026-11-24 01:16:00 PC lane 32: 32 decentralised_comm 200007 exit 0
+2026-11-24 01:16:00 PC lane 32: 32 decentralised_comm 200014
+2026-11-24 01:19:17 PC lane 32: 32 decentralised_comm 200008 exit 0
+2026-11-24 01:19:17 PC lane 32: 32 decentralised_comm 200015
+2026-11-24 01:21:21 PC lane 32: 32 decentralised_comm 200009 exit 0
+2026-11-24 01:21:21 PC lane 32: 32 decentralised_comm 200016
+2026-11-24 01:22:04 PC lane 32: 32 decentralised_comm 200012 exit 0
+2026-11-24 01:22:04 PC lane 32: 32 decentralised_comm 200017
+2026-11-24 01:23:47 PC lane 32: 32 decentralised_comm 200010 exit 0
+2026-11-24 01:23:47 PC lane 32: 32 decentralised_comm 200018
+2026-11-24 01:24:28 PC lane 32: 32 decentralised_comm 200013 exit 0
+2026-11-24 01:24:28 PC lane 32: 32 decentralised_comm 200019
+2026-11-24 01:28:01 PC lane 32: 32 decentralised_comm 200011 exit 0
+2026-11-24 01:28:02 PC lane 64: 64 decentralised 200000
+2026-11-24 01:29:54 PC lane 32: 32 decentralised_comm 200017 exit 0
+2026-11-24 01:29:54 PC lane 64: 64 decentralised 200001
+2026-11-24 01:29:54 PC lane 32: 32 decentralised_comm 200014 exit 0
+2026-11-24 01:29:55 PC lane 64: 64 decentralised 200002
+2026-11-24 01:30:26 PC lane 32: 32 decentralised_comm 200016 exit 0
+2026-11-24 01:30:27 PC lane 64: 64 decentralised 200003
+2026-11-24 01:32:50 PC lane 32: 32 decentralised_comm 200018 exit 0
+2026-11-24 01:32:50 PC lane 64: 64 decentralised 200004
+2026-11-24 01:33:09 PC lane 32: 32 decentralised_comm 200015 exit 0
+2026-11-24 01:33:09 PC lane 64: 64 decentralised 200005
+2026-11-24 01:37:16 PC lane 32: 32 decentralised_comm 200019 exit 0
+2026-11-24 01:37:16 PC lane 64: 64 decentralised 200006
+2026-11-24 01:49:53 PC lane 64: 64 decentralised 200000 exit 0
+2026-11-24 01:49:54 PC lane 64: 64 decentralised 200007
+2026-11-24 02:09:13 PC lane 64: 64 decentralised 200002 exit 0
+2026-11-24 02:09:13 PC lane 64: 64 decentralised 200008
+2026-11-24 02:11:39 PC lane 64: 64 decentralised 200001 exit 0
+2026-11-24 02:11:39 PC lane 64: 64 decentralised 200009
+2026-11-24 02:16:23 PC lane 64: 64 decentralised 200003 exit 0
+2026-11-24 02:16:24 PC lane 64: 64 decentralised 200010
+2026-11-24 02:18:23 PC lane 64: 64 decentralised 200005 exit 0
+2026-11-24 02:18:24 PC lane 64: 64 decentralised 200011
+2026-11-24 02:18:25 PC lane 64: 64 decentralised 200004 exit 0
+2026-11-24 02:18:25 PC lane 64: 64 decentralised 200012
+2026-11-24 02:23:32 PC lane 64: 64 decentralised 200006 exit 0
+2026-11-24 02:23:32 PC lane 64: 64 decentralised 200013
+2026-11-24 02:28:13 PC lane 64: 64 decentralised 200007 exit 0
+2026-11-24 02:28:13 PC lane 64: 64 decentralised 200014
+2026-11-24 02:38:27 PC lane 64: 64 decentralised 200010 exit 0
+2026-11-24 02:38:27 PC lane 64: 64 decentralised 200015
+2026-11-24 02:45:01 PC lane 64: 64 decentralised 200008 exit 0
+2026-11-24 02:45:01 PC lane 64: 64 decentralised 200016
+2026-11-24 02:51:34 PC lane 64: 64 decentralised 200009 exit 0
+2026-11-24 02:51:34 PC lane 64: 64 decentralised 200017
+2026-11-24 03:04:24 PC lane 64: 64 decentralised 200011 exit 0
+2026-11-24 03:04:24 PC lane 64: 64 decentralised 200018
+2026-11-24 03:04:43 PC lane 64: 64 decentralised 200013 exit 0
+2026-11-24 03:04:43 PC lane 64: 64 decentralised 200019
+2026-11-24 03:06:56 PC lane 64: 64 decentralised 200012 exit 0
+2026-11-24 03:06:56 PC lane 64: 64 decentralised_comm 200000
+2026-11-24 03:09:18 PC lane 64: 64 decentralised 200014 exit 0
+2026-11-24 03:09:19 PC lane 64: 64 decentralised_comm 200001
+2026-11-24 03:26:03 PC lane 64: 64 decentralised 200015 exit 0
+2026-11-24 03:26:03 PC lane 64: 64 decentralised_comm 200002
+2026-11-24 03:28:13 PC lane 64: 64 decentralised 200018 exit 0
+2026-11-24 03:28:13 PC lane 64: 64 decentralised_comm 200003
+2026-11-24 03:30:03 PC lane 64: 64 decentralised_comm 200000 exit 0
+2026-11-24 03:30:03 PC lane 64: 64 decentralised_comm 200004
+2026-11-24 03:31:22 PC lane 64: 64 decentralised 200016 exit 0
+2026-11-24 03:31:22 PC lane 64: 64 decentralised_comm 200005
+2026-11-24 03:39:06 PC lane 64: 64 decentralised 200017 exit 0
+2026-11-24 03:39:06 PC lane 64: 64 decentralised_comm 200006
+2026-11-24 03:51:37 PC lane 64: 64 decentralised 200019 exit 0
+2026-11-24 03:51:37 PC lane 64: 64 decentralised_comm 200007
+2026-11-24 03:56:40 PC lane 64: 64 decentralised_comm 200001 exit 0
+2026-11-24 03:56:41 PC lane 64: 64 decentralised_comm 200008
+2026-11-24 04:01:36 PC lane 64: 64 decentralised_comm 200004 exit 0
+2026-11-24 04:01:36 PC lane 64: 64 decentralised_comm 200009
+2026-11-24 04:04:21 PC lane 64: 64 decentralised_comm 200005 exit 0
+2026-11-24 04:04:21 PC lane 64: 64 decentralised_comm 200010
+2026-11-24 04:06:24 PC lane 64: 64 decentralised_comm 200006 exit 0
+2026-11-24 04:06:24 PC lane 64: 64 decentralised_comm 200011
+2026-11-24 04:09:16 PC lane 64: 64 decentralised_comm 200003 exit 0
+2026-11-24 04:09:16 PC lane 64: 64 decentralised_comm 200012
+2026-11-24 04:14:51 PC lane 64: 64 decentralised_comm 200002 exit 0
+2026-11-24 04:14:51 PC lane 64: 64 decentralised_comm 200013
+2026-11-24 04:34:18 PC lane 64: 64 decentralised_comm 200007 exit 0
+2026-11-24 04:34:18 PC lane 64: 64 decentralised_comm 200014
+2026-11-24 04:35:33 PC lane 64: 64 decentralised_comm 200008 exit 0
+2026-11-24 04:35:33 PC lane 64: 64 decentralised_comm 200015
+2026-11-24 04:37:57 PC lane 64: 64 decentralised_comm 200010 exit 0
+2026-11-24 04:37:57 PC lane 64: 64 decentralised_comm 200016
+2026-11-24 04:38:44 PC lane 64: 64 decentralised_comm 200009 exit 0
+2026-11-24 04:38:44 PC lane 64: 64 decentralised_comm 200017
+2026-11-24 04:40:12 PC lane 64: 64 decentralised_comm 200012 exit 0
+2026-11-24 04:40:12 PC lane 64: 64 decentralised_comm 200018
+2026-11-24 04:53:12 PC lane 64: 64 decentralised_comm 200011 exit 0
+2026-11-24 04:53:12 PC lane 64: 64 decentralised_comm 200019
+2026-11-24 04:59:17 PC lane 64: 64 decentralised_comm 200013 exit 0
+2026-11-24 04:59:17 PC lane 32: 32 section 200000
+2026-11-24 05:17:48 PC lane 64: 64 decentralised_comm 200014 exit 0
+2026-11-24 05:17:48 PC lane 32: 32 section 200001
+2026-11-24 05:22:18 PC lane 64: 64 decentralised_comm 200018 exit 0
+2026-11-24 05:22:18 PC lane 32: 32 section 200002
+2026-11-24 05:22:29 PC lane 64: 64 decentralised_comm 200015 exit 0
+2026-11-24 05:22:30 PC lane 32: 32 section 200003
+2026-11-24 05:23:38 PC lane 64: 64 decentralised_comm 200016 exit 0
+2026-11-24 05:23:38 PC lane 32: 32 section 200004
+2026-11-24 05:24:23 PC lane 64: 64 decentralised_comm 200017 exit 0
+2026-11-24 05:24:24 PC lane 32: 32 section 200005
+2026-11-24 05:31:11 PC lane 32: 32 section 200000 exit 0
+2026-11-24 05:31:12 PC lane 32: 32 section 200006
+2026-11-24 05:40:01 PC lane 64: 64 decentralised_comm 200019 exit 0
+2026-11-24 05:40:01 PC lane 32: 32 section 200007
+2026-11-24 05:54:30 PC lane 32: 32 section 200001 exit 0
+2026-11-24 05:54:30 PC lane 32: 32 section 200008
+2026-11-24 05:57:38 PC lane 32: 32 section 200003 exit 0
+2026-11-24 05:57:38 PC lane 32: 32 section 200009
+2026-11-24 05:58:02 PC lane 32: 32 section 200002 exit 0
+2026-11-24 05:58:03 PC lane 32: 32 section 200010
+2026-11-24 05:58:14 PC lane 32: 32 section 200005 exit 0
+2026-11-24 05:58:14 PC lane 32: 32 section 200011
+2026-11-24 06:01:00 PC lane 32: 32 section 200006 exit 0
+2026-11-24 06:01:01 PC lane 32: 32 section 200012
+2026-11-24 06:01:34 PC lane 32: 32 section 200004 exit 0
+2026-11-24 06:01:34 PC lane 32: 32 section 200013
+2026-11-24 06:16:20 PC lane 32: 32 section 200007 exit 0
+2026-11-24 06:16:20 PC lane 32: 32 section 200014
+2026-11-24 06:32:45 PC lane 32: 32 section 200008 exit 0
+2026-11-24 06:32:45 PC lane 32: 32 section 200015
+2026-11-24 06:33:16 PC lane 32: 32 section 200009 exit 0
+2026-11-24 06:33:16 PC lane 32: 32 section 200016
+2026-11-24 06:33:36 PC lane 32: 32 section 200010 exit 0
+2026-11-24 06:33:36 PC lane 32: 32 section 200017
+2026-11-24 06:35:45 PC lane 32: 32 section 200013 exit 0
+2026-11-24 06:35:46 PC lane 32: 32 section 200018
+2026-11-24 06:35:48 PC lane 32: 32 section 200011 exit 0
+2026-11-24 06:35:49 PC lane 32: 32 section 200019
+2026-11-24 06:36:05 PC lane 32: 32 section 200012 exit 0
+2026-11-24 06:36:05 PC lane 32: 32 centralised 200000
+2026-11-24 06:50:45 PC lane 32: 32 section 200014 exit 0
+2026-11-24 06:50:45 PC lane 32: 32 centralised 200001
+2026-11-24 07:06:36 PC lane 32: 32 section 200017 exit 0
+2026-11-24 07:06:36 PC lane 32: 32 centralised 200002
+2026-11-24 07:09:21 PC lane 32: 32 section 200015 exit 0
+2026-11-24 07:09:22 PC lane 32: 32 centralised 200003
+2026-11-24 07:09:24 PC lane 32: 32 section 200016 exit 0
+2026-11-24 07:09:25 PC lane 32: 32 centralised 200004
+2026-11-24 07:10:35 PC lane 32: 32 section 200018 exit 0
+2026-11-24 07:10:35 PC lane 32: 32 centralised 200005
+2026-11-24 07:12:38 PC lane 32: 32 section 200019 exit 0
+2026-11-24 07:12:38 PC lane 32: 32 centralised 200006
+2026-11-24 07:42:21 PC lane 32: 32 centralised 200000 exit 0
+2026-11-24 07:42:21 PC lane 32: 32 centralised 200007
+2026-11-24 07:58:07 PC lane 32: 32 centralised 200001 exit 0
+2026-11-24 07:58:07 PC lane 32: 32 centralised 200008
+2026-11-24 08:14:23 PC lane 32: 32 centralised 200002 exit 0
+2026-11-24 08:14:23 PC lane 32: 32 centralised 200009
+2026-11-24 08:15:58 PC lane 32: 32 centralised 200003 exit 0
+2026-11-24 08:15:58 PC lane 32: 32 centralised 200010
+2026-11-24 08:16:43 PC lane 32: 32 centralised 200005 exit 0
+2026-11-24 08:16:43 PC lane 32: 32 centralised 200011
+2026-11-24 08:16:59 PC lane 32: 32 centralised 200004 exit 0
+2026-11-24 08:16:59 PC lane 32: 32 centralised 200012
+2026-11-24 08:19:58 PC lane 32: 32 centralised 200006 exit 0
+2026-11-24 08:19:58 PC lane 32: 32 centralised 200013
+2026-11-24 08:54:41 PC lane 32: 32 centralised 200007 exit 0
+2026-11-24 08:54:41 PC lane 32: 32 centralised 200014
+2026-11-24 09:17:32 PC lane 32: 32 centralised 200008 exit 0
+2026-11-24 09:17:32 PC lane 32: 32 centralised 200015
+2026-11-24 09:32:49 PC lane 32: 32 centralised 200009 exit 0
+2026-11-24 09:32:49 PC lane 32: 32 centralised 200016
+2026-11-24 09:34:58 PC lane 32: 32 centralised 200010 exit 0
+2026-11-24 09:34:58 PC lane 32: 32 centralised 200017
+2026-11-24 09:35:38 PC lane 32: 32 centralised 200012 exit 0
+2026-11-24 09:35:38 PC lane 32: 32 centralised 200018
+2026-11-24 09:36:51 PC lane 32: 32 centralised 200013 exit 0
+2026-11-24 09:36:51 PC lane 32: 32 centralised 200019
+2026-11-24 09:38:31 PC lane 32: 32 centralised 200011 exit 0
+2026-11-24 09:38:31 PC lane 64: 64 section 200000
+2026-11-24 10:10:41 PC lane 32: 32 centralised 200014 exit 0
+2026-11-24 10:10:41 PC lane 64: 64 section 200001
+2026-11-24 10:36:31 PC lane 32: 32 centralised 200015 exit 0
+2026-11-24 10:36:32 PC lane 64: 64 section 200002
+2026-11-24 10:44:33 job.sh now runs from ~/worktrees/main-run (main 811b8f2, fast observation, bit-for-bit same decisions at 8 to 128 agents); the Lenovo copy synced too. Running episodes finish on the old code.
+2026-11-24 10:44:45 (correction: the 10:44 swap left job.sh empty for a minute, no job started, restored; now really on main-run)
+2026-11-24 10:52:10 PC lane 32: 32 centralised 200016 exit 0
+2026-11-24 10:52:10 PC lane 64: 64 section 200003
+2026-11-24 10:54:05 PC lane 32: 32 centralised 200017 exit 0
+2026-11-24 10:54:05 PC lane 64: 64 section 200004
+2026-11-24 10:55:48 PC lane 32: 32 centralised 200018 exit 0
+2026-11-24 10:55:49 PC lane 64: 64 section 200005
+2026-11-24 10:56:51 PC lane 32: 32 centralised 200019 exit 0
+2026-11-24 10:56:51 PC lane 64: 64 section 200006
+2026-11-24 11:27:47 PC lane 64: 64 section 200000 exit 0
+2026-11-24 11:27:47 PC lane 64: 64 section 200007
+2026-11-24 11:57:38 job.sh now runs from ~/worktrees/main-bdfda94 (main bdfda94: #213 to #215, bit-for-bit same decisions at 8 to 128 agents); the Lenovo copy synced too. Running episodes finish on main-run 811b8f2.
+2026-11-24 12:01:59 PC lane 64: 64 section 200005 exit 0
+2026-11-24 12:01:59 PC lane 64: 64 section 200008
+2026-11-24 12:10:51 PC lane 64: 64 section 200004 exit 0
+2026-11-24 12:10:51 PC lane 64: 64 section 200009
+2026-11-24 12:13:51 PC lane 64: 64 section 200003 exit 0
+2026-11-24 12:13:52 PC lane 64: 64 section 200010
+2026-11-24 12:15:27 PC lane 64: 64 section 200006 exit 0
+2026-11-24 12:15:28 PC lane 64: 64 section 200011
+2026-11-24 12:31:54 PC lane 64: 64 section 200001 exit 0
+2026-11-24 12:40:56 colab lane: 28 jobs claimed (8 section 64, 20 centralised 64), on f16-perf (7 lanes), started by hand 12:42 after a hung start call
+2026-11-24 12:41:53 PC lane 64: 64 section 200007 exit 0
+2026-11-24 13:04:17 PC lane 64: 64 section 200002 exit 0
+2026-11-24 13:05:05 PC lane 64: 64 section 200008 exit 0
+2026-11-24 13:13:40 PC lane 64: 64 section 200009 exit 0
+2026-11-24 13:16:06 PC lane 64: 64 section 200010 exit 0
+2026-11-24 13:17:51 PC lane 64: 64 section 200011 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200012 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200013 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200014 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200015 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200016 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200017 exit 0
+2026-11-24 13:57:28 colab lane: 64 section 200018 exit 0
+2026-11-24 14:42:47 colab lane: 64 section 200019 exit 0
+2026-11-24 15:42:54 colab lane: 64 centralised 200000 exit 0
+2026-11-24 15:57:55 colab lane: 64 centralised 200001 exit 0
+2026-11-24 15:57:55 colab lane: 64 centralised 200002 exit 0
+2026-11-24 15:57:55 colab lane: 64 centralised 200003 exit 0
+2026-11-24 15:57:55 colab lane: 64 centralised 200004 exit 0
+2026-11-24 15:57:55 colab lane: 64 centralised 200005 exit 0
+2026-11-24 16:43:57 colab lane: 64 centralised 200006 exit 0
+2026-11-24 17:44:15 colab lane: 64 centralised 200007 exit 0
+2026-11-24 17:59:17 colab lane: 64 centralised 200008 exit 0
+2026-11-24 17:59:17 colab lane: 64 centralised 200009 exit 0
+2026-11-24 17:59:17 colab lane: 64 centralised 200010 exit 0
+2026-11-24 17:59:17 colab lane: 64 centralised 200011 exit 0
+2026-11-24 17:59:17 colab lane: 64 centralised 200012 exit 0
+2026-11-24 19:00:20 colab lane: 64 centralised 200013 exit 0
+2026-11-24 19:45:44 colab lane: 64 centralised 200014 exit 0
+2026-11-24 20:16:06 colab lane: 64 centralised 200015 exit 0
+2026-11-24 20:16:06 colab lane: 64 centralised 200016 exit 0
+2026-11-24 20:16:06 colab lane: 64 centralised 200017 exit 0
+2026-11-24 20:16:06 colab lane: 64 centralised 200018 exit 0
+2026-11-24 20:16:06 colab lane: 64 centralised 200019 exit 0
+2026-11-24 20:16:08 colab lane: released 0 unfinished jobs to the PC and Lenovo lanes

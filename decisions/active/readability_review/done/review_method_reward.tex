@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize #1}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{the (\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, ``What an agent is rewarded for''}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers what is left of \texttt{method\_reward\_comments.md} for
+\lab{sec:method:rl} in \texttt{4.Implementation.tex}. A4 and the per-task
+shaping were done in [A109]. Agreed on 24 November: the B3 arguments, the
+rename $n_{\mathrm{blocked}} \to n_{\mathrm{override}}$, dropping
+$\omega_i(t)$, the numbers moved down to the step costs (D1), and a table of
+the reward terms (E). The rest (A5, B1, B2, B4, C4, D2, D3) is fixed as the
+comments say. No value, no term and no behaviour of the reward changes. The
+code already calls the weight \texttt{override\_penalty}.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item van Knippenberg et al.\ (2021), Table~1: move $-0.1$, wait off goal
+    $-0.2$, collision $-2$, wait on goal $+0.1$, complete episode $+10$. They
+    have no shaping. A collision is possible there.
+  \item \texttt{multi\_agent\_env.py:599}: the crowding charge uses
+    $\delta_i(t)$ ``at the step the action is chosen in'' (A5).
+  \item \lab{eq:congestion}: $\delta_i(t)$ is the share of the field of view
+    where another agent stands, between 0 and 1.
+  \item The worked example: with $\Phi = -$distance left and $\gamma = 0.99$,
+    a step closer gives $\gamma(-(d-1)) + d - 0.1 \approx +0.9$, a wait
+    $-0.2$, a step away $\approx -1.1$, each plus $(1-\gamma)$ times the
+    distance left. Over a task the shaping sums to about the start distance.
+  \item \texttt{rl\_review\_2026-11-10}: override penalty 0.1 and 0 at fleet 32
+    had no effect on the collapse. That goes to Appendix~I (Part~4).
+\end{itemize}
+
+\section*{Part 2. The section as it would read}
+
+The reward pays an agent for progress through its task and charges it for
+time lost. \old{When little of the task is left, a step that brings it closer
+to done is worth about $+0.9$, a wait $-0.2$ and a step away $-1.1$. So moving
+on is best, and on a single step waiting is cheaper than stepping away.}
+\new{A step closer to done pays, a wait costs a little and a step away costs
+most.} An agent also earns a bonus for finishing a task, pays extra when
+conflict resolution overrides its move, and pays a little \old{for every step
+in a crowded neighbourhood} \new{when its neighbourhood is crowded.
+Table~\ref{tab:rewardterms} lists the terms, their values and where each
+comes from}. \note{D1. The numbers move to the step costs, where $\gamma$ and
+$c_{\mathrm{move}}$ are known.}
+
+\new{\textbf{Table, caption:} The terms of the reward.}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{l l l X}
+\toprule
+term & weight & value & source \\
+\midrule
+progress (shaping) & $\gamma$ & 0.99 & \citet{ng1999policy}, $\gamma$ in Appendix~\ref{app:cal:discount} \\
+finishing a task & $n_{\mathrm{deliver}}$ & 10 & \citet{vanKnippenberg2021}, paid per task, not per episode \\
+being overridden & $n_{\mathrm{override}}$ & 0.5 & the thesis's own, Appendix~\ref{app:cal:reward} \\
+a move & $c_{\mathrm{move}}$ & 0.1 & \citet{vanKnippenberg2021}, Table~1 \\
+standing still with a task & $c_{\mathrm{wait}}$ & 0.2 & \citet{vanKnippenberg2021}, Table~1 \\
+crowding & $n_{\mathrm{crowd}}$ & 0.1 & the thesis's own, Appendix~\ref{app:cal:reward} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\note{E. Values from \lab{tab:rlparams} (Appendix~B), unchanged.}
+
+\new{Progress is counted at every step, because the delivery bonus comes many
+steps later and the target is usually outside the field of view. Without it
+an agent would learn of its progress only when a task ends. The reward of
+\citet{vanKnippenberg2021} has no such term.} Progress is measured by the
+distance left in the whole task. \emph{[Rest of the paragraph and
+\lab{eq:taskpotential} unchanged.]} \note{B1.}
+
+and the reward is
+\begin{equation*}
+  \begin{aligned}
+  R_i(t) = {}&\gamma\Phi_i(t+1) - \Phi_i(t)
+           \;+\; n_{\mathrm{deliver}}\,\mathbb{1}[a_i \text{ completes a task at } t]
+           \\
+         &\;-\; n_{\mathrm{\old{blocked}\new{override}}}\,\mathbb{1}[a_i \text{ is overridden at } t]
+           \;-\; c_{\mathrm{move}}\,\mathbb{1}[a_i \text{ moves at } t]
+           \\
+         &\;-\; c_{\mathrm{wait}}\,\old{\omega_i(t)}\new{\mathbb{1}[a_i \text{ serves a task and stands still at } t]}
+           \;-\; n_{\mathrm{crowd}}\,\delta_i(t) .
+  \end{aligned}
+  \tag{\lab{eq:reward}}
+\end{equation*}
+\note{C1 and C3. Same terms and values, two names changed.}
+
+\emph{[The per-task paragraph, ``The reason is that an agent avoids a
+charge\dots'' and the paragraph on potential-based shaping are unchanged.]}
+
+Standing still costs time, and the reward says so. An agent that serves a
+task and stands still pays the wait cost $c_{\mathrm{wait}}$\old{ of
+\nref{eq:onestepcost}}, whether it chose to wait or was \old{stopped}
+\new{overridden}. \old{Formally, $\omega_i(t) = \omega_j(t)$ of
+\nref{eq:split} for the task $\tau_j$ with $\sigma(j) = i$, and $\omega_i(t)
+= 0$ when the agent serves no task, so an idle agent pays nothing.} \new{It
+is the same standing still that the blocked indicator $\omega_j(t)$ of the
+service-time split~\eqref{eq:split} counts for the task, and an idle agent
+pays nothing.} Being \old{stopped} \new{overridden} therefore costs
+$c_{\mathrm{wait}} + n_{\mathrm{override}}$ and a chosen wait costs
+$c_{\mathrm{wait}}$ alone, so \old{yielding} \new{a chosen wait} is never
+dearer than being \old{stopped} \new{overridden}. \note{C1, C3, C4. One word,
+``overridden'', everywhere.}
+
+\new{There is no collision penalty, unlike the $-2$ of
+\citet{vanKnippenberg2021}. There a collision happens and ends the episode,
+so the penalty is what keeps agents apart. Here conflict resolution turns
+every clashing move into a wait, so no collision ever happens. Without a
+penalty, though, a refused move would cost exactly what a chosen wait costs,
+and the reward would never show the agent that it asked for a vertex that
+was taken. The override term puts that cost on the agent whose move is
+refused. It is the thesis's own. It only has to make an override dearer
+than a chosen wait, which any positive weight does, and its size is set in
+Appendix~\ref{app:cal:reward}.} A centralised agent never pays it, because
+the claim mask keeps its moves apart. A section-based agent pays it only at
+the border between two zones, and a decentralised agent at any clash.
+\note{B3, as agreed. That the same ordering favours waiting in front of a
+workstation is said in ``When moves still clash''.}
+
+Moving costs a little too. Every move pays $c_{\mathrm{move}}$, with or
+without a task, so an agent with no reason to move stays put. The two step
+costs are those of \citet{vanKnippenberg2021}, a move $0.1$ and a wait
+$0.2$, which they set from common practice and which are taken as they are.
+\old{Their reward has no shaping term.} \old{Here the shaping term pays about
+one for each step that shortens the distance left in the task and charges
+about one for each step that lengthens it, which gives the $+0.9$, $-0.2$
+and $-1.1$ above.} \new{With the discount $\gamma = 0.99$, the shaping term
+pays about one for a step that shortens the distance left in the task and
+charges about one for a step that lengthens it. When little of the task is
+left, a step closer is then worth about $+0.9$, a wait $-0.2$ and a step
+away $-1.1$.} With more of the task left, every action gets the same small
+extra amount, $1-\gamma$ times the distance left. So the order of the three
+stays the same.
+
+\new{Take a task of 12 steps done without a stop. The shaping pays about 12,
+the delivery bonus 10, and the twelve moves cost 1.2, so the task is worth
+about 20.8. Every step the agent stands still on the way costs 0.2 more,
+and 0.7 if it was overridden.} \note{D3, a worked example on the values of
+the table.}
+
+These are the values of one step. Over a whole route the order of waiting
+and a detour turns round. \emph{[Rest of the paragraph unchanged.]}
+
+\old{The last term, the crowding term, charges for crowding.} \new{The
+crowding term charges an agent in proportion to how full its field of view
+is, $\delta_i(t)$~\eqref{eq:congestion}. The network already sees
+$\delta_i(t)$, but seeing a crowd does not make it costly, and the term
+does. It is the thesis's own. It is read at the step the move is chosen in,
+so a move changes only the next step's charge.} Even within a task it can
+change which behaviour is best, and that is accepted because it gives the
+policy a direct signal to avoid crowds. The delivery bonus, the override
+\old{cost} \new{weight} and the crowding weight are set in
+Appendix~\ref{app:cal:reward}. \note{A5, B4, C4.}
+
+\section*{Part 3. Notation}
+\begin{itemize}[nosep]
+  \item Both notation tables: $n_{\mathrm{deliver}},
+    \old{n_{\mathrm{blocked}}}\new{n_{\mathrm{override}}}, n_{\mathrm{crowd}}$.
+  \item \texttt{A.Notation.tex}: the blocked indicator row drops
+    ``$\omega_i(t)$'' and keeps $\omega_j(t)$.
+  \item \texttt{B.Parameters.tex} (\lab{tab:rlparams}) and
+    \texttt{I.Reward.tex}: $n_{\mathrm{blocked}} \to n_{\mathrm{override}}$.
+\end{itemize}
+
+\section*{Part 4. Appendix I}
+After ``The override penalty only has to make an override cost more than a
+chosen wait, which any $n_{\mathrm{override}} > 0$ does, so its size is
+open.'':
+
+\new{Two training runs at 32 agents set it to 0.1 and to 0, and neither
+changed the collapse those runs were testing. So the penalty did not cause
+the collapse. Whether it helps was not tested.} \note{rl\_review\_2026-11-10,
+README rows \texttt{f32\_override\_0.1} and \texttt{f32\_override\_0.0}.}
+
+\section*{Questions}
+None. The choices were made in chat on 24 November.
+
+\end{document}

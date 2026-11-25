@@ -1,0 +1,314 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize\detokenize{#1}}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, Introduction, Project Description,\\ Background and Related Work}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers sections 3 and 4 of \texttt{Checklist.md}, as corrected on
+24 November. The aim is to stop telling the same thing several times.
+Agreed on 24 November: each part gets one job. The Introduction gives the
+problem, the coupling and what is compared. Aim and scope gives the factors
+and the scope. The research questions give only the questions. Expected
+outcome gives only the predictions. The tragedy of the commons stays,
+because it returns in the Discussion.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+Parts~1 and~2 show the whole text. Parts~3 and~4 show only the paragraphs
+that change.
+
+\section*{What was repeated}
+\begin{itemize}[nosep]
+  \item ``The whole fleet, one zone or one robot'' was told four times
+    (Introduction, Aim and scope, the main question, RQ1). Now once, in the
+    Introduction.
+  \item ``The main load and a higher load where the aisles fill'' was told
+    four times. Now the Introduction gives the reason, RQ2 asks it and
+    Expected outcome predicts it.
+  \item The popular SKU near a workstation was the example of two paragraphs
+    in a row. Now one.
+  \item The percentage gain paragraph after the questions is nearly word for
+    word the one beside \lab{eq:relgain} in the Problem Formulation.
+  \item Orders, pick tasks and put-away tasks were explained in Aim and scope
+    and again, properly, in the Problem Formulation.
+  \item ``Three problems usually solved apart'' opens the Contributions, the
+    Problem Formulation and the research gap.
+\end{itemize}
+
+% ================================================================
+\section*{Part 1. Introduction}
+
+An automated warehouse makes two kinds of decision that depend on each
+other. The storage layer decides where stock-keeping units (SKUs) are kept.
+The transport layer gives pickup and delivery tasks to robots and routes
+them through shared aisles. The first is studied as the Storage Location
+Assignment Problem (SLAP), including dynamic versions where the placement
+changes over time. The second is studied as Multi-Agent Path Finding (MAPF)
+and Multi-Agent Pickup and Delivery (MAPD) \citep{ma2017lifelong_mapf},
+where many robots keep carrying out tasks without colliding.
+
+Storage and routing affect each other. Where the stock sits decides where
+the robots must go. \old{If a popular SKU is put on a shelf near a
+workstation, many trips go to that shelf and its aisle gets busy.} In the
+other direction, the traffic decides how long a shelf really takes to
+reach. \old{A shelf next to a workstation is still slow to reach if its
+aisle is full of robots.}
+\old{So neither layer can be planned well on its own.} Suppose storage puts
+every popular SKU on the shelves closest to the workstations. On paper this
+gives the shortest trips. In practice every robot now goes to the same few
+aisles, they block each other, and orders take longer than before.
+\new{So neither layer can be planned well on its own.}
+\note{3.1. Two paragraphs with the same example become one. Both directions
+stay, and the example is told once. The conclusion moves to the end, where
+the example has earned it.}
+
+This thesis measures how much it helps to move stock as demand changes, and
+whether that gain depends on how the robots are controlled. A storage rule
+decides from time to time where arriving stock goes, based on the orders it
+has seen. Between these updates, a controller gives tasks to the robots and
+routes them. Demand storage is compared with fixed storage under three
+controllers. The centralised controller decides for the whole fleet, the
+section-based one for one zone and the decentralised one for a single
+robot. All three are graph neural networks trained the same way with
+reinforcement learning, so they differ only in how much one decision
+covers. Token Passing, a classic planner that does not learn, is shown next
+to them as a reference.
+\note{Unchanged. This is now the one place that says what each controller
+decides for.}
+
+The coupling is tested in two ways. The first runs one way. Demand storage
+changes where the robots go, and the thesis asks whether the gain it gives
+depends on the controller. If it does, what storage is worth depends on how
+the robots are routed.
+
+The second runs both ways. The storage rule can also read where robots get
+stuck, and steer both new stock and picks away from those shelves. Then the
+robots' movement feeds back into where the stock goes and where it is taken
+from, and the loop between the two layers is closed. Avoiding crowded
+aisles can only help when the aisles are crowded. So the loop is tested at
+the main load and again at a higher load\old{, where the fleet still keeps
+up but the aisles fill}.
+\note{The detail of the higher load is in RQ2.}
+
+\new{The decentralised robots may also send short messages to the robots
+near them. A robot that decides alone sees only what is around it, and a
+message can tell it about crowding further away.}
+\note{New. RQ4 asks about communication, but the Introduction never
+mentioned it. See question~1.}
+
+The main measure is the mean time an order takes, from when it is placed
+until it leaves the warehouse.
+
+% ================================================================
+\section*{Part 2. Project Description}
+
+\subsection*{Aim and scope}
+
+The project aims to find out how feedback between storage and the control
+of the robots affects how well a warehouse works. \old{The warehouse is a
+finite graph. Customers keep sending orders. An order is a short list of
+items. Each item becomes a pick task, where a robot fetches it from its
+shelf and brings it to a workstation. So where the stock sits decides where
+the robots go. New stock also arrives at the warehouse. Each delivery
+becomes a put-away task, where a robot carries it to a shelf chosen by the
+storage rule.}
+\note{3.2. The Problem Formulation defines orders and tasks properly, and
+the Introduction already says that the stock decides where the robots go.}
+
+Four things are varied in the experiments:
+\begin{enumerate}[nosep]
+    \item the storage rule: fixed, demand or congestion-aware
+    \item the controller: centralised, section-based or decentralised\old{,
+      each a learned policy that decides for the whole fleet, one zone or one
+      robot}
+    \item communication: off or local, for the decentralised controller
+      only, because the other two already see more than one robot
+    \item the load: the number of robots and how fast orders arrive, as a
+      share of what the fleet can serve
+\end{enumerate}
+The main result compares demand storage with fixed storage under each
+controller, at a main load where every controller should keep up. The
+other factors test how far that result reaches. \old{Congestion-aware
+storage tests whether closing the loop helps. It is run at the main load
+and at a higher load, where the aisles fill. A sweep of rising loads then
+shows how busy the warehouse can get before the gain of demand storage
+disappears.}
+\note{RQ2 and RQ3 ask exactly this.}
+
+\old{The mean order service time gives the main result. It is split into the
+wait for a robot, travel and blocked time, which shows which part the
+storage rule changes. Blocked time and how crowded the aisles get show
+whether closing the loop helps.} \new{A fleet keeps up when it} \old{Whether
+the fleet keeps up, meaning it} finishes tasks as fast as they arrive\old{,
+shows where the gain stops}. Order times are compared only when both runs
+keep up, because a fleet that falls behind has a queue that grows for as
+long as the run lasts. \old{Where they cannot be compared, the share of the
+arriving work each fleet serves is compared instead. That share also shows
+whether messages help the decentralised controller.}
+\note{3.2. The split of service time and the served share are set out in
+the Experiments chapter. Only ``keeps up'' stays, because RQ1 and RQ2 use
+it.}
+
+\new{The study is a simulation of identical robots. It leaves out people,
+batteries and how a robot drives. Stock already on a shelf never moves, so
+the cost of moving it does not arise. The Problem Formulation lists the
+full scope.}
+\note{New. The Checklist asks Aim and scope to say what is outside the
+study. Taken from \lab{sec:pf:scope}. See question~2.}
+
+\subsection*{Research question}
+
+The main research question is: \newline
+\textbf{RQ:} How much does demand storage shorten the service time of
+orders, how does that gain differ between \new{the three controllers}
+\old{controllers that decide for the whole fleet, one zone or one robot},
+and does closing the loop add to it?
+
+It is split into four questions:
+\begin{description}[nosep]
+  \item[RQ1:] Does demand storage shorten order service time compared with
+  fixed storage, at a load where the fleet keeps up, and how does that gain
+  differ between \new{the three controllers}\old{controllers that decide for
+  the whole fleet, one zone or one robot}?
+  \item[RQ2:] Does closing the loop, so that storage also avoids shelves
+  where robots get blocked, make orders faster than demand storage does,
+  at the main load and at a higher load where the aisles are crowded?
+  Where a fleet falls behind, does it let the fleet serve more?
+  \item[RQ3:] As orders arrive faster, does the gain of RQ1 grow, shrink or
+  disappear, and at what rate does each trained controller stop keeping up?
+  \item[RQ4:] Does local communication make the decentralised controller
+  route better than what a robot sees on its own?
+\end{description}
+
+\old{The gain of RQ1 is given as a percentage of the time orders take under
+fixed storage. A controller that is slow under fixed storage has more to
+save, so the gain in steps alone would favour the controller that routes
+worst.}
+\note{3.3. The same reason, with its citation, stands beside
+\lab{eq:relgain} in the Problem Formulation, where the gain is defined.}
+
+\subsection*{Contributions}
+
+\old{The thesis joins three problems that are usually solved apart, storage
+assignment, task assignment and path finding.} \new{The thesis} \old{It}
+makes \new{three}\old{four} contributions.
+\begin{enumerate}[nosep]
+\item One model in which the three problems share the same warehouse graph
+  and the same stock, so each changes what the others face
+  (Chapter~\ref{sec:problem}).
+\item Congestion-aware storage, the thesis's own rule. It adds the time
+  picks stand still at a shelf to the classic slotting score, so where new
+  stock goes reacts to the traffic of the agents
+  (Section~\ref{sec:method:storage}).
+\item A simulator built on that model. Between two runs only the storage
+  rule or only the controller changes. A difference between fixed and demand
+  storage can then be traced to storage itself and not to a different setup.
+\item \old{Results that answer each research question, for the warehouses,
+  demand and controllers used in the experiments
+  (Chapter~\ref{sec:experiments}).}
+\end{enumerate}
+\note{3.4. The lead-in is told again in the Problem Formulation opening and
+the research gap, and item~1 says it more precisely. Item~4 is what every
+thesis delivers, not a contribution. See question~3.}
+
+\subsection*{Expected outcome}
+\note{Unchanged. It holds only the predictions, as agreed.}
+
+% ================================================================
+\section*{Part 3. Background, the paragraphs that change}
+
+\subsection*{Multi-Agent Path Finding}
+
+\ldots This is fast, but it promises neither the cheapest paths nor a path
+for every agent.
+
+Conflict-Based Search (CBS) sits between the two. It \new{plans each agent
+alone and plans again only for the agents whose paths
+clash~\citep{sharon2015cbs}.} \old{first plans each agent as if the others
+were absent. Where two plans clash, it tries two fixes, each forbidding one
+of the two agents from that place at that step, and plans again only for
+that agent. It searches these fixes until it finds the cheapest set of
+paths with no clash~\citep{sharon2015cbs}.}
+\note{4.2. No later chapter uses CBS. One sentence keeps the picture of the
+solver families.}
+
+\subsection*{Reinforcement learning}
+
+\ldots the actor learns from how much better or worse an action turned out
+than the critic expected. \old{Not every method has a critic.} Deep
+Q-learning\old{, for example,} \new{has no critic. It} learns the value of
+each action directly and acts on the best one.
+\note{4.3. Kept, because Related Work uses Deep Q-learning twice (van
+Knippenberg, Ma 2021). Only the framing goes. It has no citation today, see
+question~4.}
+
+\old{In methods with a critic, what the critic may see is a design choice.
+In centralised training with decentralised execution, the critic sees the
+whole state during training, while each agent still acts only on what it
+sees~\citep{lowe2017maddpg}.} \new{Agents may also} \old{A different line of
+work lets agents} choose their actions one after another, each seeing the
+choices before it. Any joint choice can be built this way, while the
+network only runs once per agent~\citep{wen2022mat,fu2022revisiting}.
+\note{4.3. The Method explains centralised training with its citation where
+it is rejected ([A128]). Choosing one after another stays, because SePar
+and the Method use it.}
+
+\subsection*{Graph neural networks}
+
+\ldots The second kind is how agents send each other messages.
+
+\old{GNNs have been combined with reinforcement learning for routing on
+graphs. \citet{tien2022vrp_drl_gnn} use a GNN with deep reinforcement
+learning to solve vehicle routing problems. \citet{lischka2024great} build
+a GNN around the edges for problems such as the travelling salesman
+problem, and argue that edge features carry information that a network
+over vertices alone loses.}
+\note{4.4. Nothing later cites these, and the Tien link is broken. See
+question~5 on Lischka.}
+
+\subsection*{Congestion}
+\note{Unchanged. The tragedy of the commons stays for the Discussion.}
+
+% ================================================================
+\section*{Part 4. Related Work, the paragraph that changes}
+
+\ldots \citet{li2021magat} extend this network with attention, so each robot
+weighs the messages it receives. \old{Its success rate is up to 47\% above
+the benchmark they compare with, also on}\new{It also does well on} problems
+100 times larger than those it was trained on. \ldots
+\note{4.6. A benchmark unlike this thesis's, and nothing uses the number.
+The 6.3\% of Waubert de Puiseau et al.\ (the size of a storage gain), the
+1024 agents of PRIMAL (scale) and the switch-off test of Pham et al.\ (it
+bears on RQ4 and the crowd reward) stay.}
+
+% ================================================================
+\section*{Questions}
+\begin{enumerate}[nosep]
+  \item The new Introduction paragraph on messages. Keep it, or is RQ4 meant
+    to stay minor and the Introduction silent about it?
+  \item The scope paragraph in Aim and scope. Keep it as written, cut it to
+    one sentence that points to the Problem Formulation, or leave it out?
+  \item Contribution~4. Drop it now, or keep it until the results are in and
+    then name what the results show?
+  \item Deep Q-learning has no citation. Add Mnih et al.\ (2015) to
+    \texttt{references.bib}, or leave it uncited as it is today?
+  \item Lischka et al. Drop it, or cite it in the Method beside the move
+    scores, since it argues that features on the edges help?
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,114 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize #1}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{the (\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, ``When moves still clash''}
+\date{24 November 2026, version 1}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers what is left of \texttt{method\_resolution\_comments.md} for
+\lab{sec:method:resolution} in \texttt{4.Implementation.tex}. A3 (the lock
+told as agents choosing to wait), C1, C2 and the dock draw of C3 were done in
+[A107] and [A109]. This change does D1, D2 (keep the list, cut the prose, as
+agreed on 24 November), D3, C3 and C4, and adds parking to the legend of
+Figure~15. The rule itself, the code and the lock story do not change.
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \texttt{resolution/conflict\_resolution.py}: an agent whose chain of
+    waiting ``runs into a cycle'' is never ready and waits (D3).
+  \item The Problem Formulation (Who decides) already says the priority
+    order is drawn once per episode.
+  \item \texttt{styles/eqnames.tex}: \lab{eq:waiting} is named ``mean
+    blocked time'', so ``the blocked time of \texttt{\textbackslash
+    nref\{eq:waiting\}}'' prints ``the blocked time of the mean blocked time
+    (31)'' (C4).
+  \item Figure~15 already follows the viewer: orange to a pick, red to a
+    workstation. The green diamonds of (a) are parking spots and are missing
+    from the legend.
+\end{itemize}
+
+\section*{Part 2. The section as it would read}
+
+\old{The masks make each move possible on its own, but two agents that
+choose separately can still pick the same vertex or try to swap.}
+\new{The action mask makes each move possible on its own. Inside one
+decision of the centralised and section-based controllers the claim mask
+also keeps the agents apart. Agents that choose separately can still pick the
+same vertex or try to swap. These are decentralised agents, which choose at
+the same time, and agents of two zones at a border.} A penalty in the reward
+would not be enough on its own, because a learned policy draws its actions
+at random and can still draw a forbidden move. A fixed rule removes these
+clashes. \old{It goes through the agents one at a time, accepts a move that
+does not clash with the moves already accepted, and turns any other move into
+a wait.} An agent that wants the vertex of another agent is handled after
+that agent, so it can follow an agent that leaves, as in
+\citet{vanKnippenberg2021}. \old{Among the agents that are ready, the
+priority order decides, and it is drawn once from the episode seed and kept
+for the whole episode.} Formally, given the proposed joint action
+$(u_1(t),\dots,u_m(t))$, agent $a_i$ \emph{waits on} $a_j$ when $u_i(t)$
+moves onto $\ell_j(t)$, and
+\begin{enumerate}[nosep]
+  \item an agent is ready when it waits on no agent, or on an agent already
+    handled. Of the ready agents, the first in the priority order is
+    handled next.
+  \item the vertex it asks for is accepted if it breaks neither the vertex
+    rule nor the swap rule against the moves already accepted.
+  \item otherwise its action becomes $\mathrm{wait}$ (always legal by
+    \nref{eq:actions}) and its override flag for $t$ is set.
+  \item agents never ready wait, with their override flag set.
+\end{enumerate}
+\note{D1 and D2. The list is the rule. The prose kept only what the list does
+not say, why a fixed rule is needed and why the agent in front goes first.
+The priority order is drawn once per episode in the Problem Formulation.}
+
+An agent is never ready when the agents it waits on form a circle, each
+wanting the next one's vertex\new{, or when its chain of waiting runs into
+such a circle}. A swap is the shortest such circle. These agents wait, since
+none of them can move first. \note{D3.}
+
+\emph{[The lock, ``No rule is added to break the lock'', Figure~15 and its
+story are unchanged.]}
+
+\textbf{Figure 15 legend.} shelf, workstation, dock, \new{parking,} agent to
+a pick, agent to a workstation. \note{Script
+\texttt{scripts/images/workstation\_lock.py}, one entry added with the
+viewer's green diamond.}
+
+The rule always ends with no collision. \emph{[Unchanged.]}
+
+The rule is a fixed function of the state, which includes the priority order
+(Section~\ref{sec:pf:game}), with no added randomness. So \old{$P$}
+\new{the warehouse} is random only through the arrival of orders and the dock
+drawn at random for each shipment and put-away. \old{It also makes paired
+seeds a fair comparison, because the same seed and the same moves give the
+same decisions.} \new{So two runs with the same seed and the same moves make
+the same decisions, which is what a comparison on the same seeds needs.}
+\note{C3. $P$ was last met chapters ago, and ``paired seeds'' is defined only
+in the Experiments.}
+
+The override flag is logged (Section~\ref{sec:impl:logging}) and used in
+two places. It sets the override term of \nref{eq:reward}, and together
+with a chosen wait it \old{sets the blocked time of \nref{eq:waiting}}
+\new{counts towards the mean blocked time~\eqref{eq:waiting}}. \note{C4.}
+
+\section*{Questions}
+None. The choices were made in chat on 24 November.
+
+\end{document}

@@ -2253,6 +2253,8 @@ wrong under [A32] are marked.
 - **Rejected.** Making the closed loop the main result, given the 2 % finding.
 - **Gap.** The higher load is TBD. Choose it from the load test (old RQ4, new RQ3) as the highest
   load where every trained controller still keeps up, not from the Token Passing sweep.
+  **Settled by [A131] (2026-11-24):** this rule has no answer, since the learned controllers fall
+  behind at the main load. The higher load is 0.9 of Token Passing's capacity.
 - **Cost.** Evaluation only. The main setup runs one frozen policy, trained under fixed storage,
   under every storage rule, so no new training.
 - **Revises.** `[A44]` (adds the one-way reading and the higher load). Settles the open point of `[A83]`.
@@ -2801,7 +2803,7 @@ Later the same day the expected outcome also got the predictions per research qu
 
 **Where.** `5.Experiments.tex`, Threats to validity. Tagged `% [A112]`.
 
-**What.** A ship task is created when the order's last unit reaches the workstation (`_ship`, `multi_agent_env.py`). A fleet that falls behind owes shipments that are not counted yet, so its served share reads high, the same fault [A96] fixed for lines waiting for stock. Estimated from the rows at about 0.01 for the best learned runs and 0.05 for the weakest, one seed's verdict changes. Token Passing finishes nearly every order. Measured exactly after all evaluations by a replay of the order stream alone (queued in `SESSION_CONTEXT.md`). Counting one shipment per arrived order is not applied to the finished runs, so all runs keep one count. It is the fix for later work.
+**What.** A ship task is created when the order's last unit reaches the workstation (`_ship`, `multi_agent_env.py`). A fleet that falls behind owes shipments that are not counted yet, so its served share reads high, the same fault [A96] fixed for lines waiting for stock. Estimated from the rows at about 0.01 for the best learned runs and 0.05 for the weakest. Measured on 2026-11-23 by a replay of the order stream alone (`~/thesis_runs/shipment_range_2026-11-23/replay.py`, merged code, one row per test seed in `runs11/rows.jsonl`, `comm_cng_ckpt2_rows.jsonl`, `token_passing_rows.jsonl`). The estimate was low. The learned runs at 16 agents lose 0.04 to 0.08 of their pick share, and a run keeps up on at most two fewer of its 20 test seeds (section fixed and congestion-aware 6 to 4, comm congestion at checkpoint_000002 6 to 6). The ranking per storage rule stays, except that centralised and section become equal under fixed storage (0.709 each). Token Passing loses under 0.01 and keeps up on 20 of 20 at both ends in every regime. Centralised demand follows once it is evaluated. Counting one shipment per arrived order is not applied to the finished runs, so all runs keep one count. It is the fix for later work.
 
 **Model change.** None.
 
@@ -2903,3 +2905,137 @@ Later the same day the expected outcome also got the predictions per research qu
 **Why.** Review of 2026-11-20 (`method_storage_comments.md` A1): text and code differed, and from 2026-11-18 the code decides because every run used it.
 
 **Model change.** None, text only. Follow-up: draw the tea example on `fig:storageexample`.
+
+### [A123] Method opening, storage and assignment reworded, lost pallets reported (author approved 2026-11-24, review_method_storage.pdf v4)
+
+**Where.** `4.Implementation.tex` (opening of `sec:method`, `fig:methodloop` caption, `sec:method:storage`, `sec:method:assignment`, the halo sentences of `sec:method:controllers`), `3.ProblemFormulation.tex` (`sec:pf:storage`: the arrival-only reason, fixed-storage overflow, "greedy" removed, the lost pallet, `tab:rules`), both notation tables (epoch to update), `5.Experiments.tex` (Results "Keeping up", Discussion "What could have been done differently", mock-up "storage periods"), `E.Load.tex` (`app:load:validity`), `L.Results.tex` (new `app:results:lost`, `tab:app:lost:16`). Figure `scripts/images/methodloop.tex` redrawn in greys. Tagged `% [A123]`.
+
+**What.** Two comment sets in one go (the pasted ten points and `method_assignment_comments.pdf`). The six-step list becomes prose and the figure stays; Token Passing chooses its own tasks is said in the loop. What the Problem Formulation already says is not repeated in the Method (only the controller differs, the three rules, stock stays, few picks per period, the pickup rule, arrivals the same, the K reason). "Order" of a rule becomes "ranking". beta is explained after `eq:storageobjective`, and D + beta K moves from the display into the sentence. "Greedy" is said once, in the Method. Five readings are a practical smoothing choice, not tuned. Ties in one place. The arrival-only reason and the pilot numbers move to the Problem Formulation. Assignment is held fixed on purpose and out of scope, "nearest" is to where the task picks up, an example on Table I, and the put-away priority goes to the Discussion. With p = 1 the section-based controller is the centralised one (undoes the cut of [A120] D2, at the reviewer's request). A pallet that fits on no shelf is lost, its units are not ordered again (code: `_put_away`, `refill_amounts`). A SKU's category is always known by its first pallet, since a pallet needs Q ordered units.
+
+**Lost pallets.** Token Passing loses none at the main load (460 storage-sweep runs at 16 agents). The long 16-agent learned runs lose up to 15 percent of arriving units (decentralised, fixed). Rows and script in `thesis-progress/results/L_results/lost_units/`. Appendix E's rule (zero failed placements at the main load) was checked with Token Passing only, and now says learned losses are reported, not used to drop a setting.
+
+**Model change.** None, text only. Open: centralised demand in `tab:app:lost:16` and the Results sentence once it is evaluated.
+
+### [A124] "How an agent chooses its move" reworded, three figures redrawn (author approved 2026-11-24, review_method_model.pdf v3)
+
+**Where.** `4.Implementation.tex` (`sec:method:model`, `fig:architecture`, new `fig:distancedifference`, `fig:edgescore`), `5.Experiments.tex` (two threats to validity), `6.Conclusion.tex` (future work, memory), `D.Warehouses.tex` (trip lengths at 16 agents), both notation tables (row of the vertex message removed, SCORE row reworded). Figures `scripts/images/architecture.tex`, `edgescore.tex`, new `distance_difference.py`. Tagged `% [A124]`.
+
+**What.** Part B of `method_model_comments.md`. Message passing over graph convolution gets its reason in one clause (a vertex weighs a neighbour by what is on it, Appendix C). Messages have no layer of their own, the thesis's own choice: CRAMP needs a separate network because its agent state comes from an image network, here the agent vector already comes from message passing, so a message is one more round along the communication graph, the mean collects and the move score learns ("adds no power" removed). Vertices hear neighbours, agents send messages. AGG is written as mean, the vertex message symbol is replaced by xi_j of the agent on w (zero when empty). The relative label display moves to "Distance as a difference", with a new figure of the two numbers. The 50 is the thesis's own round number (van Knippenberg et al. give the raw distance, checked in the paper); at 16 agents the longest trip is about 48 steps (instance report 2026-11-20), the label is one leg so stays below 1. No memory: training cost and the network is not the focus; that it may favour controllers that see more goes to threats, memory (LSTM) to future work. Slot order explained. Figure 13 keeps both halves in greys with the words of the text; Figure 14 in words, agents in viewer colours; Appendix C keeps its compact figure whole.
+
+**Model change.** None, text only. The review PDF quoted 41 and 75 steps from the older step-12 instance report; the thesis uses 48 and 86 from the 2026-11-20 report that Appendix D already follows.
+
+### [A125] "Choosing together" trimmed to what the Problem Formulation does not say (author approved 2026-11-24, review_method_controllers.pdf)
+
+**Where.** `4.Implementation.tex` (`sec:method:controllers`), `5.Experiments.tex` (Discussion, "What was expected"). Tagged `% [A125]`.
+
+**What.** The rest of `method_controllers_comments.md` (B2, B3, B4, C1, E1 were done in [A119] and [A120]). D4: one run per agent is said in the PF, the Method keeps only that runtime grows with the fleet. D1: the three claim-mask cases are the PF rule, so the mask is only named and introduced. D2: the section-based paragraph splits into the zone with its halo and "At the border"; the p = 1 sentence, re-added in [A123], goes again since the PF says it. D3: the closing paragraph is dropped, the PF's "What the controllers share" says it. B1: the Discussion gives a possible reason the centralised controller did not gain the most (detail near the agent, the rest as an average, so it differs mainly by the claim mask and the shared credit). The controller table keeps "the whole warehouse", since it states what the controller may see.
+
+**Model change.** None, text only.
+
+### [A126] "When moves still clash" trimmed, the rule told once (author approved 2026-11-24, review_method_resolution.pdf)
+
+**Where.** `4.Implementation.tex` (`sec:method:resolution`), `scripts/images/workstation_lock.py` (legend). Tagged `% [A126]`.
+
+**What.** The rest of `method_resolution_comments.md` (A3, C1, C2 and the dock draw of C3 were done in [A107] and [A109]). D1: the opening names who can still clash (decentralised agents, agents of two zones at a border) instead of "the masks make each move possible". D2: the list is the rule; the prose keeps only why a fixed rule is needed and that the agent in front is handled first (van Knippenberg et al.); the priority order drawn once per episode is in the PF. D3: an agent whose chain of waiting runs into a circle is never ready (code: `conflict_resolution.py`). C3: "the warehouse is random" instead of P, and the paired-seeds sentence in plain words. C4: "counts towards the mean blocked time" (the doubled equation name). Figure 15 gets parking in its legend; nothing else in the figure changed.
+
+**Model change.** None, text only.
+
+### [A127] "What an agent is rewarded for": reasons and sources per term, n_override, a table of terms (author approved 2026-11-24, review_method_reward.pdf)
+
+**Where.** `4.Implementation.tex` (`sec:method:rl`, new `tab:rewardterms`, one word in `sec:method:resolution`), both notation tables, `B.Parameters.tex`, `I.Reward.tex`. Tagged `% [A127]`.
+
+**What.** The rest of `method_reward_comments.md` (A4 and per-task shaping were [A109]). Opening in words, the numbers +0.9, -0.2, -1.1 moved to the step-cost paragraph with gamma = 0.99 (D1). A table of the six terms with value and source (E). Why shaping: the bonus is far and the target usually out of view; van Knippenberg et al. have none (B1). Delivery bonus: their "complete episode" +10, paid per task here (B2). No collision penalty: collisions cannot happen here; the override term (the thesis's own) stops a refused move from costing the same as a chosen wait (B3). n_blocked renamed n_override (code: override_penalty), omega_i(t) replaced by an indicator in words (C1, C3). Crowding: charged by how full the field of view is, read when the move is chosen, the thesis's own, seeing a crowd does not make it costly (A5, B4). A worked example of a 12-step task (D3). Appendix I: override 0.1 and 0 at fleet 32 did not change the collapse (rl_review_2026-11-10).
+
+**Model change.** None. Names only (n_override), values and terms unchanged.
+
+### [A128] "How the controllers learn": two training stages told as done, the credit group, one critic reason (author approved 2026-11-24, review_method_training.pdf v3)
+
+**Where.** `4.Implementation.tex` (`sec:method:training`, one sentence in `sec:method:resolution`), `J.Training.tex` (training budget), `5.Experiments.tex` ("What could have been done differently"), both notation tables (row `eq:credit`), `references.bib` (`{{Ray Team}}`). Tagged `% [A128]`.
+
+**What.** The rest of `method_training_comments.md`. One shared policy cited to the Background, not RLlib (B2). Seeds split three ways, training, validation, test (C3). Runtime told once (D3). The critic explanation cut (D2). The critic keeps one reason, the window limit holds in learning too; the crowding reason was wrong there (the credit hides the cost, not the critic) and is cut, since the Problem Formulation already says it (A3, D1). The rejected critic named, centralised training with decentralised execution (Lowe et al.) (B3). The credit: "credit group" (the code's word, symbol A_i(t) kept, C2); the joint reward is borrowed from PRIMAL (agents within one field of view, their "no noticeable difference" not quoted); here the group is the agents that chose together; the group is fixed at the start of t (`_start_timestep`); a mean so the credit keeps one agent's reward scale and all controllers share the PPO values (B1). "Training ... is also harder" dropped, no result shows it (B4). "When moves still clash" and the Experiments say "credit", not "reward" (D1).
+
+Training told as it was done, at 16 agents: a first run of 500,000 steps on 2000-step episodes, then a second run from its tested checkpoint of 2,000,000 steps on 16,000-step episodes, the same for every controller and rule. The Method gives reasons from the design only (saves time; episodes longer than the 10,000-step evaluation run). Appendix J gives the outcomes: first-stage policies fell behind; the pilot (decentralised with messages, fixed) broke down within 10k to 20k steps over 100k-step runs and kept learning in the second stage (0.079 to 0.184 tasks per step in training, iterations 1 to 18; test 0.091 to 0.156, served 0.37 to 0.56; checkpoint chosen on 2 validation seeds; budget and episode length changed together). New Discussion item: training from random weights on long episodes, since a weak first run could hold its long run back. The list count "Four more" corrected to "Six more".
+
+**Left out on purpose (author, 2026-11-24).** Five second-stage runs (section fixed, demand, congestion-aware; centralised fixed, demand) restarted on Colab after 144,000 steps from their own checkpoint because of the `resume --gpu` bug, with fresh optimiser state (lr and entropy constant), budget 1,856,000, so 2,000,000 in all. The weights carried over, so "every run is trained the same way" holds. Some second-stage runs are evaluated on 2026-11-25; the text is written as done.
+
+**Model change.** None, text only.
+
+### [A129] Introduction, Project Description, Background and Related Work: each part tells the design once (author approved 2026-11-24, review_intro_background.pdf v1)
+
+**Where.** `2.Introduction.tex` (Introduction, Aim and scope, Research question, Contributions), `3.Background.tex` (MAPF, RL, GNN sections, Related Work `sec:rw:comm-decentral`). Tagged `% [A129]`.
+
+**What.** From `readability_review/Checklist.md`, sections 3 and 4, as corrected on 2026-11-24. Each part gets one job: the Introduction gives the problem, the coupling and what is compared; Aim and scope the factors and the scope; the RQs only the questions; Expected outcome only predictions. The two Introduction paragraphs with the same popular-SKU example merged. "Whole fleet, one zone or one robot" now told once, in the Introduction. The higher-load detail left to RQ2. New Introduction paragraph on messages, so RQ4 is motivated. Aim and scope loses the order and task explanation (Problem Formulation defines them) and the measures paragraph (Experiments sets them out), and keeps what "keeps up" means. A scope paragraph was proposed and then cut (author): `sec:pf:scope` already says homogeneous agents, no humans, no physical model and stored stock never moves. RQ4 reworded to what is tested (author, option 1): "Do learned messages between nearby robots let the decentralised controller serve more of the arriving work, and does that change with the storage rule?" It was "route better than what a robot sees on its own", but the Experiments compare served share with and without messages under each storage rule. The percentage-gain paragraph after the RQs cut, it is nearly word for word the one beside `eq:relgain`. Contributions lose the lead-in (repeats the Problem Formulation opening and `sec:rw:gap`) and item 4 ("results"). Background: CBS in one sentence (nothing later uses it), Deep Q-learning kept as one defining sentence (Related Work uses it twice), CTDE removed (the Method explains it where it is rejected, [A128]), the Tien and Lischka paragraph cut (not cited later, Tien link broken). Related Work: the 47% of MAGAT cut. Kept on purpose: the tragedy of the commons (returns in the Discussion), the 6.3%, the 1024 agents and Pham's switch-off test.
+
+**Open.** Deep Q-learning stays uncited as before. `sec:pf:scope` still says "If RQ4 is not reached", for the Problem Formulation pass.
+
+**Model change.** None, text only.
+
+### [A131] Future work: embedding feedback between storage and routers (author approved 2026-11-24)
+
+**Where.** `6.Conclusion.tex` (`sec:future`, end of the storage paragraph). Tagged `% [A131]`.
+
+**What.** Three sentences after the learned storage policy: storage could read the agents' own embeddings ($\xi_j(t)$, `eq:message`), averaged per shelf over a storage period, as shelf features beside $\hat\omega_t(v)$, and hand the routers a short vector per shelf (stock on its way, room reserved). Modelled out in `ideas/learned_storage_policy.md`, section "Variant: embedding feedback between storage and routers", from `ideas/slap_mapd_embedding_feedback_handoff.md`. Not planned (author). Deadlines from the same conversation left out.
+
+**Model change.** None, text only.
+
+### [A130] Introduction and Project Description, second pass: storage told as the arrival model, Token Passing's role, one name per idea (author approved 2026-11-24, review_introduction.pdf v1)
+
+**Where.** `2.Introduction.tex` (Introduction, Aim and scope, RQ3, Contributions, Expected outcome), `E.Load.tex` (`app:load:method`, the reason for 0.6). Tagged `% [A130]`.
+
+**What.** From the red comments `readability_review/intro_comments.pdf`. "Move stock as demand changes" was a leftover from before [A38]; it now says "place arriving stock by demand", that stock on a shelf stays there, and one sentence each on fixed and demand storage (code: `storage/arrival.py`). The measure moves into that paragraph and is named service time. "Differ only in how much one decision covers" becomes "differ in how much one decision covers", and what each robot sees and whose reward judges it follow from that ([A128]). Token Passing gets its reason: from the paper that defines MAPD, and it needs no training, so it sets the main load. Congestion-aware storage is named in the Introduction; "blocked" is the one name for its signal. "Learned messages", not "short". Aim and scope: "the coupling" and "how fast orders are served"; the main load and why it sits below capacity (from Appendix E); the served share defined again (lost in [A129]). RQ3 "learned" for "trained". Contributions name the three problems, explain the classic score in words with Heskett, say "robots", and limit the pairing to one fleet size. Expected outcome loses its sentence about the text, says service time and robots, and gains the author's RQ4 expectation (messages help under every storage rule). SLAP cited to Reyes et al.
+
+**Why 0.6 (author, 2026-11-24).** It comes from an early Token Passing run that found where the fleet falls behind (the pilot of [A31], 2026-10-14, 3 agents, 6 seeds). At about 0.6 of that point the fleet kept up with room to spare and its agents seldom waited for a task. Written into Appendix E.
+
+**Open.** A sentence on why warehouses and robot fleets matter, before the first paragraph, was offered and not answered.
+
+**Model change.** None, text only.
+
+### [A131] The higher load of the loop test is 0.9 of Token Passing's capacity (Design change, author approved 2026-11-24, review_introduction.pdf question 3a)
+
+**Where.** `E.Load.tex` (`app:load:method`, new display `lambda_high`), `5.Experiments.tex` (`tab:expfactors`, row "load for the loop"). Tagged `% [A131]`.
+
+**What.** RQ2 runs congestion-aware and demand storage at the main load and at lambda_high = 0.9 lambda_capacity, for every controller. The learned controllers are judged there by served share.
+
+**Why.** The rule of [A84], the highest load where every trained controller still keeps up, has no answer: the learned controllers already fall behind at the main load (Experiments, "Keeping up"). So Token Passing sets this rate too. 0.9 sits close to the limit, where the aisles should be fuller, and Token Passing should still keep up because every tested rate below its capacity passes.
+
+**Rejected.** Dropping the higher load (RQ2 at the main load only), and running it for Token Passing alone.
+
+**Revises.** [A84] (its Gap: the higher load).
+
+**Open.** The runs at 0.9 of capacity are not done. The evaluation needs the higher load as one more condition for demand and congestion-aware storage under every controller and Token Passing. The Results then need RQ2 at this load.
+
+### [A132] Introduction opens on why picking matters; the scope sentence on RQ4 not being reached is cut (author approved 2026-11-24)
+
+**Where.** `2.Introduction.tex` (new first paragraph), `3.ProblemFormulation.tex` (`sec:pf:scope`). Tagged `% [A132]`.
+
+**What.** Two sentences of motivation before the two decisions: order picking is the most labour-intensive and costly warehouse activity, up to 55% of operating cost (de Koster et al. 2007, abstract checked on Semantic Scholar 2026-11-24), and in warehouses where mobile robots fetch the goods, such as Kiva systems (Weidinger et al. 2018), how fast orders are picked depends on where the stock sits and how the robots move. The scope sentence "If RQ4 is not reached, the results say nothing about communication" is cut, since RQ4 is answered.
+
+**Open.** The Merschformann et al. abstract could not be fetched, so it is not cited here.
+
+**Model change.** None, text only.
+
+### [A133] Problem Formulation: the model kept, method and evaluation detail cut or moved (author approved 2026-11-25, review_problem_formulation.pdf v1 and v2)
+
+**Where.** `3.ProblemFormulation.tex` (all sections), `5.Experiments.tex` (new paragraph "The gain test" before "Mapping questions to comparisons", one clause in "Scoring a condition"), `2.Introduction.tex` (demand storage sentence), both notation tables (row of $\mathcal{F}$). Tagged `% [A133]`.
+
+**What.** From `readability_review/Checklist.md` sections 5 and 6, checked against the text, plus a second list from the author. P1: the Background named in full once, later "described in the Background". P2: the DSLAP is named first, the pilot numbers (43 %, 25 %) leave the chapter and stay in Appendix G (`app:cal:arrival`), partly undoing [A123]. P3: the capacity example in words, matrix product dropped. P4 option a (checklist 6.3): a storage rule places arriving stock and ranks the shelves a line takes from; $F$ means both parts and $\mathcal{F}$ holds both ("and nothing else" cut); the congestion-aware listing now writes $v_{(i)}$ as in the pickup rule. P5: busy and free said once; what an idle agent does moved from "Direction to the target" to "A task's life", the target section keeps one sentence. P6 and P12: two sentences swallowed by mid-line `%` tags restored ("The centralised policy is", "It looks at the whole fleet and not at one"). P7: forward pointers cut where the Method already holds the content (two forms of the distance label, the crowding weight paragraph, masked moves, the scoring opening); kept only for $R_i$, $\gamma$ and "the reward is given in", which the chapter leaves open on purpose. P8 and N6: the 2/5 crowding example cut, `fig:crowding` carries it. N5: $\zeta_1 = 14-5 = 9$ cut, `fig:lifecycle` shows it. N4: the storage update example in one sentence. P9: subsection "Putting the pieces together" removed, `eq:observation` closes the crowding subsection. N7: crowding subsection titled "for every controller". P10 (checklist 6.1 and 6.2): the prose inventory, the policy/kernel explanation and the sequential-draw repeat cut; the learned policy is the routing rule of a controller, assignment sits in $P$; "only the observation changes" replaced by the three differences of Who decides. P11: the $\Delta$ paragraph trimmed to the trade-off (learning and the sweep table cut). N1: "storage epochs" to "storage updates". P13: full stop after `eq:split`. N2: "queue split" to "service-time split" in `tab:measures`. P14: the gain test, `eq:rqformal`, `eq:relgain` and the 95 % reporting line moved to the Experiments (labels unchanged); the factor paragraph cut (third copy after Aim and scope and `tab:expfactors`); the Experiments' "paired t-test" clause now points to the gain test. P15: scope keeps the boundary only (how to add deadlines or re-tasking cut). P16: about 200 lines of commented-out old text removed (in git). N3: Introduction, demand storage puts stock "on the free shelves with the shortest trips" (code ranks by the dock, shelf, workstation trip [A122]).
+
+**Kept on purpose.** Pickup rule and controller definitions stay in the Problem Formulation ([A123], [A125]); the task-route figure stays (tea task $\tau_1$ reused); the storage-update figure stays (only place a lost pallet is shown); the count examples of the keep-up check stay.
+
+**Model change.** None, text only.
+
+### [A134] Problem Formulation round 2: design reasons to the Method, reporting to the Experiments and Appendix C (author approved 2026-11-25, review_problem_formulation_v3.pdf)
+
+**Where.** `3.ProblemFormulation.tex`, `4.Implementation.tex` (`sec:method:storage`, `sec:method:model`, `sec:method:training`), `5.Experiments.tex` ("Scoring a condition", new paragraph "Stalls"), `C.ModelDetails.tex` (new `app:measures:keepup`). Tagged `% [A134]`.
+
+**What.** R1: action numbering cut from the learning problem (the Method already has it), the four-exit example moved to "Only moves that exist". R2: why messages are learned (a hand-picked message cannot say where the sender heads) moved to the Method's "Messages"; the Problem Formulation keeps that a message is part of the policy. R3: why the field of view is small moved to the Method's model opening; the limit stays. R4: "sharing one policy suits agents that are all alike" cut (the Method's training section gives it). R5: what $\theta$ stands for per controller moved to "How the controllers learn"; the credit difference stays. R6: why every controller reads the crowding feature, the CRAMP source and the appendix pointer moved to "What the network reads"; the chapter keeps that every controller reads only the agent's own value. R7: smoothing of $\hat\omega$ (few picks per period, a shelf with no pick yet reads 0) moved to the Method beside `eq:standstill`. R8: stalls moved unchanged to the Experiments. R9: "the backlog over the run is shown" moved to "Scoring a condition"; the finite-horizon limit stays. R10: the reasons of the keep-up counting and both count examples (900/600, 800/10) moved to Appendix C, `app:measures:keepup`; the chapter keeps each rule in one sentence.
+
+**Model change.** None, text only.
+
+### [A135] Problem Formulation round 3: seams after the cuts, smaller figures (author approved 2026-11-25, review_problem_formulation_v4.pdf)
+
+**Where.** `3.ProblemFormulation.tex`, `4.Implementation.tex` (`sec:method:storage`, `sec:method:model`). Tagged `% [A135]`.
+
+**What.** S1: the storage update now says what a valid placement is, and $\mathcal{F}$ is defined once, in Orders and tasks (placement and ranking, [A133] P4a). S2: `eq:estimates` moved up beside the words on $\hat\rho$. S3: the field of view's limit joined its paragraph (the one-line paragraph under `fig:observation` removed). S4: "so $a_2$ can take its next task once $\tau_1$ is delivered" replaces a "So" that did not follow. S5: the Method's crowding sentences ([A134] R6) get their own paragraph "Crowding" after the vertex features. S6: the reason for smoothing $\hat\omega$ comes before the choice of five readings. G1 to G9: figure widths only (instance 0.6, observation 0.7, storage update 0.6, pickup rule 0.6, crowding 0.45, loop 0.8, arriving tea 0.7, lifecycle 0.85, conflicts 0.85). The chapter ends one page earlier (PDF pages 20 to 42). G10 (removing a figure) declined.
+
+**Model change.** None, text and figure sizes only.

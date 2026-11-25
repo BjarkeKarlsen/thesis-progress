@@ -90,6 +90,7 @@ def main():
     handles = [Line2D([], [], marker=m, ls="", mfc=f, mec=e, ms=9, label=lab) for lab, m, f, e in (
         ("shelf", "s", "white", PG["slot_rim"]), ("workstation", "s", PG["work_f"], PG["work_e"]),
         ("dock", "^", PG["dock_f"], PG["dock_e"]),
+        ("parking", "D", PG["park_f"], PG["park_e"]),  # [A126]
         ("agent to a pick", "o", PG["to_pickup"], "white"),
         ("agent to a workstation", "o", PG["to_delivery"], "white"))]
     fig.legend(handles=handles, loc="lower center", ncol=len(handles), frameon=False,

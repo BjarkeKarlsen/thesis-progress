@@ -1,0 +1,178 @@
+2026-11-24 15:31:00 start: main bdfda94, fleets 8 16 32 64 128, seeds 200001 200002 200003 200004, arms decentralised decentralised_comm section centralised
+2026-11-24 15:31:00 fleet 8 decentralised seed 200001 (checkpoint_000010)
+2026-11-24 15:31:19 fleet 8 decentralised seed 200001 exit 0: window 0.0036 s (all steps 0.0036), first/last 100 0.0037/0.
+2026-11-24 15:31:19 fleet 8 decentralised_comm seed 200001 (checkpoint_000002)
+2026-11-24 15:31:40 fleet 8 decentralised_comm seed 200001 exit 0: window 0.0045 s (all steps 0.0044), first/last 100 0.0044/0.
+2026-11-24 15:31:40 fleet 8 section seed 200001 (checkpoint_000011)
+2026-11-24 15:32:39 fleet 8 section seed 200001 exit 0: window 0.0169 s (all steps 0.0169), first/last 100 0.0194/0.
+2026-11-24 15:32:39 fleet 8 centralised seed 200001 (checkpoint_000013)
+2026-11-24 15:33:47 fleet 8 centralised seed 200001 exit 0: window 0.0200 s (all steps 0.0195), first/last 100 0.0196/0.
+2026-11-24 15:33:47 fleet 16 decentralised seed 200001 (checkpoint_000010)
+2026-11-24 15:34:13 fleet 16 decentralised seed 200001 exit 0: window 0.0046 s (all steps 0.0046), first/last 100 0.0046/0.
+2026-11-24 15:34:13 fleet 16 decentralised_comm seed 200001 (checkpoint_000002)
+2026-11-24 15:34:41 fleet 16 decentralised_comm seed 200001 exit 0: window 0.0057 s (all steps 0.0056), first/last 100 0.0054/0.
+2026-11-24 15:34:41 fleet 16 section seed 200001 (checkpoint_000011)
+2026-11-24 15:36:37 fleet 16 section seed 200001 exit 0: window 0.0389 s (all steps 0.0343), first/last 100 0.0381/0.
+2026-11-24 15:36:37 fleet 16 centralised seed 200001 (checkpoint_000013)
+2026-11-24 15:38:55 fleet 16 centralised seed 200001 exit 0: window 0.0452 s (all steps 0.0414), first/last 100 0.0490/0.
+2026-11-24 15:38:55 fleet 32 decentralised seed 200001 (checkpoint_000010)
+2026-11-24 15:39:34 fleet 32 decentralised seed 200001 exit 0: window 0.0071 s (all steps 0.0069), first/last 100 0.0065/0.
+2026-11-24 15:39:35 fleet 32 decentralised_comm seed 200001 (checkpoint_000002)
+2026-11-24 15:40:20 fleet 32 decentralised_comm seed 200001 exit 0: window 0.0088 s (all steps 0.0086), first/last 100 0.0085/0.
+2026-11-24 15:40:20 fleet 32 section seed 200001: done in section_seeds, skipped
+2026-11-24 15:40:20 fleet 32 centralised seed 200001 (checkpoint_000013)
+2026-11-24 15:45:28 fleet 32 centralised seed 200001 exit 0: window 0.1080 s (all steps 0.0947), first/last 100 0.1213/0.
+2026-11-24 15:45:28 fleet 64 decentralised seed 200001 (checkpoint_000010)
+2026-11-24 15:46:49 fleet 64 decentralised seed 200001 exit 0: window 0.0119 s (all steps 0.0110), first/last 100 0.0112/0.
+2026-11-24 15:46:49 fleet 64 decentralised_comm seed 200001 (checkpoint_000002)
+2026-11-24 15:48:24 fleet 64 decentralised_comm seed 200001 exit 0: window 0.0163 s (all steps 0.0156), first/last 100 0.0159/0.
+2026-11-24 15:48:24 fleet 64 section seed 200001: done in section_seeds, skipped
+2026-11-24 15:48:24 fleet 64 centralised seed 200001 (checkpoint_000013)
+2026-11-24 15:59:46 fleet 64 centralised seed 200001 exit 0: window 0.2383 s (all steps 0.2089), first/last 100 0.2203/0.
+2026-11-24 15:59:47 fleet 128 decentralised seed 200001 (checkpoint_000010)
+2026-11-24 16:03:05 fleet 128 decentralised seed 200001 exit 0: window 0.0215 s (all steps 0.0203), first/last 100 0.0212/0.
+2026-11-24 16:03:05 fleet 128 decentralised_comm seed 200001 (checkpoint_000002)
+2026-11-24 16:07:04 fleet 128 decentralised_comm seed 200001 exit 0: window 0.0358 s (all steps 0.0341), first/last 100 0.0357/0.
+2026-11-24 16:07:05 fleet 128 section seed 200001 (checkpoint_000011)
+2026-11-24 16:15:39 fleet 128 section seed 200001 exit 0: window 0.1407 s (all steps 0.1207), first/last 100 0.1233/0.
+2026-11-24 16:15:39 fleet 128 centralised seed 200001 (checkpoint_000013)
+2026-11-24 16:40:29 fleet 128 centralised seed 200001 exit 0: window 0.5074 s (all steps 0.4448), first/last 100 0.4597/0.
+2026-11-24 16:40:29 fleet 8 decentralised seed 200002 (checkpoint_000010)
+2026-11-24 16:40:48 fleet 8 decentralised seed 200002 exit 0: window 0.0036 s (all steps 0.0034), first/last 100 0.0035/0.
+2026-11-24 16:40:49 fleet 8 decentralised_comm seed 200002 (checkpoint_000002)
+2026-11-24 16:41:11 fleet 8 decentralised_comm seed 200002 exit 0: window 0.0047 s (all steps 0.0045), first/last 100 0.0049/0.
+2026-11-24 16:41:11 fleet 8 section seed 200002 (checkpoint_000011)
+2026-11-24 16:42:06 fleet 8 section seed 200002 exit 0: window 0.0148 s (all steps 0.0150), first/last 100 0.0186/0.
+2026-11-24 16:42:06 fleet 8 centralised seed 200002 (checkpoint_000013)
+2026-11-24 16:43:13 fleet 8 centralised seed 200002 exit 0: window 0.0195 s (all steps 0.0193), first/last 100 0.0194/0.
+2026-11-24 16:43:13 fleet 16 decentralised seed 200002 (checkpoint_000010)
+2026-11-24 16:43:40 fleet 16 decentralised seed 200002 exit 0: window 0.0047 s (all steps 0.0045), first/last 100 0.0045/0.
+2026-11-24 16:43:40 fleet 16 decentralised_comm seed 200002 (checkpoint_000002)
+2026-11-24 16:44:11 fleet 16 decentralised_comm seed 200002 exit 0: window 0.0061 s (all steps 0.0059), first/last 100 0.0058/0.
+2026-11-24 16:44:11 fleet 16 section seed 200002 (checkpoint_000011)
+2026-11-24 16:45:46 fleet 16 section seed 200002 exit 0: window 0.0295 s (all steps 0.0270), first/last 100 0.0228/0.
+2026-11-24 16:45:46 fleet 16 centralised seed 200002 (checkpoint_000013)
+2026-11-24 16:48:02 fleet 16 centralised seed 200002 exit 0: window 0.0429 s (all steps 0.0405), first/last 100 0.0410/0.
+2026-11-24 16:48:02 fleet 32 decentralised seed 200002 (checkpoint_000010)
+2026-11-24 16:48:43 fleet 32 decentralised seed 200002 exit 0: window 0.0070 s (all steps 0.0066), first/last 100 0.0072/0.
+2026-11-24 16:48:43 fleet 32 decentralised_comm seed 200002 (checkpoint_000002)
+2026-11-24 16:49:30 fleet 32 decentralised_comm seed 200002 exit 0: window 0.0089 s (all steps 0.0086), first/last 100 0.0086/0.
+2026-11-24 16:49:30 fleet 32 section seed 200002: done in section_seeds, skipped
+2026-11-24 16:49:30 fleet 32 centralised seed 200002 (checkpoint_000013)
+2026-11-24 16:54:11 fleet 32 centralised seed 200002 exit 0: window 0.0928 s (all steps 0.0859), first/last 100 0.0887/0.
+2026-11-24 16:54:11 fleet 64 decentralised seed 200002 (checkpoint_000010)
+2026-11-24 16:55:33 fleet 64 decentralised seed 200002 exit 0: window 0.0117 s (all steps 0.0109), first/last 100 0.0109/0.
+2026-11-24 16:55:33 fleet 64 decentralised_comm seed 200002 (checkpoint_000002)
+2026-11-24 16:57:09 fleet 64 decentralised_comm seed 200002 exit 0: window 0.0160 s (all steps 0.0150), first/last 100 0.0159/0.
+2026-11-24 16:57:09 fleet 64 section seed 200002: done in section_seeds, skipped
+2026-11-24 16:57:09 fleet 64 centralised seed 200002 (checkpoint_000013)
+2026-11-24 17:07:43 fleet 64 centralised seed 200002 exit 0: window 0.2180 s (all steps 0.1930), first/last 100 0.2056/0.
+2026-11-24 17:07:43 fleet 128 decentralised seed 200002 (checkpoint_000010)
+2026-11-24 17:11:04 fleet 128 decentralised seed 200002 exit 0: window 0.0211 s (all steps 0.0199), first/last 100 0.0205/0.
+2026-11-24 17:11:04 fleet 128 decentralised_comm seed 200002 (checkpoint_000002)
+2026-11-24 17:15:10 fleet 128 decentralised_comm seed 200002 exit 0: window 0.0360 s (all steps 0.0344), first/last 100 0.0345/0.
+2026-11-24 17:15:10 fleet 128 section seed 200002 (checkpoint_000011)
+2026-11-24 17:24:57 fleet 128 section seed 200002 exit 0: window 0.1745 s (all steps 0.1419), first/last 100 0.1394/0.
+2026-11-24 17:24:57 fleet 128 centralised seed 200002 (checkpoint_000013)
+2026-11-24 17:49:56 fleet 128 centralised seed 200002 exit 0: window 0.5027 s (all steps 0.4459), first/last 100 0.4537/0.
+2026-11-24 17:49:56 fleet 8 decentralised seed 200003 (checkpoint_000010)
+2026-11-24 17:50:14 fleet 8 decentralised seed 200003 exit 0: window 0.0034 s (all steps 0.0033), first/last 100 0.0034/0.
+2026-11-24 17:50:14 fleet 8 decentralised_comm seed 200003 (checkpoint_000002)
+2026-11-24 17:50:37 fleet 8 decentralised_comm seed 200003 exit 0: window 0.0048 s (all steps 0.0044), first/last 100 0.0045/0.
+2026-11-24 17:50:37 fleet 8 section seed 200003 (checkpoint_000011)
+2026-11-24 17:51:30 fleet 8 section seed 200003 exit 0: window 0.0154 s (all steps 0.0147), first/last 100 0.0150/0.
+2026-11-24 17:51:30 fleet 8 centralised seed 200003 (checkpoint_000013)
+2026-11-24 17:52:37 fleet 8 centralised seed 200003 exit 0: window 0.0195 s (all steps 0.0194), first/last 100 0.0197/0.
+2026-11-24 17:52:38 fleet 16 decentralised seed 200003 (checkpoint_000010)
+2026-11-24 17:53:04 fleet 16 decentralised seed 200003 exit 0: window 0.0049 s (all steps 0.0047), first/last 100 0.0046/0.
+2026-11-24 17:53:04 fleet 16 decentralised_comm seed 200003 (checkpoint_000002)
+2026-11-24 17:53:34 fleet 16 decentralised_comm seed 200003 exit 0: window 0.0058 s (all steps 0.0057), first/last 100 0.0059/0.
+2026-11-24 17:53:34 fleet 16 section seed 200003 (checkpoint_000011)
+2026-11-24 17:55:29 fleet 16 section seed 200003 exit 0: window 0.0375 s (all steps 0.0337), first/last 100 0.0407/0.
+2026-11-24 17:55:29 fleet 16 centralised seed 200003 (checkpoint_000013)
+2026-11-24 17:57:49 fleet 16 centralised seed 200003 exit 0: window 0.0455 s (all steps 0.0420), first/last 100 0.0435/0.
+2026-11-24 17:57:49 fleet 32 decentralised seed 200003 (checkpoint_000010)
+2026-11-24 17:58:28 fleet 32 decentralised seed 200003 exit 0: window 0.0071 s (all steps 0.0066), first/last 100 0.0069/0.
+2026-11-24 17:58:28 fleet 32 decentralised_comm seed 200003 (checkpoint_000002)
+2026-11-24 17:59:13 fleet 32 decentralised_comm seed 200003 exit 0: window 0.0088 s (all steps 0.0086), first/last 100 0.0085/0.
+2026-11-24 17:59:13 fleet 32 section seed 200003 (checkpoint_000011)
+2026-11-24 18:02:38 fleet 32 section seed 200003 exit 0: window 0.0660 s (all steps 0.0614), first/last 100 0.0534/0.
+2026-11-24 18:02:38 fleet 32 centralised seed 200003 (checkpoint_000013)
+2026-11-24 18:07:28 fleet 32 centralised seed 200003 exit 0: window 0.0961 s (all steps 0.0891), first/last 100 0.0941/0.
+2026-11-24 18:07:28 fleet 64 decentralised seed 200003 (checkpoint_000010)
+2026-11-24 18:08:47 fleet 64 decentralised seed 200003 exit 0: window 0.0114 s (all steps 0.0108), first/last 100 0.0115/0.
+2026-11-24 18:08:47 fleet 64 decentralised_comm seed 200003 (checkpoint_000002)
+2026-11-24 18:10:20 fleet 64 decentralised_comm seed 200003 exit 0: window 0.0161 s (all steps 0.0154), first/last 100 0.0160/0.
+2026-11-24 18:10:20 fleet 64 section seed 200003 (checkpoint_000011)
+2026-11-24 18:14:58 fleet 64 section seed 200003 exit 0: window 0.0867 s (all steps 0.0761), first/last 100 0.0775/0.
+2026-11-24 18:14:58 fleet 64 centralised seed 200003 (checkpoint_000013)
+2026-11-24 18:25:38 fleet 64 centralised seed 200003 exit 0: window 0.2213 s (all steps 0.1953), first/last 100 0.2147/0.
+2026-11-24 18:25:39 fleet 128 decentralised seed 200003 (checkpoint_000010)
+2026-11-24 18:28:53 fleet 128 decentralised seed 200003 exit 0: window 0.0212 s (all steps 0.0197), first/last 100 0.0205/0.
+2026-11-24 18:28:53 fleet 128 decentralised_comm seed 200003 (checkpoint_000002)
+2026-11-24 18:32:50 fleet 128 decentralised_comm seed 200003 exit 0: window 0.0355 s (all steps 0.0339), first/last 100 0.0342/0.
+2026-11-24 18:32:50 fleet 128 section seed 200003 (checkpoint_000011)
+2026-11-24 18:41:25 fleet 128 section seed 200003 exit 0: window 0.1439 s (all steps 0.1209), first/last 100 0.1396/0.
+2026-11-24 18:41:25 fleet 128 centralised seed 200003 (checkpoint_000013)
+2026-11-24 19:06:02 fleet 128 centralised seed 200003 exit 0: window 0.5027 s (all steps 0.4411), first/last 100 0.4621/0.
+2026-11-24 19:06:02 fleet 8 decentralised seed 200004 (checkpoint_000010)
+2026-11-24 19:06:21 fleet 8 decentralised seed 200004 exit 0: window 0.0036 s (all steps 0.0034), first/last 100 0.0034/0.
+2026-11-24 19:06:21 fleet 8 decentralised_comm seed 200004 (checkpoint_000002)
+2026-11-24 19:06:43 fleet 8 decentralised_comm seed 200004 exit 0: window 0.0047 s (all steps 0.0043), first/last 100 0.0043/0.
+2026-11-24 19:06:43 fleet 8 section seed 200004 (checkpoint_000011)
+2026-11-24 19:07:36 fleet 8 section seed 200004 exit 0: window 0.0155 s (all steps 0.0146), first/last 100 0.0152/0.
+2026-11-24 19:07:36 fleet 8 centralised seed 200004 (checkpoint_000013)
+2026-11-24 19:08:44 fleet 8 centralised seed 200004 exit 0: window 0.0203 s (all steps 0.0196), first/last 100 0.0199/0.
+2026-11-24 19:08:44 fleet 16 decentralised seed 200004 (checkpoint_000010)
+2026-11-24 19:09:11 fleet 16 decentralised seed 200004 exit 0: window 0.0046 s (all steps 0.0047), first/last 100 0.0044/0.
+2026-11-24 19:09:11 fleet 16 decentralised_comm seed 200004 (checkpoint_000002)
+2026-11-24 19:09:41 fleet 16 decentralised_comm seed 200004 exit 0: window 0.0057 s (all steps 0.0056), first/last 100 0.0056/0.
+2026-11-24 19:09:41 fleet 16 section seed 200004 (checkpoint_000011)
+2026-11-24 19:11:41 fleet 16 section seed 200004 exit 0: window 0.0389 s (all steps 0.0353), first/last 100 0.0397/0.
+2026-11-24 19:11:41 fleet 16 centralised seed 200004 (checkpoint_000013)
+2026-11-24 19:13:56 fleet 16 centralised seed 200004 exit 0: window 0.0429 s (all steps 0.0403), first/last 100 0.0413/0.
+2026-11-24 19:13:56 fleet 32 decentralised seed 200004 (checkpoint_000010)
+2026-11-24 19:14:36 fleet 32 decentralised seed 200004 exit 0: window 0.0070 s (all steps 0.0066), first/last 100 0.0073/0.
+2026-11-24 19:14:36 fleet 32 decentralised_comm seed 200004 (checkpoint_000002)
+2026-11-24 19:15:23 fleet 32 decentralised_comm seed 200004 exit 0: window 0.0088 s (all steps 0.0086), first/last 100 0.0084/0.
+2026-11-24 19:15:23 fleet 32 section seed 200004 (checkpoint_000011)
+2026-11-24 19:18:00 fleet 32 section seed 200004 exit 0: window 0.0555 s (all steps 0.0451), first/last 100 0.0489/0.
+2026-11-24 19:18:00 fleet 32 centralised seed 200004 (checkpoint_000013)
+2026-11-24 19:22:50 fleet 32 centralised seed 200004 exit 0: window 0.0963 s (all steps 0.0887), first/last 100 0.0923/0.
+2026-11-24 19:22:50 fleet 64 decentralised seed 200004 (checkpoint_000010)
+2026-11-24 19:24:09 fleet 64 decentralised seed 200004 exit 0: window 0.0114 s (all steps 0.0108), first/last 100 0.0111/0.
+2026-11-24 19:24:10 fleet 64 decentralised_comm seed 200004 (checkpoint_000002)
+2026-11-24 19:25:41 fleet 64 decentralised_comm seed 200004 exit 0: window 0.0160 s (all steps 0.0154), first/last 100 0.0163/0.
+2026-11-24 19:25:41 fleet 64 section seed 200004 (checkpoint_000011)
+2026-11-24 19:29:07 fleet 64 section seed 200004 exit 0: window 0.0577 s (all steps 0.0520), first/last 100 0.0630/0.
+2026-11-24 19:29:07 fleet 64 centralised seed 200004 (checkpoint_000013)
+2026-11-24 19:39:51 fleet 64 centralised seed 200004 exit 0: window 0.2212 s (all steps 0.1962), first/last 100 0.2129/0.
+2026-11-24 19:39:51 fleet 128 decentralised seed 200004 (checkpoint_000010)
+2026-11-24 19:43:00 fleet 128 decentralised seed 200004 exit 0: window 0.0210 s (all steps 0.0196), first/last 100 0.0208/0.
+2026-11-24 19:43:00 fleet 128 decentralised_comm seed 200004 (checkpoint_000002)
+2026-11-24 19:46:55 fleet 128 decentralised_comm seed 200004 exit 0: window 0.0353 s (all steps 0.0339), first/last 100 0.0346/0.
+2026-11-24 19:46:55 fleet 128 section seed 200004 (checkpoint_000011)
+2026-11-24 19:54:46 fleet 128 section seed 200004 exit 0: window 0.1278 s (all steps 0.1079), first/last 100 0.1274/0.
+2026-11-24 19:54:46 fleet 128 centralised seed 200004 (checkpoint_000013)
+2026-11-24 20:19:24 fleet 128 centralised seed 200004 exit 0: window 0.4960 s (all steps 0.4425), first/last 100 0.4546/0.
+2026-11-24 20:19:24 fleet 8 token_passing 5 seeds 2000 steps
+2026-11-24 20:19:35 fleet 8 token_passing 2000 exit 0
+2026-11-24 20:19:35 fleet 8 token_passing 5 seeds 3000 steps
+2026-11-24 20:19:51 fleet 8 token_passing 3000 exit 0
+2026-11-24 20:19:51 fleet 16 token_passing 5 seeds 2000 steps
+2026-11-24 20:20:11 fleet 16 token_passing 2000 exit 0
+2026-11-24 20:20:11 fleet 16 token_passing 5 seeds 3000 steps
+2026-11-24 20:20:41 fleet 16 token_passing 3000 exit 0
+2026-11-24 20:20:41 fleet 32 token_passing 5 seeds 2000 steps
+2026-11-24 20:21:21 fleet 32 token_passing 2000 exit 0
+2026-11-24 20:21:21 fleet 32 token_passing 5 seeds 3000 steps
+2026-11-24 20:22:26 fleet 32 token_passing 3000 exit 0
+2026-11-24 20:22:26 fleet 64 token_passing 5 seeds 2000 steps
+2026-11-24 20:24:36 fleet 64 token_passing 2000 exit 0
+2026-11-24 20:24:36 fleet 64 token_passing 5 seeds 3000 steps
+2026-11-24 20:28:16 fleet 64 token_passing 3000 exit 0
+2026-11-24 20:28:16 fleet 128 token_passing 5 seeds 2000 steps
+2026-11-24 20:38:58 fleet 128 token_passing 2000 exit 0
+2026-11-24 20:38:58 fleet 128 token_passing 5 seeds 3000 steps
+2026-11-24 20:57:35 fleet 128 token_passing 3000 exit 0
+2026-11-24 20:57:35 finished

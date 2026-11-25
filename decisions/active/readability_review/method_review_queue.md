@@ -13,14 +13,14 @@ At the end, all readability points go into one review PDF for the chapter.
 
 | Section | Label | Status | Comments file |
 |---|---|---|---|
-| Method opening, loop, Fig. 12 | `sec:method` | reviewed 18 Nov and 20 Nov | `method_storage_comments.md` |
-| Where arriving stock goes | `sec:method:storage` | reviewed 18 Nov and 20 Nov | `method_storage_comments.md` |
-| Who takes which task | `sec:method:assignment` | reviewed 20 Nov | `method_model_comments.md`, part A |
-| How an agent chooses its move | `sec:method:model` | reviewed 20 Nov | `method_model_comments.md`, part B |
-| Choosing together | `sec:method:controllers` | reviewed 20 Nov | `method_controllers_comments.md` |
-| When moves still clash | `sec:method:resolution` | reviewed 20 Nov | `method_resolution_comments.md` |
-| What an agent is rewarded for | `sec:method:rl` | reviewed 20 Nov | `method_reward_comments.md` |
-| How the controllers learn | `sec:method:training` | reviewed 20 Nov | `method_training_comments.md` |
+| Method opening, loop, Fig. 12 | `sec:method` | **done 24 Nov** ([A123]) | `done/review_method_storage.pdf` |
+| Where arriving stock goes | `sec:method:storage` | **done 24 Nov** ([A123]) | `done/review_method_storage.pdf` |
+| Who takes which task | `sec:method:assignment` | **done 24 Nov** ([A123]) | `done/review_method_storage.pdf` (`done/method_model_comments.md` part A) |
+| How an agent chooses its move | `sec:method:model` | **done 24 Nov** ([A124]) | `done/review_method_model.pdf` |
+| Choosing together | `sec:method:controllers` | **done 24 Nov** ([A125]) | `done/review_method_controllers.pdf` |
+| When moves still clash | `sec:method:resolution` | **done 24 Nov** ([A126]) | `done/review_method_resolution.pdf` |
+| What an agent is rewarded for | `sec:method:rl` | **done 24 Nov** ([A127]) | `done/review_method_reward.pdf` |
+| How the controllers learn | `sec:method:training` | **done 24 Nov** ([A128]) | `done/review_method_training.pdf` |
 | A reference point | `sec:method:reference` | reviewed 20 Nov | `method_reference_comments.md` |
 | Implementation (simulator, logging, cost, checks) | `sec:implementation` | reviewed 20 Nov | `implementation_comments.md` |
 | Appendices A to L | `app:*` | reviewed 20 Nov | `appendix_<X>_<name>_comments.md` |
@@ -324,7 +324,7 @@ FIXED: "run on every experiment" (two places); broken sec:impl:instances ref -> 
 
 ### method_reference (fixed 3, A108)
 MISTAKES:
-- **Token Passing in the loop.** In the Method opening, steps 2 and 3 do not hold for Token Passing. It assigns its own tasks in its token round (`SelfAssigningPlanner.assign`) and in step 3 follows its planned path, not a window of Table IV (`method_reference_comments.md` A3, extends `method_storage_comments.md` A3).
+- **Token Passing in the loop.** *Done 24 Nov ([A123]): the loop now says Token Passing selects its own tasks.* In the Method opening, steps 2 and 3 do not hold for Token Passing. It assigns its own tasks in its token round (`SelfAssigningPlanner.assign`) and in step 3 follows its planned path, not a window of Table IV (`method_reference_comments.md` A3, extends `method_storage_comments.md` A3).
 - **Fixed [A108].** `sec:method:reference` said Token Passing runs only under demand storage, and called it "kept as published" although its vertex rule is stricter than Ma et al.'s.
 DISCUSSION:
 - The reference is the only controller whose gain can be measured, and it also sets the main load. Say why (`method_reference_comments.md` A4).

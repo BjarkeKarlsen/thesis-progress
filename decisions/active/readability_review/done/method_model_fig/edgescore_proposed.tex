@@ -1,0 +1,57 @@
+% fig:edgescore, proposed (review 2026-11-24). Greys for the network, the viewer's
+% style for the warehouse: aisle positions as small white circles, agents and their
+% moves in the colour of what they do (orange, on the way to a pick).
+\documentclass[border=3pt]{standalone}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,decorations.pathreplacing}
+\definecolor{ink}{HTML}{43505C}
+\definecolor{muted}{HTML}{5A6673}
+\definecolor{shareF}{HTML}{F3F5F7}
+\definecolor{edgeC}{HTML}{9AA5B1}
+\definecolor{pick}{HTML}{E08A1E}
+\definecolor{deliver}{HTML}{C0392B}
+\tikzset{
+  v/.style={circle, draw=edgeC, fill=white, minimum size=6mm, inner sep=0pt, line width=0.9pt},
+  ag/.style={circle, fill=pick, minimum size=4.2mm, inner sep=0pt},
+  aisle/.style={line width=1.4pt, draw=edgeC},
+  mv/.style={-{Stealth[length=2.4mm]}, line width=1.2pt, draw=pick, shorten <=3.2mm, shorten >=3.4mm},
+  box/.style={draw=ink, line width=0.8pt, rounded corners=3pt, align=center,
+              font=\small, inner sep=4pt, minimum height=9mm, fill=shareF},
+  flow/.style={-{Stealth[length=2.2mm]}, line width=0.8pt, draw=ink},
+  lbl/.style={font=\footnotesize, text=muted},
+}
+\begin{document}
+\begin{tikzpicture}
+  % the warehouse around a_1: aisle positions joined along the aisles
+  \node[v] (v) at (0,0) {};
+  \node[v] (w1) at (0,1.6) {};
+  \node[v] (w2) at (1.6,0) {};
+  \node[v] (w3) at (0,-1.6) {};
+  \draw[aisle] (v) -- (w1); \draw[aisle] (v) -- (w2); \draw[aisle] (v) -- (w3);
+  \node[ag] at (v) {};
+  \node[font=\small, left=4pt of v] {$a_1$};
+  \node[ag, fill=deliver] at (w2) {};
+  \node[font=\small, above=4pt of w2] {$a_2$};
+  \draw[mv] (v) -- (w1); \draw[mv] (v) -- (w2); \draw[mv] (v) -- (w3);
+  \node[lbl, right=4pt of w1, align=left] {$w_1$, closer to the target};
+  \node[lbl, right=4pt of w2, align=left] {$w_2$, $a_2$ stands here\\ and sends its message};
+  \node[lbl, right=4pt of w3, align=left] {$w_3$, further from the target};
+
+  % one score per move
+  \node[box, minimum width=4.6cm] (s1) at (10.2, 1.9) {move to $w_1$};
+  \node[box, minimum width=4.6cm, below=0.35cm of s1] (s2) {move to $w_2$, with $a_2$'s message};
+  \node[box, minimum width=4.6cm, below=0.35cm of s2] (s3) {move to $w_3$};
+  \node[box, minimum width=4.6cm, below=0.35cm of s3] (sw) {wait};
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, line width=0.8pt, draw=muted]
+    ($(s1.north west)+(-0.15,0)$) -- ($(s3.south west)+(-0.15,0)$)
+    node[midway, left=7pt, lbl, align=right] {one small network\\ scores every move};
+  \node[box, right=0.8cm of $(s2.east)!0.5!(s3.east)$, minimum width=2.4cm] (sm)
+    {chance of\\ each move};
+  \node[font=\small, right=0.5cm of sm] (pi) {the move};
+  \foreach \s in {s1,s2,s3,sw} { \draw[flow] (\s.east) -- (sm.west); }
+  \draw[flow] (sm) -- (pi);
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,258 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,xcolor,enumitem,booktabs,graphicx,tabularx}
+\usepackage[normalem]{ulem}
+\setlength{\parskip}{0.6em}\setlength{\parindent}{0pt}
+\definecolor{newc}{HTML}{1f6f43}
+\newcommand{\new}[1]{\textcolor{newc}{#1}}
+\newcommand{\old}[1]{\textcolor{gray}{\sout{#1}}}
+\newcommand{\note}[1]{{\small\itshape [#1]}}
+\newcommand{\lab}[1]{\textsf{\footnotesize #1}}
+\renewcommand{\ref}[1]{\lab{#1}}
+\renewcommand{\eqref}[1]{(\lab{#1})}
+\newcommand{\nref}[1]{the (\lab{#1})}
+\newcommand{\citep}[1]{[\lab{#1}]}
+\newcommand{\citet}[1]{\lab{#1}}
+\title{Proposed change, ``How the controllers learn''}
+\date{24 November 2026, version 3}
+\begin{document}\sloppy
+\maketitle
+
+\section*{How to read this}
+This answers what is left of \texttt{method\_training\_comments.md} for
+\lab{sec:method:training} in \texttt{4.Implementation.tex}. A1, A2, C4, D4
+and E were settled by [A109] and [A114]. No value and no behaviour of the
+training changes.
+
+Changed from version 1, as agreed on 24 November:
+\begin{itemize}[nosep]
+  \item The training is told as it was done. Every 16-agent policy trains in
+    two stages, a short run and then a long one that starts from its
+    weights. The Method gives only reasons from the design. How the runs
+    went, and why training became longer, is in Appendix~J.
+  \item The credit is introduced with PRIMAL, then ``here the group is
+    instead''. ``The groups used here are the thesis's own'' and PRIMAL's
+    ``no clear change'' are gone.
+  \item The crowding paragraph is cut. The Problem Formulation already says
+    it (\lab{sec:pf:controllers}, ``a decentralised agent is not charged for
+    the delay it causes others'').
+  \item The Discussion gets one new point, training from random weights on
+    long episodes.
+  \item Version 3: Appendix~J tells how the second stage came about, as the
+    author put it. The first runs fell behind, the episodes were too short,
+    and the policy had not learned enough in the budget.
+  \item The Colab restart of five runs after 144\,000 steps is left out of the
+    thesis. The weights carried over and each run still trained
+    2\,000\,000 steps, so ``every run is trained the same way'' holds. It is
+    recorded in the GAPS entry.
+\end{itemize}
+
+Black text stays, \new{green} is new and \old{struck} text goes.
+\note{Notes in brackets} say why. Nothing below is in the thesis yet.
+
+\section*{Part 1. What was checked}
+\begin{itemize}[nosep]
+  \item \texttt{training/env.py}: \texttt{team\_mean} replaces each reward by
+    the mean over the group, for the centralised and section-based
+    controllers only. The decentralised controller keeps its own reward.
+    \texttt{\_start\_timestep} fixes the groups at the start of the
+    timestep, before anyone moves.
+  \item \texttt{models/base\_model.py}: the value is its own network
+    (Linear, ReLU, Linear) over $z_i$ alone.
+  \item \texttt{training/config.py}: three seed sets (training, validation,
+    test).
+  \item \texttt{SESSION\_CONTEXT.md}, 19 November: every 16-agent long run
+    starts from the checkpoint its 500\,000-step run was tested with
+    (\texttt{train --init-checkpoint}, \texttt{feat/warm-start-a93}), then
+    2\,000\,000 steps on episodes of 16\,000, 3 runners, so 48\,000 steps per
+    iteration. The checkpoint is chosen afterwards on the 5 validation seeds.
+  \item The pilot (decentralised with messages, fixed storage): on the 20
+    test seeds the long run reached 0.156 tasks per step against 0.091,
+    served share 0.56 against 0.37. On runs of 100\,000 steps the earlier
+    policy broke down on all 3 seeds within 10\,000 to 20\,000 steps.
+  \item An evaluation run lasts 10\,000 steps (\lab{sec:exp:setup}).
+  \item PRIMAL (\texttt{papers/1809.03531v3.pdf}): ``apply joint rewards to
+    agents in an attempt to help them realize the benefit of taking personal
+    sacrifices to benefit the team. We briefly tried to assign joint rewards
+    to agents within the same FOV.'' It does not say mean or sum.
+\end{itemize}
+
+\section*{Part 2. The section as it would read}
+
+\subsection*{How the controllers learn}
+
+Every learned controller is trained with PPO \citep{schulman2017ppo}\old{,
+with one policy shared by all agents, as RLlib supports
+\citep{rllibmultiagent}}\new{. All agents of a controller share one policy,
+the common recipe of Section~\ref{sec:bg:marl}}. \old{Seeds are split between
+training and evaluation before any run starts.} Each controller is trained
+separately with the same budget of environment steps, so a difference between
+them is not a difference in training effort. One environment step is one
+timestep of the warehouse, however many agents choose within it. The
+centralised controller therefore gets no more experience for running its
+network once per agent. \old{Its extra cost shows in runtime and training time
+instead} \new{It pays in time instead}
+(Section~\ref{sec:impl:cost}). The PPO values, the budget and how a checkpoint
+is chosen are in Appendix~\ref{app:training}. \note{B2. The idea is the
+Background's, RLlib is the tool and stays in the Simulator section. D3. The
+seed split moves to the next paragraph, and runtime is told once, in
+``Choosing together''.}
+
+\new{Each seed is its own warehouse. Before any run starts the seeds are split
+three ways. Training seeds are played in training, validation seeds choose the
+checkpoint and test seeds give the results.} Training plays a new warehouse in
+every episode\old{, 250 in the budget of 500\,000 steps in episodes of 2000.
+Each controller sees as many layouts as the budget allows, and}\new{, so}
+\old{it}\new{a policy} cannot learn one map by heart.
+\old{The 16-agent runs were then trained for 2\,000\,000 more steps on
+episodes of 16\,000 (Appendix~\ref{app:training}).}
+\new{Training has two stages, the same for every controller and storage rule.
+A first run plays 500\,000 steps on episodes of 2000. A second run starts from
+the weights of the first and plays 2\,000\,000 steps on episodes of 16\,000.
+Starting there saves training time. The episodes of the second run are longer
+than an evaluation run, 10\,000 steps, so a fleet that falls behind over an
+evaluation run also falls behind in training and in the validation that
+chooses the checkpoint. How the two stages were chosen is in
+Appendix~\ref{app:training}.} \note{C3, the three names of the code. The
+training as it was done, with reasons from the design only. ``Same budget''
+now means both stages, 2\,500\,000 steps in all.}
+
+Each agent's choice is one training sample with its own value estimate. It
+is credited with the mean reward of \new{its \emph{credit group}}\old{the
+agents that chose together with it at that timestep}. \new{A joint reward of
+this kind lets an agent gain from helping the others.
+\citet{sartoretti2019primal} tried one for the agents within one field of
+view. Here the group is instead the agents that chose together with it at
+that timestep.} These are the whole fleet for the centralised controller, the
+agents in the same zone for the section-based controller, and the agent alone
+for the decentralised controller. A zone's agents change as agents cross its
+border, and the \old{mean is taken over the agents in the zone at
+$t$}\new{group is fixed by where the agents stand at the start of $t$, before
+anyone moves}. \new{The credit is a mean rather than a sum, so it stays on the
+scale of one agent's reward whatever the size of the group, and all three
+controllers can train with the same PPO values.} Formally, with
+$\mathcal{A}_i(t)$ the \old{agents that choose together with}\new{credit group
+of} $a_i$ at $t$, the \emph{credit} of agent $a_i$ is
+\begin{equation*}
+  \bar R_i(t) = \frac{1}{|\mathcal{A}_i(t)|} \sum_{a_j \in \mathcal{A}_i(t)} R_j(t) .
+  \tag{\lab{eq:credit}}
+\end{equation*}
+\note{B1, the joint reward is borrowed, the group and the mean are named
+without a label. C2, the symbol stays and the word is the code's. What the
+credit means for each controller is in the Problem Formulation and is not
+told again.}
+
+The value estimate comes from a value head $V_\theta$, a small fully
+connected network with ReLU activations over the same vector $z_i$ as the
+policy. So the critic\old{, the part of the learner that estimates how good a
+situation is,} sees the same window as its own policy\old{. There are two
+reasons. What}\new{, because what} a controller sees is set by the agents it
+decides for, so that limit should hold when it learns as well as when it
+acts. \old{It also keeps the difference in crowding between the controllers
+visible. A decentralised learner gets no signal about the crowding it causes
+for agents it cannot see, and that is the effect the comparison is meant to
+show. A critic that sees the whole warehouse during training only would
+partly teach that cost and hide the difference, so it is not used.} \new{A
+critic that sees the whole warehouse during training, as in centralised
+training with decentralised execution \citep{lowe2017maddpg}, is therefore
+not used.} \note{D2, the Background explains the critic. A3, one reason, the
+crowding is the credit's and the PF has it. B3, the rejected critic named.}
+
+Each storage rule gets its own policy, trained under the same rule it is
+tested with, because a warehouse would train its fleet under the rule it
+runs. The gain then compares two whole systems, storage rule and policy
+together, and part of it can come from training. \old{Training under demand
+and congestion-aware storage is also harder, because these rules change which
+shelves the picks come from, through \nref{eq:coupling}, while the policy is
+learning (Section~\ref{sec:pf:coupling}).} \note{B4. No result shows it, so
+it goes.}
+
+\section*{Part 3. Other places that change}
+
+\textbf{Appendix J, training budget (\lab{app:training}).} \note{The outcomes
+that set the two stages belong here, in the experiment paper, not in the
+Method.}
+
+\old{Every learned controller is trained for 500\,000 environment steps on
+episodes of 2000 steps, at every fleet. The budget was not read off learning
+curves. The 16-agent runs were then trained again, from a warm start at the
+checkpoint each run had been tested with, for 2\,000\,000 more steps on
+episodes of 16\,000 steps. That is 125 episodes over the 250 training
+warehouses.}
+
+\new{The first stage trains every learned controller for 500\,000 environment
+steps on episodes of 2000, at every fleet. That is about one episode on each
+of the 250 training warehouses. The budget was not read off learning curves.}
+
+\new{At 16 agents the first-stage policies fell behind in the tests. A pilot
+on the decentralised controller with messages under fixed storage looked for
+the cause, and found two. The episodes were too short. Played for 100\,000
+steps on 3 seeds, the first-stage policy broke down within 10\,000 to 20\,000
+steps, later than a training episode of 2000 ever reaches. The budget was too
+small. A second run from its weights, on episodes of 16\,000, kept learning.
+Its throughput in training rose from 0.079 to 0.184 tasks per step over the
+first 18 of its 42 iterations. On the 20 test seeds it raised the throughput
+from 0.091 to 0.156 tasks per step and the served share from 0.37 to 0.56.
+The pilot changed the budget and the episode length together, so it cannot
+say which of the two helped more.}
+
+\new{So every 16-agent controller and storage rule gets the same second stage.
+It starts from the checkpoint its first run was tested with and plays
+2\,000\,000 steps on episodes of 16\,000, 125 episodes over the 250 training
+warehouses. The second stage starts from the first rather than from random
+weights to save time. One second-stage run is about 42 iterations of 48\,000
+steps. The first-stage runs are kept as earlier runs.} \note{Pilot numbers
+from \texttt{SESSION\_CONTEXT.md}. The episode-length plot (2000, 8000,
+16\,000) and the list of every run come with the Appendix~L ``earlier runs''
+rewrite.}
+
+\textbf{Experiments, ``What could have been done differently''.}
+
+Longer training episodes were the first change, and they helped.
+\old{Four}\new{Six} more could bring the learned controllers closer to Token
+Passing. \note{The list already had five items, and gets one more.}
+\begin{itemize}[nosep]
+  \item \emph{More training seeds.} Each run had one seed. \ldots
+  \item \new{\emph{Training from random weights.} Every 16-agent policy
+    started its long run from its first run, so a weak first run could hold
+    its long run back. Runs from random weights on episodes of 16\,000 would
+    show how much the start matters.}
+  \item \emph{A way out of locks.} \ldots A shared \old{reward}\new{credit}, or
+    a rule that makes one of two locked agents give way, would let them back
+    out.
+\end{itemize}
+
+\textbf{``When moves still clash'' (\lab{sec:method:resolution}).} \note{D1,
+the credit is told once, in the training section.}
+
+\ldots A decentralised agent\old{ is credited with its own reward only}\new{'s
+credit is its own reward only (Section~\ref{sec:method:training})}, so it
+gains nothing when it backs out for another agent. The section-based and
+centralised controllers share the \old{reward of the agents that choose
+together}\new{credit of their group}, so they have a reason to learn it.
+\ldots
+
+\textbf{Notation table, row \lab{eq:credit}.}
+
+\old{The agents that choose together with $a_i$ at $t$}\new{The credit group
+of $a_i$ at $t$, the agents that choose together with it}, and the mean of
+their rewards, which trains $a_i$'s choice.
+
+\textbf{\texttt{references.bib}.} \texttt{author = \{\{Ray Team\}\}} in both
+RLlib entries, so the citation prints as ``Ray Team, 2024''.
+
+\section*{Questions}
+\begin{enumerate}[nosep]
+  \item Appendix~J now gives the pilot numbers as the reason for the second
+    stage. Enough, or should the episode-length plot come in this change
+    too?
+  \item The pilot's test numbers (0.156, 0.56) come from a checkpoint chosen
+    on 2 validation seeds by mistake (\texttt{*\_2seeds}). Was it chosen
+    again on 5 seeds (\texttt{eval-comm-long-v5})? If so, which numbers go
+    here?
+  \item Some second-stage runs are not evaluated yet (\texttt{TODO [A110]} in
+    the Experiments). The Method describes the training as done for all of
+    them. Fine to apply now?
+\end{enumerate}
+
+\end{document}
